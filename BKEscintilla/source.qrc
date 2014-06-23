@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/left">
+        <file>source/bianji.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,137 @@
+﻿##
+var f = %[];
+var vf = %[];
+var sf = %[] ;
+var basic_layer ;
+var message_layer ;
+function array() ;
+function dictionary() ;
+function log() ;
+function eval() ;
+function range() ;
+function randaom() ;
+function typeof() ;
+function itoa() ;
+function itoa2() ;
+function time() ;
+function hash() ;
+function hash16() ;
+function char() ;
+function saveFile() ;
+function loadFile() ;
+function appenFile() ;
+function evalFile() ;
+var Date.getYear() ;
+var Date.getMonth() ;
+var Date.getDay() ;
+var Date.getWDay() ;
+var Date.getHour() ;
+var Date.getMinute() ;
+var Date.getSecond() ;
+var Math.abs() ;
+var Math.sqrt() ;
+var Math.lg() ;
+var Math.ln() ;
+var Math.log() ;
+var Math.floor() ;
+var Math.ceil() ;
+var Math.round() ;
+var Math.sin() ;
+var Math.cos() ;
+var Math.tan() ;
+var Math.asin() ;
+var Math.acos() ;
+var Math.aton() ;
+##
+@macro name="animate" "horizontal" "vertical" "multifiles" "start" "cell" "stop" 
+@macro name="animate#\"horizontal\"" index file frame interval=0 loop=0 delay=0 
+@macro name="animate#\"vertical\"" index file frame interval=0 loop=0 delay=0 
+@macro name="animate#\"multifiles\"" index frames interval=0 loop=0 delay=0 
+@macro name="animate#\"start\"" index 
+@macro name="animate#\"cell\"" index frame 
+@macro name="animate#\"stop\"" index 
+@macro name="sprite" index file rect=0
+@macro name="addto" index target zorder=0 pos=0 opacity=0 
+@macro name="remove" index delete=0 
+@macro name="removeall" index delete=0 
+@macro name="info" file get 
+@macro name="infoex" index get 
+@macro name="anchor" index qset=0 set=0 keep=0 
+@macro name="bgm" file loop=0 vol=0 fadein=0 loopto=0 
+@macro name="se" file channel loop=0 vol=0 fadein=0 
+@macro name="voice" file vol=0 
+@macro name="stop" channel=0 fadeout=0 
+@macro name="volume" channel vol fade=0 
+@macro name="pause" channel 
+@macro name="resume" channel 
+@macro name="mute" channel 
+@macro name="text" text 
+@macro name="textcursor" index follow pos=0 
+@macro name="textwindow" file=0 opacity=0 pos=0 rect=0 xinterval=0 yinterval=0 
+@macro name="textoff" 
+@macro name="texton" 
+@macro name="textshadow" shadow color=0 
+@macro name="textspeed" interval 
+@macro name="textstyle" name=0 size=0 color=0 bold=0 italic=0 strike=0 under=0 
+@macro name="texttag" block file=0 
+@macro name="ruby" text 
+@macro name="action" "queue" "moveby" "moveto" "fadeto" "scaleto" "scaleby" "rotateto" "rotateby" "tintto" "tintby" "jump" "shake" "quake" "visible" "remove" "flipx" "flipy" "delay" "callback" "copy" "start"
+@macro name="action#\"queue\"" 
+@macro name="action#\"moveby\"" pos time=0 target=0 ease=0 
+@macro name="action#\"moveto\"" pos time=0 target=0 ease=0 
+@macro name="action#\"fadeto\"" opacity time=0 target=0 ease=0 
+@macro name="action#\"scaleto\"" time=0 x=0 y=0 target=0 ease=0 
+@macro name="action#\"scaleby\"" time=0 x=0 y=0 target=0 ease=0 
+@macro name="action#\"rotateto\"" rotate time=0 target=0 ease=0 
+@macro name="action#\"rotateby\"" rotate time=0 target=0 ease=0 
+@macro name="action#\"tintto\"" color time=0 target=0 ease=0 
+@macro name="action#\"tintby\"" r g b time=0 target=0 ease=0 
+@macro name="action#\"jump\"" time height x=0 target=0 times=0 
+@macro name="action#\"shake\"" time range target=0 times=0 
+@macro name="action#\"quake\"" time rangex=0 rangey=0 target=0 
+@macro name="action#\"visible\"" visible target=0 
+@macro name="action#\"remove\"" delete=0 target=0 
+@macro name="action#\"flipx\"" target=0 
+@macro name="action#\"flipy\"" target=0 
+@macro name="action#\"delay\"" time 
+@macro name="action#\"callback\"" block file=0 
+@macro name="action#\"copy\"" index  
+@macro name="action#\"start\"" target 
+@macro name="eval" exp 
+@macro name="jump" block file=0 
+@macro name="call" block file=0 
+@macro name="return" value=0 
+@macro name="if" exp 
+@macro name="else" 
+@macro name="elseif" exp 
+@macro name="endif"
+@macro name="tablegoto" exp target 
+@macro name="for" var range 
+@macro name="continue" 
+@macro name="break" 
+@macro name="next" 
+@macro name="print" exp 
+@macro name="wait" time=0 canskip=0 
+@macro name="waitaction" index=0 canskip=0 
+@macro name="waitbutton" 
+@macro name="waitbgm" canskip=0 
+@macro name="waitfade" canskip=0 
+@macro name="waittrans" index=0 canskip=0 
+@macro name="waitvoice" canskip=0 
+@macro name="stoptrans" index=0 
+@macro name="click" 
+@macro name="button" index idle hover=0 click=0 onenter=0 onleave=0 onclick=0 
+@macro name="buttonex" index idle hover=0 click=0 onenter=0 onleave=0 onclick=0 
+@macro name="pretrans" index=0 
+@macro name="trans" "crossfade" "universal" 
+@macro name="trans#\"crossfade\"" time index=0 
+@macro name="trans#\"universal\"" rule time vague=0 index=0 
+@macro name="event" name block=0 file=0 enable=0 iscall=0 
+@macro name="quit" force=true
+@macro name="macro" name
+@macro name="layer" index width height color opacity=255
+
+
+
+
+
