@@ -114,6 +114,7 @@ void SearchBox::SearchModel()
     if( sciedit == 0) return ;
     if( !isFloating() ) setFloating(true);
     this->show();
+    this->setFocus();
     edit->setFocus();
 }
 
@@ -128,6 +129,7 @@ void SearchBox::ReplaceModel()
     if( sciedit == 0) return ;
     if( !isFloating() ) setFloating(true);
     this->show();
+    this->setFocus();
     edit->setFocus();
 }
 
