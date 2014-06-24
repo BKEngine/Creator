@@ -60,7 +60,11 @@ void ProjectWindow::OpenProject(const QString &file)
 
     if( pro == 0){
         pro = new BKEproject ;
-        pro->OpenProject(file) ;
+        if(!pro->OpenProject(file))
+        {
+            QMessageBox::information(this,"错误","文件不存在，项目打开失败",QMessageBox::Ok) ;
+            return;
+        }
         projectlist << pro ;
         addTopLevelItem(pro->Root);
         BkeChangeCurrentProject(pro);

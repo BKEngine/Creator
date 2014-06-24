@@ -153,6 +153,15 @@ void BKEproject::MakeImport()
     OutFilelist <<"main.bkscr"<<"macro.bkscr"<<"config.bkpsr" ;
     QStringList ls = BkeCreator::CopyStencil(dirs,OutFilelist) ;
     LOLI::makeNullFile(ls,dirs) ;
+    {
+        QString a;
+        QString filename = FileDir() + "/config.bkpsr";
+        if(LOLI::AutoRead(a,filename) && !a.isEmpty())
+        {
+            a.replace("Bke_New_Project",ProjectName());
+            LOLI::AutoWrite(filename,a);
+        }
+    }
 
     lex->ParserFile("macro.bkscr",dirs);
     OutFilelist.append( lex->GetImportFiles() ); //导入的脚本，将在脚本中属于例外

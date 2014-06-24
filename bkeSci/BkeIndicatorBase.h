@@ -30,6 +30,7 @@ public:
     int index ;
     int lineadd ;
     QString text ;
+    BkeModifiedBase(){clear();}
 
     void clear(){
         pos = 0 ;

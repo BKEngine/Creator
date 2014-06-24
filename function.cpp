@@ -216,10 +216,10 @@ void BkeCreator::AddRecentProject(const QString &file)
         LOLI::AutoWrite(BKE_CURRENT_DIR+"/projects.txt",QString()) ;
         return ;
     }
-    QRegExp exp(file) ;
-    if( isSYSTEMP_LOWDER ) exp.setCaseSensitivity(Qt::CaseInsensitive);
+    //QRegExp exp(file) ;
+    //if( isSYSTEMP_LOWDER ) exp.setCaseSensitivity(Qt::CaseInsensitive);
 
-    int i = BKE_Recently_Project.indexOf(exp) ;
+    int i = BKE_Recently_Project.indexOf(file) ;
     if( i > 0 ) BKE_Recently_Project.takeAt(i) ;
     else if( i == 0 ) return ;
     BKE_Recently_Project.prepend( file );
@@ -234,10 +234,8 @@ void BkeCreator::AddRecentFile(const QString &file)
         LOLI::AutoWrite(BKE_CURRENT_DIR+"/files.txt",QString()) ;
         return ;
     }
-    QRegExp exp(file) ;
-    if( isSYSTEMP_LOWDER ) exp.setCaseSensitivity(Qt::CaseInsensitive);
 
-    int i = BKE_Recently_Files.indexOf(exp) ;
+    int i = BKE_Recently_Files.indexOf(file) ;
     if( i > 0 ) BKE_Recently_Files.takeAt(i) ;
     else if( i == 0 ) return ;
     BKE_Recently_Files.prepend( file );

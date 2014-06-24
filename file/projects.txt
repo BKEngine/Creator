@@ -1,2 +1,2 @@
-﻿E:/魔法使いの夜/BKE/BkeProject.bkp
-F:/BKEtest/BkeProject.bkp
+﻿D:/新建文件夹 (2)/BkeProject.bkp
+D:/BKEngine/明日的世界 (1)/BkeProject.bkp
