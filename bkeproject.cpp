@@ -576,7 +576,10 @@ QStringList BKEproject::ListFiles(int type)
         path = ptr.key() ;
         list = ptr.value() ;
         for( int i = 0 ; i < list->size() ; i++){
-            filelist << path + "/"+list->at(i) ;
+            if(path.size())
+                filelist << path + "/"+list->at(i) ;
+            else
+                filelist << list->at(i) ;
         }
     }
 
