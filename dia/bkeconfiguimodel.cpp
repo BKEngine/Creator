@@ -94,7 +94,7 @@ void BkeConfigUiModel::Sure()
     if( WordSupport::IsNumber(fontsize->text())) result.append("DefaultFontSize="+fontsize->text()+";\r\n") ;
     if( WordSupport::IsNumber(savenum->text())) result.append("MaxSaveDataNum="+savenum->text()+";\r\n") ;
     if( WordSupport::IsColor(fontcolor->text())) result.append("DefaultFontColor="+fontcolor->text()+";\r\n") ;
-    if( !fontname->text().isEmpty() ) result.append("DefaultFoneName="+fontname->text()+";\r\n") ;
+    if( !fontname->text().isEmpty() ) result.append("DefaultFontName=\""+fontname->text()+"\";\r\n") ;
 
     QFile ks( Name ) ;
     if( !LOLI::AutoWrite(&ks,result,"UTF-8")){
@@ -165,7 +165,7 @@ void BkeConfigUiModel::ReadFile(const QString &file)
 
     temp = ToType( LOLI_KEY_VAL(Text,"DefaultFontColor")) ;
     if( !temp.isEmpty() ) fontcolor->setText( temp ) ;
-    fontname->setText( ToType( LOLI_KEY_VAL(Text,"DefaultFoneName")) ) ;
+    fontname->setText( ToType( LOLI_KEY_VAL(Text,"DefaultFontName")) ) ;
 }
 
 
