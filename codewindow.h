@@ -48,7 +48,19 @@ public:
             name = e.right(e.length() - e.lastIndexOf('/')-1) ;
         }
         else name = e ;
+        info.setFile(fullname);
         fileIO.setFileName(fullname);
+        upFileTime();
+    }
+
+    void upFileTime(){
+       info.refresh();
+    }
+
+    bool isFileChange(){  //文件是否从外部被改变
+        QDateTime t1 = info.lastModified() ;
+        info.refresh();
+        return t1 != info.lastModified();
     }
 
     QString dir(){
@@ -65,6 +77,7 @@ private:
     QString fullname ;
     QString name ;
     QString prodir ;
+    QFileInfo info ;
 };
 
 
@@ -112,6 +125,7 @@ public:
     QToolBar *toolbar ;
     QComboBox *slablelist ;
     QStringList slablels ;
+    bool ignoreActive ;
 
 signals:
     void CurrentFileChange(const QString &file) ;
@@ -139,7 +153,7 @@ public slots:
     void CompileFinish() ;
     void CompileAndRun() ;
     void FileNameChange(const QString &oldname,const QString &newname,bool &c) ;
-    void ToLocation(BkeMarkerBase *p) ;
+    void ToLocation(BkeMarkerBase *p,const QString &prodir) ;
     void ShowRmenu( const QPoint & pos ) ;
     void AddBookMark() ;
     void RunBKE() ;

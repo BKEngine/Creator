@@ -1,5 +1,7 @@
 #include "loli_island.h"
 
+int LOLI_AUTOWRITE_LEN ;
+
 bool LOLI::AutoWrite(const QString &file,const QString &text)
 {
     QFile f( file ) ;
@@ -29,6 +31,7 @@ bool LOLI::AutoWrite(QFile *file,const QString &text,const char *codecname)
     strem.setCodec(QTextCodec::codecForName(codecname));
     bom(strem) ;
     strem << text ;
+    LOLI_AUTOWRITE_LEN = text.length() ;
     strem.flush();
     return true ;
 }

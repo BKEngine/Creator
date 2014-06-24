@@ -87,6 +87,7 @@ private:
     bool hasFileUp(QJsonObject fi) ;
 protected:
     void closeEvent(QCloseEvent *e);
+    bool eventFilter ( QObject * watched, QEvent * event ) ;
 
 };
 

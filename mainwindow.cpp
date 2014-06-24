@@ -93,6 +93,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //改变标题
     connect(codeedit,SIGNAL(CurrentFileChange(QString,QString)),this,SLOT(CurrentFileChange(QString,QString))) ;
 
+    //注册事件过滤器
+    QMainWindow::installEventFilter(this) ;
 
 }
 
@@ -204,7 +206,7 @@ void MainWindow::AboutBkeCreator()
     QString temp ;
     temp.append("  Bke Creator           \r\n\r\n") ;
     temp.append("  版本："+BKE_CREATOR_VERTION+"    \r\n") ;
-    temp.append("  开发：萝莉岛&歪鼻子\r\n\r\n") ;
+    temp.append("  开发：萝莉岛&歪鼻子&Taigacon\r\n\r\n") ;
     temp.append("  Bke Creator处于完善开发阶段，有些功能无效是正常的。\r\n"
                 "") ;
     msg.SetLable(temp);
@@ -371,4 +373,16 @@ bool MainWindow::hasFileUp(QJsonObject fi)
         if( oldfiles.value(ls.at(i)).toString() != fi.value(ls.at(i)).toString()) upList.append( ls.at(i) );
     }
     return upList.size() > 0 ;
+}
+
+
+//事件过滤器
+bool MainWindow::eventFilter ( QObject * watched, QEvent * event )
+{
+    if( watched == this && QEvent::WindowActivate == event->type())
+    {  //主窗口被激活，检查文件更新
+        if( codeedit->ignoreActive ) codeedit->ignoreActive = false ;
+        else codeedit->QfileChange("");
+    }
+    return false ;
 }

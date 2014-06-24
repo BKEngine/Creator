@@ -34,12 +34,12 @@ public:
     OtherWindow(QWidget *parent = 0);
 
     int ErrorCount(){ return errorcount ; }
-    void ShowProblem(BkeMarkList *list) ;
+    void ShowProblem(BkeMarkList *list,const QString &dir) ;
     void IfShow(QPushButton *btn,bool must = false) ;
     void RefreshBookMark(BkeMarkList *b) ;
 
 signals:
-    void Location(BkeMarkerBase *mark) ;
+    void Location(BkeMarkerBase *mark,const QString &prodir) ;
 
 public slots:
     void ProblemDoubleClicked(QListWidgetItem * item) ;
@@ -65,6 +65,7 @@ private:
     BkeMarkList membookmark ;
     BkeMarkList memmark ;
     BkeMarkList memproblem ;
+    QString problemdir ;
 
     QHash<QPushButton*,QWidget*> emap ;
     void BuildBookMarker() ;

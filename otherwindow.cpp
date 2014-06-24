@@ -85,22 +85,23 @@ void OtherWindow::IfShow(QPushButton *btn,bool must)
 //定位问题处
 void OtherWindow::ProblemDoubleClicked(QListWidgetItem * item)
 {
-    emit Location( memproblem.at(ProblemList->currentRow()) );
+    emit Location( memproblem.at(ProblemList->currentRow()),problemdir );
 }
 
 void OtherWindow::BookMarkDoubleClicked(QListWidgetItem * item)
 {
-    emit Location( membookmark.at(bookmarklist->currentRow()) );
+    emit Location( membookmark.at(bookmarklist->currentRow()),"" );
 }
 
 void OtherWindow::MarkDoubleClicked(QListWidgetItem * item)
 {
-    emit Location( memmark.at(marklist->currentRow()) );
+    emit Location( memmark.at(marklist->currentRow()),"" );
 }
 
 
-void OtherWindow::ShowProblem(BkeMarkList *list)
+void OtherWindow::ShowProblem(BkeMarkList *list,const QString &dir)
 {
+    problemdir = dir ;
     ProblemList->clear();
 
     BkeMarkerBase *akb ;

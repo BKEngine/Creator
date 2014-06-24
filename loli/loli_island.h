@@ -3,6 +3,7 @@
 
 #include <QtCore>
 
+extern int LOLI_AUTOWRITE_LEN ;
 
 namespace LOLI{
     bool AutoWrite(const QString &file,const QString &text) ;

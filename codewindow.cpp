@@ -64,6 +64,7 @@ CodeWindow::CodeWindow(QWidget *parent)
     ignoreflag = false ;
     isRun = false ;
     isSearLable = false ; //是否在查找标签，如果是，刷新文件队列
+    ignoreActive = false ;
 
     searchlablelater = 0 ;
     isCompileNotice = _NOTICE_ALWAYS ;
@@ -175,9 +176,7 @@ void CodeWindow::OtherWinOtherwin(OtherWindow *win)
 {
     othwin = win ;
     //定位文件
-    connect(win,SIGNAL(Location(BkeMarkerBase*)),this,SLOT(ToLocation(BkeMarkerBase*))) ;
-
-
+    connect(win,SIGNAL(Location(BkeMarkerBase*,QString)),this,SLOT(ToLocation(BkeMarkerBase*,QString))) ;
 }
 
 void CodeWindow::OtherWinProject(ProjectWindow *p)
@@ -360,14 +359,15 @@ void CodeWindow::addFile(const QString &file,const QString &prodir)
 
         BkeCreator::AddRecentFile(loli->FullName()) ;
         //添加文件监视
-        bool ks = filewatcher->addPath(loli->FullName()) ;
-        ks = false ;
+//        bool ks = filewatcher->addPath(loli->FullName()) ;
+//        ks = false ;
     }
 
     //从当前文档的附近路径中寻找项目，失败返回0
     ChangeProject( prowin->FindProjectFromDir(loli->ProjectDir()) );
     //改变当前显示项
     SetCurrentEdit(loli->edit);
+    if( loli->isFileChange() ) QfileChange("");
 }
 
 void CodeWindow::simpleNew(BkeDocBase *loli,const QString &t)
@@ -459,6 +459,9 @@ void CodeWindow::simpleSave(BkeDocBase *loli)
         return ;
     }
     loli->edit->setModified(false);
+    //更新文件被改写的时间
+    loli->upFileTime();
+
 }
 
 //另存为
@@ -739,8 +742,9 @@ void CodeWindow::CompileFinish()
     BkeMarkList *problemslist ;
     if( stackwidget->count() > 0){
         //给当前文件标记错误信息
+        BkeMarkList templs = *(markadmin.GetPrombleMark(currentbase->FullName(),false)) ;
         problemslist = markadmin.GetPrombleMark(currentbase->FullName(),true) ;
-        CheckProblemMarks(currentedit,problemslist);
+        CheckProblemMarks(currentedit,&templs);
         currentedit->update();
     }
     else{
@@ -748,14 +752,14 @@ void CodeWindow::CompileFinish()
     }
 
     othwin->compileedit->setText(ComText);
-    othwin->ShowProblem(problemslist);
+    othwin->ShowProblem(problemslist,currentproject->FileDir());
 
     copyCompileFile(ComList);
 
     //按钮可用
     btncompileact->setEnabled(true);
     btncompilerunact->setEnabled(true);
-    btnrunact->setEnabled(true);
+    btnrunact->setEnabled( markadmin.errorcount < 1);  //只有错误等于0，按钮才是可用的
     QTimer::singleShot(8*1000,kag,SLOT(reset())) ; //8秒之后隐藏
     if( markadmin.errorcount < 1 ) btnrunact->setEnabled(true) ;  //编译完成并且没有问题运行按钮才可用
     if( markadmin.errorcount < 1 && isRun ) RunBKE();
@@ -774,13 +778,15 @@ void CodeWindow::FileNameChange(const QString &oldname,const QString &newname,bo
 }
 
 //转到文件
-void CodeWindow::ToLocation(BkeMarkerBase *p)
+void CodeWindow::ToLocation(BkeMarkerBase *p,const QString &prodir)
 {
-    BKEproject *pro = prowin->FindFileProject(p->FullName) ;
-    if( pro == 0){
-        addFile(p->FullName,0);
-    }
-    else  addFile(p->FullName,pro->FileDir());
+    if( prodir.isEmpty() ) addFile( p->FullName,0) ;
+    else addFile(p->FullName,prodir) ;
+//    BKEproject *pro = prowin->FindFileProject(p->FullName) ;
+//    if( pro == 0){
+//        addFile(p->FullName,0);
+//    }
+//    else  addFile(p->FullName,pro->FileDir());
 
     if( p->Atpos > 1) currentedit->setFirstVisibleLine(p->Atpos-1);
     else currentedit->setFirstVisibleLine(p->Atpos);
@@ -985,43 +991,28 @@ void CodeWindow::SelectAll()
 
 void CodeWindow::QfileChange(const QString &path)
 {
-    //文件监视有bug，占时不启用。
-    return ;
-    if( watcherflag == 0){
-        watcherflag = 1 ;
-        return ;
+    if( stackwidget->count() < 1 ) return ;
+
+    BkeDocBase *tempbase = currentbase ;
+
+    if( !path.isEmpty() ){
+        tempbase = docStrHash.value( LOLI_OS_QSTRING(path),0 ) ;
+        if( tempbase == 0) return ;
+        SetCurrentEdit(tempbase->edit);
     }
 
-    if( !docStrHash.contains(LOLI_OS_QSTRING(path))) return ;
-    addFile(path,"");
+    ignoreActive = true ;
 
-    if( !currentbase->File()->exists() ){
-        QMessageBox msg ;
-        msg.setText("文件：\r\n"+path+"\r\n已经被删除，是否关闭文件？");
-        msg.addButton("关闭",QMessageBox::AcceptRole);
-        msg.addButton("另存为..",QMessageBox::RejectRole);
-        msg.addButton("取消",QMessageBox::DestructiveRole);
-        int k = msg.exec() ;
-
-        if( k == QMessageBox::AcceptRole ){
-            filewatcher->removePath(path) ;
-            CloseFile();
-        }
-        else if( k == QMessageBox::RejectRole ) SaveAs();
-        else return ;
-    }
+    QMessageBox msg(this) ;
+    msg.setText("文件：\r\n"+path+"\r\n已经被改变，是否重新载入？");
+    msg.addButton(QMessageBox::Yes);
+    msg.addButton(QMessageBox::No);
+    if( msg.exec() == QMessageBox::No ) return ;
     else{
-        QMessageBox msg ;
-        msg.setText("文件：\r\n"+path+"\r\n已经被改变，是否重新载入？");
-        msg.addButton(QMessageBox::Yes);
-        msg.addButton(QMessageBox::No);
-        if( msg.exec() == QMessageBox::No ) return ;
-        else{
-            QString en ;
-            LOLI::AutoRead(en,path) ;
-            currentedit->setText(en);
-            currentedit->setModified(false);
-        }
+        QString en ;
+        LOLI::AutoRead(en,tempbase->FullName()) ;
+        tempbase->edit->setText(en);
+        tempbase->edit->setModified(false);
     }
 }
 
@@ -1050,7 +1041,7 @@ void CodeWindow::simpleClose(BkeDocBase *loli)
     if( stackwidget->count() < 1){
         btnDisable();
         currentedit = NULL ;
-        filewatcher->removePaths(filewatcher->files()) ;
+        //filewatcher->removePaths(filewatcher->files()) ;
         DrawLine(false);
     }
     else{
