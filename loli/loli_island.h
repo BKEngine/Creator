@@ -10,6 +10,7 @@ namespace LOLI{
     bool AutoWrite(QFile *file,const QString &text,const char *codecname) ;
     bool AutoRead(QString &text,const QString &name) ;
     bool AutoRead(QString &text,QFile *file) ;
+    bool AutoRead(QByteArray &dest,const QString &name) ;
     QString isValidUTF8(QFile *file) ;
     void makeNullFile(const QStringList &list,const QString &dir ) ;
     bool P_OpenFile(QFile *file) ;

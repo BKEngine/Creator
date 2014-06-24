@@ -423,32 +423,36 @@ void BKEproject::AddFileToHash(BkeFilesHash *hash,const QString &filename)
     }
 }
 
-void BKEproject::removeFromHash(BkeFilesHash *hash,const QString &filename)
+bool BKEproject::removeFromHash(BkeFilesHash *hash,ItemInfo &f )
 {
-    QString allfilename = filename ;   //全路径
-    if( allfilename.indexOf(":") < 0) allfilename.prepend(FileDir()+"/") ;
+    //如果是目录，则删除目录
+    if( IconKey(f.IconKey) == "@dir" ){
 
-    QFileInfo temp(allfilename) ;
-    QStringList *ls ;
+        //寻找所有的子目录
+        QStringList ks = hash->keys() ;
+        QRegExp exp ;
+        exp.setPattern("^"+f.FullName);
+        if( isSYSTEMP_LOWDER ) exp.setCaseSensitivity(Qt::CaseInsensitive);
+        else exp.setCaseSensitivity(Qt::CaseSensitive);
+        ks = ks.filter(exp) ;
 
-    //没有.的被认为是目录，清空目录
-    if( temp.fileName().indexOf('.') < 0 ){
-        ls =  hash->value( LOLI_OS_QSTRING( allfilename) ) ;
-        if( ls == 0) return ;
-        ls->clear();
+        //移除所有的子目录
+        if( ks.size() < 0) return false ;
+        for( int i = 0 ; i < ks.size() ; i++){
+            hash->remove( ks.at(i) ) ;
+        }
     }
     else{
+        QFileInfo temp(f.FullName) ;
+        QStringList *ls ;
+
         ls = hash->value( LOLI_OS_QSTRING( temp.path() ) ) ;
-        if( ls == 0) return ;
+        if( ls == 0) return false;
         ls->removeOne(temp.fileName()) ;
+        if( ls->isEmpty() && f.Layer > 1 ) hash->remove( LOLI_OS_QSTRING( temp.path() )  ) ;
     }
 
-    if( ls->isEmpty() && temp.path().compare( FileDir(),Qt::CaseInsensitive ) != 0 ){
-        hash->remove( LOLI_OS_QSTRING( temp.path() ) ) ;
-        delete ls ;
-    }
-
-    return ;
+    return true;
 }
 
 
@@ -533,21 +537,10 @@ bool BKEproject::RemoveItem(ItemInfo &f)
     if( le == 0) return false ;
 
     BkeFilesHash *h = typeHash(f.RootName) ;
-    if( IconKey(f.IconKey) != "@dir" ){
-        RemoveItem(le) ;
-        delete le ;
-        removeFromHash(h,f.FullName);
-    }
-    else{  //获取所有的子目录列表，从hash中移除
-        QStringList ls = ItemDirs(le) ;
-        ls << f.FullName ;
-        RemoveItem(le) ;  //移除自身
-        delete le ;
 
-        for( int i = 0 ; i < ls.size() ; i++){
-            removeFromHash(h,ls.at(i));
-        }
-    }
+    RemoveItem(le) ;
+    if( !removeFromHash(h,f) ) return false;
+    delete le ;
     return true ;
 }
 

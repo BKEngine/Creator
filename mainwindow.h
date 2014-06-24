@@ -40,6 +40,7 @@ public slots:
     void CheckUpdate() ;
     void CheckConnect() ;
     void upfileFinish(QNetworkReply *netf) ;
+    void startUp() ;
 
 private:
 //    CodeWindow *codeedit ;
@@ -66,6 +67,7 @@ private:
 
     QVector<QFile*> FilePtrList ;
     QStringList OpenNameList ;
+    QStringList upList ;
 
     //各类视图
     QTreeWidget *ProjectBasic ;
@@ -82,6 +84,7 @@ private:
     void isUpdate(QJsonObject &newJSON) ;
 
     void test() ;
+    bool hasFileUp(QJsonObject fi) ;
 protected:
     void closeEvent(QCloseEvent *e);
 

@@ -138,3 +138,14 @@ void LOLI::makeNullFile(const QStringList &list,const QString &dir )
 
 }
 
+bool LOLI::AutoRead(QByteArray &dest,const QString &name)
+{
+    QFile file(name) ;
+    if( !file.exists() ) return false ;
+    if( !file.open(QFile::ReadWrite) ) return false ;
+
+    if( file.size() < 50000000 ) dest = file.readAll() ;
+    else dest = file.read( 50000000 ) ;
+    file.close();
+    return true ;
+}

@@ -140,7 +140,7 @@ void MainWindow::CreateMenu()
     wmenu = this->menuBar()->addMenu("&工具");
     wmenu = this->menuBar()->addMenu("&帮助");
     wmenu->addAction("帮助文件") ;
-    wmenu->addAction("检查更新") ;
+    connect(wmenu->addAction("检查更新"),SIGNAL(triggered()),this,SLOT(startUp())) ;
     connect(wmenu->addAction("Creator教程"),SIGNAL(triggered()),this,SLOT(HelpCreator())) ;
     connect(wmenu->addAction("关于..."),SIGNAL(triggered()),this,SLOT(AboutBkeCreator())) ;
 
@@ -324,9 +324,7 @@ void MainWindow::upfileFinish(QNetworkReply *netf)
     QJsonDocument dc = QJsonDocument::fromJson(netf->readAll()) ;
     if( !dc.isEmpty() ){
         QJsonObject llm = dc.object() ;
-        if( QString::compare(BKE_CREATOR_VERTION,llm.value("versiton").toString()) < 0){
-            isUpdate(llm);
-        }
+        if( hasFileUp( llm.value("files").toObject()) ) isUpdate( llm );
     }
 
     netf->deleteLater();
@@ -345,10 +343,32 @@ void MainWindow::isUpdate(QJsonObject &newJSON)
     QString temp = "版本：" + newJSON.value("versiton").toString() ;
     temp.append("\n更新日志：\n") ;
     temp.append(newJSON.value("info").toString() ) ;
+    temp.append("\n以下文件需要更新:\n"+upList.join("\n")) ;
     msg.SetLable("Bke Creator已经有了新版本，是否更新？\n\n"+temp);
     msg.SetBtn(QStringList()<<"【立即更新】"<<"下次再说");
     if( msg.WaitUser() == 1 ) return ;
 
+    startUp();
+}
+
+void MainWindow::startUp()
+{
     QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/update.exe")) ;
     close() ;
+}
+
+bool MainWindow::hasFileUp(QJsonObject fi)
+{
+    QByteArray temp ;
+    LOLI::AutoRead(temp,BKE_CURRENT_DIR+"/version.txt") ;
+    QJsonDocument dc = QJsonDocument::fromJson( temp ) ;
+    QJsonObject oldfiles ;
+    if( !dc.isNull() ) oldfiles = dc.object().value("files").toObject() ;
+
+    upList.clear();
+    QStringList ls = fi.keys() ;
+    for( int i = 0 ; i < ls.size() ; i++){
+        if( oldfiles.value(ls.at(i)).toString() != fi.value(ls.at(i)).toString()) upList.append( ls.at(i) );
+    }
+    return upList.size() > 0 ;
 }

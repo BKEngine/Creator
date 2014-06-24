@@ -46,7 +46,7 @@ public:
     QStringList ListFiles(int type) ;
     QStringList ItemDirs(QTreeWidgetItem *dest) ;
     void AddFileToHash(BkeFilesHash *hash,const QString &filename) ;
-    void removeFromHash(BkeFilesHash *hash,const QString &filename) ;
+    bool removeFromHash(BkeFilesHash *hash,ItemInfo &f ) ;
     bool SearchDir(BkeFilesHash &hash,const QString &dir,const QString &suffix) ;
     void ItemFromHash(QTreeWidgetItem *dest,BkeFilesHash &hash) ;
     void Addfiles(const QStringList &ls ,ItemInfo &f) ;
