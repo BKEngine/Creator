@@ -112,17 +112,21 @@ bool BKEproject::OpenProject(const QString &name)
     bkpAdmin = new QJsonObject( kk.object() ) ;
     if( bkpAdmin->isEmpty() ) return false ;
 
-    pdir = bkpAdmin->value("dir").toString() ;
+    QFileInfo fi(name);
+    pdir = fi.path();
     pname = bkpAdmin->value("name").toString() ;
-    if( bkpAdmin->value("version").toString().isEmpty() ) pdir = pdir+pname ;
-
+    //if( bkpAdmin->value("version").toString().isEmpty() ) pdir = pdir + "/" + pname ;
 
     BuildItem(pname);
-    JsonToHash(ImportHash,bkpAdmin->value("import").toObject());
-    JsonToHash(ScriptHash,bkpAdmin->value("script").toObject());
-    JsonToHash(SourceHash,bkpAdmin->value("source").toObject());
+    bool lowVersion = false;
+    if(bkpAdmin->value("version").toString() < "1.1")
+        lowVersion = true;
+    JsonToHash(ImportHash,bkpAdmin->value("import").toObject(),lowVersion);
+    JsonToHash(ScriptHash,bkpAdmin->value("script").toObject(),lowVersion);
+    JsonToHash(SourceHash,bkpAdmin->value("source").toObject(),lowVersion);
 
     //检查路径是否已经改变
+    /*
     QFileInfo llm(name) ;
     if( LOLI_OS_QSTRING( FileDir()) != LOLI_OS_QSTRING(llm.path()) ){
         //被改变
@@ -131,15 +135,11 @@ bool BKEproject::OpenProject(const QString &name)
         CheckDir(&SourceHash,llm.path());
         pdir = llm.path() ;
         WriteBkpFile() ;
-    }
+    }*/
 
     MakeItems(Import,ImportHash);
     MakeItems(Script,ScriptHash);
     MakeItems(Source,SourceHash);
-
-
-
-
 
     return true ;
 }
@@ -174,7 +174,6 @@ void BKEproject::MakeItems(QTreeWidgetItem *dest,const QStringList &list)
     QString temp ;
     for( int i = 0 ; i < list.size() ; i++){
         temp = list.at(i) ;
-        if( temp.indexOf(":") > 0) temp = BkeFullnameToName(temp,FileDir()) ;
         if( temp.isEmpty() ) continue ;
         FindItem(dest,temp,true) ;
     }
@@ -196,7 +195,6 @@ void BKEproject::MakeItems(QTreeWidgetItem *dest,BkeFilesHash &hash)
 QTreeWidgetItem *BKEproject::MakeItem(QTreeWidgetItem *dest,const QString &dir)
 {
     QString abc = dir ;
-    if( abc.indexOf(":") >= 0) abc = BkeFullnameToName(dir,FileDir()) ;
     if( abc.isEmpty() ) return dest ;
 
     QTreeWidgetItem *root = dest ;
@@ -231,7 +229,6 @@ QTreeWidgetItem *BKEproject::FindItem(QTreeWidgetItem *dest,const QString &dir,b
 {
     QString llm = dir ;
 
-    if( dir.indexOf(':') >= 0 ) llm = BkeFullnameToName(dir,FileDir()) ;
     if( llm.isEmpty() ) return dest ;
 
     QTreeWidgetItem *root = dest ;
@@ -349,12 +346,11 @@ bool BKEproject::WriteBkpFile()
 {
     bkpAdmin = new QJsonObject ;
     bkpAdmin->insert("name",pname) ;
-    bkpAdmin->insert("dir",pdir) ;
 
     bkpAdmin->insert("import",HashToJson(ImportHash)) ;
     bkpAdmin->insert("script",HashToJson(ScriptHash)) ;
     bkpAdmin->insert("source",HashToJson(SourceHash)) ;
-    bkpAdmin->insert("version",QString("1.0")) ;
+    bkpAdmin->insert("version",QString("1.1")) ;
 
     QJsonDocument llm ;
     llm.setObject(*bkpAdmin);
@@ -373,14 +369,20 @@ QJsonObject BKEproject::HashToJson(BkeFilesHash &hash)
     return llm ;
 }
 
-void BKEproject::JsonToHash(BkeFilesHash &hash,QJsonObject llm)
+void BKEproject::JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion)
 {
     QStringList keyls = llm.keys() ;
     for( int i = 0 ; i < keyls.size() ; i++){
-        QVariant ks = llm.value(keyls.at(i)).toVariant() ;
+        QString name = keyls.at(i);
+        QString oriname = name;
+        if(lowVersion)
+        {
+            name = BkeFullnameToName(name, FileDir());
+        }
+        QVariant ks = llm.value(oriname).toVariant() ;
         QStringList *ls = new QStringList ;
         *ls = ks.toStringList() ;
-        hash[ keyls.at(i) ] = ls ;
+        hash[ name ] = ls ;
     }
 }
 
@@ -406,10 +408,7 @@ QString BKEproject::IconKey(qint64 key)
 //从完整的文件路径插入文件
 void BKEproject::AddFileToHash(BkeFilesHash *hash,const QString &filename)
 {
-    QString allfilename = filename ;   //全路径
-    if( allfilename.indexOf(":") < 0) allfilename.prepend(FileDir()+"/") ;
-
-    QFileInfo temp(allfilename) ;
+    QFileInfo temp(filename) ;
     QString path = LOLI_OS_QSTRING( temp.path() );
 
     QStringList *list = hash->value(path, &emptylist) ;  //绝对路径是否已经在列表中
@@ -443,7 +442,7 @@ bool BKEproject::removeFromHash(BkeFilesHash *hash,ItemInfo &f )
         }
     }
     else{
-        QFileInfo temp(f.FullName) ;
+        QFileInfo temp = f.FullName ;
         QStringList *ls ;
 
         ls = hash->value( LOLI_OS_QSTRING( temp.path() ) ) ;

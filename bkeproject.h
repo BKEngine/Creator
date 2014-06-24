@@ -101,7 +101,7 @@ private:
     void SortTree(QTreeWidgetItem *tree) ;
     void SearchTree(BkeFilesHash &hash, QTreeWidgetItem *dest,const QString &dir) ;
     QJsonObject HashToJson(BkeFilesHash &hash) ;
-    void JsonToHash(BkeFilesHash &hash,QJsonObject llm) ;
+    void JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion) ;
 
     void workItem(QTreeWidgetItem **la,BkeFilesHash **h1,ItemInfo &f) ;
 

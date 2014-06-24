@@ -1,3 +1,7 @@
-﻿F:/BKEtest/main.bkscr
+﻿E:/魔法使いの夜/BKE/script/1-1.bkscr
+E:/魔法使いの夜/BKE/script/1-0.bkscr
+E:/魔法使いの夜/BKE/parser_macro.bkscr
+E:/魔法使いの夜/BKE/macro.bkscr
+F:/BKEtest/main.bkscr
 F:/BKEtest/01sence.bkscr
 F:/09.txt

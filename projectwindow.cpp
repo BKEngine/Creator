@@ -265,11 +265,12 @@ void ProjectWindow::Addfiles(ItemInfo f)
 void ProjectWindow::AddDir(ItemInfo f)
 {
     QString d = QFileDialog::getExistingDirectory(this,"添加目录",workpro->FileDir()) ;
-    if( BkeFullnameToName(d,workpro->FileDir()).isEmpty() ){
+    QString tmp = BkeFullnameToName(d,workpro->FileDir());
+    if( tmp.isEmpty() ){
         QMessageBox::information(this,"","工作目录之外的文件不能添加",QMessageBox::Ok) ;
         return ;
     }
-    workpro->AddDir(d,f);
+    workpro->AddDir(tmp,f);
 }
 
 void ProjectWindow::ReName()
