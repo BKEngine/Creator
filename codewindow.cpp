@@ -367,7 +367,7 @@ void CodeWindow::addFile(const QString &file,const QString &prodir)
     ChangeProject( prowin->FindProjectFromDir(loli->ProjectDir()) );
     //改变当前显示项
     SetCurrentEdit(loli->edit);
-    if( loli->isFileChange() ) QfileChange("");
+    QfileChange("");
 }
 
 void CodeWindow::simpleNew(BkeDocBase *loli,const QString &t)
@@ -1000,11 +1000,11 @@ void CodeWindow::QfileChange(const QString &path)
         if( tempbase == 0) return ;
         SetCurrentEdit(tempbase->edit);
     }
-
+    if(!tempbase->isFileChange()) return;
     ignoreActive = true ;
 
     QMessageBox msg(this) ;
-    msg.setText("文件：\r\n"+path+"\r\n已经被改变，是否重新载入？");
+    msg.setText("文件：\r\n"+tempbase->Name()+"\r\n已经被改变，是否重新载入？");
     msg.addButton(QMessageBox::Yes);
     msg.addButton(QMessageBox::No);
     if( msg.exec() == QMessageBox::No ) return ;

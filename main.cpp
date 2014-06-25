@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         projectedit->OpenProject(xcodec->toUnicode(QByteArray(argv[1])) );
     }
 
-    QTimer::singleShot(3000,&test,SLOT(CheckUpdate()) ) ;
+    //QTimer::singleShot(3000,&test,SLOT(CheckUpdate()) ) ;
 
 
     return a.exec();
