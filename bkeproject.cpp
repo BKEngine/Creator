@@ -295,14 +295,14 @@ bool BKEproject::SearchDir(BkeFilesHash &hash,const QString &dir,const QString &
 
         if( fff.fileName() == "." || fff.fileName() == ".." ) continue ;
         else if( fff.isDir() ) SearchDir( hash , dir+"/"+fff.fileName(),suffix ) ;
-        else if( suffix.indexOf(fff.suffix().toLower()) < 0 ) continue ; //不是已指定后缀结尾
+        else if( fff.suffix().toLower()!=suffix ) continue ; //不是已指定后缀结尾
         else if( OutFilelist.indexOf( LOLI_OS_QSTRING(dir+"/"+fff.fileName() ) ) >= 0 ) continue ;
         else ls->append( fff.fileName() );
     }
 
     if( !ls->isEmpty() ){
         //hash[ LOLI_OS_QSTRING(dir) ] = ls ;
-        hash[ dir ] = ls ;
+        hash[ BkeFullnameToName(dir,FileDir()) ] = ls ;
         return true ;
     }
     else return false ;
@@ -322,7 +322,7 @@ void BKEproject::SearchTree(BkeFilesHash &hash, QTreeWidgetItem *dest,const QStr
 
     if( !ls->isEmpty() ){
         QStringList *ts = hash.value( LOLI_OS_QSTRING(dir) ) ;
-        hash[ LOLI_OS_QSTRING(dir) ] = ls ;
+        hash[ LOLI_OS_QSTRING(BkeFullnameToName(dir,FileDir())) ] = ls ;
         if( ts != 0) delete ts ;  //删除旧的对象
     }
 }
