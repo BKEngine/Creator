@@ -18,6 +18,22 @@ namespace LOLI{
 }
 
 
+class QFileName
+{
+public:
+    QFileName() ;
+    QFileName(const QString &file) ;
+    void setFile(const QString &file) ;
+    QString filePath() ;
+    void Clear() ;
+    QString Path(){ return path ; }
+    QString fileName(){ return filename ; }
+
+private:
+    QString filename ;
+    QString path ;
+    QString suffix ;
+};
 
 
 

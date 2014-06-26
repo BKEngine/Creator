@@ -18,8 +18,8 @@ CodeWindow::CodeWindow(QWidget *parent)
     ks2.setPaper(QColor(0xff,0xf0,0xff));
     CreateBtn();
 
-    filewatcher = new QFileSystemWatcher(this) ;
-    watcherflag = 1 ;
+//    filewatcher = new QFileSystemWatcher(this) ;
+//    watcherflag = 1 ;
 
     currentpos = -1 ;
     stackwidget = new QStackedWidget(this) ;
@@ -49,8 +49,6 @@ CodeWindow::CodeWindow(QWidget *parent)
     //编码转换
     connect(btncodeact,SIGNAL(triggered()),this,SLOT(ChangeCodec())) ;
     connect(btnselectall,SIGNAL(triggered()),this,SLOT(SelectAll())) ;
-    //文件从外部改变
-    connect(filewatcher,SIGNAL(fileChanged(QString)),this,SLOT(QfileChange(QString))) ;
     //转到行
     connect(btnfly,SIGNAL(triggered()),this,SLOT(GotoLine())) ;
     //编译并运行
@@ -452,10 +450,8 @@ void CodeWindow::simpleSave(BkeDocBase *loli)
         loli->SetFileName(temp);
     }
 
-    watcherflag = 0 ;
     if( !LOLI::AutoWrite(loli->File(),loli->edit->text(),"UTF-8")){
         QMessageBox::critical(this,"","文件：\r\n"+currentbase->FullName()+" 写出失败！") ;
-        watcherflag = 1 ;
         return ;
     }
     loli->edit->setModified(false);
@@ -472,9 +468,7 @@ void CodeWindow::SaveAs()
     else if( !name.endsWith(".bkscr")) name.append(".bkscr") ;
 
     //改变文件监视
-    filewatcher->removePath(currentbase->FullName()) ;
     currentbase->SetFileName(name);
-    filewatcher->addPath(name) ;
     simpleSave(currentbase);
 }
 
@@ -543,21 +537,6 @@ void CodeWindow::ImportBeChange(const QString &text,int type)
 //文件将被删除
 void CodeWindow::FileWillBeDel(const QString &file)
 {
-    BkeDocBase *akb = docStrHash.value(LOLI_OS_QSTRING(file),0) ;
-    if( akb == 0 ){
-        return ;
-    }
-    else{
-        stackwidget->setCurrentWidget(akb->edit);
-        SetCurrentEdit(stackwidget->currentIndex());
-        QMessageBox msg ;
-        msg.setText("文件：\r\n"+akb->FullName()+" 已经被打开，是否关闭？");
-
-        int i = msg.exec() ;
-        if( i == 0) CloseFile();
-        else if( i == 1 ) SaveAs();
-        else if( i == 2 ) return ;
-    }
 }
 
 void CodeWindow::FileIOclose(const QStringList &list)
@@ -573,8 +552,6 @@ void CodeWindow::FileIOclose(const QStringList &list)
             doclist.append( llm );
         }
     }
-
-
 }
 
 
@@ -605,6 +582,7 @@ void CodeWindow::CompileAll()
     deleteCompileFile(ComList);
 
     ComList = currentproject->AllScriptFiles() ;
+    cosdir  = currentproject->FileDir() ;
 
     //拷贝文件
     if( !WriteOpenFile(currentproject->FileDir()) ){
@@ -613,7 +591,7 @@ void CodeWindow::CompileAll()
         btnrunact->setEnabled(true);
         return ;
     }
-    QStringList ls = ListDirsCopy(ComList,currentproject->FileDir(),BKE_CURRENT_DIR+"/temp") ;
+    QStringList ls = ListDirsCopy(ComList,cosdir,BKE_CURRENT_DIR+"/temp") ;
 
     if( ls.size() > 0){
         QMessageBox msg ;
@@ -675,20 +653,18 @@ bool CodeWindow::WriteOpenFile(const QString &dir)
 //拷贝编译过的脚本
 void CodeWindow::copyCompileFile(QStringList &list)
 {
-    int len = BKE_PROJECT_DIR.length() ;
-    QFile abc ;
-    QString temp ;
+    QString fn ,ft ;
+    QString pna ;
+    QFile temp ;
     for( int i = 0 ; i < list.size() ; i++){
-        temp = list.at(i) ;
-        temp = temp.right(temp.length()-len-1) ;
-        if( temp.endsWith(".bkscr")){
-            temp = temp.left(temp.length()-6) ;
-            abc.setFileName(BKE_CURRENT_DIR+"/temp/"+temp+".bkbin");
-            abc.copy(BKE_PROJECT_DIR+"/"+temp+".bkbin") ;
-        }
-        else if( temp.endsWith(".bkpsr") ){
-            abc.setFileName(BKE_CURRENT_DIR+"/temp/"+temp);
-            abc.copy(BKE_PROJECT_DIR+"/"+temp) ;
+        pna = list.at(i) ;
+        if( pna.endsWith(".bkscr") ) pna = pna.left(pna.length() - 6 ) + ".bkbin" ;
+        fn = BKE_CURRENT_DIR + "/temp/"+pna ;
+        ft = cosdir + "/" + pna ;
+
+        if( fn.endsWith(".bkbin") ) {
+            temp.setFileName( fn );
+            temp.copy(ft) ;
         }
     }
 }
@@ -1000,20 +976,43 @@ void CodeWindow::QfileChange(const QString &path)
         if( tempbase == 0) return ;
         SetCurrentEdit(tempbase->edit);
     }
+
     if(!tempbase->isFileChange()) return;
     ignoreActive = true ;
 
     QMessageBox msg(this) ;
+
+    if( !tempbase->File()->exists() ){
+        msg.setText("文件：\r\n"+tempbase->Name()+"\r\n已经被从外部删除，是否另存为？");
+        msg.addButton(QMessageBox::Save);
+        msg.addButton(QMessageBox::Close);
+        msg.addButton(QMessageBox::Cancel);
+        int i = msg.exec() ;
+        if( i == QMessageBox::Close ){
+            BKEproject *pro = prowin->FindProjectFromDir(tempbase->ProjectDir()) ;
+            if( pro != 0 ) pro->RemoveItem(tempbase->FullName()) ;
+            simpleClose(tempbase);
+        }
+        else if( i == QMessageBox::Save ) SaveAs();
+        return ;
+    }
+
     msg.setText("文件：\r\n"+tempbase->Name()+"\r\n已经被改变，是否重新载入？");
     msg.addButton(QMessageBox::Yes);
     msg.addButton(QMessageBox::No);
     if( msg.exec() == QMessageBox::No ) return ;
-    else{
-        QString en ;
-        LOLI::AutoRead(en,tempbase->FullName()) ;
-        tempbase->edit->setText(en);
-        tempbase->edit->setModified(false);
+
+    if( tempbase->edit->isModified() ){
+        msg.setText("文件：\r\n"+tempbase->Name()+"\r\n已经修改，是否放弃修改？");
+        msg.addButton(QMessageBox::Yes);
+        msg.addButton(QMessageBox::No);
+        if( msg.exec() == QMessageBox::No ) SaveAs();
     }
+
+    QString en ;
+    LOLI::AutoRead(en,tempbase->FullName()) ;
+    tempbase->edit->setText(en);
+    tempbase->edit->setModified(false);
 }
 
 void CodeWindow::simpleClose(BkeDocBase *loli)

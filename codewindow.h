@@ -185,7 +185,7 @@ private:
 
     QHash<QString,BkeDocBase*> docStrHash ;
     QHash<QWidget*,BkeDocBase*> docWidgetHash ;
-    QFileSystemWatcher *filewatcher ;
+//    QFileSystemWatcher *filewatcher ;
 
 
     QToolBar *toolbar2 ;
@@ -198,6 +198,7 @@ private:
     SearchBox *diasearch ;
     QProgressBar *kag ;
     BkeScintilla *searchlablelater ;
+    QString cosdir ;
 
 
     int currentpos ;
@@ -205,7 +206,7 @@ private:
     bool ignoreflag ;
     bool isRun ;
     bool isSearLable ;
-    int watcherflag ;
+    //int watcherflag ;
     int isCompileNotice ;
 
     QSize hint ;

@@ -27,11 +27,12 @@ class BKEproject :public QObject
 {
 public:
     BKEproject(QObject *parent = 0);
+    ~BKEproject() ;
     QString FileDir() const;
     QString ProjectName() const ;
     QString IconKey(qint64 key) ;
     QString absName(const QString &name){ return FileDir()+"/"+name ; }
-    //QString FullNameToName(const QString &fullname) ;
+    QString AllNameToName(const QString &allname) ;
     bool NewProject(const QString &dir,const QString &name) ;
     bool OpenProject(const QString &name) ;
     bool IsNull() ;
@@ -104,9 +105,6 @@ private:
     void JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion) ;
 
     void workItem(QTreeWidgetItem **la,BkeFilesHash **h1,ItemInfo &f) ;
-
-    QTreeWidgetItem *simpleMakeItem(QTreeWidgetItem *dest,const QString &t) ;
-
     QHash<QString,QStringList*> *ItemToHashptr(const QTreeWidgetItem *root) ;
 
     void FindSection(const QString &section , int &from , int &end) ;

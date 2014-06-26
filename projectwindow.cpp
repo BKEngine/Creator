@@ -55,24 +55,19 @@ void ProjectWindow::OpenProject(const QString &file)
 {
     if( file.isEmpty() ) return  ;
 
-    QFileInfo cc(file) ;
-    BKEproject *pro = FindProjectFromDir(cc.path()) ;
+    BKEproject *pro ;
 
-    if( pro == 0){
-        pro = new BKEproject ;
-        if(!pro->OpenProject(file))
-        {
-            QMessageBox::information(this,"错误","文件不存在，项目打开失败",QMessageBox::Ok) ;
-            return;
-        }
-        projectlist << pro ;
-        addTopLevelItem(pro->Root);
-        BkeChangeCurrentProject(pro);
+    pro = new BKEproject ;
+    if(!pro->OpenProject(file))
+    {
+        QMessageBox::information(this,"错误","文件不存在，项目打开失败",QMessageBox::Ok) ;
+        return;
     }
-    else{
-        if( indexOfTopLevelItem(pro->Root) < 0) addTopLevelItem(pro->Root);
-        BkeChangeCurrentProject(pro);
-    }
+    projectlist << pro ;
+    addTopLevelItem(pro->Root);
+    BkeChangeCurrentProject(pro);
+
+
 
 //    //读取书签
 //    QString text ;
@@ -180,16 +175,16 @@ void ProjectWindow::NewFile(int type)
         int sk = QMessageBox::information(this,"","文件已经存在，是否直接添加文件",QMessageBox::Yes|QMessageBox::No) ;
         if( sk == QMessageBox::No ) return ;
     }
-    else LOLI_MAKE_NULL_FILE(sk.absoluteFilePath()) ;
+    else LOLI_MAKE_NULL_FILE(sk.filePath()) ;
 
     if( type == 1){
-        workpro->MakeItem(workpro->Import,name) ;
+        workpro->FindItem(workpro->Import,name) ;
     }
     else if( type == 2){
-        workpro->MakeItem(workpro->Script,name) ;
+        workpro->FindItem(workpro->Script,name) ;
     }
     else{
-        workpro->MakeItem(workpro->Source,name) ;
+        workpro->FindItem(workpro->Source,name) ;
     }
 
     workpro->AddFileToHash(workpro->typeHash(type),name);
@@ -372,7 +367,8 @@ void ProjectWindow::ActionAdmin()
     else if( p == btns[btn_search]) ;
     else if( p == btns[btn_remove]) DeleteFile(info);
     else if( p == btns[btn_close]){
-        takeTopLevelItem(indexOfTopLevelItem(workpro->Root)) ;
+        projectlist.removeOne(workpro) ;
+        workpro->deleteLater();
     }
 
 }

@@ -63,6 +63,13 @@ BKEproject::BKEproject(QObject *parent)
 
 }
 
+BKEproject::~BKEproject()
+{
+    lex->deleteLater();
+    RemoveItem(Root) ;
+    delete Root ;
+}
+
 
 //初始化项目
 void BKEproject::BuildItem(const QString &name)
@@ -91,7 +98,8 @@ bool BKEproject::NewProject(const QString &dir,const QString &name)
     BuildItem(pname);
     MakeImport();
 
-    SearchTree(ImportHash,Import,FileDir());
+    SearchTree(ImportHash,Import,"");
+
     SearchDir(ScriptHash,FileDir(),".bkscr") ;
     //SearchDir(SourceHash,FileDir(),".jpg.jpeg.png.bmp.ogg.wav.mp3.aac.mp4.avi.mpg") ;
     MakeItems(Script,ScriptHash);
@@ -151,18 +159,19 @@ void BKEproject::MakeImport()
     QString dirs = FileDir() ;
 
     OutFilelist <<"main.bkscr"<<"macro.bkscr"<<"config.bkpsr" ;
-    QStringList ls = BkeCreator::CopyStencil(dirs,OutFilelist) ;
-    LOLI::makeNullFile(ls,dirs) ;
-    {
-        QString a;
-        QString filename = FileDir() + "/config.bkpsr";
-        if(LOLI::AutoRead(a,filename) && !a.isEmpty())
-        {
-            a.replace("Bke_New_Project",ProjectName());
-            LOLI::AutoWrite(filename,a);
-        }
+
+    //从模版中复制文件，如果没有则创建
+    for( int i = 0 ; i < OutFilelist.size() ; i++){
+        LOLI_MAKE_NULL_FILE(dirs+"/"+OutFilelist.at(i)) ;
     }
 
+    //修改config的名字
+    QString a ;
+    LOLI::AutoRead(a,dirs+"/"+"config.bkpsr") ;
+    a.replace("Bke_New_Project",ProjectName());
+    LOLI::AutoWrite(dirs+"/"+"config.bkpsr",a) ;
+
+    //语法分析
     lex->ParserFile("macro.bkscr",dirs);
     OutFilelist.append( lex->GetImportFiles() ); //导入的脚本，将在脚本中属于例外
 
@@ -203,35 +212,17 @@ void BKEproject::MakeItems(QTreeWidgetItem *dest,BkeFilesHash &hash)
 //带排序的创建
 QTreeWidgetItem *BKEproject::MakeItem(QTreeWidgetItem *dest,const QString &dir)
 {
-    QString abc = dir ;
+    QString abc = AllNameToName(dir) ;
     if( abc.isEmpty() ) return dest ;
 
-    QTreeWidgetItem *root = dest ;
-    QStringList tk = abc.split("/") ;
+    QTreeWidgetItem *le = FindItem(dest,abc) ;
+    ItemInfo f ;
+    BKE_PROJECT_READITEM(le,f) ;
 
-    for( int i = 0 ; i < tk.size() ; i++){
-        root = simpleMakeItem(root,tk.at(i)) ;
-        SetIconFromSuffix(root,tk.at(i));
-        SortItem(root->parent()); //
-    }
-    return root ;
-}
-
-QTreeWidgetItem *BKEproject::simpleMakeItem(QTreeWidgetItem *dest,const QString &t)
-{
-    QTreeWidgetItem *le = FindItem(dest,t,false) ;
-    if( le != 0) return le ;
-
-    int i ;
-    for( i = 0 ; i < dest->childCount() ; i++){
-        if( t.compare(dest->child(i)->text(0),Qt::CaseInsensitive) < 0) break ;
-    }
-
-    le = new QTreeWidgetItem ;
-    le->setText(0,t);
-    dest->insertChild(i,le);
+    if( le->parent() != 0 ) SortItem( le->parent() );
     return le ;
 }
+
 
 //寻找文件，失败返回0，创建空路径时将创建不存在的节点
 QTreeWidgetItem *BKEproject::FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty )
@@ -295,14 +286,14 @@ bool BKEproject::SearchDir(BkeFilesHash &hash,const QString &dir,const QString &
 
         if( fff.fileName() == "." || fff.fileName() == ".." ) continue ;
         else if( fff.isDir() ) SearchDir( hash , dir+"/"+fff.fileName(),suffix ) ;
-        else if( fff.suffix().toLower()!=suffix ) continue ; //不是已指定后缀结尾
+        else if( suffix.indexOf(fff.suffix().toLower()) < 0 ) continue ; //不是已指定后缀结尾
         else if( OutFilelist.indexOf( LOLI_OS_QSTRING(dir+"/"+fff.fileName() ) ) >= 0 ) continue ;
         else ls->append( fff.fileName() );
     }
 
     if( !ls->isEmpty() ){
-        //hash[ LOLI_OS_QSTRING(dir) ] = ls ;
-        hash[ BkeFullnameToName(dir,FileDir()) ] = ls ;
+        //QString kkk = AllNameToName(dir) ;
+        hash[ AllNameToName(dir) ] = ls ;
         return true ;
     }
     else return false ;
@@ -315,14 +306,17 @@ void BKEproject::SearchTree(BkeFilesHash &hash, QTreeWidgetItem *dest,const QStr
     QStringList *ls = new QStringList ;
     for( int i = 0 ; i < dest->childCount() ; i++){
         le = dest->child(i) ;
-        if( le->childCount() > 0) SearchTree(hash,le,dir+"/"+le->text(0));
+        if( le->childCount() > 0){
+            if( dir.isEmpty() ) SearchTree(hash,le,le->text(0));
+            else SearchTree(hash,le,dir+"/"+le->text(0));
+        }
         else ls->append( le->text(0) );
         //要检测文件夹图标？
     }
 
     if( !ls->isEmpty() ){
         QStringList *ts = hash.value( LOLI_OS_QSTRING(dir) ) ;
-        hash[ LOLI_OS_QSTRING(BkeFullnameToName(dir,FileDir())) ] = ls ;
+        hash[ LOLI_OS_QSTRING(dir) ] = ls ;
         if( ts != 0) delete ts ;  //删除旧的对象
     }
 }
@@ -391,7 +385,7 @@ void BKEproject::JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion)
         QVariant ks = llm.value(oriname).toVariant() ;
         QStringList *ls = new QStringList ;
         *ls = ks.toStringList() ;
-        hash[ name ] = ls ;
+        hash[ AllNameToName(name) ] = ls ;
     }
 }
 
@@ -417,17 +411,26 @@ QString BKEproject::IconKey(qint64 key)
 //从完整的文件路径插入文件
 void BKEproject::AddFileToHash(BkeFilesHash *hash,const QString &filename)
 {
-    QFileInfo temp(filename) ;
-    QString path = LOLI_OS_QSTRING( temp.path() );
+    QString path = filename ;
+    QString name ;
+    int i = path.lastIndexOf("/") ;
+    if( i < 0){
+        name = filename ;
+        path.clear();  //相对路径的目录
+    }
+    else{
+        name = path.right(path.length()-i-1) ;
+        path = path.left( i ) ;
+    }
 
     QStringList *list = hash->value(path, &emptylist) ;  //绝对路径是否已经在列表中
     if( list->isEmpty() ){       //不存在则创建
         list = new QStringList ;
-        list->append( temp.fileName()) ;
+        list->append( name ) ;
         (*hash)[path] = list ;
     }
     else{
-        list->append( temp.fileName())  ;   //存在则添加
+        if( list->indexOf( name ) < 0) list->append( name )  ;   //存在则添加，避免重复添加
     }
 }
 
@@ -451,13 +454,13 @@ bool BKEproject::removeFromHash(BkeFilesHash *hash,ItemInfo &f )
         }
     }
     else{
-        QFileInfo temp = f.FullName ;
+        QFileName temp(f.FullName) ;
         QStringList *ls ;
 
-        ls = hash->value( LOLI_OS_QSTRING( temp.path() ) ) ;
+        ls = hash->value( LOLI_OS_QSTRING( temp.Path() ) ) ;
         if( ls == 0) return false;
-        ls->removeOne(temp.fileName()) ;
-        if( ls->isEmpty() && f.Layer > 1 ) hash->remove( LOLI_OS_QSTRING( temp.path() )  ) ;
+        ls->removeOne( temp.fileName()) ;
+        if( ls->isEmpty() && f.Layer > 1 ) hash->remove( LOLI_OS_QSTRING( temp.Path() )  ) ;
     }
 
     return true;
@@ -546,9 +549,19 @@ bool BKEproject::RemoveItem(ItemInfo &f)
 
     BkeFilesHash *h = typeHash(f.RootName) ;
 
-    RemoveItem(le) ;
     if( !removeFromHash(h,f) ) return false;
+    RemoveItem(le) ;
     delete le ;
+    return true ;
+}
+
+bool BKEproject::RemoveItem(const QString &file)
+{
+    QTreeWidgetItem *le = FindItemAll(file) ;
+    if( le == 0) return false ;
+    ItemInfo f ;
+    BKE_PROJECT_READITEM(le,f) ;
+    RemoveItem(f) ;
     return true ;
 }
 
@@ -576,10 +589,10 @@ QStringList BKEproject::ListFiles(int type)
         path = ptr.key() ;
         list = ptr.value() ;
         for( int i = 0 ; i < list->size() ; i++){
-            if(path.size())
-                filelist << path + "/"+list->at(i) ;
-            else
+            if( path.isEmpty() )
                 filelist << list->at(i) ;
+            else
+                filelist <<  path + "/" + list->at(i) ;
         }
     }
 
@@ -602,9 +615,10 @@ void BKEproject::copyStencil(const QString &file)
 QTreeWidgetItem *BKEproject::FindItemAll(const QString &name)
 {
     QTreeWidgetItem *le ;
-    le = FindItem(Import,name,false) ;
-    if( le == 0) FindItem(Script,name,false) ;
-    else if( le == 0) FindItem(Source,name,false) ;
+    QString temp = AllNameToName(name) ;
+    le = FindItem(Import,temp,false) ;
+    if( le == 0) le = FindItem(Script,temp,false) ;
+    else if( le == 0) le = FindItem(Source,temp,false) ;
     return le ;
 }
 
@@ -758,4 +772,14 @@ void BKEproject::CheckDir(BkeFilesHash *hash, const QString dirnow)
 
     hash->clear();
     *hash = th ;
+}
+
+QString BKEproject::AllNameToName(const QString &allname)
+{
+
+    if(allname.startsWith("/") || ( allname.length() > 1 && allname[1] == QChar(':')) ){
+        if( allname.length() == FileDir().length() ) return "" ;
+        else return  allname.right(allname.length() - FileDir().length()-1) ;
+    }
+    else return allname ;
 }

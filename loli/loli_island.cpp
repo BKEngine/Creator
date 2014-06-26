@@ -152,3 +152,44 @@ bool LOLI::AutoRead(QByteArray &dest,const QString &name)
     file.close();
     return true ;
 }
+
+
+QFileName::QFileName()
+{
+}
+
+QFileName::QFileName(const QString &file)
+{
+    QFileName() ;
+    setFile(file);
+}
+
+void QFileName::Clear()
+{
+    filename.clear();
+    path.clear();
+    suffix.clear();
+}
+
+void QFileName::setFile(const QString &file)
+{
+    int i = file.lastIndexOf("/") ;
+    if( i < 0){
+        path.clear();
+        filename = file ;
+    }
+    else{
+        filename = file.right(file.length()-i-1) ;
+        path = file.left(i) ;
+    }
+
+    i = filename.lastIndexOf(".") ;
+    if( i < 0) suffix.clear();
+    else suffix = filename.right(filename.length()-i-1) ;
+}
+
+QString QFileName::filePath()
+{
+    if( path.isEmpty() ) return filename ;
+    else return path + "/" + filename ;
+}
