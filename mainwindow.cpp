@@ -342,7 +342,7 @@ void MainWindow::isUpdate(QJsonObject &newJSON)
 {
     LableSureDialog msg ;
     msg.setWindowTitle("自动更新");
-    QString temp = "版本：" + newJSON.value("versiton").toString() ;
+    QString temp = "版本：" + newJSON.value("version").toString() ;
     temp.append("\n更新日志：\n") ;
     temp.append(newJSON.value("info").toString() ) ;
     temp.append("\n以下文件需要更新:\n"+upList.join("\n")) ;
