@@ -228,11 +228,12 @@ static inline void HandleAtCommand( StyleContext *sc )
         sc->ChangeState(SCE_BKE_ERROR);
         sc->SetState(SCE_BKE_DEFAULT);  //改变为错误状态，着色
     }
-    while( !sc->atLineEnd && !isspace(sc->ch) && sc->More()) sc->Forward();
+    while( !sc->atLineEnd && !isspace(sc->ch) && sc->More() && (sc->ch != '/' || sc->chNext != '/')) sc->Forward();
     sc->SetState(SCE_BKE_DEFAULT);
     while(!sc->atLineEnd)
     {
-        while(sc->More() && !sc->atLineEnd && isspace(sc->ch))sc->Forward();
+    	while(sc->More() && !sc->atLineEnd && isspace(sc->ch) )sc->Forward();
+        if(sc->ch == '/' && sc->chNext == '/') break;
         SetAttr(sc);
     }
 }
@@ -242,11 +243,11 @@ static inline void HandleCommand( StyleContext *sc )
     sc->SetState(SCE_BKE_COMMAND);
     if(!sc->atLineEnd && sc->More()) sc->Forward();
     else{
-        sc->ChangeState(SCE_BKE_ERROR);
-        sc->SetState(SCE_BKE_DEFAULT);
+        //sc->ChangeState();
+        sc->SetState(SCE_BKE_ERROR);
     }
     //命令本身
-    while( !sc->atLineEnd && !isspace(sc->ch) && sc->More()) sc->Forward();
+    while( !sc->atLineEnd && !isspace(sc->ch) && sc->ch!=']' && sc->More()) sc->Forward();
     sc->SetState(SCE_BKE_DEFAULT);
 
     while(!sc->atLineEnd && sc->ch!=']')
@@ -299,7 +300,8 @@ static void SetParser( StyleContext *sc)
         }
 
         //注释
-        if(sc->ch == '/' && sc->chNext == '/' ) AnnotateLine( sc );
+        if(sc->ch == '/' && sc->chNext == '/' ) return;
+        else if(sc->ch == '[') return;
         //返回
         else if( sc->ch == '#' && sc->chNext == '#'  ){
             sc->SetState(SCE_BKE_DEFAULT);
