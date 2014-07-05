@@ -251,13 +251,33 @@ void ProjectWindow::DeleteFile(ItemInfo f)
 void ProjectWindow::Addfiles(ItemInfo f)
 {
     QStringList ls ;
-        if( f.RootName == "初始化" || f.RootName == "脚本"){
-            ls = QFileDialog::getOpenFileNames(this,"添加文件",workpro->FileDir(),"bkscr脚本(*.bkscr)") ;
-        }
-        else ls = QFileDialog::getOpenFileNames(this,"添加文件",workpro->FileDir(),"所有文件(*.*)") ;
+    if( f.RootName == "初始化" || f.RootName == "脚本"){
+        ls = QFileDialog::getOpenFileNames(this,"添加文件",workpro->FileDir(),"bkscr脚本(*.bkscr)") ;
+    }
+    else ls = QFileDialog::getOpenFileNames(this,"添加文件",workpro->FileDir(),"所有文件(*.*)") ;
 
-        if( ls.isEmpty() ) return ;
-        workpro->Addfiles(ls,f);
+    if( ls.isEmpty() ) return ;
+    QStringList errors;
+    auto it = ls.begin();
+    while(it != ls.end())
+    {
+        QString rfile = BkeFullnameToName( *it, workpro->FileDir() );
+        if(rfile.isEmpty())
+        {
+            errors.append(*it);
+            it = ls.erase(it);
+        }
+        else
+        {
+            *it = rfile;
+            it++;
+        }
+    }
+    if(!errors.isEmpty())
+    {
+        QMessageBox::warning(this,"警告","不允许添加工程目录之外的文件：\n" + errors.join('\n'));
+    }
+    workpro->Addfiles(ls,f);
 }
 
 //

@@ -709,16 +709,16 @@ void BKEproject::Addfiles(const QStringList &ls ,ItemInfo &f)
     workItem(&la,&h1,f);
 
     for( int i = 0 ; i < ls.size() ; i++){
-        if( ls.at(i).endsWith(".bkscr") || ls.at(i).endsWith(".bkpsr") ){
-            FindItem(la,ls.at(i)) ;
-            AddFileToHash(h1,ls.at(i));
+        QString rfile = ls.at(i);
+        if( rfile.endsWith(".bkscr") || rfile.endsWith(".bkpsr") ){
+            FindItem(la,rfile) ;
+            AddFileToHash(h1,rfile);
         }
         else{
-            FindItem(Source,ls.at(i)) ;
-            AddFileToHash(&SourceHash,ls.at(i));
+            FindItem(Source,rfile) ;
+            AddFileToHash(&SourceHash,rfile);
         }
     }
-
     if( ls.size() > 0)  WriteBkpFile() ;
 }
 
