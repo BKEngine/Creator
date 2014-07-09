@@ -374,18 +374,17 @@ QJsonObject BKEproject::HashToJson(BkeFilesHash &hash)
 
 void BKEproject::JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion)
 {
-    QStringList keyls = llm.keys() ;
-    for( int i = 0 ; i < keyls.size() ; i++){
-        QString name = keyls.at(i);
-        QString oriname = name;
-        if(lowVersion)
-        {
-            name = BkeFullnameToName(name, FileDir());
-        }
-        QVariant ks = llm.value(oriname).toVariant() ;
+    QVariantMap bugs = llm.toVariantMap() ;
+    for( auto ptr = bugs.begin() ; ptr != bugs.end() ; ptr++){
+
+        QString orname = ptr.key() ;
         QStringList *ls = new QStringList ;
-        *ls = ks.toStringList() ;
-        hash[ AllNameToName(name) ] = ls ;
+        *ls = ptr.value().toStringList() ;
+        if( lowVersion ){
+            orname = BkeFullnameToName(orname,FileDir()) ;
+        }
+
+        hash[orname] = ls ;
     }
 }
 
