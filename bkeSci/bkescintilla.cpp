@@ -644,3 +644,30 @@ void BkeScintilla::InsertIndent(int count,int lineID)
     ChangeIgnore = back ;
 
 }
+
+
+bool BkeScintilla::event(QEvent *e)
+{
+    if (e->type() == QEvent::ToolTip){
+        ShowInfomation();
+        return true ;
+    }
+    return QsciScintilla::event(e) ;
+}
+
+
+//显示鼠标悬浮位置的信息
+void BkeScintilla::ShowInfomation()
+{
+    QPoint pt1 = QCursor::pos() ;
+    QPoint pt = mapFromGlobal(pt1) ;
+
+    //获取鼠标所在位置的位置（相当于文档）
+    long close_pos = SendScintilla(SCI_POSITIONFROMPOINTCLOSE, pt.x(),pt.y() );
+    int xl,xi ;
+    lineIndexFromPosition(close_pos,&xl,&xi);
+
+    QString t = defparser->GetInfo( this->text(xl).trimmed() ) ;;
+    if( t.isEmpty() ) return ;
+    QToolTip::showText(pt1,t) ;
+}

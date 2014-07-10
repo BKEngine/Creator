@@ -38,6 +38,7 @@ public:
     void NextWord() ;
     QString NextWord2() ;
     QString WordUntilLineEnd(int pos = -1) ;
+    QString GetLine(int pos = -1 ) ;
     void NextTwoWord() ;
     int  ErrorPos(){ return currentpos-cWord.length() ; }
     bool IsCurrentSpace(){ return cch == QChar(' ') ; }

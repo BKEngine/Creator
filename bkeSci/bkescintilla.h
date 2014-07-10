@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <Qsci/qsciscintilla.h>
 #include <QMessageBox>
+#include <QToolTip>
 #include "bkeSci/qscilexerbkescript.h"
 #include "paper/parser.h"
 #include "bkeSci/BkeIndicatorBase.h"
@@ -126,9 +127,11 @@ private:
     void BkeStartUndoAction() ;
     void BkeEndUndoAction() ;
     void InsertIndent(int count,int lineID) ;
+    void ShowInfomation() ;
 
     BkeIndicatorBase simpleFind(const char *ss , int flag,int from,int to) ;
 protected:
+    bool event(QEvent *e) ;
 
 };
 

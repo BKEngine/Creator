@@ -238,6 +238,13 @@ void BkeParser::defCommand(int pos)
     }
     else le = CommandBase.AddChild(name,CompleteBase::BKE_TYPE_COMMAND) ;
 
+    //添加定义说明
+    QString cinfo = w.GetLine() ;
+    if( !cinfo.isEmpty() ){
+
+    }
+    le->functioninfo = cinfo.replace(QRegExp("//"),"\n") ;
+
     StackWordadmin.push(wordadmin);
     wordadmin = &w ;
     while( !w.atLineEnd ){
@@ -585,4 +592,21 @@ int  BkeParser::GetLessIndent(QsciScintilla *edit,int line)
 
     if( pos_n >= pos_f ) return -1 ;
     else return 0 ;
+}
+
+//取得信息
+QString BkeParser::GetInfo(const QString &t)
+{
+    if( t.isEmpty() ) return QString();
+
+    WordSupport w ;
+    w.setText(t);
+
+    if( w.NextWord2() != "@" ) return QString() ;
+
+    CompleteBase *le = CommandBase.indexOf(w.NextWord2(),CompleteBase::BKE_TYPE_COMMAND) ;
+    if( le == 0) return QString() ;
+    CompleteBase *le1 = le->indexOf( w.NextWord2(),CompleteBase::BKE_TYPE_COMMAND ) ;
+    if( le1 != 0 && le1->hasChild() ) le = le1 ;
+    return le->functioninfo ;
 }

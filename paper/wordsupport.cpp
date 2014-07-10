@@ -343,3 +343,17 @@ bool WordSupport::IsLastSeparate(QChar c,int pos)
         }
     }
 }
+
+//获取指定位置的所在行，小于0为当前行，其他不存在时返回空
+QString WordSupport::GetLine(int pos )
+{
+    if( pos < 0) pos = NowAt() ;
+    if( pos < 0 || pos >= text.length() ) return QString() ;
+
+    int ef,ee ;
+    ef = text.lastIndexOf("\n",pos) ;
+    if( ef < 0) ef = 0 ;
+    ee = text.indexOf("\n") ;
+    if( ee < 0) ee = text.length() ;
+    return text.mid(ef,ee-ef).trimmed() ;
+}

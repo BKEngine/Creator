@@ -59,6 +59,7 @@ public:
     int  GetLessIndent(QsciScintilla *edit,int line) ;
     QStringList GetImportFiles(){ return importfile ; }
     bool isListShow(){ return showtype != SHOW_NULL ; }
+    QString GetInfo(const QString &t) ;
 
     int showtype ;
     CompleteBase VariablesBase ; //类、字典、变量
