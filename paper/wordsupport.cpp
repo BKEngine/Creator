@@ -357,3 +357,14 @@ QString WordSupport::GetLine(int pos )
     if( ee < 0) ee = text.length() ;
     return text.mid(ef,ee-ef).trimmed() ;
 }
+
+
+QString WordSupport::GetRightLine(int pos  )
+{
+    if( pos < 0) pos = NowAt() ;
+    if( pos < 0 || pos >= text.length() ) return QString() ;
+
+    int ee = text.indexOf("\n") ;
+    if( ee < 0) ee = text.length() ;
+    return text.mid(pos,ee-pos).trimmed() ;
+}

@@ -228,22 +228,27 @@ void BkeParser::defCommand(int pos)
         ErrorSub(w.ErrorPos()+pos,"名称必须使用字符串");
         return ;
     }
+
+    QString cinfo1("命令:") ;
     name = name.mid(1,name.length()-2) ;
     CompleteBase *le ;
     int i ;
     if(  (i=name.indexOf('#')) >= 0){
         le = CommandBase.AddChild(name.left(i),CompleteBase::BKE_TYPE_COMMAND) ;
+        cinfo1.append(le->Name) ;
         name = name.right(name.length()-i-1).replace(QRegExp("\\\\"),"") ;
         le = le->AddChild(name,CompleteBase::BKE_TYPE_COMMAND) ;
+        cinfo1.append(" " + le->Name+" 参数:") ;
     }
-    else le = CommandBase.AddChild(name,CompleteBase::BKE_TYPE_COMMAND) ;
+    else{
+        le = CommandBase.AddChild(name,CompleteBase::BKE_TYPE_COMMAND) ;
+        cinfo1.append(le->Name+" 参数:") ;
+    }
 
     //添加定义说明
-    QString cinfo = w.GetLine() ;
-    if( !cinfo.isEmpty() ){
-
-    }
-    le->functioninfo = cinfo.replace(QRegExp("//"),"\n") ;
+    QString cinfo = w.GetRightLine() ;
+    cinfo.replace(QRegExp("//"),"\n") ;
+    le->functioninfo = cinfo1 + cinfo ;
 
     StackWordadmin.push(wordadmin);
     wordadmin = &w ;
@@ -608,5 +613,6 @@ QString BkeParser::GetInfo(const QString &t)
     if( le == 0) return QString() ;
     CompleteBase *le1 = le->indexOf( w.NextWord2(),CompleteBase::BKE_TYPE_COMMAND ) ;
     if( le1 != 0 && le1->hasChild() ) le = le1 ;
+
     return le->functioninfo ;
 }
