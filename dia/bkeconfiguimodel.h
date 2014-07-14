@@ -52,6 +52,7 @@ private:
     QLineEdit* fontsize ;
     QLineEdit* fontcolor ;
     QLineEdit* fontname ;
+    QLineEdit* debuglevel ;
 
     QString Text ;
 };

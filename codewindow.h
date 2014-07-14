@@ -164,7 +164,7 @@ public slots:
     void FileReadyToCompile(int i) ;
     void ChangeProject(BKEproject *p) ;
     void TextToMarks(const QString &text,const QString &dir,int type) ;
-    void deleteCompileFile(QStringList &list) ;
+    void deleteCompileFile(const QStringList &list, const QString &path) ;
     void SelectAll() ;
     void QfileChange(const QString &path) ;
     void GotoLine() ;

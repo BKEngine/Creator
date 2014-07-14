@@ -579,7 +579,7 @@ void CodeWindow::CompileAll()
     btncompilerunact->setEnabled(false);
     btnrunact->setEnabled(false);
     //清理上次编译的项目
-    deleteCompileFile(ComList);
+    deleteCompileFile(ComList, cosdir);
 
     ComList = currentproject->AllScriptFiles() ;
     cosdir  = currentproject->FileDir() ;
@@ -670,14 +670,14 @@ void CodeWindow::copyCompileFile(QStringList &list)
 }
 
 //删除编译过的文件
-void CodeWindow::deleteCompileFile(QStringList &list)
+void CodeWindow::deleteCompileFile(const QStringList &list, const QString &path)
 {
     QFileInfo info ;
     QFile llm ;
     for( int i = 0 ; i < list.size() ; i++){
         info.setFile(list.at(i));
         if( info.suffix() == "bkscr" ){
-            llm.setFileName(info.path()+"/"+info.baseName()+".bkbin");
+            llm.setFileName(path + "/" + info.path()+"/"+info.baseName()+".bkbin");
             llm.remove() ;
         }
     }
@@ -882,8 +882,8 @@ void CodeWindow::RunBKE()
 //    cakedir.mkpath(temp) ;
 
     QString ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev.exe" ;
-    QDir::setCurrent(currentproject->FileDir()) ;
-    QProcess::startDetached( ndir,QStringList() ) ;
+    //QDir::setCurrent() ;
+    QProcess::startDetached( ndir,QStringList(), currentproject->FileDir() ) ;
 }
 
 void CodeWindow::AnnotateSelect()
@@ -893,7 +893,7 @@ void CodeWindow::AnnotateSelect()
 
 void CodeWindow::ClearCompile()
 {
-    deleteCompileFile(ComList) ;
+    deleteCompileFile(ComList, cosdir) ;
     btnrunact->setEnabled(false) ; //清理后运行按钮不可用
     btndebugact->setEnabled(false); //debug按钮也不可用
 }

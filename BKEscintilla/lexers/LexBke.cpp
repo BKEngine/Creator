@@ -80,8 +80,29 @@ static inline void SetString( StyleContext *sc)
     while(sc->More() && !sc->atLineEnd)
     {
         sc->Forward();
-        if(sc->ch=='\"' && sc->chNext!='\"')
-            break;
+        if(sc->ch=='\"'  )
+        {
+             if(sc->chNext!='\"')
+                   break;
+             else
+                   sc->Forward();
+        }
+    }
+    sc->Forward();
+    sc->SetState(k);
+}
+
+static inline void SetString2( StyleContext *sc)
+{
+    int k = sc->state ;
+    sc->SetState(SCE_BKE_STRING);
+    while(sc->More() && !sc->atLineEnd)
+    {
+        sc->Forward();
+        if(sc->ch=='\'')
+             break;
+        else if(sc->ch=='\\')
+           	sc->Forward();
     }
     sc->Forward();
     sc->SetState(k);
@@ -109,8 +130,27 @@ static void SetValue(StyleContext *sc, bool BeginWithAt=true)
             while(sc->More() && !sc->atLineEnd)
             {
                 sc->Forward();
-                if(sc->ch=='\"' && sc->chNext!='\"')
+                if(sc->ch=='\"'  )
+                {
+                	if(sc->chNext!='\"')
+                   	break;
+                   else
+                   	sc->Forward();
+                }
+            }
+            sc->Forward();
+            sc->SetState(SCE_BKE_DEFAULT);
+        }
+        else if(sc->ch == '\'')
+        {
+        	sc->SetState(SCE_BKE_STRING);
+            while(sc->More() && !sc->atLineEnd)
+            {
+                sc->Forward();
+                if(sc->ch=='\'')
                     break;
+                else if(sc->ch=='\\')
+                	sc->Forward();
             }
             sc->Forward();
             sc->SetState(SCE_BKE_DEFAULT);
@@ -186,6 +226,7 @@ static void SetValue(StyleContext *sc, bool BeginWithAt=true)
         }
         else
             break;
+        while(sc->More() && !sc->atLineEnd && isspace(sc->ch) )sc->Forward();
     }
 }
 
@@ -334,6 +375,7 @@ static void ColouriseBkeDoc(unsigned int startPos, int length, int initStyle,
         else if(sc.ch == '*') SetLabel(&sc);
         //else if(sc.ch == '#' && sc.chNext == '#' ) SetParser( &sc );
         else if(sc.ch == '\"') SetString(&sc);
+        else if(sc.ch == '\'') SetString2(&sc);
         else SetParser( &sc );
     }
 	sc.Complete();

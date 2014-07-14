@@ -663,11 +663,22 @@ void BkeScintilla::ShowInfomation()
     QPoint pt = mapFromGlobal(pt1) ;
 
     //获取鼠标所在位置的位置（相当于文档）
-    long close_pos = SendScintilla(SCI_POSITIONFROMPOINTCLOSE, pt.x(),pt.y() );
-    int xl,xi ;
-    lineIndexFromPosition(close_pos,&xl,&xi);
+    //long close_pos = SendScintilla(SCI_POSITIONFROMPOINTCLOSE, pt.x(),pt.y() );
+    //int xl,xi ;
+    //lineIndexFromPosition(close_pos,&xl,&xi);
+    int line = lineAt(pt);
+    if(line == -1)
+    {
+        QToolTip::hideText();
+        return;
+    }
 
-    QString t = defparser->GetInfo( this->text(xl).trimmed() ) ;;
-    if( t.isEmpty() ) return ;
+
+    QString t = defparser->GetInfo( this->text(line).trimmed() ) ;;
+    if( t.isEmpty() )
+    {
+        QToolTip::hideText();
+        return ;
+    }
     QToolTip::showText(pt1,t) ;
 }

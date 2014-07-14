@@ -34,16 +34,20 @@ BkeConfigUiModel::BkeConfigUiModel(QWidget *parent)
 
     fontname = new QLineEdit(this) ;
     form->addRow("默认字体文件名:", fontname );
+
+    debuglevel = new QLineEdit(this) ;
+    form->addRow("Log等级:", debuglevel );
+
     form->setLabelAlignment(Qt::AlignRight);
 
-    btnclose->setGeometry(380,350,100,35);
-    btnsave->setGeometry(270,350,100,35);
+    btnclose->setGeometry(380,370,100,35);
+    btnsave->setGeometry(270,370,100,35);
 
     setLayout(form);
 
     connect(btnclose,SIGNAL(clicked()),this,SLOT(close())) ;
     connect(btnsave,SIGNAL(clicked()),this,SLOT(Sure())) ;
-    resize(500,400);
+    resize(500,430);
     hide();
 }
 
@@ -95,6 +99,7 @@ void BkeConfigUiModel::Sure()
     if( WordSupport::IsNumber(savenum->text())) result.append("MaxSaveDataNum="+savenum->text()+";\r\n") ;
     if( WordSupport::IsColor(fontcolor->text())) result.append("DefaultFontColor="+fontcolor->text()+";\r\n") ;
     if( !fontname->text().isEmpty() ) result.append("DefaultFontName=\""+fontname->text()+"\";\r\n") ;
+    if( !debuglevel->text().isEmpty() ) result.append("DebugLevel="+debuglevel->text()+";\r\n") ;
 
     QFile ks( Name ) ;
     if( !LOLI::AutoWrite(&ks,result,"UTF-8")){
@@ -166,6 +171,7 @@ void BkeConfigUiModel::ReadFile(const QString &file)
     temp = ToType( LOLI_KEY_VAL(Text,"DefaultFontColor")) ;
     if( !temp.isEmpty() ) fontcolor->setText( temp ) ;
     fontname->setText( ToType( LOLI_KEY_VAL(Text,"DefaultFontName")) ) ;
+    debuglevel->setText( ToType( LOLI_KEY_VAL(Text,"DebugLevel")) ) ;
 }
 
 
