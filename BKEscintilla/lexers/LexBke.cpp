@@ -310,7 +310,7 @@ static inline void HandleCommand( StyleContext *sc )
 static void SetLabel( StyleContext *sc )
 {
     sc->SetState(SCE_BKE_LABEL);
-    while( !sc->atLineEnd && sc->More()) sc->Forward();
+    while( !sc->atLineEnd && sc->More() && isspace(sc->ch)) sc->Forward();
     sc->SetState(SCE_BKE_DEFAULT);
 }
 
