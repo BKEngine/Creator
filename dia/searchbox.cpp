@@ -100,6 +100,7 @@ void SearchBox::SetSci(BkeScintilla *sci)
 void SearchBox::closeEvent(QCloseEvent *event)
 {
     if( sciedit == 0) return ;
+    fstr.clear();
     sciedit->ClearIndicators(BkeScintilla::BKE_INDICATOR_FIND);
 }
 
