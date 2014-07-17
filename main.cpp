@@ -1,8 +1,11 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMainWindow>
+#include <QLibrary>
 #include "mainwindow.h"
 #include "weh.h"
+
+void CheckOpenAL32() ;
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +25,7 @@ int main(int argc, char *argv[])
     QTranslator translator;
     if( !translator.load("qt_zh_CN",BKE_CURRENT_DIR,"",".qm") ) QMessageBox::information(0,"错误","加载中文翻译失败",QMessageBox::Ok) ;
     a.installTranslator(&translator);
+
 //启动------->>>>>>>>>>
 
     //创建文件夹
@@ -74,5 +78,19 @@ int main(int argc, char *argv[])
     QTimer::singleShot(3000,&test,SLOT(CheckUpdate()) ) ;
 #endif
 
+    //使用win32时，检查依赖库
+    #ifdef Q_OS_WIN
+    CheckOpenAL32();
+    #endif
+
     return a.exec();
+}
+
+//检测是否安装了openal32，没有则安装
+void CheckOpenAL32()
+{
+    QLibrary lib("OpenAL32.dll") ;
+    if( lib.load() ) return ;
+    QMessageBox::information(0,"安装支持库","你的计算机没有安装OpenAL32，Creator将为你安装，\n在接下来的窗口中选择 OK ") ;
+    QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/tool/OpenAL.exe")) ;
 }

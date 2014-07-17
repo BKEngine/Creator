@@ -235,7 +235,7 @@ file/projects.txt -text
 file/qt_zh_CN.qm -text
 file/tool/BKCompiler_Dev.exe -text
 file/tool/BKEngine_Dev.exe -text
-file/tool/OpenAL32.dll -text
+file/tool/OpenAL.exe -text
 file/tool/新建工程.mht -text
 file/tool/简介.html -text
 file/tool/编译与运行.mht -text
