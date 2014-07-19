@@ -1,6 +1,7 @@
 * text=auto !eol
 /BKE_creator.pro -text
 /BKE_creator.pro.user -text
+/BKE_creator_static_qsci.pro -text
 BKEscintilla/Qt4Qt5/ListBoxQt.cpp -text
 BKEscintilla/Qt4Qt5/ListBoxQt.h -text
 BKEscintilla/Qt4Qt5/PlatQt.cpp -text

@@ -48,6 +48,36 @@ using namespace Scintilla;
 static const char *BKE_PARSER_KEY = " for foreach in extends do while function propset propget int string number typeof var delete class if else continue break return this true false void global " ;
 static const char *BKE_SEPARATEOR = " ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\" ;
 
+static inline bool isSpace(int i)
+{
+    return i <= 32;
+}
+
+static inline bool isAlpha(int i)
+{
+    return (i>='a' && i<='z') || (i>='A' && i<='Z');
+}
+
+static inline bool isDigit(int i)
+{
+    return i>='0' && i<='9';
+}
+
+static inline bool isWord(int i)
+{
+    return i >= 0x100;
+}
+
+static inline bool isIdentifyBegin(int i)
+{
+    return i=='_' || isAlpha(i) || isWord(i);
+}
+
+static inline bool isIdentifyBody(int i)
+{
+    return isIdentifyBegin(i) || isDigit(i);
+}
+
 bool isSeparator(char ch)
 {
     char bt[2] ;
@@ -166,9 +196,9 @@ static void SetValue(StyleContext *sc, bool BeginWithAt=true)
             }
             sc->SetState(SCE_BKE_DEFAULT);
         }
-        else if(!isspace(sc->ch) || bracket[bracket.size()-1]>'0')
+        else if(!isSpace(sc->ch) || bracket[bracket.size()-1]>'0')
         {
-            if(isspace(sc->ch))
+            if(isSpace(sc->ch))
             {
                 if(sc->More() && !sc->atLineEnd)
                 {
@@ -226,34 +256,48 @@ static void SetValue(StyleContext *sc, bool BeginWithAt=true)
         }
         else
             break;
-        while(sc->More() && !sc->atLineEnd && isspace(sc->ch) )sc->Forward();
     }
 }
 
 static void SetAttr( StyleContext *sc, bool BeginWithAt=true )
 {
-    long orgpos=sc->currentPos;
+    int orgpos=sc->currentPos;
     bool isattr=false;
-    while(sc->More())
+    int attrpos = -1;
+    while(sc->More() && !sc->atLineEnd)
     {
-        sc->Forward();
+        if((!BeginWithAt && sc->ch == ']')
+            ||isSpace(sc->ch))
+            break;
         if(sc->ch=='=')
         {
             isattr=true;
+            attrpos=sc->currentPos;
             break;
         }
-        if(!isalpha(sc->ch))
-            break;
+        sc->Forward();
     }
     sc->currentPos=orgpos-2;
     sc->Forward();
     sc->Forward();
     if(isattr)
     {
+        bool first=true;
         sc->SetState(SCE_BKE_ATTRIBUTE);
-        sc->Forward();
-        while(sc->More() && isalpha(sc->ch)) sc->Forward();
-        sc->SetState((SCE_BKE_DEFAULT));
+        while(sc->currentPos<attrpos)
+        {
+            if((first && isIdentifyBegin(sc->ch))||
+               (!first && isIdentifyBody(sc->ch)))
+            {
+                first = false;
+            }
+            else
+            {
+                sc->SetState(SCE_BKE_ERROR);
+            }
+            sc->Forward();
+        }
+        sc->SetState(SCE_BKE_DEFAULT);
     }
     if(sc->ch=='=')
         sc->Forward();
@@ -269,11 +313,11 @@ static inline void HandleAtCommand( StyleContext *sc )
         sc->ChangeState(SCE_BKE_ERROR);
         sc->SetState(SCE_BKE_DEFAULT);  //改变为错误状态，着色
     }
-    while( !sc->atLineEnd && !isspace(sc->ch) && sc->More() && (sc->ch != '/' || sc->chNext != '/')) sc->Forward();
+    while( !sc->atLineEnd && sc->More() && !isSpace(sc->ch) && (sc->ch != '/' || sc->chNext != '/')) sc->Forward();
     sc->SetState(SCE_BKE_DEFAULT);
     while(!sc->atLineEnd)
     {
-    	while(sc->More() && !sc->atLineEnd && isspace(sc->ch) )sc->Forward();
+        while(sc->More() && !sc->atLineEnd && isSpace(sc->ch) )sc->Forward();
         if(sc->ch == '/' && sc->chNext == '/') break;
         SetAttr(sc);
     }
@@ -288,12 +332,12 @@ static inline void HandleCommand( StyleContext *sc )
         sc->SetState(SCE_BKE_ERROR);
     }
     //命令本身
-    while( !sc->atLineEnd && !isspace(sc->ch) && sc->ch!=']' && sc->More()) sc->Forward();
+    while( !sc->atLineEnd && !isSpace(sc->ch) && sc->ch!=']' && sc->More()) sc->Forward();
     sc->SetState(SCE_BKE_DEFAULT);
 
-    while(!sc->atLineEnd && sc->ch!=']')
+    while(sc->More() && !sc->atLineEnd && sc->ch!=']')
     {
-        while(sc->More() && !sc->atLineEnd && isspace(sc->ch))sc->Forward();
+        while(sc->More() && !sc->atLineEnd && isSpace(sc->ch))sc->Forward();
         SetAttr(sc, false);
     }
 
@@ -310,7 +354,7 @@ static inline void HandleCommand( StyleContext *sc )
 static void SetLabel( StyleContext *sc )
 {
     sc->SetState(SCE_BKE_LABEL);
-    while( !sc->atLineEnd && sc->More() && isspace(sc->ch)) sc->Forward();
+    while( !sc->atLineEnd && sc->More() && !isSpace(sc->ch)) sc->Forward();
     sc->SetState(SCE_BKE_DEFAULT);
 }
 
@@ -350,7 +394,7 @@ static void SetParser( StyleContext *sc)
             return ;
         }
         else if( sc->ch == '\"' ) SetString(sc);
-
+        else if( sc->ch == '\'' ) SetString2(sc);
         else if( isk && isoperator(sc->ch) ) sc->SetState(SCE_BKE_OPERATORS);
 
         sc->Forward();
