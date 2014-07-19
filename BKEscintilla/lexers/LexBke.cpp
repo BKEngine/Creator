@@ -168,7 +168,7 @@ static void SetValue(StyleContext *sc, bool BeginWithAt=true)
                    	sc->Forward();
                 }
             }
-            sc->Forward();
+            if(!sc->atLineEnd) sc->Forward();
             sc->SetState(SCE_BKE_DEFAULT);
         }
         else if(sc->ch == '\'')
@@ -264,12 +264,32 @@ static void SetAttr( StyleContext *sc, bool BeginWithAt=true )
     int orgpos=sc->currentPos;
     bool isattr=false;
     int attrpos = -1;
+    bool quote=false;
+    int bracket=0;
     while(sc->More() && !sc->atLineEnd)
     {
-        if((!BeginWithAt && sc->ch == ']')
+        if((!BeginWithAt && !bracket && sc->ch == ']')
             ||isSpace(sc->ch))
             break;
-        if(sc->ch=='=')
+        if(sc->ch=='"')
+        {
+            if(sc->chNext=='"')
+            {
+                sc->Forward(2);
+                continue;
+            }
+            else
+                quote=!quote;
+        }
+        else if(sc->ch=='[')
+        {
+            bracket++;
+        }
+        else if(sc->ch==']')
+        {
+            bracket--;
+        }
+        else if(!quote && sc->ch=='=')
         {
             isattr=true;
             attrpos=sc->currentPos;
