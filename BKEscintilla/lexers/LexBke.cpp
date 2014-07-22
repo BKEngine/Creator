@@ -265,6 +265,7 @@ static void SetAttr( StyleContext *sc, bool BeginWithAt=true )
     bool isattr=false;
     int attrpos = -1;
     bool quote=false;
+    bool quote2=false;
     int bracket=0;
     while(sc->More() && !sc->atLineEnd)
     {
@@ -281,6 +282,18 @@ static void SetAttr( StyleContext *sc, bool BeginWithAt=true )
             else
                 quote=!quote;
         }
+        else if(sc->ch=='\'')
+        {
+            quote2 = !quote2;
+        }
+        else if(sc->ch=='\\')
+        {
+            if(quote2)
+            {
+                if(sc->chNext=='\'')
+                    sc->Forward();
+            }
+        }
         else if(sc->ch=='[')
         {
             bracket++;
@@ -289,7 +302,7 @@ static void SetAttr( StyleContext *sc, bool BeginWithAt=true )
         {
             bracket--;
         }
-        else if(!quote && sc->ch=='=')
+        else if(!quote && !quote2 && sc->ch=='=')
         {
             isattr=true;
             attrpos=sc->currentPos;
