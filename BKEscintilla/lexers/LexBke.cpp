@@ -408,9 +408,11 @@ static void SetParser( StyleContext *sc)
             ls[ki] = 32 ;  //总是有一个空格，保证完全匹配
             if( strstr(BKE_PARSER_KEY,&ls[0]) != NULL && ls[1] > 32) sc->ChangeState(SCE_BKE_UNTYPEA);
             ki = 1 ;
+            sc->Forward();
             memset(&ls[0],0,24) ;
             ls[0] = 32 ; //开始总要有一个空格
             sc->SetState(SCE_BKE_DEFAULT);
+            continue;
         }
         else if( ki < 23){
             ls[ki] = sc->ch ;
