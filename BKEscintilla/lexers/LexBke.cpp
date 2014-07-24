@@ -174,15 +174,15 @@ static void SetValue(StyleContext *sc, bool BeginWithAt=true)
         else if(sc->ch == '\'')
         {
         	sc->SetState(SCE_BKE_STRING);
+            sc->Forward();
             while(sc->More() && !sc->atLineEnd)
             {
-                sc->Forward();
                 if(sc->ch=='\'')
                     break;
                 else if(sc->ch=='\\')
                 	sc->Forward();
+                sc->Forward();
             }
-            sc->Forward();
             sc->SetState(SCE_BKE_DEFAULT);
         }
         else if(sc->ch=='_' || isalpha(sc->ch) || sc->ch>=0x80)

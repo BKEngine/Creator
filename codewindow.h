@@ -151,6 +151,7 @@ public slots:
     void Compile() ;
     void CompileAll() ;
     void CompileFinish() ;
+    void CompileError(QString s) ;
     void CompileAndRun() ;
     void FileNameChange(const QString &oldname,const QString &newname,bool &c) ;
     void ToLocation(BkeMarkerBase *p,const QString &prodir) ;

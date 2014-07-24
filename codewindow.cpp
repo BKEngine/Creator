@@ -43,6 +43,7 @@ CodeWindow::CodeWindow(QWidget *parent)
     connect(btnfindact,SIGNAL(triggered()),diasearch,SLOT(SearchModel())) ;
     connect(btnreplaceact,SIGNAL(triggered()),diasearch,SLOT(ReplaceModel())) ;
     connect(&comtool,SIGNAL(CompliteFinish()),this,SLOT(CompileFinish())) ;
+    connect(&comtool,SIGNAL(CompliteError(QString)),this,SLOT(CompileError(QString))) ;
     connect(btnrunact,SIGNAL(triggered()),this,SLOT(RunBKE())) ;
     connect(pannote,SIGNAL(triggered()),this,SLOT(AnnotateSelect())) ;
     connect(btnclearact,SIGNAL(triggered()),this,SLOT(ClearCompile())) ;
@@ -706,6 +707,17 @@ bool CodeWindow::ReadyCompile(const QString &file)
 }
 
 
+void CodeWindow::CompileError(QString s)
+{
+    btncompileact->setEnabled(true);
+    kag->setValue(kag->maximum());
+    btncompilerunact->setEnabled(true);
+    btnrunact->setEnabled(true);
+    QTimer::singleShot(8*1000,kag,SLOT(reset())) ; //8秒之后隐藏
+    isRun = false ;
+    QMessageBox::warning(this,"编译失败","bkc打开失败，错误："+s);
+}
+
 //编译完成
 void CodeWindow::CompileFinish()
 {
@@ -735,7 +747,6 @@ void CodeWindow::CompileFinish()
     //按钮可用
     btncompileact->setEnabled(true);
     btncompilerunact->setEnabled(true);
-    btnrunact->setEnabled( markadmin.errorcount < 1);  //只有错误等于0，按钮才是可用的
     QTimer::singleShot(8*1000,kag,SLOT(reset())) ; //8秒之后隐藏
     if( markadmin.errorcount < 1 ) btnrunact->setEnabled(true) ;  //编译完成并且没有问题运行按钮才可用
     if( markadmin.errorcount < 1 && isRun ) RunBKE();
