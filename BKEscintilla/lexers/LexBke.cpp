@@ -406,7 +406,7 @@ static void SetParser( StyleContext *sc)
         isk = isSeparator(sc->ch) ;
         if( isk ){
             ls[ki] = 32 ;  //总是有一个空格，保证完全匹配
-            if( strstr(BKE_PARSER_KEY,&ls[0]) != NULL && ls[1] > 32) sc->ChangeState(SCE_BKE_UNTYPEA);
+            if( strstr(BKE_PARSER_KEY,&ls[0]) != NULL && ls[1] > 32){ sc->ChangeState(SCE_BKE_UNTYPEA); sc->SetState(SCE_BKE_DEFAULT);}
             ki = 1 ;
             sc->Forward();
             memset(&ls[0],0,24) ;
