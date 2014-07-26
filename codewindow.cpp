@@ -252,7 +252,6 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 
     //改变项目
     ChangeProject( prowin->FindProjectFromDir( currentbase->ProjectDir()) );
-
     currentedit = currentbase->edit ;
     //连接文档改变信号
     CurrentConnect(true);
@@ -1082,6 +1081,7 @@ void CodeWindow::BackstageSearchLable(BkeScintilla *edit)
         return ;
     }
 
+    int fline = edit->firstVisibleLine() ;
     edit->findFirst1("^[*].*",false,true,false,false) ;
 
     slablelist->clear();
@@ -1104,6 +1104,8 @@ void CodeWindow::BackstageSearchLable(BkeScintilla *edit)
         BackstageSearchLable(searchlablelater);
         searchlablelater = 0 ;
     }
+
+    edit->setFirstVisibleLine(fline);
 }
 
 void CodeWindow::GotoLable(int i)
