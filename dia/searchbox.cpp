@@ -3,7 +3,7 @@
 SearchBox::SearchBox(QWidget *parent) :
     QDockWidget(parent)
 {
-    QWidget *w = new QWidget(parent) ;
+    QWidget *w = new QWidget() ;
     h1 = new QVBoxLayout ;
     h2 = new QVBoxLayout ;
     v1 = new QHBoxLayout ;
@@ -104,6 +104,11 @@ void SearchBox::closeEvent(QCloseEvent *event)
     sciedit->ClearIndicators(BkeScintilla::BKE_INDICATOR_FIND);
 }
 
+void SearchBox::showEvent(QShowEvent *)
+{
+    edit->setFocus();
+}
+
 void SearchBox::SearchModel()
 {
     btnreplacemodel->setText("替换>>");
@@ -115,8 +120,6 @@ void SearchBox::SearchModel()
     if( sciedit == 0) return ;
     if( !isFloating() ) setFloating(true);
     this->show();
-    this->setFocus();
-    edit->setFocus();
 }
 
 void SearchBox::ReplaceModel()
@@ -130,8 +133,6 @@ void SearchBox::ReplaceModel()
     if( sciedit == 0) return ;
     if( !isFloating() ) setFloating(true);
     this->show();
-    this->setFocus();
-    edit->setFocus();
 }
 
 void SearchBox::ChangeModel()

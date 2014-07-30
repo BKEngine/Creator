@@ -53,6 +53,7 @@ private:
     QString fstr ;
 protected:
     void closeEvent(QCloseEvent *event);
+    void showEvent(QShowEvent *) override;
 };
 
 #endif // SEARCHBOX_H
