@@ -64,12 +64,15 @@ public:
     void setLexer(QsciLexer *lex = 0);
     void setParser( BkeParser *p){ defparser = p ; }
 
+    int findcount ;
+
 signals:
     void Undoready(bool is) ;
     void Redoready(bool is) ;
 
 public slots:
-    void undo () ;
+//    void undo () ;
+//    void redo() ;
 private slots:
     void EditModified(int pos, int mtype, const char *text,
                                     int len, int added, int line, int foldNow, int foldPrev, int token,
@@ -100,7 +103,6 @@ private:
     bool IsWorkingUndo ;
     int LastLine ;
     int SectionPos ;
-    int findcount ;
     BkeIndicatorBase findlast ;
     BkeModifiedBase modfieddata ;
     BkeModifiedBase indentdate ;

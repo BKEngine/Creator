@@ -56,6 +56,12 @@ CodeWindow::CodeWindow(QWidget *parent)
     connect(btncompilerunact,SIGNAL(triggered()),this,SLOT(CompileAndRun())) ;
     //点击标签
     connect(slablelist,SIGNAL(currentIndexChanged(int)),this,SLOT(GotoLable(int))) ;
+    //重做
+    connect(btnredoact,SIGNAL(triggered()),this,SLOT(ActRedo())) ;
+    //撤销
+    connect(btnundoact,SIGNAL(triggered()),this,SLOT(ActUndo())) ;
+
+
 
 
     btnDisable();
@@ -286,24 +292,27 @@ void CodeWindow::CurrentConnect(bool c)
     if( c ){
         connect(currentedit,SIGNAL(copyAvailable(bool)),btncopyact,SLOT(setEnabled(bool))) ;
         connect(currentedit,SIGNAL(copyAvailable(bool)),btncutact,SLOT(setEnabled(bool))) ;
-        connect(currentedit,SIGNAL(Undoready(bool)),btnundoact,SLOT(setEnabled(bool))) ;
-        connect(currentedit,SIGNAL(Redoready(bool)),btnredoact,SLOT(setEnabled(bool))) ;
+//        connect(currentedit,SIGNAL(Undoready(bool)),btnundoact,SLOT(setEnabled(bool))) ;
+//        connect(currentedit,SIGNAL(Redoready(bool)),btnredoact,SLOT(setEnabled(bool))) ;
         connect(btncopyact,SIGNAL(triggered()),currentedit,SLOT(copy())) ;
         connect(btncutact,SIGNAL(triggered()),currentedit,SLOT(cut())) ;
         connect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
-        connect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
-        connect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
+//        connect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
+//        connect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
+        //项目被改变，需要从下层传递信号
+        connect(currentedit,SIGNAL(textChanged()),this,SLOT(ActCurrentChange())) ;
     }
     else{
         disconnect(currentedit,SIGNAL(copyAvailable(bool)),btncopyact,SLOT(setEnabled(bool))) ;
         disconnect(currentedit,SIGNAL(copyAvailable(bool)),btncutact,SLOT(setEnabled(bool))) ;
-        disconnect(currentedit,SIGNAL(Undoready(bool)),btnundoact,SLOT(setEnabled(bool))) ;
-        disconnect(currentedit,SIGNAL(Redoready(bool)),btnredoact,SLOT(setEnabled(bool))) ;
+//        disconnect(currentedit,SIGNAL(Undoready(bool)),btnundoact,SLOT(setEnabled(bool))) ;
+//        disconnect(currentedit,SIGNAL(Redoready(bool)),btnredoact,SLOT(setEnabled(bool))) ;
         disconnect(btncopyact,SIGNAL(triggered()),currentedit,SLOT(copy())) ;
         disconnect(btncutact,SIGNAL(triggered()),currentedit,SLOT(cut())) ;
         disconnect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
-        disconnect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
-        disconnect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
+//        disconnect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
+//        disconnect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
+        connect(currentedit,SIGNAL(textChanged()),this,SLOT(ActCurrentChange())) ;
     }
 }
 
@@ -1123,4 +1132,22 @@ void CodeWindow::DrawLine(bool isClear)
 
         stackwidget->setStyleSheet("QWidget{border-left:1px solid #313131;border-top:1px solid #313131 }");
     }
+}
+
+//撤销
+void CodeWindow::ActUndo()
+{
+    currentedit->undo();
+}
+
+//重做
+void CodeWindow::ActRedo()
+{
+    currentedit->redo();
+}
+
+void CodeWindow::ActCurrentChange()
+{
+    btnundoact->setEnabled( currentedit->isUndoAvailable() );
+    btnredoact->setEnabled( currentedit->isRedoAvailable() );
 }

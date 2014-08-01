@@ -18,8 +18,6 @@ class SearchBox : public QDockWidget
 public:
     explicit SearchBox(QWidget *parent = 0);
     void SetSci(BkeScintilla *sci);
-//    QSize sizeHint () const ;
-//    QSize minimumSizeHint() const ;
 
 signals:
 
@@ -31,6 +29,7 @@ public slots:
     void ChangeModel() ;
     void ReplaceText() ;
     void ReplaceAllText() ;
+    void Show_() ;
 private:
     QVBoxLayout *h1 ;
     QVBoxLayout *h2 ;
@@ -51,9 +50,9 @@ private:
     QLabel *lable2 ;
     BkeScintilla *sciedit ;
     QString fstr ;
+    bool firstshow ;
 protected:
     void closeEvent(QCloseEvent *event);
-    void showEvent(QShowEvent *) override;
 };
 
 #endif // SEARCHBOX_H

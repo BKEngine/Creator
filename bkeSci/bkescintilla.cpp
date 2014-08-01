@@ -372,6 +372,7 @@ void BkeScintilla::ClearIndicators(int id)
     }
 }
 
+//
 bool BkeScintilla::FindForward(int pos)
 {
     clearSelection();
@@ -379,7 +380,6 @@ bool BkeScintilla::FindForward(int pos)
         QMessageBox::information(this,"查找","没有找到任何匹配的文本！",QMessageBox::Ok) ;
         return false;
     }
-
 
     BkeIndicatorBase abc ;
     if( !findlast.IsNull() ){ //上一个节点有效，则再寻找一次
@@ -506,8 +506,13 @@ BkeIndicatorBase BkeScintilla::findIndicator(int id,int postion)
 void BkeScintilla::setSelection( BkeIndicatorBase &p)
 {
     if( p.IsNull() ) return ;
-    SendScintilla(SCI_SETSELECTIONSTART,p.Start()) ;
-    SendScintilla(SCI_SETSELECTIONEND,p.End()) ;
+    int fl,fi,el,ei ;
+    lineIndexFromPosition(p.Start(),&fl,&fi);
+    lineIndexFromPosition(p.End(),&el,&ei);
+    SendScintilla(SCI_SETCURRENTPOS,p.End()) ;
+    QsciScintilla::setSelection(fl,fi,el,ei) ;
+//    SendScintilla(SCI_SETSELECTIONSTART,p.Start()) ;
+//    SendScintilla(SCI_SETSELECTIONEND,p.End()) ;
 }
 
 BkeIndicatorBase BkeScintilla::findIndicatorLast(int id,int from)
@@ -593,12 +598,19 @@ void BkeScintilla::BkeEndUndoAction()
     emit Undoready(isUndoAvailable());
 }
 
-void BkeScintilla::undo()
-{
-    QsciScintilla::undo() ;
-    if( !isUndoAvailable() ) emit Undoready(false);
-    emit Redoready(isRedoAvailable());
-}
+//void BkeScintilla::undo()
+//{
+//    QsciScintilla::undo() ;
+//    if( !isUndoAvailable() ) emit Undoready(false);
+//    else emit Redoready(isRedoAvailable());
+//}
+
+//void BkeScintilla::redo()
+//{
+//    QsciScintilla::redo() ;
+//    if( !isRedoAvailable() ) emit Redoready(false);
+//    //else emit ;
+//}
 
 int BkeScintilla::GetTrueCurrentLine()
 {

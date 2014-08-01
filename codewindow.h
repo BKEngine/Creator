@@ -170,6 +170,9 @@ public slots:
     void QfileChange(const QString &path) ;
     void GotoLine() ;
     void GotoLable(int i) ;
+    void ActUndo() ;
+    void ActRedo() ;
+    void ActCurrentChange() ;
 private:
     OtherWindow   *othwin ;
     ProjectWindow *prowin ;

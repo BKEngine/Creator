@@ -22,6 +22,7 @@ SearchBox::SearchBox(QWidget *parent) :
     isalwaysbegin = new QCheckBox("总是从文档开头(结尾)开始查找",this) ;
     isalwaysbegin->setChecked(true);
     sciedit = 0 ;
+    firstshow = true ;
 
     h1->addWidget(lable1);
     h1->addWidget(edit);
@@ -69,8 +70,9 @@ void SearchBox::FindNext()
         if( isalwaysbegin->isChecked() ) sciedit->FindForward(0);
         else sciedit->FindForward(sciedit->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS));
     }
-    else{
-        sciedit->FindForward(sciedit->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS));
+    else if( !sciedit->FindForward(sciedit->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS)) ){
+        if( sciedit->findcount > 0)
+            QMessageBox::information(this,"查找","再往前没有了") ;
     }
 }
 
@@ -104,11 +106,6 @@ void SearchBox::closeEvent(QCloseEvent *event)
     sciedit->ClearIndicators(BkeScintilla::BKE_INDICATOR_FIND);
 }
 
-void SearchBox::showEvent(QShowEvent *)
-{
-    edit->setFocus();
-}
-
 void SearchBox::SearchModel()
 {
     btnreplacemodel->setText("替换>>");
@@ -118,8 +115,7 @@ void SearchBox::SearchModel()
     btnreplaceall->setEnabled(false);
     edit1->setEnabled(false);
     if( sciedit == 0) return ;
-    if( !isFloating() ) setFloating(true);
-    this->show();
+    Show_();
 }
 
 void SearchBox::ReplaceModel()
@@ -131,8 +127,7 @@ void SearchBox::ReplaceModel()
     btnreplaceall->setEnabled(true);
     edit1->setEnabled(true);
     if( sciedit == 0) return ;
-    if( !isFloating() ) setFloating(true);
-    this->show();
+    Show_();
 }
 
 void SearchBox::ChangeModel()
@@ -166,12 +161,21 @@ void SearchBox::ReplaceAllText()
     sciedit->ReplaceAllFind(edit1->text());
 }
 
-//QSize SearchBox::sizeHint () const
-//{
-//    return QSize(315,195) ;
-//}
+void SearchBox::Show_()
+{
+    if( !isFloating() ) setFloating(true);
 
-//QSize SearchBox::minimumSizeHint() const
-//{
-//    return QSize(315,195) ;
-//}
+    if( firstshow ){  //首次显示处于左下角
+        QWidget *pw = this->parentWidget() ;
+        if( pw != 0){
+            QPoint pt = pw->pos() ;
+            pt.setX(pt.x()+pw->width()-350) ;
+            pt.setY(pt.y()+pw->height()-300);
+            move(pw->mapToGlobal(pt));
+        }
+        firstshow = false ;
+    }
+
+    this->show();
+    activateWindow();
+}
