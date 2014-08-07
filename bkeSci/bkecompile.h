@@ -1,4 +1,4 @@
-#ifndef BKECOMPILE_H
+﻿#ifndef BKECOMPILE_H
 #define BKECOMPILE_H
 
 #include <QObject>

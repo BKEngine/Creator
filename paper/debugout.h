@@ -1,4 +1,4 @@
-#ifndef DEBUGOUT_H
+﻿#ifndef DEBUGOUT_H
 #define DEBUGOUT_H
 
 #include <QObject>

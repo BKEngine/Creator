@@ -1,4 +1,4 @@
-#ifndef CODEWINDOW_H
+﻿#ifndef CODEWINDOW_H
 #define CODEWINDOW_H
 #include "weh.h"
 #include <QDockWidget>

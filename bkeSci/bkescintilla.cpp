@@ -1,4 +1,4 @@
-#include "bkescintilla.h"
+﻿#include "bkescintilla.h"
 
 QImage BKE_AUTOIMAGE_KEY(":/auto/source/auto_key.png") ;
 QImage BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_funcotin.png") ;

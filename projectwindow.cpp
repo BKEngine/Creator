@@ -1,4 +1,4 @@
-#include "projectwindow.h"
+﻿#include "projectwindow.h"
 #include "dia/newprodia.h"
 #include <QSize>
 #include "dia/lablesuredialog.h"

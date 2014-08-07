@@ -1,4 +1,4 @@
-#include "codewindow.h"
+﻿#include "codewindow.h"
 #include "dia/lablesuredialog.h"
 
 CodeWindow::CodeWindow(QWidget *parent)

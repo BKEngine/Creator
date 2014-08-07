@@ -1,4 +1,4 @@
-#ifndef OTHERBASICWIN_H
+﻿#ifndef OTHERBASICWIN_H
 #define OTHERBASICWIN_H
 
 #include <QtCore>

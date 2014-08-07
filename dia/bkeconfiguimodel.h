@@ -1,4 +1,4 @@
-#ifndef BKECONFIGUIMODEL_H
+﻿#ifndef BKECONFIGUIMODEL_H
 #define BKECONFIGUIMODEL_H
 #include <QDialog>
 #include <QStringList>

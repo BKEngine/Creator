@@ -1,4 +1,4 @@
-#include "qscilexerbkescript.h"
+﻿#include "qscilexerbkescript.h"
 
 QsciLexerBkeScript::QsciLexerBkeScript(QObject *parent)
     :QsciLexer(parent)

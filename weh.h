@@ -1,4 +1,4 @@
-#ifndef WEH_H
+﻿#ifndef WEH_H
 #define WEH_H
 
 #include <QWidget>

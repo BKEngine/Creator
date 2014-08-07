@@ -266,6 +266,8 @@ paper/wordsupport.cpp -text
 paper/wordsupport.h -text
 /projectwindow.cpp -text
 /projectwindow.h -text
+/singleapplication.cpp -text
+/singleapplication.h -text
 /source.qrc -text
 source/.bmp.png -text
 source/.jpg.png -text

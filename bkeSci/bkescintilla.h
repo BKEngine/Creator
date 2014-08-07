@@ -1,4 +1,4 @@
-#ifndef BKESCINTILLA_H
+﻿#ifndef BKESCINTILLA_H
 #define BKESCINTILLA_H
 
 #include <QWidget>

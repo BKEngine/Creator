@@ -1,4 +1,4 @@
-#ifndef BKEINDICATORBASE_H
+﻿#ifndef BKEINDICATORBASE_H
 #define BKEINDICATORBASE_H
 
 #include <QString>

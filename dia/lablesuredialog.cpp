@@ -1,4 +1,4 @@
-#include "lablesuredialog.h"
+﻿#include "lablesuredialog.h"
 
 LableSureDialog::LableSureDialog(QWidget *parent) :
     QDialog(parent)

@@ -1,4 +1,4 @@
-#ifndef COMPILEPROBLEM_H
+﻿#ifndef COMPILEPROBLEM_H
 #define COMPILEPROBLEM_H
 #include "weh.h"
 #include <Qsci/qsciscintilla.h>

@@ -1,4 +1,4 @@
-#include "bkeleftfilewidget.h"
+﻿#include "bkeleftfilewidget.h"
 
 BkeLeftFileWidget::BkeLeftFileWidget(QWidget *parent) :
     QListWidget(parent)

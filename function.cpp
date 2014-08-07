@@ -1,4 +1,4 @@
-#include "function.h"
+﻿#include "function.h"
 
 QString BKE_CURRENT_DIR ;
 QString BKE_PROJECT_NAME("BkeProject.bkp") ;

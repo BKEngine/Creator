@@ -1,15 +1,17 @@
-#include <QApplication>
+﻿#include <QApplication>
 #include <QDesktopWidget>
 #include <QMainWindow>
 #include <QLibrary>
 #include "mainwindow.h"
 #include "weh.h"
+#include "singleapplication.h"
 
 void CheckOpenAL32() ;
 
 int main(int argc, char *argv[])
 {
-    QTextCodec *xcodec = QTextCodec::codecForLocale() ;
+    QApplication::setApplicationName("BKE_Creator");
+    QTextCodec *xcodec = QTextCodec::codecForLocale();
 #ifdef QT_DEBUG
     BKE_CURRENT_DIR = QString("F:/work/qt/BKE_creator/file") ;
 #endif
@@ -21,7 +23,9 @@ int main(int argc, char *argv[])
    QApplication::setLibraryPaths( QApplication::libraryPaths() << BKE_CURRENT_DIR) ;
 #endif
 
-    QApplication a(argc, argv);
+    SingleApplication a(argc, argv);
+    if(a.isRunning())
+        return -1;
     QTranslator translator;
     if( !translator.load("qt_zh_CN",BKE_CURRENT_DIR,"",".qm") ) QMessageBox::information(0,"错误","加载中文翻译失败",QMessageBox::Ok) ;
     a.installTranslator(&translator);
@@ -67,12 +71,19 @@ int main(int argc, char *argv[])
 
     MainWindow test ;
 
+    a.setActiveWidget(&test);
+
     if( BKE_CLOSE_SETTING->value("window/ismax").toBool() ) test.showMaximized();
     else test.show();
 
     if( argc > 1){
         projectedit->OpenProject(xcodec->toUnicode(QByteArray(argv[1])) );
     }
+
+    QObject::connect(&a,&SingleApplication::newApplication,[=](QString args)
+        {if(args.count())
+            projectedit->OpenProject(args);}
+    );
 
 #ifndef QT_DEBUG
     QTimer::singleShot(3000,&test,SLOT(CheckUpdate()) ) ;

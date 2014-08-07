@@ -1,4 +1,4 @@
-#include "bkecompile.h"
+﻿#include "bkecompile.h"
 #include "weh.h"
 
 BkeCompile::BkeCompile(QObject *parent) :

@@ -1,4 +1,4 @@
-#ifndef PROJECTWINDOW_H
+﻿#ifndef PROJECTWINDOW_H
 #define PROJECTWINDOW_H
 
 #include <QDialogButtonBox>

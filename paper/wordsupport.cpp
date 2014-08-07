@@ -1,4 +1,4 @@
-#include "wordsupport.h"
+﻿#include "wordsupport.h"
 
 QString BKE_WORD_KEY = QString(" for foreach in extends do while function propset propget int string number typeof var delete class if else continue break return this true false void global ") ;
 QString BKE_WORD_OPERATOR = QString("+,-,*,/,^,%,!,~,++,--,&,|,&&,||") ;

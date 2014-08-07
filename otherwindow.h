@@ -1,4 +1,4 @@
-#ifndef OTHERWINDOW_H
+﻿#ifndef OTHERWINDOW_H
 #define OTHERWINDOW_H
 #include "weh.h"
 #include "topbarwindow.h"

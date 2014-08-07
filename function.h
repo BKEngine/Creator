@@ -1,4 +1,4 @@
-#ifndef FUNCTION_H
+﻿#ifndef FUNCTION_H
 #define FUNCTION_H
 
 #include <Qsci/qsciscintilla.h>

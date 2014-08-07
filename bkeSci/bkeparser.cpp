@@ -1,4 +1,4 @@
-#include "bkeparser.h"
+﻿#include "bkeparser.h"
 
 BkeParser::BkeParser()
 {

@@ -1,4 +1,4 @@
-#ifndef AUTOLEX_H
+﻿#ifndef AUTOLEX_H
 #define AUTOLEX_H
 
 #include <QHash>

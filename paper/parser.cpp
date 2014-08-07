@@ -1,4 +1,4 @@
-#include "parser.h"
+﻿#include "parser.h"
 
 QStringList SYSlist ;
 
@@ -160,6 +160,7 @@ bool BkeParser::CLeftExp()
 //@右值表达式
 bool BkeParser::CRightExp()
 {
+	return false;
 }
 
 //右表达式

@@ -1,4 +1,4 @@
-#include "newprodia.h"
+﻿#include "newprodia.h"
 
 NewProDia::NewProDia(QWidget *parent) :
     QWidget(parent)

@@ -1,4 +1,4 @@
-#include "bkeconfiguimodel.h"
+﻿#include "bkeconfiguimodel.h"
 
 BkeConfigUiModel::BkeConfigUiModel(QWidget *parent)
     :QDialog(parent)

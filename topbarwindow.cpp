@@ -1,4 +1,4 @@
-#include "topbarwindow.h"
+﻿#include "topbarwindow.h"
 
 TopBarWindow::TopBarWindow(QWidget *parent) :
     QWidget(parent)

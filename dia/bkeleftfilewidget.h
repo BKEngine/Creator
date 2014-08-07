@@ -1,4 +1,4 @@
-#ifndef BKELEFTFILEWIDGET_H
+﻿#ifndef BKELEFTFILEWIDGET_H
 #define BKELEFTFILEWIDGET_H
 
 #include <QtCore>

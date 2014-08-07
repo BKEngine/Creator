@@ -1,4 +1,4 @@
-#ifndef QSCILEXERBKESCRIPT_H
+﻿#ifndef QSCILEXERBKESCRIPT_H
 #define QSCILEXERBKESCRIPT_H
 
 #include <QObject>

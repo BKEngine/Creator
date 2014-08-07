@@ -1,4 +1,4 @@
-#ifndef TOPBARWINDOW_H
+﻿#ifndef TOPBARWINDOW_H
 #define TOPBARWINDOW_H
 
 #include "weh.h"

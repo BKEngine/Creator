@@ -1,4 +1,4 @@
-#include "bkeproject.h"
+﻿#include "bkeproject.h"
 
 //读取一个item信息s
 void BKE_PROJECT_READITEM( QTreeWidgetItem *dest,ItemInfo &info)

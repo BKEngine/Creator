@@ -1,4 +1,4 @@
-#ifndef WORDSUPPORT_H
+﻿#ifndef WORDSUPPORT_H
 #define WORDSUPPORT_H
 #include <QString>
 #include <QStringList>

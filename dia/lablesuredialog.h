@@ -1,4 +1,4 @@
-#ifndef LABLESUREDIALOG_H
+﻿#ifndef LABLESUREDIALOG_H
 #define LABLESUREDIALOG_H
 
 //选择框的确认对话框

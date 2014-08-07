@@ -1,4 +1,4 @@
-#ifndef COMPLETEBASE_H
+﻿#ifndef COMPLETEBASE_H
 #define COMPLETEBASE_H
 #include <QtCore>
 #include <QRegExp>

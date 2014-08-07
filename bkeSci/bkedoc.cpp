@@ -1,4 +1,4 @@
-#include "bkedoc.h"
+﻿#include "bkedoc.h"
 #include "function.h"
 #include <QFileInfo>
 

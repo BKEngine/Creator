@@ -1,4 +1,4 @@
-#ifndef BKEPARSER_H
+﻿#ifndef BKEPARSER_H
 #define BKEPARSER_H
 
 #include <QString>

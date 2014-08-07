@@ -1,4 +1,4 @@
-<RCC>
+﻿<RCC>
     <qresource prefix="/left">
         <file>source/bianji.png</file>
         <file>source/hiddenleft.png</file>

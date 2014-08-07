@@ -1,4 +1,4 @@
-#include "bkemarks.h"
+﻿#include "bkemarks.h"
 
 
 void BkeMarkSupport::SetFile(const QString &file)

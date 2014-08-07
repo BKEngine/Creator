@@ -1,4 +1,4 @@
-#ifndef BKEDOC_H
+﻿#ifndef BKEDOC_H
 #define BKEDOC_H
 
 #include "QHash"

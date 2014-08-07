@@ -1,4 +1,4 @@
-#include "weh.h"
+﻿#include "weh.h"
 
 QString BKE_CURRENT_DIR ;
 QString BKE_PROJECT_NAME("BkeProject.bkp") ;

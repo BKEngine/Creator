@@ -1,4 +1,4 @@
-#include "debugout.h"
+﻿#include "debugout.h"
 
 DebugOut::DebugOut(QObject *parent) :
     QObject(parent)

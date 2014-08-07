@@ -45,7 +45,8 @@ SOURCES += main.cpp \
     loli/loli_island.cpp \
     otherbasicwin.cpp \
     dia/bkeleftfilewidget.cpp \
-    dia/qsearchlineedit.cpp
+    dia/qsearchlineedit.cpp \
+    singleapplication.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -72,7 +73,8 @@ HEADERS  += \
     loli/loli_island.h \
     otherbasicwin.h \
     dia/bkeleftfilewidget.h \
-    dia/qsearchlineedit.h
+    dia/qsearchlineedit.h \
+    singleapplication.h
 
 RESOURCES += \
     source.qrc

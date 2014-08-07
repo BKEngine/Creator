@@ -1,5 +1,5 @@
-#include "qsearchlineedit.h"
-#include "mainwindow.h"
+﻿#include "qsearchlineedit.h"
+#include "../mainwindow.h"
 
 
 QSearchLineEdit::QSearchLineEdit(const QString &backtext , QWidget *parent) :

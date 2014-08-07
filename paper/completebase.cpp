@@ -1,4 +1,4 @@
-#include "completebase.h"
+﻿#include "completebase.h"
 
 CompleteBase::CompleteBase(QObject *parent)
     :QObject(parent)

@@ -1,4 +1,4 @@
-#include "searchbox.h"
+﻿#include "searchbox.h"
 
 SearchBox::SearchBox(QWidget *parent) :
     QDockWidget(parent)
@@ -164,7 +164,7 @@ void SearchBox::ReplaceAllText()
 void SearchBox::Show_()
 {
     if( !isFloating() ) setFloating(true);
-
+/*
     if( firstshow ){  //首次显示处于左下角
         QWidget *pw = this->parentWidget() ;
         if( pw != 0){
@@ -174,7 +174,7 @@ void SearchBox::Show_()
             move(pw->mapToGlobal(pt));
         }
         firstshow = false ;
-    }
+    }*/
 
     this->show();
     activateWindow();

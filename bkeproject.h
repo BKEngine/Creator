@@ -1,4 +1,4 @@
-#ifndef BKEPROJECT_H
+﻿#ifndef BKEPROJECT_H
 #define BKEPROJECT_H
 
 #include <QSettings>

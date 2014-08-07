@@ -1,4 +1,4 @@
-#include "autolex.h"
+﻿#include "autolex.h"
 
 AutoLex::AutoLex()
 {

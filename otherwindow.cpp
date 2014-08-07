@@ -1,4 +1,4 @@
-#include "otherwindow.h"
+﻿#include "otherwindow.h"
 
 OtherWindow::OtherWindow(QWidget *parent)
     :TopBarWindow(parent)
