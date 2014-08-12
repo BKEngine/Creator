@@ -86,8 +86,11 @@ int main(int argc, char *argv[])
     );
 
 #ifndef QT_DEBUG
-    QTimer::singleShot(3000,&test,SLOT(CheckUpdate()) ) ;
+    if( !BKE_CLOSE_SETTING->value("update/close").toBool() ) QTimer::singleShot(3000,&test,SLOT(CheckUpdate()) ) ;
 #endif
+//#ifdef QT_DEBUG
+//    if( !BKE_CLOSE_SETTING->value("update/close").toBool() ) QTimer::singleShot(3000,&test,SLOT(CheckUpdate()) ) ;
+//#endif
 
     //使用win32时，检查依赖库
     #ifdef Q_OS_WIN

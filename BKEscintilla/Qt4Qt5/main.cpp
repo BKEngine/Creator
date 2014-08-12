@@ -2,6 +2,7 @@
 #include <QApplication>
 #include "Qsci/qsciscintilla.h"
 #include "bkestyle.h"
+#include "loli_island.h"
 
 
 int main(int argc, char *argv[])
@@ -12,8 +13,12 @@ int main(int argc, char *argv[])
     BKEstyle ss ;
 
     w.setCentralWidget(&pp);
+
+    pp.setUtf8(true);
     pp.setLexer(&ss);
-    pp.setText("##\r\nif(abc)\r\nreturn\r\n##");
+    QString temp ;
+    LOLI::AutoRead(temp,"F:/明日的世界/makelogo.bkscr") ;
+    pp.setText(temp);
     w.show();
     return a.exec();
 }

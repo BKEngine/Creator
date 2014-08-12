@@ -41,6 +41,7 @@ public slots:
     void CheckConnect() ;
     void upfileFinish(QNetworkReply *netf) ;
     void startUp() ;
+    void OCupdate() ;
 
 private:
 //    CodeWindow *codeedit ;

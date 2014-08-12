@@ -143,6 +143,7 @@ void MainWindow::CreateMenu()
     wmenu = this->menuBar()->addMenu("&帮助");
     wmenu->addAction("帮助文件") ;
     connect(wmenu->addAction("检查更新"),SIGNAL(triggered()),this,SLOT(startUp())) ;
+    connect(wmenu->addAction("(开启/关闭)自动更新"),SIGNAL(triggered()),this,SLOT(OCupdate())) ;
     connect(wmenu->addAction("Creator教程"),SIGNAL(triggered()),this,SLOT(HelpCreator())) ;
     connect(wmenu->addAction("关于..."),SIGNAL(triggered()),this,SLOT(AboutBkeCreator())) ;
 
@@ -150,7 +151,6 @@ void MainWindow::CreateMenu()
     connect(btnopenprojectact,SIGNAL(triggered()),projectedit,SLOT(OpenProject())) ;
     connect(btnopenfileact,SIGNAL(triggered()),projectedit ,SLOT(OpenFile())) ;
     connect(btnnewfileact,SIGNAL(triggered()),codeedit,SLOT(NewEmptyFile())) ;
-
 }
 
 //创建下边栏
@@ -347,8 +347,14 @@ void MainWindow::isUpdate(QJsonObject &newJSON)
     temp.append(newJSON.value("info").toString() ) ;
     temp.append("\n以下文件需要更新:\n"+upList.join("\n")) ;
     msg.SetLable("Bke Creator已经有了新版本，是否更新？\n\n"+temp);
+    msg.SetCheckbox(QStringList()<<"不再提示自动更新");
     msg.SetBtn(QStringList()<<"【立即更新】"<<"下次再说");
-    if( msg.WaitUser() == 1 ) return ;
+
+    int ks =  msg.WaitUser() ;
+    if( msg.IsCheckboxChoise(0) ){  //关闭自动更新
+        BKE_CLOSE_SETTING->setValue("update/close",true);
+    }
+    if( ks != 0 ) return ;
 
     startUp();
 }
@@ -385,4 +391,21 @@ bool MainWindow::eventFilter ( QObject * watched, QEvent * event )
         else codeedit->QfileChange("");
     }
     return false ;
+}
+
+
+//开启或关闭自动更新
+void MainWindow::OCupdate()
+{
+    QString temp ;
+    if( BKE_CLOSE_SETTING->value("update/close").toBool() ){
+        BKE_CLOSE_SETTING->setValue("update/close",false);
+        temp = "自动更新已开启！" ;
+    }
+    else{
+        BKE_CLOSE_SETTING->setValue("update/close",true);
+        temp = "自动更新已关闭！" ;
+    }
+
+    QMessageBox::information(this,"",temp,QMessageBox::Ok) ;
 }

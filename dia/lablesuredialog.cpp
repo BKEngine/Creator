@@ -47,6 +47,7 @@ bool LableSureDialog::IsCheckboxChoise(int index)
 
 int  LableSureDialog::WaitUser(int w , int h )
 {
+    result = -1 ;
     h1->addWidget( new QLabel(LableText,this) );
     if( cwidget != 0) h1->addWidget(cwidget) ;
 
