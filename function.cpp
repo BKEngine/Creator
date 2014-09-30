@@ -6,11 +6,12 @@ QString BKE_USE_NAME("BkeUse.bkpuse") ;
 QString BKE_PROJECT_WORKPRO ;
 QString BKE_API_FILE ;
 QString BKE_PROJECT_DIR ;
-QString BKE_CREATOR_VERTION("2014_08_12a\t") ;
+QString BKE_CREATOR_VERTION("2014_09_23a\t") ;
 QStringList BKE_Recently_Project ;
 QStringList BKE_Recently_Files ;
 QJsonObject BKE_MARKS_OBJECT ;
 QSettings *BKE_CLOSE_SETTING ;
+QSettings *BKE_USER_SETTING ;
 QJsonObject BKE_QCSS_OBJECT ;
 bool isSYSTEMP_LOWDER = true ;  //系统是否忽略大小写，默认为真
 

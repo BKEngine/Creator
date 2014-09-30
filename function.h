@@ -18,6 +18,7 @@ extern QStringList BKE_Recently_Project ;
 extern QStringList BKE_Recently_Files ;
 extern QJsonObject BKE_MARKS_OBJECT ;
 extern QSettings *BKE_CLOSE_SETTING ;
+extern QSettings *BKE_USER_SETTING ;
 extern QJsonObject BKE_QCSS_OBJECT ;
 extern bool isSYSTEMP_LOWDER ;
 

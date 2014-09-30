@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
 
     //setting
     BKE_CLOSE_SETTING = new QSettings(BKE_CURRENT_DIR+"/setting.ini",QSettings::IniFormat) ;
+    BKE_USER_SETTING = new QSettings(BKE_CURRENT_DIR+"/user.ini",QSettings::IniFormat) ;
 
     //颜色配置项
     QFile sa;

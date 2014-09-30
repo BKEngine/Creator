@@ -12,6 +12,7 @@
 #include "dia/bkeleftfilewidget.h"
 #include "dia/qsearchlineedit.h"
 #include "dia/lablesuredialog.h"
+#include "dia/cconfigdia.h"
 
 extern QSplitter *ras[3] ;
 extern CodeWindow *codeedit ;
@@ -42,6 +43,7 @@ public slots:
     void upfileFinish(QNetworkReply *netf) ;
     void startUp() ;
     void OCupdate() ;
+    void Config() ;
 
 private:
 //    CodeWindow *codeedit ;

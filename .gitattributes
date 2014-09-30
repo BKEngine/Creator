@@ -213,6 +213,11 @@ dia/bkeconfiguimodel.cpp -text
 dia/bkeconfiguimodel.h -text
 dia/bkeleftfilewidget.cpp -text
 dia/bkeleftfilewidget.h -text
+dia/cconfigdia.cpp -text
+dia/cconfigdia.h -text
+dia/ctextedit.cpp -text
+dia/ctextedit.h -text
+dia/ctextedit.ui -text
 dia/lablesuredialog.cpp -text
 dia/lablesuredialog.h -text
 dia/newprodia.cpp -text

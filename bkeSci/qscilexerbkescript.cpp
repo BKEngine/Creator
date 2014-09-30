@@ -5,6 +5,7 @@ QsciLexerBkeScript::QsciLexerBkeScript(QObject *parent)
 {
     Lfont.setFamily("微软雅黑");
     Lfont.setPointSize(12);
+    ReadConfig();
 }
 
 const char *QsciLexerBkeScript::language() const { return "Bke" ; }
@@ -45,7 +46,7 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
     case Operators: return QColor( 0x00,0x00,0x00) ;
     case Text :    return QColor( 0x00,0x00,0x00) ;
     case Error:    return QColor( 0xff,0x00,0x00) ;
-    case UntypeA:  return QColor( 0x80,0x80,0x00 ) ;
+    case UntypeA:  return QColor( 0x80,0x80,0x00 ) ; //保留字，
     }
     return QColor( 0x00,0x00,0x00) ;
 }
@@ -69,4 +70,33 @@ QStringList QsciLexerBkeScript::autoCompletionWordSeparators() const
 const char * QsciLexerBkeScript::blockStart (int *style ) const
 {
     return "{ @if if while @for for foreach" ;
+}
+
+
+//从文件中读取配置
+void QsciLexerBkeScript::ReadConfig()
+{
+    QString hname = BKE_USER_SETTING->value("sys/Highlight",QString("默认")).toString() ;
+    if( hname == "默认" ){
+        for( int i = 0 ; i < 32 ; i++ ){
+            hlb[i].font = defaultFont(0) ;
+            hlb[i].fc = defaultColor(i) ;
+            hlb[i].bc = QColor(0xff,0xff,0xff) ;
+        }
+    }
+    else ReadConfig(hname);
+}
+
+
+void QsciLexerBkeScript::ReadConfig(QString hname)
+{
+    QString akb ;
+    QFont ft ;
+    for( int i = 0 ; i < 32 ; i++ ){
+        akb.setNum(i) ;
+        ft.fromString(BKE_USER_SETTING->value(hname+"/"+akb+"_font").toString()) ;
+        hlb[i].font = ft ;
+        hlb[i].fc   = QColor(BKE_USER_SETTING->value(hname+"/"+akb+"_fc").toUInt());
+        hlb[i].bc   = QColor(BKE_USER_SETTING->value(hname+"/"+akb+"_bc").toUInt());
+    }
 }

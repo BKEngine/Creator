@@ -140,6 +140,7 @@ void MainWindow::CreateMenu()
     wmenu->addAction(codeedit->btnrunact ) ;
 
     wmenu = this->menuBar()->addMenu("&工具");
+    connect(wmenu->addAction("选项..."),SIGNAL(triggered()),this,SLOT(Config())) ;
     wmenu = this->menuBar()->addMenu("&帮助");
     wmenu->addAction("帮助文件") ;
     connect(wmenu->addAction("检查更新"),SIGNAL(triggered()),this,SLOT(startUp())) ;
@@ -408,4 +409,11 @@ void MainWindow::OCupdate()
     }
 
     QMessageBox::information(this,"",temp,QMessageBox::Ok) ;
+}
+
+//配置项目
+void MainWindow::Config()
+{
+    CConfigdia *ctk = new CConfigdia ;
+    ctk->show();
 }

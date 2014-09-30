@@ -4,6 +4,14 @@
 #include <QObject>
 #include <Qsci/qscilexer.h>
 #include <Qsci/qscistyle.h>
+#include "function.h"
+
+class HighlightAttribute{
+public:
+    QFont font ;
+    QColor fc ;
+    QColor bc ;
+};
 
 class QsciLexerBkeScript : public QsciLexer
 {
@@ -37,9 +45,13 @@ public:
     QFont defaultFont (int style) const ;
     QStringList autoCompletionWordSeparators() const ;
     const char * blockStart (int *style=0) const ;
-private:
-    QFont Lfont ;
 
+    void ReadConfig() ;
+    void ReadConfig(QString hname) ;
+private:
+
+    QFont Lfont ;
+    HighlightAttribute hlb[32] ;
 };
 
 #endif // QSCILEXERBKESCRIPT_H

@@ -46,7 +46,9 @@ SOURCES += main.cpp \
     otherbasicwin.cpp \
     dia/bkeleftfilewidget.cpp \
     dia/qsearchlineedit.cpp \
-    singleapplication.cpp
+    singleapplication.cpp \
+    dia/cconfigdia.cpp \
+    dia/ctextedit.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -74,9 +76,12 @@ HEADERS  += \
     otherbasicwin.h \
     dia/bkeleftfilewidget.h \
     dia/qsearchlineedit.h \
-    singleapplication.h
+    singleapplication.h \
+    dia/cconfigdia.h \
+    dia/ctextedit.h
 
 RESOURCES += \
     source.qrc
 
-FORMS +=
+FORMS += \
+    dia/ctextedit.ui
