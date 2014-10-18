@@ -183,6 +183,7 @@ static void SetValue(StyleContext *sc, bool BeginWithAt=true)
                 	sc->Forward();
                 sc->Forward();
             }
+            if(!sc->atLineEnd) sc->Forward();
             sc->SetState(SCE_BKE_DEFAULT);
         }
         else if(sc->ch=='_' || isalpha(sc->ch) || sc->ch>=0x80)
@@ -204,6 +205,7 @@ static void SetValue(StyleContext *sc, bool BeginWithAt=true)
                 {
                     sc->Forward();
                     sc->SetState(SCE_BKE_DEFAULT);
+                    continue;
                 }
             }
             sc->SetState(SCE_BKE_OPERATORS);

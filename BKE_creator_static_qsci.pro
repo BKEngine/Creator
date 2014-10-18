@@ -100,7 +100,8 @@ SOURCES += main.cpp \
     BKEscintilla/Qt4Qt5/qscistyledtext.cpp \
     BKEscintilla/Qt4Qt5/SciClasses.cpp \
     BKEscintilla/Qt4Qt5/ScintillaQt.cpp \
-    BKEscintilla/lexlib/CharacterSet.cpp
+    BKEscintilla/lexlib/CharacterSet.cpp \
+    singleapplication.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -186,7 +187,8 @@ HEADERS  += \
     BKEscintilla/Qt4Qt5/Qsci/qsciscintilla.h \
     BKEscintilla/Qt4Qt5/Qsci/qsciscintillabase.h \
     BKEscintilla/Qt4Qt5/Qsci/qscistyle.h \
-    BKEscintilla/Qt4Qt5/Qsci/qscistyledtext.h
+    BKEscintilla/Qt4Qt5/Qsci/qscistyledtext.h \
+    singleapplication.h
 
 RESOURCES += \
     source.qrc

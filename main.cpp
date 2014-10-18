@@ -17,10 +17,16 @@ int main(int argc, char *argv[])
 #endif
 
 #ifndef QT_DEBUG
+#ifdef WIN32
+    wchar_t tmp[MAX_PATH];
+    GetModuleFileNameW(NULL, tmp, MAX_PATH);
+    QString exeDir = QString::fromWCharArray(tmp);
+#else
     QString exeDir = xcodec->toUnicode( QByteArray(argv[0]) ) ;
+#endif
     BKE_CURRENT_DIR = QFileInfo( exeDir ).path() ;
     //qt has a bug in 5.2.1(windows)? so I use setLibraryPaths
-   QApplication::setLibraryPaths( QApplication::libraryPaths() << BKE_CURRENT_DIR) ;
+   QApplication::addLibraryPath( BKE_CURRENT_DIR) ;
 #endif
 
     SingleApplication a(argc, argv);

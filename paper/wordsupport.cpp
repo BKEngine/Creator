@@ -315,13 +315,40 @@ bool WordSupport::IsNumber(const QString &t)
 bool WordSupport::IsColor(const QString &t)
 {
     QString s = t.toLower() ;
-    if( !t.startsWith("0x") || s.length() != 8) return false ;
+    bool isSharp;
+    if( t.startsWith("0x") && s.length() == 8)
+        isSharp = false;
+    else if(t.startsWith("#") && (s.length() == 4 || s.length() == 7))
+        isSharp = true;
+    else
+        return false;
 
-    s = s.right(s.length() - 2) ;
-    for( int i = 0 ; i < 6 ; i++){
+    s = s.right(s.length() - (1 + !isSharp)) ;
+    for( int i = 0 ; i < s.length() ; i++){
         if( !s.at(i).isLower() && !s.at(i).isNumber() ) return false ;
     }
     return true ;
+}
+
+bool WordSupport::IsFontColor(const QString &t)
+{
+    QString s = t.toLower();
+    if(IsColor(s))
+        return true;
+    if(s.startsWith('[') && s.endsWith(']'))
+    {
+        s = s.mid(1, s.length() - 2);
+        int pos = s.indexOf(',');
+        if(pos != -1)
+        {
+            if(!IsColor(s.mid(0,pos).trimmed()))
+                return false;
+            if(!IsColor(s.mid(pos + 1).trimmed()))
+                return false;
+            return true;
+        }
+    }
+    return false;
 }
 
 int  WordSupport::GetEmptyStartCount(const QString &t)

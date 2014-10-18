@@ -365,6 +365,8 @@ void CodeWindow::addFile(const QString &file,const QString &prodir)
         if( prodir != 0 ) loli->edit->setParser( tpro->lex );
 
         BkeCreator::AddRecentFile(loli->FullName()) ;
+
+        loli->File()->close();
         //添加文件监视
 //        bool ks = filewatcher->addPath(loli->FullName()) ;
 //        ks = false ;

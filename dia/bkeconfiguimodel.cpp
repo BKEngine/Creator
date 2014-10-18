@@ -97,7 +97,7 @@ void BkeConfigUiModel::Sure()
 
     if( WordSupport::IsNumber(fontsize->text())) result.append("DefaultFontSize="+fontsize->text()+";\r\n") ;
     if( WordSupport::IsNumber(savenum->text())) result.append("MaxSaveDataNum="+savenum->text()+";\r\n") ;
-    if( WordSupport::IsColor(fontcolor->text())) result.append("DefaultFontColor="+fontcolor->text()+";\r\n") ;
+    if( WordSupport::IsFontColor(fontcolor->text())) result.append("DefaultFontColor="+fontcolor->text()+";\r\n") ;
     if( !fontname->text().isEmpty() ) result.append("DefaultFontName=\""+fontname->text()+"\";\r\n") ;
     if( !debuglevel->text().isEmpty() ) result.append("DebugLevel="+debuglevel->text()+";\r\n") ;
 

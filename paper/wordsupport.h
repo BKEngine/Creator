@@ -47,6 +47,7 @@ public:
     bool IsAtEnd() ;
     static bool IsNumber(const QString &t) ;
     static bool IsColor(const QString &t) ;
+    static bool IsFontColor(const QString &t) ;
     static int  GetEmptyStartCount(const QString &t) ;
     int  NowAt(){ return currentpos ;}
     void RightExp(const QString &t) ;
