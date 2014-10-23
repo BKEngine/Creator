@@ -212,18 +212,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
-             <widget class="QComboBox" name="comboBox">
-              <item>
-               <property name="text">
-                <string>默认（不可修改）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>经典黑</string>
-               </property>
-              </item>
-             </widget>
+             <widget class="QComboBox" name="listBox"/>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton">
@@ -239,7 +228,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_2">
+             <widget class="QPushButton" name="delbtn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -256,7 +245,7 @@
           <item>
            <layout class="QGridLayout" name="gridLayout">
             <item row="0" column="4">
-             <widget class="QPushButton" name="pushButton_3">
+             <widget class="QPushButton" name="fcbtn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -281,7 +270,7 @@
              </widget>
             </item>
             <item row="1" column="4">
-             <widget class="QPushButton" name="pushButton_4">
+             <widget class="QPushButton" name="bcbtn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>

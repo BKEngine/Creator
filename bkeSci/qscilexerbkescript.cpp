@@ -5,7 +5,7 @@ QsciLexerBkeScript::QsciLexerBkeScript(QObject *parent)
 {
     Lfont.setFamily("微软雅黑");
     Lfont.setPointSize(12);
-    ReadConfig();
+    ReadConfig(ConfigName());
 }
 
 const char *QsciLexerBkeScript::language() const { return "Bke" ; }
@@ -73,30 +73,41 @@ const char * QsciLexerBkeScript::blockStart (int *style ) const
 }
 
 
-//从文件中读取配置
-void QsciLexerBkeScript::ReadConfig()
+//返回配置项的名字
+QString QsciLexerBkeScript::ConfigName()
 {
     QString hname = BKE_USER_SETTING->value("sys/Highlight",QString("默认")).toString() ;
-    if( hname == "默认" ){
-        for( int i = 0 ; i < 32 ; i++ ){
-            hlb[i].font = defaultFont(0) ;
-            hlb[i].fc = defaultColor(i) ;
-            hlb[i].bc = QColor(0xff,0xff,0xff) ;
-        }
-    }
-    else ReadConfig(hname);
+    return hname ;
+}
+
+//返回配置列表
+QStringList QsciLexerBkeScript::ConfigList()
+{
+    QString temp = BKE_USER_SETTING->value("sys/HighlightList").toString() ;
+    if( temp.isEmpty() ) return QStringList() ;
+    else return temp.split("&&") ;
 }
 
 
+//从文件中读取配置
 void QsciLexerBkeScript::ReadConfig(QString hname)
 {
+    if( hname == "默认" ){
+        for( int i = 0 ; i < 32 ; i++ ){
+            hlb[i].font = defaultFont(0) ;
+            hlb[i].fc = defaultColor(i).rgb() ;
+            hlb[i].bc = qRgb(255,255,255) ;
+        }
+        return ;
+    }
+
     QString akb ;
     QFont ft ;
     for( int i = 0 ; i < 32 ; i++ ){
         akb.setNum(i) ;
         ft.fromString(BKE_USER_SETTING->value(hname+"/"+akb+"_font").toString()) ;
         hlb[i].font = ft ;
-        hlb[i].fc   = QColor(BKE_USER_SETTING->value(hname+"/"+akb+"_fc").toUInt());
-        hlb[i].bc   = QColor(BKE_USER_SETTING->value(hname+"/"+akb+"_bc").toUInt());
+        hlb[i].fc   = BKE_USER_SETTING->value(hname+"/"+akb+"_fc").toUInt();
+        hlb[i].bc   = BKE_USER_SETTING->value(hname+"/"+akb+"_bc").toUInt();
     }
 }

@@ -9,8 +9,8 @@
 class HighlightAttribute{
 public:
     QFont font ;
-    QColor fc ;
-    QColor bc ;
+    unsigned int fc ;
+    unsigned int bc ;
 };
 
 class QsciLexerBkeScript : public QsciLexer
@@ -45,13 +45,14 @@ public:
     QFont defaultFont (int style) const ;
     QStringList autoCompletionWordSeparators() const ;
     const char * blockStart (int *style=0) const ;
-
-    void ReadConfig() ;
     void ReadConfig(QString hname) ;
+    QString ConfigName() ;
+    QStringList ConfigList() ;
+
+    HighlightAttribute hlb[32] ;
 private:
 
     QFont Lfont ;
-    HighlightAttribute hlb[32] ;
 };
 
 #endif // QSCILEXERBKESCRIPT_H
