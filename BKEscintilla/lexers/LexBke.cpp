@@ -250,6 +250,8 @@ static void SetValue(StyleContext *sc, bool BeginWithAt=true)
                     sc->SetState(SCE_BKE_ERROR);
                 }
             }
+            else if(sc->ch == '/' && sc->chNext=='/')
+                break;
             if(sc->More() && !sc->atLineEnd)
             {
                 sc->Forward();

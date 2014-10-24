@@ -698,7 +698,7 @@ bool CodeWindow::ReadyCompile(const QString &file)
 {
     //不复制觉得路径
     if( file.indexOf("\\") >= 0) return true;
-    int s = BKE_PROJECT_DIR.length() ;
+    int s = currentproject->FileDir().length() ;
 
     QFileInfo info( BKE_CURRENT_DIR + "/temp/" + file.right(file.length()- s - 1) ) ;
     QDir abc(info.path()) ;
@@ -735,7 +735,7 @@ void CodeWindow::CompileFinish()
     kag->setValue(kag->maximum());
 
     ComText = comtool.Result() ;
-    markadmin.ProblemsFromText(BKE_PROJECT_DIR,ComText);
+    markadmin.ProblemsFromText(currentproject->FileDir(),ComText);
 
     BkeMarkList *problemslist ;
     if( stackwidget->count() > 0){

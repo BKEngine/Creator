@@ -101,7 +101,9 @@ SOURCES += main.cpp \
     BKEscintilla/Qt4Qt5/SciClasses.cpp \
     BKEscintilla/Qt4Qt5/ScintillaQt.cpp \
     BKEscintilla/lexlib/CharacterSet.cpp \
-    singleapplication.cpp
+    singleapplication.cpp \
+    dia/cconfigdia.cpp \
+    dia/ctextedit.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -188,7 +190,9 @@ HEADERS  += \
     BKEscintilla/Qt4Qt5/Qsci/qsciscintillabase.h \
     BKEscintilla/Qt4Qt5/Qsci/qscistyle.h \
     BKEscintilla/Qt4Qt5/Qsci/qscistyledtext.h \
-    singleapplication.h
+    singleapplication.h \
+    dia/cconfigdia.h \
+    dia/ctextedit.h
 
 RESOURCES += \
     source.qrc
@@ -197,3 +201,6 @@ INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKE
 
 OTHER_FILES += \
     BKEscintilla/lexlib/License.txt
+
+FORMS += \
+    dia/ctextedit.ui

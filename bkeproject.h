@@ -40,18 +40,18 @@ public:
     bool WriteMarkFile(BkeMarkSupport *m) ;
     bool RemoveItem(QTreeWidgetItem *Item) ;
     bool RemoveItem(const QString &file) ;
-    bool RemoveItem(ItemInfo &f) ;
+    bool RemoveItem(const ItemInfo &f) ;
     void SetTopLeveBold(bool t) ;
     void MakeItems(QTreeWidgetItem *dest,const QStringList &list) ;
     void MakeItems(QTreeWidgetItem *dest,BkeFilesHash &hash) ;
     QStringList ListFiles(int type) ;
     QStringList ItemDirs(QTreeWidgetItem *dest) ;
     void AddFileToHash(BkeFilesHash *hash,const QString &filename) ;
-    bool removeFromHash(BkeFilesHash *hash,ItemInfo &f ) ;
+    bool removeFromHash(BkeFilesHash *hash, const ItemInfo &f ) ;
     bool SearchDir(BkeFilesHash &hash,const QString &dir,const QString &suffix) ;
     void ItemFromHash(QTreeWidgetItem *dest,BkeFilesHash &hash) ;
-    void Addfiles(const QStringList &ls ,ItemInfo &f) ;
-    void AddDir(const QString &dir ,ItemInfo &f) ;
+    void Addfiles(const QStringList &ls , const ItemInfo &f) ;
+    void AddDir(const QString &dir ,const ItemInfo &f) ;
 
     QStringList AllScriptFiles() ;
     QTreeWidgetItem *FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty = true) ;
@@ -84,7 +84,6 @@ private:
     QString pname ;
     QString ErrorInfo ;
     QString Time ;
-    QString Bkpfile ;
     QStringList OutFilelist ;
     QStringList emptylist ;
     BkeFilesHash ImportHash ;
@@ -104,7 +103,7 @@ private:
     QJsonObject HashToJson(BkeFilesHash &hash) ;
     void JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion) ;
 
-    void workItem(QTreeWidgetItem **la,BkeFilesHash **h1,ItemInfo &f) ;
+    void workItem(QTreeWidgetItem **la,BkeFilesHash **h1, const ItemInfo &f) ;
     QHash<QString,QStringList*> *ItemToHashptr(const QTreeWidgetItem *root) ;
 
     void FindSection(const QString &section , int &from , int &end) ;

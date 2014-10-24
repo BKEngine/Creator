@@ -16,8 +16,8 @@ ProjectWindow::ProjectWindow(QWidget *parent)
     connect(this,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(ItemDoubleClick(QTreeWidgetItem*,int))) ;
     connect(this,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(ShowRmenu(QPoint))) ;
 
-    QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建导入脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭项目").split(" ") ;
-    for( int i = btn_compile ; i < BTN_COUNT ; i++){
+    QStringList ls = QString("设为活动项目 编译脚本 发布游戏 插入路径 预览 新建脚本 新建导入脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭项目").split(" ") ;
+    for( int i = 0 ; i < BTN_COUNT ; i++){
         btns[i] = new QAction(ls.at(i),this);
         connect(btns[i],SIGNAL(triggered()),this,SLOT(ActionAdmin())) ;
     }
@@ -55,12 +55,22 @@ void ProjectWindow::OpenProject(const QString &file)
 {
     if( file.isEmpty() ) return  ;
 
+    QString path = QFileInfo(file).path();
+    for(auto it = projectlist.begin();it != projectlist.end();++it)
+    {
+        if((*it)->FileDir()==path)
+        {
+            BkeChangeCurrentProject(*it);
+            return;
+        }
+    }
     BKEproject *pro ;
 
     pro = new BKEproject ;
     if(!pro->OpenProject(file))
     {
         QMessageBox::information(this,"错误","文件不存在，项目打开失败",QMessageBox::Ok) ;
+        delete pro;
         return;
     }
     projectlist << pro ;
@@ -85,7 +95,6 @@ bool ProjectWindow::ReadItemInfo(QTreeWidgetItem *dest,ItemInfo &f)
 {
     if( dest == NULL ) return false ;
     BKE_PROJECT_READITEM(dest,f) ;
-    BkeChangeCurrentProject(FindPro(info.ProName));
     return true ;
 }
 
@@ -117,6 +126,7 @@ void ProjectWindow::ShowRmenu( const QPoint & pos )
     QMenu mn ;
 
     if( info.Layer < 1){
+        mn.addAction(btns[btn_active]) ;
         mn.addAction(btns[btn_compile]) ;
         mn.addAction(btns[btn_release]) ;
     }
@@ -163,7 +173,7 @@ void ProjectWindow::SetCurrentItem(const QString &file)
     }
 }
 
-void ProjectWindow::NewFile(int type)
+void ProjectWindow::NewFile(const ItemInfo &f, int type)
 {
     QString name = QInputDialog::getText(this,"新建脚本","输入脚本名称，如: \r\n   abc \r\n   abc/sence.bkscr") ;
     if( name.isEmpty()) return ;
@@ -199,7 +209,6 @@ BKEproject *ProjectWindow::FindPro(const QString &proname)
     for( int i = 0 ; i < projectlist.size() ; i++){
         abc = projectlist.at(i) ;
         if( abc->ProjectName() == proname){
-            BKE_PROJECT_WORKPRO = abc->FileDir() ;
             return abc ;
         }
     }
@@ -224,14 +233,15 @@ QTreeWidgetItem *ProjectWindow::findFileInProject(const QString &name)
 }
 
 
-void ProjectWindow::DeleteFile(ItemInfo f)
+void ProjectWindow::DeleteFile(const ItemInfo &f)
 {
     //是文件的话将询问是否移除文件
-    QString sk = workpro->FileDir()+"/"+f.FullName ;
+    BKEproject *p = FindPro(f.ProName);
+    QString sk = p->FileDir()+"/"+f.FullName ;
     LableSureDialog msg;
     msg.SetLable("要移除文件"+sk+"吗？");
     msg.SetCheckbox(QStringList()<<"彻底删除");
-    if( workpro->IconKey(f.IconKey) == "@dir" ) msg.SetCheckboxAble(0,false);
+    if( p->IconKey(f.IconKey) == "@dir" ) msg.SetCheckboxAble(0,false);
     msg.SetBtn(QStringList()<<"移除"<<"取消");
     if( msg.WaitUser(240,130) == 1) return ;
 
@@ -239,29 +249,30 @@ void ProjectWindow::DeleteFile(ItemInfo f)
         QFile(sk).remove() ;
     }
     //移除文件
-    if( !workpro->RemoveItem(f) ){
+    if( !p->RemoveItem(f) ){
         QMessageBox::information(this,"错误","移除项目过程中出了一个错误",QMessageBox::Ok) ;
         return ;
     }
 
     //写出结果
-    workpro->WriteBkpFile() ;
+    p->WriteBkpFile() ;
 }
 
-void ProjectWindow::Addfiles(ItemInfo f)
+void ProjectWindow::Addfiles(const ItemInfo &f)
 {
+    BKEproject *p = FindPro(f.ProName);
     QStringList ls ;
     if( f.RootName == "初始化" || f.RootName == "脚本"){
-        ls = QFileDialog::getOpenFileNames(this,"添加文件",workpro->FileDir(),"bkscr脚本(*.bkscr)") ;
+        ls = QFileDialog::getOpenFileNames(this,"添加文件",p->FileDir(),"bkscr脚本(*.bkscr)") ;
     }
-    else ls = QFileDialog::getOpenFileNames(this,"添加文件",workpro->FileDir(),"所有文件(*.*)") ;
+    else ls = QFileDialog::getOpenFileNames(this,"添加文件",p->FileDir(),"所有文件(*.*)") ;
 
     if( ls.isEmpty() ) return ;
     QStringList errors;
     auto it = ls.begin();
     while(it != ls.end())
     {
-        QString rfile = BkeFullnameToName( *it, workpro->FileDir() );
+        QString rfile = BkeFullnameToName( *it, p->FileDir() );
         if(rfile.isEmpty())
         {
             errors.append(*it);
@@ -277,19 +288,22 @@ void ProjectWindow::Addfiles(ItemInfo f)
     {
         QMessageBox::warning(this,"警告","不允许添加工程目录之外的文件：\n" + errors.join('\n'));
     }
-    workpro->Addfiles(ls,f);
+    p->Addfiles(ls,f);
 }
 
 //
-void ProjectWindow::AddDir(ItemInfo f)
+void ProjectWindow::AddDir(const ItemInfo &f)
 {
-    QString d = QFileDialog::getExistingDirectory(this,"添加目录",workpro->FileDir()) ;
-    QString tmp = BkeFullnameToName(d,workpro->FileDir());
+    BKEproject *p = FindPro(f.ProName);
+    QString d = QFileDialog::getExistingDirectory(this,"添加目录",p->FileDir()) ;
+    if(d.isEmpty())
+        return;
+    QString tmp = BkeFullnameToName(d,p->FileDir());
     if( tmp.isEmpty() ){
         QMessageBox::information(this,"","工作目录之外的文件不能添加",QMessageBox::Ok) ;
         return ;
     }
-    workpro->AddDir(tmp,f);
+    p->AddDir(tmp,f);
 }
 
 void ProjectWindow::ReName()
@@ -338,12 +352,10 @@ void ProjectWindow::BkeChangeCurrentProject(BKEproject *p)
 
     if( p != 0){
         workpro = p ;
-        BKE_PROJECT_DIR = workpro->FileDir() ;
         workpro->SetTopLeveBold(true);
         emit CurrentProChange(workpro);
     }
     else{
-        BKE_PROJECT_DIR.clear();
         workpro = 0 ;
         emit CurrentProChange(workpro);
     }
@@ -375,29 +387,73 @@ void ProjectWindow::ActionAdmin()
     QAction *p = dynamic_cast<QAction*>(sender()) ;
 
     if( p == NULL ) return ;
+    else if( p == btns[btn_active] ) Active(info);
     else if( p == btns[btn_compile] ) emit Compile();
     else if( p == btns[btn_release] ) ;
     else if( p == btns[btn_insertdir] ) emit DirWillBeInsert(info.FullName);
     else if( p == btns[btn_preview] ) PreviewFile(info);
-    else if( p == btns[btn_newscript] ) NewFile(2);
-    else if( p == btns[btn_newimport] ) NewFile(1);
+    else if( p == btns[btn_newscript] ) NewFile(info, 2);
+    else if( p == btns[btn_newimport] ) NewFile(info, 1);
     else if( p == btns[btn_addfile] ) Addfiles(info);
     else if( p == btns[btn_adddir] ) AddDir(info);
-    else if( p == btns[btn_showindir] ) ;
+    else if( p == btns[btn_showindir] ) ShowInDir(info);
     else if( p == btns[btn_search]) ;
     else if( p == btns[btn_remove]) DeleteFile(info);
-    else if( p == btns[btn_close]){
-        projectlist.removeOne(workpro) ;
-        workpro->deleteLater();
-    }
-
+    else if( p == btns[btn_close]) CloseProject(info);
 }
 
-void ProjectWindow::PreviewFile(ItemInfo &f)
+void ProjectWindow::PreviewFile(const ItemInfo &f)
 {
-    QString n = workpro->FileDir()+"/"+info.FullName ;
-    if( n.endsWith(".bkscr") || n.endsWith(".bkpsr") ) emit OpenThisFile(n,workpro->FileDir());
+    BKEproject *p = FindPro(f.ProName);
+    QString n = p->FileDir()+"/"+info.FullName ;
+    if( n.endsWith(".bkscr") || n.endsWith(".bkpsr") ) emit OpenThisFile(n,p->FileDir());
     else{
         QDesktopServices::openUrl(QUrl::fromLocalFile(n)) ;
     }
+}
+
+void ProjectWindow::CloseProject(const ItemInfo &f)
+{
+    BKEproject *p = FindPro(f.ProName);
+    if(p)
+    {
+        projectlist.removeOne(p);
+        p->deleteLater();
+        takeTopLevelItem(indexOfTopLevelItem(p->Root));
+        if(p == workpro)
+        {
+            p = NULL;
+            if(!projectlist.empty())
+            {
+                p = projectlist.first();
+            }
+            BkeChangeCurrentProject(p);
+        }
+    }
+}
+
+void ProjectWindow::Active(const ItemInfo &f)
+{
+    BKEproject *p = FindPro(f.ProName);
+    if(p)
+    {
+        BkeChangeCurrentProject(p);
+    }
+}
+
+#if defined(Q_OS_WIN)
+#include <windows.h>
+#include <shellapi.h>
+#pragma comment(lib,"shell32.lib")
+#endif
+
+void ProjectWindow::ShowInDir(const ItemInfo &f)
+{
+    BKEproject *p = FindPro(f.ProName);
+    QString n = p->FileDir()+"\\"+info.FullName ;
+#if defined(Q_OS_WIN)
+    n.replace('/','\\');
+    QByteArray a = ("/select,"+n).toLocal8Bit();
+    ShellExecuteA(NULL,"open","explorer.exe",a.data(),NULL,true);
+#endif
 }

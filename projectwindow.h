@@ -16,6 +16,7 @@ class ProjectWindow : public QTreeWidget
     Q_OBJECT
 public:
     enum{
+        btn_active,
         btn_compile ,
         btn_release ,
         btn_insertdir ,
@@ -75,11 +76,14 @@ private:
     bool ReadItemInfo(QTreeWidgetItem *dest,ItemInfo &f) ;
     void BkeChangeCurrentProject(BKEproject *p) ;
     void ConfigProject(const QString &f,const QString &dir) ;
-    void NewFile(int type) ;
-    void DeleteFile(ItemInfo f) ;
-    void Addfiles(ItemInfo f) ;
-    void AddDir(ItemInfo f) ;
-    void PreviewFile(ItemInfo &f) ;
+    void NewFile(const ItemInfo &f, int type) ;
+    void DeleteFile(const ItemInfo &f) ;
+    void Addfiles(const ItemInfo &f) ;
+    void AddDir(const ItemInfo &f) ;
+    void PreviewFile(const ItemInfo &f) ;
+    void CloseProject(const ItemInfo &f);
+    void Active(const ItemInfo &f);
+    void ShowInDir(const ItemInfo &f);
     QTreeWidgetItem *findFileInProject(const QString &name) ;
 };
 

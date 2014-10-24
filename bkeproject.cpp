@@ -66,8 +66,6 @@ BKEproject::BKEproject(QObject *parent)
 BKEproject::~BKEproject()
 {
     lex->deleteLater();
-    RemoveItem(Root) ;
-    delete Root ;
 }
 
 
@@ -272,7 +270,7 @@ QString BKEproject::ProjectName() const
 //寻找指定的文件，并把文件加入到hash中
 bool BKEproject::SearchDir(BkeFilesHash &hash,const QString &dir,const QString &suffix)
 {
-    QDir d( dir ) ;
+    QDir d( pdir + "/" + dir ) ;
     if( !d.exists() ) return false ;
 
     d.setFilter(QDir::Dirs | QDir::Files | QDir::NoSymLinks);
@@ -433,7 +431,7 @@ void BKEproject::AddFileToHash(BkeFilesHash *hash,const QString &filename)
     }
 }
 
-bool BKEproject::removeFromHash(BkeFilesHash *hash,ItemInfo &f )
+bool BKEproject::removeFromHash(BkeFilesHash *hash, const ItemInfo &f )
 {
     //如果是目录，则删除目录
     if( IconKey(f.IconKey) == "@dir" ){
@@ -541,7 +539,7 @@ bool BKEproject::RemoveItem(QTreeWidgetItem *Item)
     return true ;
 }
 
-bool BKEproject::RemoveItem(ItemInfo &f)
+bool BKEproject::RemoveItem(const ItemInfo &f)
 {
     QTreeWidgetItem *le = FindItem(f.Root,f.FullName,false) ;
     if( le == 0) return false ;
@@ -701,7 +699,7 @@ QStringList BKEproject::ItemDirs(QTreeWidgetItem *dest)
     return ls ;
 }
 
-void BKEproject::Addfiles(const QStringList &ls ,ItemInfo &f)
+void BKEproject::Addfiles(const QStringList &ls ,const ItemInfo &f)
 {
     QTreeWidgetItem *la ;
     BkeFilesHash *h1 ;
@@ -721,7 +719,7 @@ void BKEproject::Addfiles(const QStringList &ls ,ItemInfo &f)
     if( ls.size() > 0)  WriteBkpFile() ;
 }
 
-void BKEproject::AddDir(const QString &dir ,ItemInfo &f)
+void BKEproject::AddDir(const QString &dir , const ItemInfo &f)
 {
     BkeFilesHash k1,k2 ;
     SearchDir(k1,dir,".bkscr") ;
@@ -745,7 +743,7 @@ void BKEproject::AddDir(const QString &dir ,ItemInfo &f)
 }
 
 
-void BKEproject::workItem(QTreeWidgetItem **la,BkeFilesHash **h1,ItemInfo &f)
+void BKEproject::workItem(QTreeWidgetItem **la,BkeFilesHash **h1,const ItemInfo &f)
 {
     if( f.Layer < 1 || f.RootName == "资源"){
         *la = Script ;

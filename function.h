@@ -9,8 +9,6 @@
 //公用函数，公用的变量
 extern QString BKE_CURRENT_DIR ;
 extern QString BKE_PROJECT_NAME ;
-extern QString BKE_PROJECT_WORKPRO ;
-extern QString BKE_PROJECT_DIR ;
 extern QString BKE_USE_NAME ;
 extern QString BKE_API_FILE ;
 extern QString BKE_CREATOR_VERTION ;
