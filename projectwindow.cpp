@@ -37,7 +37,11 @@ void ProjectWindow::NewProject()
     else if( use.type == 1){
 
     }
-    else return ;
+    else
+    {
+        delete pro;
+        return ;
+    }
 
     projectlist << pro ;
     addTopLevelItem(pro->Root);
