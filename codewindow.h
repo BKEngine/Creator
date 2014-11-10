@@ -173,6 +173,9 @@ public slots:
     void ActUndo() ;
     void ActRedo() ;
     void ActCurrentChange() ;
+    void ActCut() ;
+    void ActPaste() ;
+    void ActCopy() ;
 private:
     OtherWindow   *othwin ;
     ProjectWindow *prowin ;

@@ -131,6 +131,7 @@ void MainWindow::CreateMenu()
     wmenu->addSeparator() ;
     wmenu->addAction(codeedit->btnfindact) ;
     wmenu->addAction(codeedit->btnreplaceact) ;
+    wmenu->addAction("在文件中查找/替换...") ;
     wmenu->addAction(codeedit->btnfly) ;
     wmenu->addAction(codeedit->btncodeact) ;
 

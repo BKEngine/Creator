@@ -60,6 +60,12 @@ CodeWindow::CodeWindow(QWidget *parent)
     connect(btnredoact,SIGNAL(triggered()),this,SLOT(ActRedo())) ;
     //撤销
     connect(btnundoact,SIGNAL(triggered()),this,SLOT(ActUndo())) ;
+    //剪切
+    connect(btncutact,SIGNAL(triggered()),this,SLOT(ActCut())) ;
+    //粘贴
+    connect(btnpasteact,SIGNAL(triggered()),this,SLOT(ActPaste()));
+    //复制
+    connect(btncopyact,SIGNAL(triggered()),this,SLOT(ActCopy())) ;
 
 
 
@@ -294,9 +300,9 @@ void CodeWindow::CurrentConnect(bool c)
         connect(currentedit,SIGNAL(copyAvailable(bool)),btncutact,SLOT(setEnabled(bool))) ;
 //        connect(currentedit,SIGNAL(Undoready(bool)),btnundoact,SLOT(setEnabled(bool))) ;
 //        connect(currentedit,SIGNAL(Redoready(bool)),btnredoact,SLOT(setEnabled(bool))) ;
-        connect(btncopyact,SIGNAL(triggered()),currentedit,SLOT(copy())) ;
-        connect(btncutact,SIGNAL(triggered()),currentedit,SLOT(cut())) ;
-        connect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
+//        connect(btncopyact,SIGNAL(triggered()),currentedit,SLOT(copy())) ;
+//        connect(btncutact,SIGNAL(triggered()),currentedit,SLOT(cut())) ;
+//        connect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
 //        connect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
 //        connect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
         //项目被改变，需要从下层传递信号
@@ -307,9 +313,9 @@ void CodeWindow::CurrentConnect(bool c)
         disconnect(currentedit,SIGNAL(copyAvailable(bool)),btncutact,SLOT(setEnabled(bool))) ;
 //        disconnect(currentedit,SIGNAL(Undoready(bool)),btnundoact,SLOT(setEnabled(bool))) ;
 //        disconnect(currentedit,SIGNAL(Redoready(bool)),btnredoact,SLOT(setEnabled(bool))) ;
-        disconnect(btncopyact,SIGNAL(triggered()),currentedit,SLOT(copy())) ;
-        disconnect(btncutact,SIGNAL(triggered()),currentedit,SLOT(cut())) ;
-        disconnect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
+//        disconnect(btncopyact,SIGNAL(triggered()),currentedit,SLOT(copy())) ;
+//        disconnect(btncutact,SIGNAL(triggered()),currentedit,SLOT(cut())) ;
+//        disconnect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
 //        disconnect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
 //        disconnect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
         connect(currentedit,SIGNAL(textChanged()),this,SLOT(ActCurrentChange())) ;
@@ -1152,4 +1158,21 @@ void CodeWindow::ActCurrentChange()
 {
     btnundoact->setEnabled( currentedit->isUndoAvailable() );
     btnredoact->setEnabled( currentedit->isRedoAvailable() );
+}
+
+//剪切
+void CodeWindow::ActCut()
+{
+    currentedit->cut();
+}
+
+//粘贴
+void CodeWindow::ActPaste()
+{
+    currentedit->paste();
+}
+
+void CodeWindow::ActCopy()
+{
+    currentedit->copy();
 }
