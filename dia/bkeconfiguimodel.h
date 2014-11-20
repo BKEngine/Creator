@@ -12,6 +12,7 @@
 #include <QMessageBox>
 
 #include "function.h"
+#include "bkeprojectconfig.h"
 #include "paper/wordsupport.h"
 
 class BkeConfigUiModel :public QDialog
@@ -19,7 +20,7 @@ class BkeConfigUiModel :public QDialog
     Q_OBJECT
 public:
     BkeConfigUiModel(QWidget *parent = 0);
-    void StartConfig(const QString &file,const QString &dir) ;
+    void StartConfig(BkeProjectConfig *config) ;
 signals:
     void FileOpen(const QString &file,const QString &dir) ;
 
@@ -27,19 +28,18 @@ private slots:
     void ToScriptModel() ;
     void Sure() ;
     void UseDir() ;
+    void refreshUI();
 private:
     QPushButton *btnchange ;
     QPushButton *btnclose ;
     QPushButton *btnsave ;
-    QString Name ;
-    QString Dir ;
+    BkeProjectConfig *config;
+    QString basePath;
     QFormLayout *form ;
     QHBoxLayout *btnLineEdit(const QString &basename,QLineEdit **e) ;
-    void ReadFile(const QString &file) ;
     void callText(QWidget *w, QPoint size,const QString &info) ;
-    QString GetDirText( QLineEdit *e,const QString &left) ;
     QString GetVal(const QString &key) ;
-    QString ToType(QString t) ;
+
 
     QLineEdit* projectname ;
     QLineEdit* projecttitle ;
@@ -53,6 +53,7 @@ private:
     QLineEdit* fontcolor ;
     QLineEdit* fontname ;
     QLineEdit* debuglevel ;
+    QLineEdit* live2dkey ;
 
     QString Text ;
 };

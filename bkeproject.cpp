@@ -60,7 +60,7 @@ BKEproject::BKEproject(QObject *parent)
     imgfileico = new QIcon(":/project/source/image.png") ;
     volfileico = new QIcon(":/project/source/music.png") ;
     movfileico = new QIcon(":/project/source/movie.png") ;
-
+    config = nullptr;
 }
 
 BKEproject::~BKEproject()
@@ -143,6 +143,10 @@ bool BKEproject::OpenProject(const QString &name)
         WriteBkpFile() ;
     }*/
 
+    delete config;
+    config = new BkeProjectConfig(pdir, pdir + "/config.bkpsr");
+    config->readFile();
+
     MakeItems(Import,ImportHash);
     MakeItems(Script,ScriptHash);
     MakeItems(Source,SourceHash);
@@ -156,18 +160,18 @@ void BKEproject::MakeImport()
     OutFilelist.clear();
     QString dirs = FileDir() ;
 
-    OutFilelist <<"main.bkscr"<<"macro.bkscr"<<"config.bkpsr" ;
+    OutFilelist <<"main.bkscr"<<"macro.bkscr";
 
     //从模版中复制文件，如果没有则创建
     for( int i = 0 ; i < OutFilelist.size() ; i++){
         LOLI_MAKE_NULL_FILE(dirs+"/"+OutFilelist.at(i)) ;
     }
 
-    //修改config的名字
-    QString a ;
-    LOLI::AutoRead(a,dirs+"/"+"config.bkpsr") ;
-    a.replace("Bke_New_Project",ProjectName());
-    LOLI::AutoWrite(dirs+"/"+"config.bkpsr",a) ;
+    //新建工程设置
+    delete config;
+    config = new BkeProjectConfig(dirs, dirs + "/config.bkpsr");
+    config->projectName = ProjectName();
+    config->writeFile();
 
     //语法分析
     lex->ParserFile("macro.bkscr",dirs);

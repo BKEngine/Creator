@@ -904,12 +904,11 @@ void CodeWindow::CheckMarks(BkeScintilla *edit,BkeMarkList *list)
 //运行BKEngine.exe
 void CodeWindow::RunBKE()
 {
-//    QString temp = BKE_CURRENT_DIR+"/ProjectCake/"+currentproject->ProjectName() ;
-//    QDir cakedir ;
-//    cakedir.mkpath(temp) ;
-
-    QString ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev.exe" ;
-    //QDir::setCurrent() ;
+    QString ndir;
+    if(!currentproject->config->live2DKey.isEmpty())
+        ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Live2D_Dev.exe";
+    else
+        ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev.exe";
     QProcess::startDetached( ndir,QStringList(), currentproject->FileDir() ) ;
 }
 

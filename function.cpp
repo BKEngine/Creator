@@ -178,38 +178,6 @@ QStringList ListDirsCopy(QStringList &list,const QString &dir,const QString &new
     return ls ;
 }
 
-QString LOLI_KEY_VAL(const QString &Text, const QString &key)
-{
-    int i,pos = 0 ;
-    bool variable ;
-
-    while( pos < Text.length() ){
-        pos = Text.indexOf(key,pos) ;
-        if( pos < 0) return QString() ;
-
-        variable = true ;
-        for( i = pos ; i >= 0 ; i-- ){
-            if( Text.at(i)==QChar('\n') ) break ;
-            else if( Text.at(i)== QChar('/') ){
-                variable = false ;
-                break ;
-            }
-        }
-
-        if( variable ){
-            while( pos < Text.length() && Text.at(pos) != QChar('=')
-                   && Text.at(pos) != QChar('\n') ) pos++ ;
-            if( Text.at(pos) != QChar('=') ) return QString() ;
-
-            i = pos+1 ;
-            while( pos < Text.length() && Text.at(pos) != QChar('\n') && Text.at(pos) != QChar(';')) pos++ ;
-            return Text.mid(i,pos-i) ;
-        }
-        else pos++ ;
-    }
-}
-
-
 void BkeCreator::AddRecentProject(const QString &file)
 {
     if( file == "##" ){

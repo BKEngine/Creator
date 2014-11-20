@@ -1,0 +1,356 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E350C6D9-D2BC-3CE8-9A95-45E137450F47}</ProjectGuid>
+    <RootNamespace>qscintilla2</RootNamespace>
+    <Keyword>Qt4VSv1.0</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <PlatformToolSet>v120</PlatformToolSet>
+    <OutputDirectory>release\</OutputDirectory>
+    <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
+    <CharacterSet>NotSet</CharacterSet>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <IntermediateDirectory>release\</IntermediateDirectory>
+    <PrimaryOutput>qscintilla2</PrimaryOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <PlatformToolSet>v120</PlatformToolSet>
+    <OutputDirectory>debug\</OutputDirectory>
+    <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
+    <CharacterSet>NotSet</CharacterSet>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <IntermediateDirectory>debug\</IntermediateDirectory>
+    <PrimaryOutput>qscintilla2</PrimaryOutput>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">qscintilla2</TargetName>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</IgnoreImportLibrary>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">qscintilla2</TargetName>
+    <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</IgnoreImportLibrary>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>F:\work\qt\BKE_Creator\BKEscintilla\Qt4Qt5;F:\work\qt\BKE_Creator\BKEscintilla;F:\work\qt\BKE_Creator\BKEscintilla\lexers;F:\work\qt\BKE_Creator\BKEscintilla\lexlib;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>".";"..\include";"..\lexlib";"..\src";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore";"release";C:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zm200 %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>release\</AssemblerListingLocation>
+      <BrowseInformation>false</BrowseInformation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;QT;SCI_LEXER;QT_NO_DEBUG;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;QT_OPENGL_ES_2;QT_OPENGL_ES_2_ANGLE;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+    </ClCompile>
+    <Link>
+      <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    </Link>
+    <Midl>
+      <DefaultCharType>Unsigned</DefaultCharType>
+      <EnableErrorChecks>None</EnableErrorChecks>
+      <WarningLevel>0</WarningLevel>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;QT;SCI_LEXER;QT_NO_DEBUG;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;QT_OPENGL_ES_2;QT_OPENGL_ES_2_ANGLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ResourceOutputFileName>$(OutDir)\$(InputName).res</ResourceOutputFileName>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>".";"..\include";"..\lexlib";"..\src";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE";"C:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore";"debug";C:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-Zm200 %(AdditionalOptions)</AdditionalOptions>
+      <AssemblerListingLocation>debug\</AssemblerListingLocation>
+      <BrowseInformation>false</BrowseInformation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_WINDOWS;QT;SCI_LEXER;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;QT_OPENGL_ES_2;QT_OPENGL_ES_2_ANGLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <Link>
+      <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    </Link>
+    <Midl>
+      <DefaultCharType>Unsigned</DefaultCharType>
+      <EnableErrorChecks>None</EnableErrorChecks>
+      <WarningLevel>0</WarningLevel>
+    </Midl>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;QT;SCI_LEXER;QT_PRINTSUPPORT_LIB;QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;QT_OPENGL_ES_2;QT_OPENGL_ES_2_ANGLE;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ResourceOutputFileName>$(OutDir)\$(InputName).res</ResourceOutputFileName>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\lexlib\Accessor.cpp" />
+    <ClCompile Include="..\src\AutoComplete.cpp" />
+    <ClCompile Include="..\src\CallTip.cpp" />
+    <ClCompile Include="..\src\Catalogue.cpp" />
+    <ClCompile Include="..\src\CellBuffer.cpp" />
+    <ClCompile Include="..\src\CharClassify.cpp" />
+    <ClCompile Include="..\lexlib\CharacterSet.cpp" />
+    <ClCompile Include="..\src\ContractionState.cpp" />
+    <ClCompile Include="..\src\Decoration.cpp" />
+    <ClCompile Include="..\src\Document.cpp" />
+    <ClCompile Include="..\src\Editor.cpp" />
+    <ClCompile Include="..\src\ExternalLexer.cpp" />
+    <ClCompile Include="..\src\Indicator.cpp" />
+    <ClCompile Include="..\src\KeyMap.cpp" />
+    <ClCompile Include="..\lexers\LexBke.cpp" />
+    <ClCompile Include="..\lexlib\LexerBase.cpp" />
+    <ClCompile Include="..\lexlib\LexerModule.cpp" />
+    <ClCompile Include="..\lexlib\LexerNoExceptions.cpp" />
+    <ClCompile Include="..\lexlib\LexerSimple.cpp" />
+    <ClCompile Include="..\src\LineMarker.cpp" />
+    <ClCompile Include="Debug\moc_qsciabstractapis.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qsciapis.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qscilexer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qscimacro.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qsciscintilla.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qsciscintillabase.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SciClasses.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="ListBoxQt.cpp" />
+    <ClCompile Include="..\src\PerLine.cpp" />
+    <ClCompile Include="PlatQt.cpp" />
+    <ClCompile Include="..\src\PositionCache.cpp" />
+    <ClCompile Include="..\lexlib\PropSetSimple.cpp" />
+    <ClCompile Include="..\src\RESearch.cpp" />
+    <ClCompile Include="..\src\RunStyles.cpp" />
+    <ClCompile Include="Release\moc_qsciabstractapis.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qsciapis.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qscilexer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qscimacro.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qsciscintilla.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qsciscintillabase.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SciClasses.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="SciClasses.cpp" />
+    <ClCompile Include="..\src\ScintillaBase.cpp" />
+    <ClCompile Include="ScintillaQt.cpp" />
+    <ClCompile Include="..\src\Selection.cpp" />
+    <ClCompile Include="..\src\Style.cpp" />
+    <ClCompile Include="..\lexlib\StyleContext.cpp" />
+    <ClCompile Include="..\src\UniConversion.cpp" />
+    <ClCompile Include="..\src\ViewStyle.cpp" />
+    <ClCompile Include="..\lexlib\WordList.cpp" />
+    <ClCompile Include="..\src\XPM.cpp" />
+    <ClCompile Include="qsciabstractapis.cpp" />
+    <ClCompile Include="qsciapis.cpp" />
+    <ClCompile Include="qscicommand.cpp" />
+    <ClCompile Include="qscicommandset.cpp" />
+    <ClCompile Include="qscidocument.cpp" />
+    <ClCompile Include="qscilexer.cpp" />
+    <ClCompile Include="qscimacro.cpp" />
+    <ClCompile Include="qsciprinter.cpp" />
+    <ClCompile Include="qsciscintilla.cpp" />
+    <ClCompile Include="qsciscintillabase.cpp" />
+    <ClCompile Include="qscistyle.cpp" />
+    <ClCompile Include="qscistyledtext.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\lexlib\Accessor.h" />
+    <ClInclude Include="..\src\AutoComplete.h" />
+    <ClInclude Include="..\src\CallTip.h" />
+    <ClInclude Include="..\src\Catalogue.h" />
+    <ClInclude Include="..\src\CellBuffer.h" />
+    <ClInclude Include="..\src\CharClassify.h" />
+    <ClInclude Include="..\lexlib\CharacterSet.h" />
+    <ClInclude Include="..\src\ContractionState.h" />
+    <ClInclude Include="..\src\Decoration.h" />
+    <ClInclude Include="..\src\Document.h" />
+    <ClInclude Include="..\src\Editor.h" />
+    <ClInclude Include="..\src\ExternalLexer.h" />
+    <ClInclude Include="..\src\FontQuality.h" />
+    <ClInclude Include="..\include\ILexer.h" />
+    <ClInclude Include="..\src\Indicator.h" />
+    <ClInclude Include="..\src\KeyMap.h" />
+    <ClInclude Include="..\lexlib\LexAccessor.h" />
+    <ClInclude Include="..\lexlib\LexerBase.h" />
+    <ClInclude Include="..\lexlib\LexerModule.h" />
+    <ClInclude Include="..\lexlib\LexerNoExceptions.h" />
+    <ClInclude Include="..\lexlib\LexerSimple.h" />
+    <ClInclude Include="..\src\LineMarker.h" />
+    <ClInclude Include="ListBoxQt.h" />
+    <ClInclude Include="..\lexlib\OptionSet.h" />
+    <ClInclude Include="..\src\Partitioning.h" />
+    <ClInclude Include="..\src\PerLine.h" />
+    <ClInclude Include="..\include\Platform.h" />
+    <ClInclude Include="..\src\PositionCache.h" />
+    <ClInclude Include="..\lexlib\PropSetSimple.h" />
+    <ClInclude Include="..\src\RESearch.h" />
+    <ClInclude Include="..\src\RunStyles.h" />
+    <ClInclude Include="..\src\SVector.h" />
+    <CustomBuild Include="SciClasses.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\release" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing SciClasses.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\debug" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing SciClasses.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
+    <ClInclude Include="..\include\SciLexer.h" />
+    <ClInclude Include="SciNamespace.h" />
+    <ClInclude Include="..\include\Scintilla.h" />
+    <ClInclude Include="..\src\ScintillaBase.h" />
+    <ClInclude Include="ScintillaQt.h" />
+    <ClInclude Include="..\include\ScintillaWidget.h" />
+    <ClInclude Include="..\src\Selection.h" />
+    <ClInclude Include="..\src\SplitVector.h" />
+    <ClInclude Include="..\src\Style.h" />
+    <ClInclude Include="..\lexlib\StyleContext.h" />
+    <ClInclude Include="..\src\UniConversion.h" />
+    <ClInclude Include="..\src\ViewStyle.h" />
+    <ClInclude Include="..\lexlib\WordList.h" />
+    <ClInclude Include="..\src\XPM.h" />
+    <CustomBuild Include="Qsci\qsciabstractapis.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\release" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qsciabstractapis.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\debug" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qsciabstractapis.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="Qsci\qsciapis.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\release" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qsciapis.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\debug" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qsciapis.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
+    <ClInclude Include="Qsci\qscicommand.h" />
+    <ClInclude Include="Qsci\qscicommandset.h" />
+    <ClInclude Include="Qsci\qscidocument.h" />
+    <ClInclude Include="Qsci\qsciglobal.h" />
+    <CustomBuild Include="Qsci\qscilexer.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\release" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qscilexer.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\debug" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qscilexer.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="Qsci\qscimacro.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\release" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qscimacro.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\debug" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qscimacro.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
+    <ClInclude Include="Qsci\qsciprinter.h" />
+    <CustomBuild Include="Qsci\qsciscintilla.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\release" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qsciscintilla.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\debug" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qsciscintilla.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
+    <CustomBuild Include="Qsci\qsciscintillabase.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\release" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qsciscintillabase.h...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DQT -DSCI_LEXER -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE "-I." "-I.\..\include" "-I.\..\lexlib" "-I.\..\src" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtPrintSupport" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtWidgets" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtGui" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtANGLE" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\include\QtCore" "-I.\debug" "-IC:\qt\msvcqt5.3.0\5.3\msvc2013\mkspecs\win32-msvc2013"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qsciscintillabase.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
+    <ClInclude Include="Qsci\qscistyle.h" />
+    <ClInclude Include="Qsci\qscistyledtext.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="qscintilla_cs.ts" />
+    <None Include="qscintilla_de.ts" />
+    <None Include="qscintilla_es.ts" />
+    <None Include="qscintilla_fr.ts" />
+    <None Include="qscintilla_pt_br.ts" />
+    <None Include="qscintilla_ru.ts" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_Win32="5.3.0 msvc" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

@@ -75,7 +75,7 @@ private:
 
     bool ReadItemInfo(QTreeWidgetItem *dest,ItemInfo &f) ;
     void BkeChangeCurrentProject(BKEproject *p) ;
-    void ConfigProject(const QString &f,const QString &dir) ;
+    void ConfigProject(BkeProjectConfig *config) ;
     void NewFile(const ItemInfo &f, int type) ;
     void DeleteFile(const ItemInfo &f) ;
     void Addfiles(const ItemInfo &f) ;

@@ -1,6 +1,9 @@
 * text=auto !eol
 /BKE_creator.pro -text
 /BKE_creator.pro.user -text
+/BKE_creator.sln -text
+/BKE_creator.v12.suo -text
+/BKE_creator.vcxproj -text
 /BKE_creator_static_qsci.pro -text
 BKEscintilla/Qt4Qt5/ListBoxQt.cpp -text
 BKEscintilla/Qt4Qt5/ListBoxQt.h -text
@@ -69,6 +72,7 @@ BKEscintilla/Qt4Qt5/qscilexeryaml.cpp -text
 BKEscintilla/Qt4Qt5/qscimacro.cpp -text
 BKEscintilla/Qt4Qt5/qscintilla.pro -text
 BKEscintilla/Qt4Qt5/qscintilla.pro.user -text
+BKEscintilla/Qt4Qt5/qscintilla.vcxproj -text
 BKEscintilla/Qt4Qt5/qscintilla_app.pro -text
 BKEscintilla/Qt4Qt5/qscintilla_cs.qm -text
 BKEscintilla/Qt4Qt5/qscintilla_cs.ts -text
@@ -120,6 +124,7 @@ BKEscintilla/lexlib/StyleContext.cpp -text
 BKEscintilla/lexlib/StyleContext.h -text
 BKEscintilla/lexlib/WordList.cpp -text
 BKEscintilla/lexlib/WordList.h -text
+BKEscintilla/m_install_qsci_pro.bat -text
 BKEscintilla/main.cpp -text
 BKEscintilla/mainwindow.cpp -text
 BKEscintilla/mainwindow.h -text
@@ -131,6 +136,7 @@ BKEscintilla/qsci/api/python/Python-2.7.api -text
 BKEscintilla/qsci/api/python/Python-3.1.api -text
 BKEscintilla/qsci/api/python/Python-3.2.api -text
 BKEscintilla/qsci/api/python/Python-3.3.api -text
+BKEscintilla/qsci/api/python/Python-3.4.api -text
 BKEscintilla/source.qrc -text
 BKEscintilla/source/bianji.png -text
 BKEscintilla/source/编辑.png -text
@@ -189,6 +195,11 @@ BKEscintilla/src/ViewStyle.h -text
 BKEscintilla/src/XPM.cpp -text
 BKEscintilla/src/XPM.h -text
 BKEscintilla/自动.e -text
+ParserHelper/ParserHelper.dll -text
+ParserHelper/ParserHelper.h -text
+ParserHelper/config.h -text
+ParserHelper/libParserHelper.a -text
+ParserHelper/parserhelper_global.h -text
 bkeSci/BkeIndicatorBase.h -text
 bkeSci/autolex.cpp -text
 bkeSci/autolex.h -text
@@ -207,6 +218,8 @@ bkeSci/qscilexerbkescript.h -text
 /bkeico.ico -text
 /bkeproject.cpp -text
 /bkeproject.h -text
+/bkeprojectconfig.cpp -text
+/bkeprojectconfig.h -text
 /codewindow.cpp -text
 /codewindow.h -text
 dia/bkeconfiguimodel.cpp -text

@@ -107,15 +107,16 @@ void ProjectWindow::ItemDoubleClick(QTreeWidgetItem * item, int column)
 {
     if( !ReadItemInfo(item,info) ) return ;
 
-    QString name = workpro->FileDir()+"/"+info.FullName ;
+    BKEproject *p = FindPro(info.ProName);
+    QString name = p->FileDir()+"/"+info.FullName ;
 
     if( info.FullName == "config.bkpsr" ){
-        ConfigProject(name,workpro->FileDir());
+        ConfigProject(p->config);
         return ;
     }
 
     if( name.endsWith(".bkscr") || name.endsWith(".bkpsr")){
-        emit OpenThisFile(name,workpro->FileDir());
+        emit OpenThisFile(name, p->FileDir());
     }
 
 
@@ -184,7 +185,8 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
     else if( !name.endsWith(".bkscr")) name.append(".bkscr") ;
     name = name.replace(QRegExp("\\"),"/") ;
 
-    QFileInfo sk(workpro->absName(name)) ;
+    BKEproject *p = FindPro(f.ProName);
+    QFileInfo sk(p->absName(name)) ;
     if( sk.exists() ){
         int sk = QMessageBox::information(this,"","文件已经存在，是否直接添加文件",QMessageBox::Yes|QMessageBox::No) ;
         if( sk == QMessageBox::No ) return ;
@@ -192,17 +194,17 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
     else LOLI_MAKE_NULL_FILE(sk.filePath()) ;
 
     if( type == 1){
-        workpro->FindItem(workpro->Import,name) ;
+        p->FindItem(p->Import,name) ;
     }
     else if( type == 2){
-        workpro->FindItem(workpro->Script,name) ;
+        p->FindItem(p->Script,name) ;
     }
     else{
-        workpro->FindItem(workpro->Source,name) ;
+        p->FindItem(p->Source,name) ;
     }
 
-    workpro->AddFileToHash(workpro->typeHash(type),name);
-    workpro->WriteBkpFile() ;
+    p->AddFileToHash(p->typeHash(type),name);
+    p->WriteBkpFile() ;
 }
 
 
@@ -380,10 +382,10 @@ BKEproject *ProjectWindow::FindProjectFromDir(const QString &dir)
     return 0 ;
 }
 
-void ProjectWindow::ConfigProject(const QString &f,const QString &dir)
+void ProjectWindow::ConfigProject(BkeProjectConfig *config)
 {
     BkeConfigUiModel kag ;
-    kag.StartConfig(f,dir);
+    kag.StartConfig(config);
 }
 
 void ProjectWindow::ActionAdmin()

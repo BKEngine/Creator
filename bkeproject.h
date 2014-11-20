@@ -5,6 +5,7 @@
 #include "weh.h"
 #include "paper/parser.h"
 #include "bkeSci/bkemarks.h"
+#include "bkeprojectconfig.h"
 
 class ItemInfo
 {
@@ -68,6 +69,7 @@ public:
     QTreeWidgetItem *VoiceFile ;
     QTreeWidgetItem *Root ;
     BkeParser *lex ;
+    BkeProjectConfig *config;
 private:
     QIcon *fileico ;
     QIcon *dirsico ;

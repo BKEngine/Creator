@@ -48,7 +48,8 @@ SOURCES += main.cpp \
     dia/qsearchlineedit.cpp \
     singleapplication.cpp \
     dia/cconfigdia.cpp \
-    dia/ctextedit.cpp
+    dia/ctextedit.cpp \
+    bkeprojectconfig.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -78,10 +79,13 @@ HEADERS  += \
     dia/qsearchlineedit.h \
     singleapplication.h \
     dia/cconfigdia.h \
-    dia/ctextedit.h
+    dia/ctextedit.h \
+    bkeprojectconfig.h
 
 RESOURCES += \
     source.qrc
 
 FORMS += \
     dia/ctextedit.ui
+
+LIBS += -L$$PWD/ParserHelper -lParserHelper

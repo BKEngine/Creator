@@ -335,18 +335,15 @@ bool WordSupport::IsFontColor(const QString &t)
     QString s = t.toLower();
     if(IsColor(s))
         return true;
-    if(s.startsWith('[') && s.endsWith(']'))
+
+    int pos = s.indexOf(',');
+    if(pos != -1)
     {
-        s = s.mid(1, s.length() - 2);
-        int pos = s.indexOf(',');
-        if(pos != -1)
-        {
-            if(!IsColor(s.mid(0,pos).trimmed()))
-                return false;
-            if(!IsColor(s.mid(pos + 1).trimmed()))
-                return false;
-            return true;
-        }
+        if(!IsColor(s.mid(0,pos).trimmed()))
+            return false;
+        if(!IsColor(s.mid(pos + 1).trimmed()))
+            return false;
+        return true;
     }
     return false;
 }

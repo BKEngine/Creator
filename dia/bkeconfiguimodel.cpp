@@ -12,7 +12,7 @@ BkeConfigUiModel::BkeConfigUiModel(QWidget *parent)
     projectname = new QLineEdit("Bke Game",this) ;
     form->addRow("游戏名称*:",projectname);
 
-    projectsize = new QLineEdit("800*600",this) ;
+    projectsize = new QLineEdit("800, 600",this) ;
     form->addRow("游戏分辨率*:",projectsize);
 
     projecttitle = new QLineEdit(this) ;
@@ -38,6 +38,9 @@ BkeConfigUiModel::BkeConfigUiModel(QWidget *parent)
     debuglevel = new QLineEdit(this) ;
     form->addRow("Log等级:", debuglevel );
 
+    live2dkey = new QLineEdit(this);
+    form->addRow("Live2D授权码：", live2dkey);
+
     form->setLabelAlignment(Qt::AlignRight);
 
     btnclose->setGeometry(380,370,100,35);
@@ -51,11 +54,11 @@ BkeConfigUiModel::BkeConfigUiModel(QWidget *parent)
     hide();
 }
 
-void BkeConfigUiModel::StartConfig(const QString &file,const QString &dir)
+void BkeConfigUiModel::StartConfig(BkeProjectConfig *config)
 {
-    Name = file ;
-    Dir = dir ;
-    ReadFile(file);
+    this->config = config;
+    connect(config, SIGNAL(onFileChanged()), this, SLOT(refreshUI()));
+    refreshUI();
     this->exec() ;
 }
 
@@ -66,11 +69,128 @@ void BkeConfigUiModel::ToScriptModel()
     close() ;
 }
 
+static QString Size2Str(int s[])
+{
+    return QString("%1, %2").arg(s[0]).arg(s[1]);
+}
+
+QString toType(const QString &t)
+{
+    QString abc = t.trimmed() ;
+    if( abc.startsWith('\"')) abc = abc.right(abc.length()-1) ;
+    if( abc.endsWith('\"')) abc = abc.left(abc.length()-1) ;
+    if( abc.startsWith('[') && abc.endsWith(']')){
+        abc = abc.mid(1,abc.length()-2) ;
+        QStringList ls = abc.split(",") ;
+        QStringList lz ;
+        for( int i = 0 ; i < ls.size() ; i++){
+            abc = toType(ls.at(i)) ;
+            if( !abc.isEmpty() ) lz.append( abc );
+        }
+        abc = lz.join(",") ;
+    }
+    return abc ;
+}
+
+static bool Str2Size(int s[], const QString &str)
+{
+    QStringList l = str.split(',');
+    if(l.size()!=2)
+        return false;
+    bool ok = false;
+    s[0] = l[0].trimmed().toInt(&ok);
+    if(!ok)
+        return false;
+    s[1] = l[1].trimmed().toInt(&ok);
+    if(!ok)
+        return false;
+    return true;
+}
+
+static QString SearchPath2Str(const QStringList &v)
+{
+    return v.join(", ");
+}
+
+static QString Int2Hex(int a)
+{
+    char tmp[8];
+    itoa(a, tmp, 16);
+    QString num = QString(tmp).toUpper();
+    if(num.size() < 6)
+    {
+        num.prepend(QString(6-num.size(),'0'));
+    }
+    return QString("0x") + num;
+}
+
+static QString Color2Str(const QBkeVariable &v)
+{
+    if(v.isNull())
+        return QString();
+    if(v.isArray())
+        return Int2Hex(v[0].toInt()) + ", " + Int2Hex(v[1].toInt());
+    return Int2Hex(v.toInt());
+}
+
+static int Color2Int(const QString &t)
+{
+    QString s = t.toLower() ;
+    if( t.startsWith("0x") && s.length() == 8)
+    {
+        s = s.right(6);
+        return s.toInt(0,16);
+    }
+    else if(t.startsWith("#"))
+    {
+        s = s.right(s.size()-1);
+        switch(s.length())
+        {
+        case 3:
+            s = QString(s[0]) + s[0] + s[1] + s[1] +s[2] + s[2];
+        case 6:
+            return s.toInt(0,16);
+        }
+    }
+    return -1;
+}
+
+static QBkeVariable Str2Color(const QString &t)
+{
+    if(t.isEmpty())
+    {
+        return QBkeVariable();
+    }
+    QString s = t.toLower();
+    if(WordSupport::IsColor(s))
+        return QBkeVariable(Color2Int(s));
+
+    int pos = s.indexOf(',');
+    if(pos != -1)
+    {
+        QBkeVariable v;
+        v[0] = Color2Int(s.mid(0,pos).trimmed());
+        v[1] = Color2Int(s.mid(pos + 1).trimmed());
+        return v;
+    }
+    return QBkeVariable();
+}
+
+static QStringList getDirText( QLineEdit *e)
+{
+    if( e->text().isEmpty() ) return QStringList();
+    QStringList ls = e->text().split(",") ;
+    for(auto &i : ls)
+    {
+        i = i.trimmed();
+    }
+    return ls;
+}
+
 void BkeConfigUiModel::Sure()
 {
-    QString result ;
-    WordSupport w ;
     QPoint pt = this->pos();
+    BkeProjectConfig tmp;
 
     //是否有名称
     if( projectname->text().isEmpty() ) {
@@ -78,37 +198,50 @@ void BkeConfigUiModel::Sure()
         return ;
     }
 
-    result.append( "GameName =\"" + projectname->text() + "\";\r\n" ) ;
+    tmp.projectName = projectname->text();
 
     //是否有分辨率
-    w.setText( projectsize->text() );
-    w.NextTwoWord();
-    if( !w.IsNumber(w.pWord) || !w.IsNumber(w.nWord) ){
+    if(!Str2Size(tmp.resolutionSize, projectsize->text())){
         callText(projectsize,pt,"无效的分辨率设置");
         return ;
     }
 
-    if( !projecttitle->text().isEmpty() ) result.append("GameTitle=\""+projecttitle->text()+"\";\r\n") ;
-    result.append("ResolutionSize=["+w.pWord+","+w.nWord+"];\r\n" ) ;
-    if( !savedir->text().isEmpty() )  result.append("SaveDir=\""+savedir->text()+"\";\r\n") ;
-    result.append( GetDirText(imgdir,"ImageAutoSearchPath = ") ) ;
-    result.append( GetDirText(audiodir,"AudioAutoSearchPath = ") ) ;
-    result.append( GetDirText(scriptdir,"ScriptAutoSearchPath = ") ) ;
+    tmp.gameTitle = projecttitle->text();
+    tmp.saveDir = savedir->text();
+    tmp.imageAutoSearchPath = getDirText(imgdir);
+    tmp.audioAutoSearchPath = getDirText(audiodir);
+    tmp.scriptAutoSearchPath = getDirText(scriptdir);
 
-    if( WordSupport::IsNumber(fontsize->text())) result.append("DefaultFontSize="+fontsize->text()+";\r\n") ;
-    if( WordSupport::IsNumber(savenum->text())) result.append("MaxSaveDataNum="+savenum->text()+";\r\n") ;
-    if( WordSupport::IsFontColor(fontcolor->text())) result.append("DefaultFontColor="+fontcolor->text()+";\r\n") ;
-    if( !fontname->text().isEmpty() ) result.append("DefaultFontName=\""+fontname->text()+"\";\r\n") ;
-    if( !debuglevel->text().isEmpty() ) result.append("DebugLevel="+debuglevel->text()+";\r\n") ;
-
-    QFile ks( Name ) ;
-    if( !LOLI::AutoWrite(&ks,result,"UTF-8")){
-        QMessageBox::critical(this,"错误","保存"+ Name+ "时遇到了一个错误。",QMessageBox::Ok) ;
+    if( WordSupport::IsNumber(fontsize->text()))
+        tmp.defaultFontSize = fontsize->text().toInt();
+    else{
+        callText(fontsize,pt,"无效的数字");
         return ;
     }
-    ks.close();
-    ks.setFileName(Dir+"/settings.bkpsr");
+    if( WordSupport::IsNumber(savenum->text()))
+        tmp.maxSaveDataNum = savenum->text().toInt();
+    else{
+        callText(savenum,pt,"无效的数字");
+        return ;
+    }
+    if( WordSupport::IsFontColor(fontcolor->text()))
+        tmp.defaultFontColor = Color2Str(fontcolor->text());
+    else{
+        callText(fontcolor,pt,"无效的字体颜色");
+        return ;
+    }
+    tmp.defaultFontName = fontname->text();
+
+    if( WordSupport::IsNumber(debuglevel->text()))
+        tmp.debugLevel = debuglevel->text().toInt();
+
+    tmp.live2DKey = live2dkey->text();
+
+    QFile ks;
+    ks.setFileName(config->projDir+"/settings.bkpsr");
     ks.remove() ;
+    *config = tmp;
+    config->writeFile();
     close() ;
 }
 
@@ -134,63 +267,36 @@ void BkeConfigUiModel::UseDir()
 
     QString obname = p->objectName() ;
     obname = obname.left(obname.length()-1)+"e" ;
-     QLineEdit* edit= findChild<QLineEdit*>(obname) ;
+    QLineEdit* edit= findChild<QLineEdit*>(obname) ;
 
     if( edit == 0) return ;
 
-    QString name = QFileDialog::getExistingDirectory(this,"选择文件夹",Dir) ;
+    QString name = QFileDialog::getExistingDirectory(this,"选择文件夹",config->projDir) ;
     if( name.isEmpty() ) return ;
 
     QString t = edit->text() ;
-    name = BkeFullnameToName(name,Dir) ;
+    name = BkeFullnameToName(name,config->projDir) ;
     if( !t.isEmpty() && !t.endsWith(",") ) t.append(","+name) ;
     else t.append(name) ;
     edit->setText( t );
 }
 
-void BkeConfigUiModel::ReadFile(const QString &file)
+void BkeConfigUiModel::refreshUI()
 {
-    LOLI::AutoRead(Text,file) ;
-    if( Text.isEmpty() ) return ;
+    projectname->setText(config->projectName);
+    projectsize->setText(Size2Str(config->resolutionSize));
+    projecttitle->setText(config->gameTitle);
 
-    QString temp ;
-    temp = ToType( LOLI_KEY_VAL(Text,"GameName"));
-    if( !temp.isEmpty() ) projectname->setText(temp);
-    temp = ToType( LOLI_KEY_VAL(Text,"ResolutionSize"));
-    if( !temp.isEmpty() ) projectsize->setText(temp);
-
-    projecttitle->setText( ToType( LOLI_KEY_VAL(Text,"GameTitle")) );
-
-    savedir->setText(  ToType( LOLI_KEY_VAL(Text,"SaveDir")) );
-    imgdir->setText(ToType( LOLI_KEY_VAL(Text,"ImageAutoSearchPath")));
-    audiodir->setText( ToType( LOLI_KEY_VAL(Text,"AudioAutoSearchPath")) )  ;
-    scriptdir->setText( ToType( LOLI_KEY_VAL(Text,"ScriptAutoSearchPath")) ) ;
-    savenum->setText( ToType( LOLI_KEY_VAL(Text,"MaxSaveDataNum")) ) ;
-    fontsize->setText( ToType( LOLI_KEY_VAL(Text,"DefaultFontSize")) )  ;
-
-    temp = ToType( LOLI_KEY_VAL(Text,"DefaultFontColor")) ;
-    if( !temp.isEmpty() ) fontcolor->setText( temp ) ;
-    fontname->setText( ToType( LOLI_KEY_VAL(Text,"DefaultFontName")) ) ;
-    debuglevel->setText( ToType( LOLI_KEY_VAL(Text,"DebugLevel")) ) ;
-}
-
-
-QString BkeConfigUiModel::ToType(QString t)
-{
-    QString abc = t.trimmed() ;
-    if( abc.startsWith('\"')) abc = abc.right(abc.length()-1) ;
-    if( abc.endsWith('\"')) abc = abc.left(abc.length()-1) ;
-    if( abc.startsWith('[') && abc.endsWith(']')){
-        abc = abc.mid(1,abc.length()-2) ;
-        QStringList ls = abc.split(",") ;
-        QStringList lz ;
-        for( int i = 0 ; i < ls.size() ; i++){
-            abc = ToType(ls.at(i)) ;
-            if( !abc.isEmpty() ) lz.append( abc );
-        }
-        abc = lz.join(",") ;
-    }
-    return abc ;
+    savedir->setText(config->saveDir);
+    imgdir->setText(SearchPath2Str(config->imageAutoSearchPath));
+    audiodir->setText(SearchPath2Str(config->audioAutoSearchPath));
+    scriptdir->setText(SearchPath2Str(config->scriptAutoSearchPath));
+    savenum->setText(QString::number(config->maxSaveDataNum));
+    fontsize->setText(QString::number(config->defaultFontSize));
+    fontcolor->setText(Color2Str(config->defaultFontColor));
+    fontname->setText(config->defaultFontName);
+    debuglevel->setText(QString::number(config->debugLevel));
+    live2dkey->setText(config->live2DKey);
 }
 
 void BkeConfigUiModel::callText(QWidget *w, QPoint size,const QString &info)
@@ -201,24 +307,3 @@ void BkeConfigUiModel::callText(QWidget *w, QPoint size,const QString &info)
     return ;
 }
 
-QString BkeConfigUiModel::GetDirText( QLineEdit *e,const QString &left)
-{
-    if( e->text().isEmpty() ) return QString();
-    QString temp ;
-    QStringList ls = e->text().split(",") ;
-    if( ls.size() < 1) return temp;
-
-    temp = "[" ;
-    QString k ;
-    for( int i = 0 ; i < ls.size() ; i++){
-        k = ls.at(i) ;
-        if( !k.startsWith('\"') ) k.prepend('\"') ;
-        if( !k.endsWith('\"') ) k.append('\"') ;
-        if( i < ls.size() -1 ) temp.append(k+",") ;
-        else temp.append(k+"]") ;
-    }
-
-    temp.prepend(left) ;
-    temp.append(";\r\n" ) ;
-    return temp ;
-}

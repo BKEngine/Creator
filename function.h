@@ -29,7 +29,6 @@ QString LOLI_AUTONEXT_QSTRING(QString text,int len = 20) ;
 bool copyDirectoryFiles(const QString &fromDir, const QString &toDir, bool coverFileIfExist,const QString &sfix) ;
 QString BkeFullnameToName(const QString &fullname,const QString &dir) ;
 QStringList ListDirsCopy(QStringList &list,const QString &dir,const QString &newdir) ;
-QString LOLI_KEY_VAL(const QString &Text, const QString &key) ;
 
 namespace BkeCreator {
      void AddRecentProject(const QString &file) ;
