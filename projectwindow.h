@@ -7,7 +7,7 @@
 #include "bkeproject.h"
 #include "dia/bkeconfiguimodel.h"
 
-extern QList<BKEproject*> projectlist ;
+extern QList<BkeProject*> projectlist ;
 
 
 // 项目树窗口
@@ -34,14 +34,14 @@ public:
 
 
     ProjectWindow(QWidget *parent = 0);
-    BKEproject *FindPro(const QString &proname) ;
-    BKEproject *FindFileProject(const QString &file) ;
-    BKEproject *FindProjectFromDir(const QString &dir) ;
+    BkeProject *FindPro(const QString &proname) ;
+    BkeProject *FindFileProject(const QString &file) ;
+    BkeProject *FindProjectFromDir(const QString &dir) ;
     void OpenProject(const QString &file) ;
-    QList<BKEproject*> ProjectList(){ return projectlist ; }
+    QList<BkeProject*> ProjectList(){ return projectlist ; }
     bool hasProject(){ return projectlist.size() > 0 ; }
 
-    BKEproject *workpro ;
+    BkeProject *workpro ;
 
 signals:
     void OpenThisFile(const QString &file,const QString &prodir) ;
@@ -49,7 +49,7 @@ signals:
     void CheckFileOpen(const QString &file,bool &IsOpen) ;
     void ImportFileChange(const QString &text,int type) ;
     void FileNameChange(const QString &oldname,const QString &newname,bool &c) ;
-    void CurrentProChange(BKEproject *pro) ;
+    void CurrentProChange(BkeProject *pro) ;
     void Compile() ;
     void TextToMarks(const QString &text,const QString &dir,int type) ;
 
@@ -67,14 +67,14 @@ public slots:
 
 private:
     //QList<BKEproject*> projectlist ;
-    BKEproject *temppro ;
+    BkeProject *temppro ;
     ItemInfo info ;
 
 
     QAction *btns[BTN_COUNT] ;
 
     bool ReadItemInfo(QTreeWidgetItem *dest,ItemInfo &f) ;
-    void BkeChangeCurrentProject(BKEproject *p) ;
+    void BkeChangeCurrentProject(BkeProject *p) ;
     void ConfigProject(BkeProjectConfig *config) ;
     void NewFile(const ItemInfo &f, int type) ;
     void DeleteFile(const ItemInfo &f) ;

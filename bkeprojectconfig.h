@@ -42,6 +42,7 @@ public slots:
 signals:
     void readFileError(QString s);
     void onFileChanged();
+    void onConfigChanged();
 };
 
 #endif // BKEPROJECTCONFIG_H

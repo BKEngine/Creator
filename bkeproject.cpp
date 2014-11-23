@@ -44,7 +44,7 @@ void BKE_PROJECT_READITEM( QTreeWidgetItem *dest,ItemInfo &info)
 }
 
 //新建一个项目
-BKEproject::BKEproject(QObject *parent)
+BkeProject::BkeProject(QObject *parent)
     :QObject(parent)
 {
     isnull = true ;
@@ -63,14 +63,14 @@ BKEproject::BKEproject(QObject *parent)
     config = nullptr;
 }
 
-BKEproject::~BKEproject()
+BkeProject::~BkeProject()
 {
     lex->deleteLater();
 }
 
 
 //初始化项目
-void BKEproject::BuildItem(const QString &name)
+void BkeProject::BuildItem(const QString &name)
 {
     Root = new QTreeWidgetItem(QStringList()<<name) ;
     Import = new QTreeWidgetItem(QStringList()<<"初始化") ;
@@ -87,7 +87,7 @@ void BKEproject::BuildItem(const QString &name)
     Root->addChild(Source);
 }
 
-bool BKEproject::NewProject(const QString &dir,const QString &name)
+bool BkeProject::NewProject(const QString &dir,const QString &name)
 {
     pdir = dir ;
     pname = name ;
@@ -107,7 +107,7 @@ bool BKEproject::NewProject(const QString &dir,const QString &name)
 }
 
 //读取文件
-bool BKEproject::OpenProject(const QString &name)
+bool BkeProject::OpenProject(const QString &name)
 {
     QFile f(name) ;
     if( !f.isOpen() && !f.open(QFile::ReadOnly) ) return false ;
@@ -155,12 +155,12 @@ bool BKEproject::OpenProject(const QString &name)
 }
 
 //寻找输入输出文件
-void BKEproject::MakeImport()
+void BkeProject::MakeImport()
 {
     OutFilelist.clear();
     QString dirs = FileDir() ;
 
-    OutFilelist <<"main.bkscr"<<"macro.bkscr";
+    OutFilelist <<"main.bkscr"<<"macro.bkscr"<<"config.bkpsr";
 
     //从模版中复制文件，如果没有则创建
     for( int i = 0 ; i < OutFilelist.size() ; i++){
@@ -189,7 +189,7 @@ void BKEproject::MakeImport()
 }
 
 //从qstring列表中创建项目
-void BKEproject::MakeItems(QTreeWidgetItem *dest,const QStringList &list)
+void BkeProject::MakeItems(QTreeWidgetItem *dest,const QStringList &list)
 {
     QString temp ;
     for( int i = 0 ; i < list.size() ; i++){
@@ -200,7 +200,7 @@ void BKEproject::MakeItems(QTreeWidgetItem *dest,const QStringList &list)
 }
 
 //从hash列表中创建项目
-void BKEproject::MakeItems(QTreeWidgetItem *dest,BkeFilesHash &hash)
+void BkeProject::MakeItems(QTreeWidgetItem *dest,BkeFilesHash &hash)
 {
     QTreeWidgetItem *le ;
     for( auto ptr = hash.begin() ; ptr != hash.end() ; ptr++){
@@ -212,7 +212,7 @@ void BKEproject::MakeItems(QTreeWidgetItem *dest,BkeFilesHash &hash)
 }
 
 //带排序的创建
-QTreeWidgetItem *BKEproject::MakeItem(QTreeWidgetItem *dest,const QString &dir)
+QTreeWidgetItem *BkeProject::MakeItem(QTreeWidgetItem *dest,const QString &dir)
 {
     QString abc = AllNameToName(dir) ;
     if( abc.isEmpty() ) return dest ;
@@ -227,7 +227,7 @@ QTreeWidgetItem *BKEproject::MakeItem(QTreeWidgetItem *dest,const QString &dir)
 
 
 //寻找文件，失败返回0，创建空路径时将创建不存在的节点
-QTreeWidgetItem *BKEproject::FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty )
+QTreeWidgetItem *BkeProject::FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty )
 {
     QString llm = dir ;
 
@@ -261,18 +261,18 @@ QTreeWidgetItem *BKEproject::FindItem(QTreeWidgetItem *dest,const QString &dir,b
     return root ;
 }
 
-QString BKEproject::FileDir() const
+QString BkeProject::FileDir() const
 {
     return pdir ;
 }
 
-QString BKEproject::ProjectName() const
+QString BkeProject::ProjectName() const
 {
     return pname ;
 }
 
 //寻找指定的文件，并把文件加入到hash中
-bool BKEproject::SearchDir(BkeFilesHash &hash,const QString &dir,const QString &suffix)
+bool BkeProject::SearchDir(BkeFilesHash &hash,const QString &dir,const QString &suffix)
 {
     QDir d( pdir + "/" + dir ) ;
     if( !d.exists() ) return false ;
@@ -302,7 +302,7 @@ bool BKEproject::SearchDir(BkeFilesHash &hash,const QString &dir,const QString &
 }
 
 //从树结构中生成hash
-void BKEproject::SearchTree(BkeFilesHash &hash, QTreeWidgetItem *dest,const QString &dir)
+void BkeProject::SearchTree(BkeFilesHash &hash, QTreeWidgetItem *dest,const QString &dir)
 {
     QTreeWidgetItem *le ;
     QStringList *ls = new QStringList ;
@@ -324,7 +324,7 @@ void BKEproject::SearchTree(BkeFilesHash &hash, QTreeWidgetItem *dest,const QStr
 }
 
 //设置图标
-void BKEproject::SetIconFromSuffix(QTreeWidgetItem *dest,const QString suffix)
+void BkeProject::SetIconFromSuffix(QTreeWidgetItem *dest,const QString suffix)
 {
     QString temp = suffix.toLower() ;
     if( !temp.startsWith('.') && temp.lastIndexOf('.') > 0) temp = temp.right(temp.length()-temp.lastIndexOf('.')) ;
@@ -347,7 +347,7 @@ void BKEproject::SetIconFromSuffix(QTreeWidgetItem *dest,const QString suffix)
     }
 }
 
-bool BKEproject::WriteBkpFile()
+bool BkeProject::WriteBkpFile()
 {
     bkpAdmin = new QJsonObject ;
     bkpAdmin->insert("name",pname) ;
@@ -362,7 +362,7 @@ bool BKEproject::WriteBkpFile()
     return LOLI::AutoWrite(FileDir()+"/"+BKE_PROJECT_NAME,llm.toJson()) ;
 }
 
-QJsonObject BKEproject::HashToJson(BkeFilesHash &hash)
+QJsonObject BkeProject::HashToJson(BkeFilesHash &hash)
 {
     QJsonObject llm ;
     QStringList *ls ;
@@ -374,7 +374,7 @@ QJsonObject BKEproject::HashToJson(BkeFilesHash &hash)
     return llm ;
 }
 
-void BKEproject::JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion)
+void BkeProject::JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion)
 {
     QVariantMap bugs = llm.toVariantMap() ;
     for( auto ptr = bugs.begin() ; ptr != bugs.end() ; ptr++){
@@ -391,7 +391,7 @@ void BKEproject::JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion)
 }
 
 
-QString BKEproject::IconKey(qint64 key)
+QString BkeProject::IconKey(qint64 key)
 {
     if( key == baseico->cacheKey()) return QString("@root") ;
     else if( key == importico->cacheKey()) return QString("@import") ;
@@ -410,7 +410,7 @@ QString BKEproject::IconKey(qint64 key)
 
 
 //从完整的文件路径插入文件
-void BKEproject::AddFileToHash(BkeFilesHash *hash,const QString &filename)
+void BkeProject::AddFileToHash(BkeFilesHash *hash,const QString &filename)
 {
     QString path = filename ;
     QString name ;
@@ -435,7 +435,7 @@ void BKEproject::AddFileToHash(BkeFilesHash *hash,const QString &filename)
     }
 }
 
-bool BKEproject::removeFromHash(BkeFilesHash *hash, const ItemInfo &f )
+bool BkeProject::removeFromHash(BkeFilesHash *hash, const ItemInfo &f )
 {
     //如果是目录，则删除目录
     if( IconKey(f.IconKey) == "@dir" ){
@@ -469,7 +469,7 @@ bool BKEproject::removeFromHash(BkeFilesHash *hash, const ItemInfo &f )
 
 
 //从hash中创建项目
-void BKEproject::ItemFromHash(QTreeWidgetItem *dest,QHash<QString,QStringList*> &hash)
+void BkeProject::ItemFromHash(QTreeWidgetItem *dest,QHash<QString,QStringList*> &hash)
 {
     QStringList *list ;
     QTreeWidgetItem *root ;
@@ -490,7 +490,7 @@ void BKEproject::ItemFromHash(QTreeWidgetItem *dest,QHash<QString,QStringList*> 
 
 
 //排序,文件夹优先，大小写不敏感
-void BKEproject::SortItem(QTreeWidgetItem *dest )
+void BkeProject::SortItem(QTreeWidgetItem *dest )
 {
     QList<QTreeWidgetItem *> root = dest->takeChildren() ;
     QStringList dirlist,filelist ;
@@ -516,7 +516,7 @@ void BKEproject::SortItem(QTreeWidgetItem *dest )
 }
 
 //排序整个目录
-void BKEproject::SortTree(QTreeWidgetItem *tree)
+void BkeProject::SortTree(QTreeWidgetItem *tree)
 {
     QTreeWidgetItem *le ;
 
@@ -527,7 +527,7 @@ void BKEproject::SortTree(QTreeWidgetItem *tree)
     SortItem(tree);
 }
 
-bool BKEproject::RemoveItem(QTreeWidgetItem *Item)
+bool BkeProject::RemoveItem(QTreeWidgetItem *Item)
 {
     QTreeWidgetItem *le ;
     for( int i = 0 ; i < Item->childCount() ;i++){
@@ -543,7 +543,7 @@ bool BKEproject::RemoveItem(QTreeWidgetItem *Item)
     return true ;
 }
 
-bool BKEproject::RemoveItem(const ItemInfo &f)
+bool BkeProject::RemoveItem(const ItemInfo &f)
 {
     QTreeWidgetItem *le = FindItem(f.Root,f.FullName,false) ;
     if( le == 0) return false ;
@@ -556,7 +556,7 @@ bool BKEproject::RemoveItem(const ItemInfo &f)
     return true ;
 }
 
-bool BKEproject::RemoveItem(const QString &file)
+bool BkeProject::RemoveItem(const QString &file)
 {
     QTreeWidgetItem *le = FindItemAll(file) ;
     if( le == 0) return false ;
@@ -568,14 +568,14 @@ bool BKEproject::RemoveItem(const QString &file)
 
 
 
-QHash<QString,QStringList*> *BKEproject::ItemToHashptr(const QTreeWidgetItem *root)
+QHash<QString,QStringList*> *BkeProject::ItemToHashptr(const QTreeWidgetItem *root)
 {
     if( root->text(0) == "初始化" ) return &ImportHash ;
     else if( root->text(0) == "脚本" ) return &ScriptHash ;
     else return &SourceHash ;
 }
 
-QStringList BKEproject::ListFiles(int type)
+QStringList BkeProject::ListFiles(int type)
 {
     QString path ;
     QStringList filelist ;
@@ -600,7 +600,7 @@ QStringList BKEproject::ListFiles(int type)
     return filelist ;
 }
 
-QStringList BKEproject::AllScriptFiles()
+QStringList BkeProject::AllScriptFiles()
 {
     QStringList temp ;
     temp.append( ListFiles(0) );
@@ -608,12 +608,12 @@ QStringList BKEproject::AllScriptFiles()
     return temp ;
 }
 
-void BKEproject::copyStencil(const QString &file)
+void BkeProject::copyStencil(const QString &file)
 {
 
 }
 
-QTreeWidgetItem *BKEproject::FindItemAll(const QString &name)
+QTreeWidgetItem *BkeProject::FindItemAll(const QString &name)
 {
     QTreeWidgetItem *le ;
     QString temp = AllNameToName(name) ;
@@ -641,7 +641,7 @@ QTreeWidgetItem *BKEproject::FindItemAll(const QString &name)
 //    }
 //}
 
-void BKEproject::SetTopLeveBold(bool t)
+void BkeProject::SetTopLeveBold(bool t)
 {
     QFont a = Root->font(0) ;
     a.setBold(t);
@@ -649,7 +649,7 @@ void BKEproject::SetTopLeveBold(bool t)
 }
 
 
-bool BKEproject::WriteMarkFile(BkeMarkSupport *m)
+bool BkeProject::WriteMarkFile(BkeMarkSupport *m)
 {
     QString akb ;
     QStringList list = AllScriptFiles() ;
@@ -665,7 +665,7 @@ bool BKEproject::WriteMarkFile(BkeMarkSupport *m)
     return LOLI::AutoWrite(FileDir()+"/BkeProject.bmk",akb) ;
 }
 
-QString BKEproject::MarksToString(BkeMarkList *mk)
+QString BkeProject::MarksToString(BkeMarkList *mk)
 {
     QString result ;
     QString temp ;
@@ -679,14 +679,14 @@ QString BKEproject::MarksToString(BkeMarkList *mk)
     return result ;
 }
 
-BkeFilesHash *BKEproject::typeHash(int type)
+BkeFilesHash *BkeProject::typeHash(int type)
 {
     if( type == 1) return &ImportHash ;
     else if( type == 2) return &ScriptHash ;
     else return &SourceHash ;
 }
 
-BkeFilesHash *BKEproject::typeHash(const QString &n)
+BkeFilesHash *BkeProject::typeHash(const QString &n)
 {
     if( n == "初始化" ) return &ImportHash ;
     else if( n == "脚本" ) return &ScriptHash ;
@@ -694,7 +694,7 @@ BkeFilesHash *BKEproject::typeHash(const QString &n)
 }
 
 //返回dest所有的子目录，不包括自身
-QStringList BKEproject::ItemDirs(QTreeWidgetItem *dest)
+QStringList BkeProject::ItemDirs(QTreeWidgetItem *dest)
 {
     QStringList ls ;
     for( int i = 0 ; i < dest->childCount() ; i++){
@@ -703,7 +703,7 @@ QStringList BKEproject::ItemDirs(QTreeWidgetItem *dest)
     return ls ;
 }
 
-void BKEproject::Addfiles(const QStringList &ls ,const ItemInfo &f)
+void BkeProject::Addfiles(const QStringList &ls ,const ItemInfo &f)
 {
     QTreeWidgetItem *la ;
     BkeFilesHash *h1 ;
@@ -723,7 +723,7 @@ void BKEproject::Addfiles(const QStringList &ls ,const ItemInfo &f)
     if( ls.size() > 0)  WriteBkpFile() ;
 }
 
-void BKEproject::AddDir(const QString &dir , const ItemInfo &f)
+void BkeProject::AddDir(const QString &dir , const ItemInfo &f)
 {
     BkeFilesHash k1,k2 ;
     SearchDir(k1,dir,".bkscr") ;
@@ -747,7 +747,7 @@ void BKEproject::AddDir(const QString &dir , const ItemInfo &f)
 }
 
 
-void BKEproject::workItem(QTreeWidgetItem **la,BkeFilesHash **h1,const ItemInfo &f)
+void BkeProject::workItem(QTreeWidgetItem **la,BkeFilesHash **h1,const ItemInfo &f)
 {
     if( f.Layer < 1 || f.RootName == "资源"){
         *la = Script ;
@@ -760,7 +760,7 @@ void BKEproject::workItem(QTreeWidgetItem **la,BkeFilesHash **h1,const ItemInfo 
 }
 
 
-void BKEproject::CheckDir(BkeFilesHash *hash, const QString dirnow)
+void BkeProject::CheckDir(BkeFilesHash *hash, const QString dirnow)
 {
     QStringList ls = hash->keys() ;
     QString kdir = FileDir() ;
@@ -775,7 +775,7 @@ void BKEproject::CheckDir(BkeFilesHash *hash, const QString dirnow)
     *hash = th ;
 }
 
-QString BKEproject::AllNameToName(const QString &allname)
+QString BkeProject::AllNameToName(const QString &allname)
 {
 
     if(allname.startsWith("/") || ( allname.length() > 1 && allname[1] == QChar(':')) ){

@@ -7,6 +7,8 @@ BkeConfigUiModel::BkeConfigUiModel(QWidget *parent)
 
     btnclose = new QPushButton("取消",this) ;
     btnsave = new QPushButton("保存",this) ;
+
+    QVBoxLayout *mainLayout = new QVBoxLayout();
     form = new QFormLayout(this) ;
 
     projectname = new QLineEdit("Bke Game",this) ;
@@ -43,14 +45,26 @@ BkeConfigUiModel::BkeConfigUiModel(QWidget *parent)
 
     form->setLabelAlignment(Qt::AlignRight);
 
-    btnclose->setGeometry(380,370,100,35);
-    btnsave->setGeometry(270,370,100,35);
+    mainLayout->addLayout(form);
 
-    setLayout(form);
+    QHBoxLayout *btnLayout = new QHBoxLayout();
+    btnLayout->addStretch();
+    btnLayout->addWidget(btnsave);
+    btnLayout->addStretch();
+    btnLayout->addWidget(btnclose);
+    btnLayout->addStretch();
+    btnsave->setMinimumSize(100,45);
+    btnclose->setMinimumSize(100,45);
+
+    mainLayout->addLayout(btnLayout);
+
+    setLayout(mainLayout);
 
     connect(btnclose,SIGNAL(clicked()),this,SLOT(close())) ;
     connect(btnsave,SIGNAL(clicked()),this,SLOT(Sure())) ;
     resize(500,430);
+    setMaximumSize(500,430);
+    setMinimumSize(500,430);
     hide();
 }
 

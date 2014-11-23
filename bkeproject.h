@@ -24,11 +24,11 @@ void BKE_PROJECT_READITEM( QTreeWidgetItem *dest,ItemInfo &info) ;
 
 typedef QHash<QString,QStringList*> BkeFilesHash ;
 
-class BKEproject :public QObject
+class BkeProject :public QObject
 {
 public:
-    BKEproject(QObject *parent = 0);
-    ~BKEproject() ;
+    BkeProject(QObject *parent = 0);
+    ~BkeProject() ;
     QString FileDir() const;
     QString ProjectName() const ;
     QString IconKey(qint64 key) ;

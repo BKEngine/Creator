@@ -200,7 +200,7 @@ void CodeWindow::OtherWinProject(ProjectWindow *p)
     //编译脚本
     connect(p,SIGNAL(Compile()),this,SLOT(CompileAll())) ;
     //当前项目被改变
-    connect(p,SIGNAL(CurrentProChange(BKEproject*)),this,SLOT(ChangeProject(BKEproject*))) ;
+    connect(p,SIGNAL(CurrentProChange(BkeProject*)),this,SLOT(ChangeProject(BkeProject*))) ;
     //改变当前文件
     connect(this,SIGNAL(CurrentFileChange(QString)),p,SLOT(SetCurrentItem(QString))) ;
     //打开项目时读取书签以及标记
@@ -367,7 +367,7 @@ void CodeWindow::addFile(const QString &file,const QString &prodir)
         //新的编辑窗口
         simpleNew(loli,en);
 
-        BKEproject *tpro = prowin->FindProjectFromDir(prodir) ;
+        BkeProject *tpro = prowin->FindProjectFromDir(prodir) ;
         if( prodir != 0 ) loli->edit->setParser( tpro->lex );
 
         BkeCreator::AddRecentFile(loli->FullName()) ;
@@ -953,7 +953,7 @@ void CodeWindow::FileReadyToCompile(int i)
 }
 
 //当前项目被改变
-void CodeWindow::ChangeProject(BKEproject *p)
+void CodeWindow::ChangeProject(BkeProject *p)
 {
     if( p == 0){
         btncompileact->setEnabled(false);  //编译按钮只有当项目出现时才可用
@@ -1015,7 +1015,7 @@ void CodeWindow::QfileChange(const QString &path)
         msg.addButton(QMessageBox::Cancel);
         int i = msg.exec() ;
         if( i == QMessageBox::Close ){
-            BKEproject *pro = prowin->FindProjectFromDir(tempbase->ProjectDir()) ;
+            BkeProject *pro = prowin->FindProjectFromDir(tempbase->ProjectDir()) ;
             if( pro != 0 ) pro->RemoveItem(tempbase->FullName()) ;
             simpleClose(tempbase);
         }

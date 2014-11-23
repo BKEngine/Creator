@@ -3,7 +3,7 @@
 #include <QSize>
 #include "dia/lablesuredialog.h"
 
-QList<BKEproject*> projectlist ;
+QList<BkeProject*> projectlist ;
 
 
 ProjectWindow::ProjectWindow(QWidget *parent)
@@ -30,7 +30,7 @@ void ProjectWindow::NewProject()
 {
     NewProDia use(this) ;
     use.WaitUser() ;
-    BKEproject *pro = new BKEproject ;
+    BkeProject *pro = new BkeProject ;
     if( use.type == 0 ){
         pro->NewProject(use.okdir,use.okname) ;
     }
@@ -68,9 +68,9 @@ void ProjectWindow::OpenProject(const QString &file)
             return;
         }
     }
-    BKEproject *pro ;
+    BkeProject *pro ;
 
-    pro = new BKEproject ;
+    pro = new BkeProject ;
     if(!pro->OpenProject(file))
     {
         QMessageBox::information(this,"错误","文件不存在，项目打开失败",QMessageBox::Ok) ;
@@ -107,7 +107,7 @@ void ProjectWindow::ItemDoubleClick(QTreeWidgetItem * item, int column)
 {
     if( !ReadItemInfo(item,info) ) return ;
 
-    BKEproject *p = FindPro(info.ProName);
+    BkeProject *p = FindPro(info.ProName);
     QString name = p->FileDir()+"/"+info.FullName ;
 
     if( info.FullName == "config.bkpsr" ){
@@ -164,7 +164,7 @@ void ProjectWindow::ShowRmenu( const QPoint & pos )
 //设置选中项
 void ProjectWindow::SetCurrentItem(const QString &file)
 {
-    BKEproject *abc ;
+    BkeProject *abc ;
     QTreeWidgetItem *le ;
     for( int i = 0 ; i < projectlist.size() ; i++){
         abc = projectlist.at(i) ;
@@ -185,7 +185,7 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
     else if( !name.endsWith(".bkscr")) name.append(".bkscr") ;
     name = name.replace(QRegExp("\\"),"/") ;
 
-    BKEproject *p = FindPro(f.ProName);
+    BkeProject *p = FindPro(f.ProName);
     QFileInfo sk(p->absName(name)) ;
     if( sk.exists() ){
         int sk = QMessageBox::information(this,"","文件已经存在，是否直接添加文件",QMessageBox::Yes|QMessageBox::No) ;
@@ -209,9 +209,9 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
 
 
 //寻找项目
-BKEproject *ProjectWindow::FindPro(const QString &proname)
+BkeProject *ProjectWindow::FindPro(const QString &proname)
 {
-    BKEproject *abc ;
+    BkeProject *abc ;
     for( int i = 0 ; i < projectlist.size() ; i++){
         abc = projectlist.at(i) ;
         if( abc->ProjectName() == proname){
@@ -242,7 +242,7 @@ QTreeWidgetItem *ProjectWindow::findFileInProject(const QString &name)
 void ProjectWindow::DeleteFile(const ItemInfo &f)
 {
     //是文件的话将询问是否移除文件
-    BKEproject *p = FindPro(f.ProName);
+    BkeProject *p = FindPro(f.ProName);
     QString sk = p->FileDir()+"/"+f.FullName ;
     LableSureDialog msg;
     msg.SetLable("要移除文件"+sk+"吗？");
@@ -266,7 +266,7 @@ void ProjectWindow::DeleteFile(const ItemInfo &f)
 
 void ProjectWindow::Addfiles(const ItemInfo &f)
 {
-    BKEproject *p = FindPro(f.ProName);
+    BkeProject *p = FindPro(f.ProName);
     QStringList ls ;
     if( f.RootName == "初始化" || f.RootName == "脚本"){
         ls = QFileDialog::getOpenFileNames(this,"添加文件",p->FileDir(),"bkscr脚本(*.bkscr)") ;
@@ -300,7 +300,7 @@ void ProjectWindow::Addfiles(const ItemInfo &f)
 //
 void ProjectWindow::AddDir(const ItemInfo &f)
 {
-    BKEproject *p = FindPro(f.ProName);
+    BkeProject *p = FindPro(f.ProName);
     QString d = QFileDialog::getExistingDirectory(this,"添加目录",p->FileDir()) ;
     if(d.isEmpty())
         return;
@@ -350,7 +350,7 @@ void ProjectWindow::OpenFile()
     else OpenThisFile(filename,temppro->FileDir());
 }
 
-void ProjectWindow::BkeChangeCurrentProject(BKEproject *p)
+void ProjectWindow::BkeChangeCurrentProject(BkeProject *p)
 {
     if( workpro != 0){
         workpro->SetTopLeveBold(false);
@@ -367,13 +367,13 @@ void ProjectWindow::BkeChangeCurrentProject(BKEproject *p)
     }
 }
 
-BKEproject *ProjectWindow::FindFileProject(const QString &file)
+BkeProject *ProjectWindow::FindFileProject(const QString &file)
 {
     if( findFileInProject(file) != 0 ) return workpro ;
     else return 0 ;
 }
 
-BKEproject *ProjectWindow::FindProjectFromDir(const QString &dir)
+BkeProject *ProjectWindow::FindProjectFromDir(const QString &dir)
 {
     QString a = LOLI_OS_QSTRING( dir ) ;
     for( int i = 0 ; i< projectlist.size() ; i++){
@@ -410,7 +410,7 @@ void ProjectWindow::ActionAdmin()
 
 void ProjectWindow::PreviewFile(const ItemInfo &f)
 {
-    BKEproject *p = FindPro(f.ProName);
+    BkeProject *p = FindPro(f.ProName);
     QString n = p->FileDir()+"/"+info.FullName ;
     if( n.endsWith(".bkscr") || n.endsWith(".bkpsr") ) emit OpenThisFile(n,p->FileDir());
     else{
@@ -420,7 +420,7 @@ void ProjectWindow::PreviewFile(const ItemInfo &f)
 
 void ProjectWindow::CloseProject(const ItemInfo &f)
 {
-    BKEproject *p = FindPro(f.ProName);
+    BkeProject *p = FindPro(f.ProName);
     if(p)
     {
         projectlist.removeOne(p);
@@ -440,7 +440,7 @@ void ProjectWindow::CloseProject(const ItemInfo &f)
 
 void ProjectWindow::Active(const ItemInfo &f)
 {
-    BKEproject *p = FindPro(f.ProName);
+    BkeProject *p = FindPro(f.ProName);
     if(p)
     {
         BkeChangeCurrentProject(p);
@@ -455,7 +455,7 @@ void ProjectWindow::Active(const ItemInfo &f)
 
 void ProjectWindow::ShowInDir(const ItemInfo &f)
 {
-    BKEproject *p = FindPro(f.ProName);
+    BkeProject *p = FindPro(f.ProName);
     QString n = p->FileDir()+"\\"+info.FullName ;
 #if defined(Q_OS_WIN)
     n.replace('/','\\');

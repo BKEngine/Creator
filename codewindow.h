@@ -163,7 +163,7 @@ public slots:
     void ChangeCodec() ;
     void NewEmptyFile() ;
     void FileReadyToCompile(int i) ;
-    void ChangeProject(BKEproject *p) ;
+    void ChangeProject(BkeProject *p) ;
     void TextToMarks(const QString &text,const QString &dir,int type) ;
     void deleteCompileFile(const QStringList &list, const QString &path) ;
     void SelectAll() ;
@@ -179,7 +179,7 @@ public slots:
 private:
     OtherWindow   *othwin ;
     ProjectWindow *prowin ;
-    BKEproject *currentproject ;
+    BkeProject *currentproject ;
     QStackedWidget *stackwidget ;
 
     QStringList ItemTextList ;
