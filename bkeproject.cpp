@@ -170,6 +170,7 @@ void BkeProject::MakeImport()
     //新建工程设置
     delete config;
     config = new BkeProjectConfig(dirs, dirs + "/config.bkpsr");
+    config->readFile();
     config->projectName = ProjectName();
     config->writeFile();
 
@@ -274,7 +275,7 @@ QString BkeProject::ProjectName() const
 //寻找指定的文件，并把文件加入到hash中
 bool BkeProject::SearchDir(BkeFilesHash &hash,const QString &dir,const QString &suffix)
 {
-    QDir d( pdir + "/" + dir ) ;
+    QDir d( dir ) ;
     if( !d.exists() ) return false ;
 
     d.setFilter(QDir::Dirs | QDir::Files | QDir::NoSymLinks);

@@ -9,7 +9,7 @@ BkeConfigUiModel::BkeConfigUiModel(QWidget *parent)
     btnsave = new QPushButton("保存",this) ;
 
     QVBoxLayout *mainLayout = new QVBoxLayout();
-    form = new QFormLayout(this) ;
+    form = new QFormLayout() ;
 
     projectname = new QLineEdit("Bke Game",this) ;
     form->addRow("游戏名称*:",projectname);

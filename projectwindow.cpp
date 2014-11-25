@@ -309,7 +309,7 @@ void ProjectWindow::AddDir(const ItemInfo &f)
         QMessageBox::information(this,"","工作目录之外的文件不能添加",QMessageBox::Ok) ;
         return ;
     }
-    p->AddDir(tmp,f);
+    p->AddDir(d,f);
 }
 
 void ProjectWindow::ReName()

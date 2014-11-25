@@ -160,7 +160,7 @@ void BkeProjectConfig::writeFile()
     results.append(QString("DebugLevel = %1;").arg(debugLevel));
     if(!live2DKey.isEmpty())
         results.append("Live2DKey = \"" + live2DKey + "\";");
-    if(!metaData.getCount())
+    if(!metaData.isNull() && metaData.getCount())
         results.append("MetaData = " + metaData.saveToString() + ";");
 
     QString result = results.join('\n');
