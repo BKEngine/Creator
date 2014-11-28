@@ -84,7 +84,7 @@ void BkeParser::ParserModel(bool issub)
 
 void BkeParser::ParserModel2()
 {
-    while( wordadmin->more && !wordadmin->atLineEnd ){
+    while( wordadmin->more && !wordadmin->IsAtEnd() ){
         if( wordadmin->cWord == "function"  ) defFunction();
         else if( wordadmin->cWord == "var" ) SetVariable(-1,true);
         wordadmin->NextWord();

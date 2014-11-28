@@ -4,7 +4,7 @@
 BkeCompile::BkeCompile(QObject *parent) :
     QObject(parent)
 {
-    codec = QTextCodec::codecForLocale();
+    codec = QTextCodec::codecForName("GBK");
 }
 
 void BkeCompile::Compile(const QString dir)

@@ -7,6 +7,7 @@ WordSupport::WordSupport()
 {
     Separate = QString(" ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\") ;
     atLineEnd = false ;
+    atParserEnd = false;
 }
 
 void WordSupport::setText(const QString &t,int pos )
