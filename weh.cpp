@@ -36,7 +36,7 @@ bool    LOLI_MAKE_NULL_FILE(const QString &filename)
     return true ;
 }
 
-void    LOLI_CLEAR_TEMP(const QString &dir)
+void LOLI_CLEAR_TEMP2(const QString &dir)
 {
     QDir temp(dir) ;
     QFileInfoList list = temp.entryInfoList() ;
@@ -47,7 +47,7 @@ void    LOLI_CLEAR_TEMP(const QString &dir)
         info = list.at(i) ;
         if( info.fileName() == "." || info.fileName() == "..") continue ;
         else if( info.isDir()){
-            LOLI_CLEAR_TEMP(info.filePath());
+            LOLI_CLEAR_TEMP2(info.filePath());
             QDir k( info.path()) ;
             k.rmdir(info.fileName()) ;
         }

@@ -123,6 +123,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glu32.lib;opengl32.lib;gdi32.lib;user32.lib;$(QTDIR)\lib\qtmain.lib;$(QTDIR)\lib\Qt5Core.lib;libqscintilla2;$(QTDIR)\lib\Qt5Widgets.lib;$(QTDIR)\lib\Qt5Network.lib;$(QTDIR)\lib\Qt5Gui.lib;$(QTDIR)\lib\Qt5Core.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -327,10 +328,18 @@
     <ClCompile Include="otherwindow.cpp" />
     <ClCompile Include="paper\BKEparser.cpp" />
     <ClCompile Include="ParserHelper\ParserHelper.cpp" />
-    <ClCompile Include="ParserHelper\parser\BKE_hash.cpp" />
-    <ClCompile Include="ParserHelper\parser\BKE_number.cpp" />
-    <ClCompile Include="ParserHelper\parser\BKE_string.cpp" />
-    <ClCompile Include="ParserHelper\parser\BKE_variable.cpp" />
+    <ClCompile Include="ParserHelper\parser\BKE_hash.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_number.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_string.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_variable.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="ParserHelper\parser\extend.cpp" />
     <ClCompile Include="ParserHelper\parser\parser.cpp" />
     <ClCompile Include="ParserHelper\parser\utils.cpp" />
@@ -347,6 +356,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="singleapplication.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="topbarwindow.cpp" />
     <ClCompile Include="paper\wordsupport.cpp" />
   </ItemGroup>

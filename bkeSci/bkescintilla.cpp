@@ -407,7 +407,7 @@ bool BkeScintilla::FindBack(int pos)
 	SetIndicator(BKE_INDICATOR_FIND, findlast);
 	clearSelection();   //清理光标必须放在这里
     if( findcount < 1){
-		QMessageBox::information(this, _T("查找"), _T("没有找到任何匹配的文本！"), QMessageBox::Ok);
+		QMessageBox::information(this, "查找", "没有找到任何匹配的文本！", QMessageBox::Ok);
         return false;
     }
 
@@ -418,7 +418,7 @@ bool BkeScintilla::FindBack(int pos)
     BkeIndicatorBase abc = findIndicatorLast(BKE_INDICATOR_FIND,pos) ;
 	if (abc.IsNull() || abc.End() == 0)
 	{
-		QMessageBox::information(this, _T("查找"), _T("再往前没有了！"), QMessageBox::Ok);
+		QMessageBox::information(this, "查找", "再往前没有了！", QMessageBox::Ok);
 		return false;
 	}
 	abc.SetStart(abc.End() - findstr_length);

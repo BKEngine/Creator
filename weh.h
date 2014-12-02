@@ -36,10 +36,8 @@
 #include <QRegExp>
 #include "function.h"
 
-#ifdef _MSC_VER
-#define _T(str) QString::fromLocal8Bit(str)
-#else
-#define _T(str) str
+#if _MSC_VER
+#pragma execution_character_set("utf-8")
 #endif
 
 #endif // WEH_H

@@ -45,8 +45,8 @@ using namespace Scintilla;
 #define SCE_BKE_UNTYPEC         12
 #define SCE_BKE_ERROR           13
 
-static const char *BKE_PARSER_KEY = " for foreach in extends do while function propset propget int string number typeof var delete class if else continue break return this true false void global " ;
-static const char *BKE_SEPARATEOR = " ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\" ;
+static const char *BKE_PARSER_KEY = " for foreach in extends do while function propset propget int string number typeof var delete class if else continue break return this super with true false void global" ;
+//static const char *BKE_SEPARATEOR = " ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\";
 
 static inline bool isSpace(int i)
 {
@@ -65,7 +65,7 @@ static inline bool isDigit(int i)
 
 static inline bool isWord(int i)
 {
-    return i >= 0x100;
+    return i >= 0x80;
 }
 
 static inline bool isIdentifyBegin(int i)
@@ -78,13 +78,14 @@ static inline bool isIdentifyBody(int i)
     return isIdentifyBegin(i) || isDigit(i);
 }
 
-bool isSeparator(char ch)
+bool isSeparator(unsigned char ch)
 {
     char bt[2] ;
-    bt[0] = ch ;
+    bt[0] = (char)ch ;
     bt[1] = 0 ;
     if( ch < 32 ) return true ;
-    return (strstr(BKE_SEPARATEOR,&bt[0]) != NULL) ;
+	return false;
+//    return (strstr(BKE_SEPARATEOR,&bt[0]) != NULL) ;
 }
 
 // Extended to accept accented characters
@@ -94,6 +95,23 @@ static inline void AnnotateLine( StyleContext *sc )//整行注释掉
     while( !sc->atLineEnd && sc->More() ) sc->Forward();
     sc->SetState(SCE_BKE_DEFAULT);   //注释状态
     return ;
+}
+
+static inline void AnnotateBlock(StyleContext *sc)//块注释
+{
+	sc->SetState(SCE_BKE_ANNOTATE);   //注释状态
+	//这里是没有嵌套注释的版本，如果时机成熟会和Compiler同步修改
+	sc->Forward();	//pass * after /
+	while (sc->More())
+	{
+		if (sc->ch == '*' && sc->chNext == '/')
+			break;
+		sc->Forward();
+	}
+	sc->Forward();
+	sc->Forward();
+	sc->SetState(SCE_BKE_DEFAULT);   //注释状态
+	return;
 }
 
 static inline void SetText( StyleContext *sc )
@@ -424,7 +442,9 @@ static void SetParser( StyleContext *sc)
         }
 
         //注释
-        if(sc->ch == '/' && sc->chNext == '/' ) return;
+		if (sc->ch == '/' && sc->chNext == '/') return;
+		else if (sc->atLineStart && sc->ch == ';')
+			return;//注释
         else if(sc->ch == '[') return;
         //返回
         else if( sc->ch == '#' && sc->chNext == '#'  ){
@@ -455,7 +475,12 @@ static void ColouriseBkeDoc(unsigned int startPos, int length, int initStyle,
         else if(sc.ch == '[' ) HandleCommand( &sc );
         //else if(sc.ch == ';' ) AnnotateLine( &sc );
         else if(sc.ch == '/' && sc.chNext == '/' ) AnnotateLine( &sc );
-        else if(sc.ch == '*') SetLabel(&sc);
+		else if (sc.ch == ';' && sc.atLineStart) AnnotateLine(&sc);
+		else if (sc.ch == '/' && sc.chNext == '*')
+		{
+			AnnotateBlock(&sc);
+		}
+		else if (sc.ch == '*') SetLabel(&sc);
         //else if(sc.ch == '#' && sc.chNext == '#' ) SetParser( &sc );
         else if(sc.ch == '\"') SetString(&sc);
         else if(sc.ch == '\'') SetString2(&sc);
