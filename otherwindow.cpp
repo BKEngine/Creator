@@ -26,11 +26,11 @@ OtherWindow::OtherWindow(QWidget *parent)
     icowarning = new QIcon(":/info/source/alert.png") ;
     icobookmark = new QIcon(":/cedit/source/Bookmark.png") ;
 
-    btnproblem = new QPushButton("问题",this) ;
-    btnsearch = new QPushButton("搜索结果",this) ;
-    btncompiletext = new QPushButton("编译输出",this) ;
-    btnbookmark = new QPushButton("书签",this) ;
-    btnmark = new QPushButton("标记",this) ;
+    btnproblem = new QPushButton(_T("问题"),this) ;
+    btnsearch = new QPushButton(_T("搜索结果"),this) ;
+	btncompiletext = new QPushButton(_T("编译输出"), this);
+	btnbookmark = new QPushButton(_T("书签"), this);
+	btnmark = new QPushButton(_T("标记"), this);
 
     connect(btnproblem,SIGNAL(clicked()),this,SLOT(WINproblem())) ;
     connect(btnsearch,SIGNAL(clicked()),this,SLOT(WINsearch())) ;

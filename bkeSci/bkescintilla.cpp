@@ -13,6 +13,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
     //setStyleSheet("QsciScintilla{border:0px solid red ;}");
     this->setContextMenuPolicy(Qt::CustomContextMenu); //使用用户右键菜单
     this->setAttribute(Qt::WA_InputMethodEnabled,true);
+	findstr_length = 0;
 
     setUtf8(true);
     setMarginWidth(0,"012345678");
@@ -337,7 +338,7 @@ int BkeScintilla::findFirst1(const QString fstr,bool cs,bool exp,bool word,bool 
     fstrdata =  fstr.toUtf8() ;
     const char *ss = fstrdata.constData() ;
     testlist.clear();
-
+	findstr_length = fstrdata.length();
     findflag = (cs ? SCFIND_MATCHCASE : 0) |
                (word ? SCFIND_WHOLEWORD : 0) |
                (exp ? SCFIND_REGEXP : 0) ;
@@ -355,8 +356,9 @@ int BkeScintilla::findFirst1(const QString fstr,bool cs,bool exp,bool word,bool 
         testlist.append(abc);
         if( mark ) SetIndicator(BKE_INDICATOR_FIND,abc);
         findcount++ ;
-        a = abc.End()+1 ;
+        a = abc.End();
     }
+	findlast.Clear();
     return findcount ;
 }
 
@@ -375,6 +377,7 @@ void BkeScintilla::ClearIndicators(int id)
 //
 bool BkeScintilla::FindForward(int pos)
 {
+	SetIndicator(BKE_INDICATOR_FIND, findlast);
     clearSelection();
     if( findcount < 1){
         QMessageBox::information(this,"查找","没有找到任何匹配的文本！",QMessageBox::Ok) ;
@@ -388,6 +391,7 @@ bool BkeScintilla::FindForward(int pos)
     }
     abc = findIndicator(BKE_INDICATOR_FIND,pos) ;
     if( abc.IsNull() ) return false ;
+	abc.SetEnd(abc.Start() + findstr_length);
     ClearIndicator(abc);
     setSelection(abc);
     findlast = abc ;
@@ -396,13 +400,14 @@ bool BkeScintilla::FindForward(int pos)
 
 bool BkeScintilla::FindBack(int pos)
 { 
-    if( pos < 0) pos = this->length()-1 ;
+    if( pos <= 0) pos = this->length()-1 ;
     if( hasSelectedText() ){ //光标总是在被选择文字的后面，搜索从选择文字之前
         pos = SendScintilla(SCI_GETSELECTIONSTART) -1 ;
     }
-    clearSelection();   //清理光标必须放在这里
+	SetIndicator(BKE_INDICATOR_FIND, findlast);
+	clearSelection();   //清理光标必须放在这里
     if( findcount < 1){
-        QMessageBox::information(this,"查找","没有找到任何匹配的文本！",QMessageBox::Ok) ;
+		QMessageBox::information(this, _T("查找"), _T("没有找到任何匹配的文本！"), QMessageBox::Ok);
         return false;
     }
 
@@ -411,8 +416,13 @@ bool BkeScintilla::FindBack(int pos)
         clearSelection();
     }
     BkeIndicatorBase abc = findIndicatorLast(BKE_INDICATOR_FIND,pos) ;
-    if( abc.IsNull() ) return false ;
-    ClearIndicator(abc);
+	if (abc.IsNull() || abc.End() == 0)
+	{
+		QMessageBox::information(this, _T("查找"), _T("再往前没有了！"), QMessageBox::Ok);
+		return false;
+	}
+	abc.SetStart(abc.End() - findstr_length);
+	ClearIndicator(abc);
     setSelection(abc);
     findlast = abc ;
     return true ;

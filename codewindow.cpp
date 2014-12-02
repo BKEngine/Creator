@@ -120,6 +120,7 @@ void CodeWindow::CreateBtn()
     btnundoact->setShortcut( Qt::CTRL + Qt::Key_Z );
     btnredoact->setShortcut( Qt::CTRL + Qt::Key_Y );
     btnfindact->setShortcut( Qt::CTRL + Qt::Key_F );
+	btnreplaceact->setShortcut(Qt::CTRL + Qt::Key_H);
     btncompileact->setShortcut( Qt::CTRL + Qt::Key_B );
     btnselectall->setShortcut( Qt::CTRL + Qt::Key_A );
     btnfly->setShortcut(  Qt::CTRL + Qt::Key_G  );

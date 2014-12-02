@@ -1,4 +1,4 @@
-#include "bkeprojectconfig.h"
+﻿#include "bkeprojectconfig.h"
 #include "loli/loli_island.h"
 
 BkeProjectConfig::BkeProjectConfig()
@@ -51,6 +51,7 @@ BkeProjectConfig &BkeProjectConfig::operator =(const BkeProjectConfig &r)
     debugLevel=r.debugLevel;
     live2DKey=r.live2DKey;
     metaData=r.metaData;
+	return *this;
 }
 
 void BkeProjectConfig::readFile()

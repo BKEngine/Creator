@@ -1,4 +1,5 @@
-﻿C:/Users/taiga/Desktop/template/macro.bkscr
+﻿F:/work/QT/BKE_Creator/file/test/main.bkscr
+C:/Users/taiga/Desktop/template/macro.bkscr
 C:/Users/taiga/Desktop/template/main.bkscr
 D:/nvl_for_bke/project/template/macro.bkscr
 D:/nvl_for_bke/project/template/main.bkscr
@@ -7,4 +8,3 @@ D:/nvl_for_bke/project/template/data/nvl/extra.bkscr
 D:/nvl_for_bke/project/template/data/nvl/cgmode.bkscr
 D:/nvl_for_bke/project/template/data/nvl/bgmlist.bkscr
 D:/nvl_for_bke/project/template/data/macro/macro_name.bkscr
-D:/nvl_for_bke/project/template/data/macro/default.bkscr

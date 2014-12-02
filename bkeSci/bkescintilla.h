@@ -8,6 +8,7 @@
 #include "bkeSci/qscilexerbkescript.h"
 #include "paper/parser.h"
 #include "bkeSci/BkeIndicatorBase.h"
+#include <weh.h>
 
 extern QImage BKE_AUTOIMAGE_KEY ;
 extern QImage BKE_AUTOIMAGE_FUNCTION ;
@@ -104,6 +105,7 @@ private:
     int LastLine ;
     int SectionPos ;
     BkeIndicatorBase findlast ;
+	int findstr_length;
     BkeModifiedBase modfieddata ;
     BkeModifiedBase indentdate ;
     int findflag ;

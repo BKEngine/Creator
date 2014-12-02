@@ -11,6 +11,7 @@
 #include <QCheckBox>
 #include "bkeSci/bkescintilla.h"
 #include <QSplitter>
+#include <weh.h>
 
 class SearchBox : public QDockWidget
 {

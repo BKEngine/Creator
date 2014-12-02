@@ -7,19 +7,19 @@ SearchBox::SearchBox(QWidget *parent) :
     h1 = new QVBoxLayout ;
     h2 = new QVBoxLayout ;
     v1 = new QHBoxLayout ;
-    btnsearchlast = new QPushButton("查找上一个",this);
-    btnsearchnext = new QPushButton("查找下一个",this);
-    btnreplacemodel = new QPushButton("替换>>",this);
-    btnreplace = new QPushButton("替换",this);
-    btnreplaceall = new QPushButton("替换全部",this);
-    lable1 = new QLabel("查找：",this) ;
-    lable2 = new QLabel("替换：",this) ;
+	btnsearchlast = new QPushButton(_T("查找上一个"), this);
+	btnsearchnext = new QPushButton(_T("查找下一个"), this);
+	btnreplacemodel = new QPushButton(_T("替换>>"), this);
+	btnreplace = new QPushButton(_T("替换"), this);
+	btnreplaceall = new QPushButton(_T("替换全部"), this);
+	lable1 = new QLabel(_T("查找："), this);
+	lable2 = new QLabel(_T("替换："), this);
     edit = new QLineEdit(this) ;
     edit1 = new QLineEdit(this) ;
-    iscase = new QCheckBox("区分大小写",this) ;
-    isregular = new QCheckBox("使用正则表达式",this) ;
-    isword = new QCheckBox("作为单词完整匹配",this) ;
-    isalwaysbegin = new QCheckBox("总是从文档开头(结尾)开始查找",this) ;
+	iscase = new QCheckBox(_T("区分大小写"), this);
+	isregular = new QCheckBox(_T("使用正则表达式"), this);
+	isword = new QCheckBox(_T("作为单词完整匹配"), this);
+	isalwaysbegin = new QCheckBox(_T("总是从文档开头(结尾)开始查找"), this);
     isalwaysbegin->setChecked(true);
     sciedit = 0 ;
     firstshow = true ;
@@ -61,7 +61,7 @@ SearchBox::SearchBox(QWidget *parent) :
 void SearchBox::FindNext()
 {
     if( edit->text().isEmpty() ){
-        QMessageBox::information(this,"查找","请输入需要查找的内容！",QMessageBox::Ok) ;
+        QMessageBox::information(this,_T("查找"),_T("请输入需要查找的内容！"),QMessageBox::Ok) ;
         return ;
     }
     else if( edit->text() != fstr ){
@@ -72,14 +72,14 @@ void SearchBox::FindNext()
     }
     else if( !sciedit->FindForward(sciedit->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS)) ){
         if( sciedit->findcount > 0)
-            QMessageBox::information(this,"查找","再往前没有了") ;
+			QMessageBox::information(this, _T("查找"), _T("再往后没有了"));
     }
 }
 
 void SearchBox::FindLast()
 {
     if( edit->text().isEmpty() ){
-        QMessageBox::information(this,"查找","请输入需要查找的内容！",QMessageBox::Ok) ;
+		QMessageBox::information(this, _T("查找"), _T("请输入需要查找的内容！"), QMessageBox::Ok);
         return ;
     }
     else if( edit->text() != fstr ){
@@ -108,8 +108,8 @@ void SearchBox::closeEvent(QCloseEvent *event)
 
 void SearchBox::SearchModel()
 {
-    btnreplacemodel->setText("替换>>");
-    this->setWindowTitle("查找");
+    btnreplacemodel->setText(_T("替换>>"));
+	this->setWindowTitle(_T("查找"));
     lable2->setEnabled(false);
     btnreplace->setEnabled(false);
     btnreplaceall->setEnabled(false);
@@ -120,8 +120,8 @@ void SearchBox::SearchModel()
 
 void SearchBox::ReplaceModel()
 {
-    btnreplacemodel->setText("查找>>");
-    this->setWindowTitle("替换");
+	btnreplacemodel->setText(_T("查找>>"));
+	this->setWindowTitle(_T("替换"));
     lable2->setEnabled(true);
     btnreplace->setEnabled(true);
     btnreplaceall->setEnabled(true);
@@ -132,7 +132,7 @@ void SearchBox::ReplaceModel()
 
 void SearchBox::ChangeModel()
 {
-    if( btnreplacemodel->text() == "替换>>" ) ReplaceModel();
+    if( btnreplacemodel->text() == _T("替换>>") ) ReplaceModel();
     else SearchModel();
 }
 

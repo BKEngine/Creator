@@ -4,15 +4,15 @@ NewProDia::NewProDia(QWidget *parent) :
     QWidget(parent)
 {
     prodialog = new QDialog(parent) ;
-    dir = new QPushButton("...",prodialog) ;
-    yes = new QPushButton("确定",prodialog);
-    no = new QPushButton("取消",prodialog);
+    dir = new QPushButton(_T("..."),prodialog) ;
+    yes = new QPushButton(_T("确定"),prodialog);
+    no = new QPushButton(_T("取消"),prodialog);
     s1 = new QLineEdit(prodialog);
     s2 = new QLineEdit(prodialog) ;
-    k1 = new QLabel("创建一个Bke项目，Bke项目能有效的帮你维护文件关系，方便编译脚本，测试与发布游戏。\r\n"
-                    "存储位置不存在时，将自动创建",prodialog) ;
-    k2 = new QLabel("    名称",prodialog) ;
-    k3 = new QLabel("存储位置",prodialog);
+	k1 = new QLabel(_T("创建一个Bke项目，Bke项目能有效的帮你维护文件关系，方便编译脚本，测试与发布游戏。\r\n"
+                    "存储位置不存在时，将自动创建"),prodialog) ;
+    k2 = new QLabel(_T("    名称"),prodialog) ;
+    k3 = new QLabel(_T("存储位置"),prodialog);
 
     k1->setWordWrap(true);
     k1->setGeometry(42,34,326,146);
@@ -25,7 +25,7 @@ NewProDia::NewProDia(QWidget *parent) :
     no->setGeometry(362,261,54,30);
 
     resize(400,300);
-    prodialog->setWindowTitle("新建项目");
+    prodialog->setWindowTitle(_T("新建项目"));
 
     type = -1 ;
 
