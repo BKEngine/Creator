@@ -1,0 +1,889 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Generated Files\Debug">
+      <UniqueIdentifier>{d8c06787-9510-4d3e-abfb-398c0db6e588}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+    <Filter Include="Generated Files\Release">
+      <UniqueIdentifier>{b8708ff5-2349-495a-8e2f-0b608d4a9e17}</UniqueIdentifier>
+      <Extensions>cpp;moc</Extensions>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BKEscintilla\lexlib\Accessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\AutoComplete.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\CallTip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Catalogue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\CellBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\CharClassify.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\CharacterSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\ContractionState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Decoration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Document.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Editor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\ExternalLexer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Indicator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\KeyMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexers\LexBke.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\LexerBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\LexerModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\LexerNoExceptions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\LexerSimple.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\LineMarker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\ListBoxQt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\PerLine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\PlatQt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\PositionCache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\PropSetSimple.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\RESearch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\RunStyles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\SciClasses.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\ScintillaBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\ScintillaQt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Selection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Style.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\StyleContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\UniConversion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\ViewStyle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\WordList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\XPM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bkeSci\bkecompile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\bkeconfiguimodel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\bkeleftfilewidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bkeSci\bkemarks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bkeproject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bkeprojectconfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bkeSci\bkescintilla.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\bkestyle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\cconfigdia.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="codewindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="paper\completebase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\ctextedit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="function.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\lablesuredialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="loli\loli_island.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mainwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\newprodia.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="otherbasicwin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="otherwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="paper\parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="projectwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qsciabstractapis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qsciapis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qscicommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qscicommandset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qscidocument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qscilexer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bkeSci\qscilexerbkescript.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qscimacro.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qsciprinter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qsciscintilla.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qsciscintillabase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qscistyle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\qscistyledtext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\qsearchlineedit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\searchbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="singleapplication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="topbarwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="paper\wordsupport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_SciClasses.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_SciClasses.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_bkecompile.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_bkecompile.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_bkeconfiguimodel.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_bkeconfiguimodel.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_bkeleftfilewidget.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_bkeleftfilewidget.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_bkeprojectconfig.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_bkeprojectconfig.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_bkescintilla.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_bkescintilla.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_cconfigdia.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_cconfigdia.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_codewindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_codewindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ctextedit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_ctextedit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_lablesuredialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_lablesuredialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_mainwindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_mainwindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_newprodia.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_newprodia.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_otherbasicwin.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_otherbasicwin.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_otherwindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_otherwindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_parser.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_parser.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_projectwindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_projectwindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qsciabstractapis.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qsciabstractapis.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qsciapis.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qsciapis.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qscilexer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qscilexer.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qscilexerbkescript.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qscilexerbkescript.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qscimacro.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qscimacro.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qsciscintilla.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qsciscintilla.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qsciscintillabase.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qsciscintillabase.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qsearchlineedit.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qsearchlineedit.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_searchbox.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_searchbox.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_singleapplication.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_singleapplication.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_topbarwindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_topbarwindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_source.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\AutoComplete.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bkeSci\BkeIndicatorBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\CallTip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\Catalogue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\CellBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\CharClassify.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\CharacterCategory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\CharacterSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\ContractionState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\Decoration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\Document.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\Editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\ExternalLexer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\FontQuality.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\Indicator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\KeyMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\LexAccessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\LexerBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\LexerModule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\LexerNoExceptions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\LexerSimple.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\LineMarker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\ListBoxQt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\OptionSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\Partitioning.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\PerLine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\PositionCache.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\PropSetSimple.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\RESearch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\RunStyles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\SVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="BKEscintilla\Qt4Qt5\SciClasses.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\SciNamespace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\ScintillaBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\ScintillaQt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\Selection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\SparseState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\SplitVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\Style.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\StyleContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\SubStyles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\UniConversion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\ViewStyle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\WordList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\XPM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="bkeSci\bkecompile.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\bkeconfiguimodel.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\bkeleftfilewidget.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="bkeSci\bkemarks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bkeproject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="bkeprojectconfig.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="bkeSci\bkescintilla.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\bkestyle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="dia\cconfigdia.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="codewindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="paper\completebase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="dia\ctextedit.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="function.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="dia\lablesuredialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="loli\loli_island.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="mainwindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\newprodia.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="otherbasicwin.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="otherwindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="paper\parser.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="projectwindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BKEscintilla\Qt4Qt5\Qsci\qsciabstractapis.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BKEscintilla\Qt4Qt5\Qsci\qsciapis.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\Qsci\qscicommand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\Qsci\qscicommandset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\Qsci\qscidocument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\Qsci\qsciglobal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="BKEscintilla\Qt4Qt5\Qsci\qscilexer.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="bkeSci\qscilexerbkescript.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BKEscintilla\Qt4Qt5\Qsci\qscimacro.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\Qsci\qsciprinter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="BKEscintilla\Qt4Qt5\Qsci\qsciscintilla.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BKEscintilla\Qt4Qt5\Qsci\qsciscintillabase.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\Qsci\qscistyle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\Qt4Qt5\Qsci\qscistyledtext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="dia\qsearchlineedit.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\searchbox.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="singleapplication.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="topbarwindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <ClInclude Include="weh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="paper\wordsupport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_ctextedit.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="dia\ctextedit.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="source\Bookmark.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\Bookmarksmall.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\alert.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\auto_diction.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\auto_funcotin.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\auto_key.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\auto_math.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\auto_nomal.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\bianji.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\bksdoc.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\bksfile.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\btnlast.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\btnnext.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\clear.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\close.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\close2.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\code.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\column.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\compile.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\compile_run.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\copy.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\database.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\debug.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\doc.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\edit_cut.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\error.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\errorsmall.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\file.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\find.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\flay.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\hiddenleft.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\image.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\import.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\movie.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\music.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\newfile.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\newproject.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\open_file.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\openfile.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\paste.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\pin.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\pinsmall.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\redo.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\replace(2).png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\run.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\save.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\saveas.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\search1.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <CustomBuild Include="source.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <None Include="source\sourcedoc.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\undo.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\wainningsmall.png">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ico.rc" />
+  </ItemGroup>
+</Project>

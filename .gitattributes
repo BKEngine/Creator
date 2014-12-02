@@ -5,6 +5,8 @@
 /BKE_creator.v12.suo -text
 /BKE_creator.vcxproj -text
 /BKE_creator_static_qsci.pro -text
+/BKE_creator_static_qsci.vcxproj -text
+/BKE_creator_static_qsci.vcxproj.filters -text
 BKEscintilla/Qt4Qt5/ListBoxQt.cpp -text
 BKEscintilla/Qt4Qt5/ListBoxQt.h -text
 BKEscintilla/Qt4Qt5/PlatQt.cpp -text

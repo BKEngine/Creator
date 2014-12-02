@@ -103,7 +103,8 @@ SOURCES += main.cpp \
     BKEscintilla/lexlib/CharacterSet.cpp \
     singleapplication.cpp \
     dia/cconfigdia.cpp \
-    dia/ctextedit.cpp
+    dia/ctextedit.cpp \
+    bkeprojectconfig.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -192,7 +193,8 @@ HEADERS  += \
     BKEscintilla/Qt4Qt5/Qsci/qscistyledtext.h \
     singleapplication.h \
     dia/cconfigdia.h \
-    dia/ctextedit.h
+    dia/ctextedit.h \
+    bkeprojectconfig.h
 
 RESOURCES += \
     source.qrc
@@ -204,3 +206,5 @@ OTHER_FILES += \
 
 FORMS += \
     dia/ctextedit.ui
+
+LIBS += -L$$PWD/ParserHelper -lParserHelper
