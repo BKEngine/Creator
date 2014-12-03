@@ -72,6 +72,26 @@ public:
 		}
 		GetNextChar(pos);
 	}
+	void resetState(int startPos, int endPos, int style)
+	{
+		if (startPos > endPos)
+			return;
+		int seg = styler.GetStartSegment();
+		int len = styler.validLen;
+		styler.validLen = startPos - styler.startPosStyling;
+		styler.StartSegment(startPos);
+		styler.ColourTo(endPos, style);
+		styler.StartSegment(seg);
+		styler.validLen = len;
+	}
+	void setStartSeg(int pos)
+	{
+		styler.StartSegment(pos);
+	}
+	int getStartSeg()
+	{
+		return styler.GetStartSegment();
+	}
 	void Complete() {
 		styler.ColourTo(currentPos - 1, state);
 		styler.Flush();

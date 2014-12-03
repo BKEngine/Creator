@@ -41,12 +41,13 @@ using namespace Scintilla;
 #define SCE_BKE_TEXT            8
 #define SCE_BKE_VARIABLE        9
 #define SCE_BKE_UNTYPEA         10
-#define SCE_BKE_UNTYPEB         11
-#define SCE_BKE_UNTYPEC         12
+#define SCE_BKE_PARSER         11
+//转义字符
+#define SCE_BKE_TRANS         12
 #define SCE_BKE_ERROR           13
 
 static const char *BKE_PARSER_KEY = " for foreach in extends do while function propset propget int string number typeof var delete class if else continue break return this super with true false void global" ;
-//static const char *BKE_SEPARATEOR = " ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\";
+static const char *BKE_SEPARATEOR = " ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\";
 
 static inline bool isSpace(int i)
 {
@@ -85,20 +86,22 @@ bool isSeparator(unsigned char ch)
     bt[1] = 0 ;
     if( ch < 32 ) return true ;
 	return false;
-//    return (strstr(BKE_SEPARATEOR,&bt[0]) != NULL) ;
+    return (strstr(BKE_SEPARATEOR,&bt[0]) != NULL) ;
 }
 
 // Extended to accept accented characters
 static inline void AnnotateLine( StyleContext *sc )//整行注释掉
 {
+	int s = sc->state;
     sc->SetState(SCE_BKE_ANNOTATE);   //注释状态
     while( !sc->atLineEnd && sc->More() ) sc->Forward();
-    sc->SetState(SCE_BKE_DEFAULT);   //注释状态
+    sc->SetState(s);   //恢复原状态
     return ;
 }
 
 static inline void AnnotateBlock(StyleContext *sc)//块注释
 {
+	int s = sc->state;
 	sc->SetState(SCE_BKE_ANNOTATE);   //注释状态
 	//这里是没有嵌套注释的版本，如果时机成熟会和Compiler同步修改
 	sc->Forward();	//pass * after /
@@ -110,14 +113,66 @@ static inline void AnnotateBlock(StyleContext *sc)//块注释
 	}
 	sc->Forward();
 	sc->Forward();
-	sc->SetState(SCE_BKE_DEFAULT);   //注释状态
+	sc->SetState(s);   //恢复原状态
 	return;
+}
+
+inline bool isLineEnd(StyleContext *sc)
+{
+	if (sc->atLineEnd || !sc->More())
+		return true;
+	if (sc->ch == '/')
+	{
+		if (sc->chNext == '/')
+		{
+			AnnotateLine(sc);
+			return true;
+		}
+		else if (sc->chNext == '*')
+		{
+			AnnotateBlock(sc);
+			return isLineEnd(sc);
+		}
+		else
+			return false;
+	}
+	return false;
+}
+
+inline bool passCmdName(StyleContext *sc, bool startwithat = true)
+{
+	bool r = false;
+	while (!isLineEnd(sc) && !isSpace(sc->ch) && (startwithat || sc->ch != L']'))
+	{
+		r = true;
+		sc->Forward();
+	}
+	return r;
+}
+
+inline bool prePassAttrName(StyleContext *sc)
+{
+
+}
+
+inline bool passAttrName(StyleContext *sc)
+{
+	bool r = false;
+	while (!isLineEnd(sc))
+	{
+		r = true;
+		sc->Forward();
+	}
+	return r;
 }
 
 static inline void SetText( StyleContext *sc )
 {
     sc->SetState(SCE_BKE_TEXT);
-    while( !sc->atLineEnd && sc->ch!='[' && sc->More()) sc->Forward();
+	while (sc->ch != '[' && !isLineEnd(sc))
+	{
+		sc->Forward();
+	}
     sc->SetState(SCE_BKE_DEFAULT);
 }
 
@@ -143,15 +198,67 @@ static inline void SetString( StyleContext *sc)
 static inline void SetString2( StyleContext *sc)
 {
     int k = sc->state ;
+	int pos = sc->currentPos;
     sc->SetState(SCE_BKE_STRING);
+    sc->Forward();
+	bool err = true;
     while(sc->More() && !sc->atLineEnd)
     {
-        sc->Forward();
-        if(sc->ch=='\'')
-             break;
-        else if(sc->ch=='\\')
-           	sc->Forward();
-    }
+		if (sc->ch == '\'')
+		{
+			err = false;
+			break;
+		}
+		else if (sc->ch == '\\')
+		{
+			int num = 0;
+			sc->SetState(SCE_BKE_TRANS);
+			sc->Forward();
+			switch (sc->ch)
+			{
+			case 'n':case 'r':case 't':case 'a':case 'b':case 'f':case 'v':
+				sc->Forward();
+				sc->SetState(SCE_BKE_STRING);
+				continue;
+			case 'o'://\o777
+				num = 3;
+				while (num-- >= 0)
+				{
+					if (sc->More())
+						sc->Forward();
+					else
+						break;	//反正最后也要被涂成error
+					if (sc->ch >= '8' || sc->ch < '0')
+						break;
+				}
+				sc->SetState(SCE_BKE_STRING);
+				continue;
+			case 'x'://\xFF
+				num = 2;
+				while (num-- >= 0)
+				{
+					if (sc->More())
+						sc->Forward();
+					else
+						break;	//反正最后也要被涂成error
+					if (sc->ch < '0' || (sc->ch > '9' && towupper(sc->ch) < L'A') || towupper(sc->ch) > L'F')
+						break;
+				}
+				sc->SetState(SCE_BKE_STRING);
+				continue;
+			default://error
+				sc->ChangeState(SCE_BKE_ERROR);
+				sc->Forward();
+				sc->SetState(SCE_BKE_STRING);
+				continue;
+			}
+		}
+		sc->Forward();
+	}
+	if (err)
+	{
+		sc->resetState(pos, sc->currentPos, SCE_BKE_ERROR);
+	}
     sc->Forward();
     sc->SetState(k);
 }
@@ -362,14 +469,21 @@ static void SetAttr( StyleContext *sc, bool BeginWithAt=true )
 static inline void HandleAtCommand( StyleContext *sc )
 {
     sc->SetState(SCE_BKE_COMMAND);    //设置状态，前面的立即着色
-    if(!sc->atLineEnd && sc->More())
-        sc->Forward();
-    else{
-        sc->ChangeState(SCE_BKE_ERROR);
-        sc->SetState(SCE_BKE_DEFAULT);  //改变为错误状态，着色
-    }
-    while( !sc->atLineEnd && sc->More() && !isSpace(sc->ch) && (sc->ch != '/' || sc->chNext != '/')) sc->Forward();
+	//命令名
+	if (!passCmdName(sc, false))
+	{
+		sc->ChangeState(SCE_BKE_ERROR);
+		sc->SetState(SCE_BKE_ERROR);
+	};
     sc->SetState(SCE_BKE_DEFAULT);
+
+    //if(!sc->atLineEnd && sc->More())
+    //    sc->Forward();
+    //else{
+    //    sc->ChangeState(SCE_BKE_ERROR);
+    //    sc->SetState(SCE_BKE_DEFAULT);  //改变为错误状态，着色
+    //}
+    //while( !sc->atLineEnd && sc->More() && !isSpace(sc->ch) && (sc->ch != '/' || sc->chNext != '/')) sc->Forward();
     while(!sc->atLineEnd)
     {
         while(sc->More() && !sc->atLineEnd && isSpace(sc->ch) )sc->Forward();
@@ -380,24 +494,26 @@ static inline void HandleAtCommand( StyleContext *sc )
 
 static inline void HandleCommand( StyleContext *sc )
 {
+	int pos1 = sc->currentPos;
     sc->SetState(SCE_BKE_COMMAND);
-    if(!sc->atLineEnd && sc->More()) sc->Forward();
-    else{
-        //sc->ChangeState();
-        sc->SetState(SCE_BKE_ERROR);
-    }
-    //命令本身
-    while( !sc->atLineEnd && !isSpace(sc->ch) && sc->ch!=']' && sc->More()) sc->Forward();
-    sc->SetState(SCE_BKE_DEFAULT);
+	//sc->ForwardSetState(SCE_BKE_DEFAULT);
+    //命令名
+	if(!passCmdName(sc, false))
+	{
+		sc->resetState(pos1, pos1, SCE_BKE_ERROR);
+	};
+	sc->SetState(SCE_BKE_DEFAULT);
 
-    while(sc->More() && !sc->atLineEnd && sc->ch!=']')
+    while(!isLineEnd(sc) && sc->ch!=']')
     {
         while(sc->More() && !sc->atLineEnd && isSpace(sc->ch))sc->Forward();
         SetAttr(sc, false);
     }
 
-    if(sc->ch!=']')
-        sc->SetState(SCE_BKE_ERROR);
+	if (sc->ch != ']')
+	{
+		sc->resetState(pos1, pos1, SCE_BKE_ERROR);
+	}
     else{
         sc->SetState(SCE_BKE_COMMAND);
         sc->Forward();
@@ -469,22 +585,36 @@ static void ColouriseBkeDoc(unsigned int startPos, int length, int initStyle,
 
     while(sc.More())
     {
-        while(sc.More() && sc.ch < 33) sc.Forward();
+        while(sc.More() && sc.ch < 33)
+			sc.Forward();
 
-        if( sc.ch == '@' )HandleAtCommand(&sc);
-        else if(sc.ch == '[' ) HandleCommand( &sc );
-        //else if(sc.ch == ';' ) AnnotateLine( &sc );
-        else if(sc.ch == '/' && sc.chNext == '/' ) AnnotateLine( &sc );
-		else if (sc.ch == ';' && sc.atLineStart) AnnotateLine(&sc);
+        if( sc.ch == '@' )
+			HandleAtCommand(&sc);
+        else if(sc.ch == '[' )
+			HandleCommand( &sc );
+        else if(sc.ch == '/' && sc.chNext == '/' ) 
+			AnnotateLine( &sc );
+		else if (sc.ch == ';' && sc.atLineStart) 
+			AnnotateLine(&sc);
 		else if (sc.ch == '/' && sc.chNext == '*')
 		{
 			AnnotateBlock(&sc);
 		}
-		else if (sc.ch == '*') SetLabel(&sc);
-        //else if(sc.ch == '#' && sc.chNext == '#' ) SetParser( &sc );
-        else if(sc.ch == '\"') SetString(&sc);
-        else if(sc.ch == '\'') SetString2(&sc);
-        else SetParser( &sc );
+		else if (sc.ch == '*') 
+			SetLabel(&sc);
+		//else if (sc.ch == '#')
+		//{
+		//	if (sc.chNext == '#')
+		//		setParser(&sc);
+		//	else
+		//		setParser2(&sc);
+		//}
+        else if(sc.ch == '\"') 
+			SetString(&sc);
+        else if(sc.ch == '\'') 
+			SetString2(&sc);
+        else
+			SetText( &sc );
     }
 	sc.Complete();
 }

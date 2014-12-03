@@ -32,8 +32,8 @@ public:
         Text = 8 ,
         Variable = 9 ,
         UntypeA = 10 ,
-        UntypeB = 11 ,
-        UntypeC = 12 ,
+        StyleParser = 11 ,
+        TRANS = 12 ,
         Error = 13
     };
 

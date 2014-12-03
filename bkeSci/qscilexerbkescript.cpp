@@ -28,7 +28,8 @@ QString QsciLexerBkeScript::description(int style) const
     case Text :    return QString("Text") ;
     case Error:    return QString("Error") ;
     case UntypeA:  return QString("Untypea") ;
-    }
+	case TRANS:  return QString("TRANS");
+	}
 
     return QString() ;
 }
@@ -47,7 +48,8 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
     case Text :    return QColor( 0x00,0x00,0x00) ;
     case Error:    return QColor( 0xff,0x00,0x00) ;
     case UntypeA:  return QColor( 0x80,0x80,0x00 ) ; //保留字，
-    }
+	case TRANS:  return QColor(0x7a, 0x0f, 0xd1); //转义字符，
+	}
     return QColor( 0x00,0x00,0x00) ;
 }
 

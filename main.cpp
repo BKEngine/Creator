@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
     CheckFileAssociation();
     #endif
 
+	
     return a.exec();
 }
 

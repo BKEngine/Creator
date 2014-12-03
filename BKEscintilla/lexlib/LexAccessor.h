@@ -28,11 +28,9 @@ private:
 	int lenDoc;
 	int mask;
 	char styleBuf[bufferSize];
-	int validLen;
 	char chFlags;
 	char chWhile;
 	unsigned int startSeg;
-	int startPosStyling;
 
 	void Fill(int position) {
 		startPos = position - slopSize;
@@ -49,6 +47,8 @@ private:
 	}
 
 public:
+	int startPosStyling;
+	int validLen;
 	LexAccessor(IDocument *pAccess_) :
 		pAccess(pAccess_), startPos(extremePosition), endPos(0),
 		codePage(pAccess->CodePage()), lenDoc(pAccess->Length()),
