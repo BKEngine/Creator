@@ -2,9 +2,13 @@
 #include "dia/newprodia.h"
 #include <QSize>
 #include "dia/lablesuredialog.h"
+#include <QApplication>
+#include <Windows.h>
+#include <stdint.h>
 
 QList<BkeProject*> projectlist ;
 
+extern uint32_t BKE_hash(const wchar_t *str);
 
 ProjectWindow::ProjectWindow(QWidget *parent)
     :QTreeWidget(parent)
@@ -92,6 +96,9 @@ void ProjectWindow::OpenProject(const QString &file)
     workpro->Root->setExpanded(true);
     workpro->Script->setExpanded(true);
     workpro->Import->setExpanded(true);
+
+	QString t = "BKE Creator - " + file;
+	SetProp(GetActiveWindow(), L"title", (HANDLE)BKE_hash(t.toStdWString().c_str()));
 }
 
 //读取项目，并发送
@@ -238,7 +245,7 @@ QTreeWidgetItem *ProjectWindow::findFileInProject(const QString &name)
     return le ;
 }
 
-
+#undef DeleteFile
 void ProjectWindow::DeleteFile(const ItemInfo &f)
 {
     //是文件的话将询问是否移除文件

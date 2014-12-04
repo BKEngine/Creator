@@ -5,6 +5,42 @@
 #include "mainwindow.h"
 #include "weh.h"
 #include "singleapplication.h"
+#include <stdint.h>
+
+QString title = "BKE Creator - ";
+uint32_t titlehash = 0;
+
+uint32_t BKE_hash(const wchar_t *str)
+{
+	if (!*str)
+		return 0;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
+	const wchar_t *c = str;
+	uint32_t ret = _FNV_offset_basis;
+	while (*c)
+	{
+		ret ^= (uint32_t)*c;
+		ret *= _FNV_prime;
+		c++;
+	}
+	return ret;
+}
+
+#ifdef WIN32
+#include <Windows.h>
+
+BOOL CALLBACK EnumWndProc(HWND hwnd, LPARAM lParam)
+{
+	uint32_t h = (uint32_t)GetProp(hwnd, L"title");
+	if (h == titlehash)
+	{
+		*(HWND*)lParam = hwnd;
+		return false;
+	}
+	return true;
+}
+#endif
 
 void CheckOpenAL32() ;
 void CheckFileAssociation();
@@ -31,8 +67,23 @@ int main(int argc, char *argv[])
 #endif
 
     SingleApplication a(argc, argv);
+#ifndef WIN32
     if(a.isRunning())
         return -1;
+#else
+	if (argc > 1)
+		title += argv[1];
+	titlehash = BKE_hash(title.toStdWString().c_str());
+	HWND oldHWnd = NULL;
+	EnumWindows(EnumWndProc, (LPARAM)&oldHWnd);
+	if (oldHWnd != NULL)
+	{
+		ShowWindow(oldHWnd, SW_SHOWNORMAL);
+		SetWindowPos(oldHWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+		SetWindowPos(oldHWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+		return 0;
+	}
+#endif
     QTranslator translator;
     if( !translator.load("qt_zh_CN",BKE_CURRENT_DIR,"",".qm") ) QMessageBox::information(0,"错误","加载中文翻译失败",QMessageBox::Ok) ;
     a.installTranslator(&translator);
