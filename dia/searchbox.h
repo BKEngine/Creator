@@ -22,6 +22,11 @@ public:
 
 signals:
 
+
+public slots :
+	void onDocChanged();
+	void onSelectionChanged();
+
 public slots:
     void FindNext() ;
     void FindLast() ;

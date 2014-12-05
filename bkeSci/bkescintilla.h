@@ -66,6 +66,7 @@ public:
     void setParser( BkeParser *p){ defparser = p ; }
 
     int findcount ;
+	BkeIndicatorBase findlast;
 
 signals:
     void Undoready(bool is) ;
@@ -104,7 +105,6 @@ private:
     bool IsWorkingUndo ;
     int LastLine ;
     int SectionPos ;
-    BkeIndicatorBase findlast ;
 	int findstr_length;
     BkeModifiedBase modfieddata ;
     BkeModifiedBase indentdate ;

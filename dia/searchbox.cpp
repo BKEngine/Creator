@@ -58,6 +58,23 @@ SearchBox::SearchBox(QWidget *parent) :
     this->hide();
 }
 
+void SearchBox::onDocChanged()
+{
+	if (this->isVisible() && edit->text() == fstr)
+	{
+		sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+	}
+}
+
+void SearchBox::onSelectionChanged()
+{
+	if (this->isVisible() && edit->text() == fstr && !sciedit->findlast.IsNull())
+	{
+		sciedit->SetIndicator(BkeScintilla::BKE_INDICATOR_FIND, sciedit->findlast);
+		sciedit->findlast.Clear();
+	}
+}
+
 void SearchBox::FindNext()
 {
     if( edit->text().isEmpty() ){

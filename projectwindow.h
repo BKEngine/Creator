@@ -53,7 +53,6 @@ signals:
     void Compile() ;
     void TextToMarks(const QString &text,const QString &dir,int type) ;
 
-
 public slots:
     void NewProject() ;
     void OpenProject() ;

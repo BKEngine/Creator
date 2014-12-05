@@ -4,7 +4,7 @@
 CodeWindow::CodeWindow(QWidget *parent)
     :QMainWindow(parent)
 {
-    diasearch  = new SearchBox(this) ;
+	diasearch = new SearchBox(this);
     addDockWidget(Qt::BottomDockWidgetArea,diasearch);
     currentedit = 0 ;
 
@@ -24,7 +24,7 @@ CodeWindow::CodeWindow(QWidget *parent)
     currentpos = -1 ;
     stackwidget = new QStackedWidget(this) ;
     setCentralWidget(stackwidget);
-    DrawLine(false);
+    DrawLine(true);
 
     this->addToolBar(Qt:: BottomToolBarArea,toolbar2);
 
@@ -66,8 +66,6 @@ CodeWindow::CodeWindow(QWidget *parent)
     connect(btnpasteact,SIGNAL(triggered()),this,SLOT(ActPaste()));
     //复制
     connect(btncopyact,SIGNAL(triggered()),this,SLOT(ActCopy())) ;
-
-
 
 
     btnDisable();
@@ -406,6 +404,9 @@ void CodeWindow::simpleNew(BkeDocBase *loli,const QString &t)
     connect(loli->edit,SIGNAL(modificationChanged(bool)),this,SLOT(DocChange(bool))) ;
     //右键菜单
     connect(loli->edit,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(ShowRmenu(QPoint))) ;
+	//文件有改动
+	connect(loli->edit, SIGNAL(textChanged()), diasearch, SLOT(onDocChanged()));
+	connect(loli->edit, SIGNAL(selectionChanged()), diasearch, SLOT(onSelectionChanged()));
 
     ignoreflag = false ;
 }

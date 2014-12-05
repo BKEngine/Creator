@@ -84,7 +84,7 @@
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">BKE_creator</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">BKE_creator</TargetName>
@@ -215,7 +215,7 @@
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
-      <OutputFile>$(OutDir)\BKE_creator.exe</OutputFile>
+      <OutputFile>$(OutDir)BKE_creator.exe</OutputFile>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
       <SuppressStartupBanner>true</SuppressStartupBanner>

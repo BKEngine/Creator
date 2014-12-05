@@ -390,11 +390,11 @@ bool BkeScintilla::FindForward(int pos)
         SetIndicator(BKE_INDICATOR_FIND,abc);
     }
     abc = findIndicator(BKE_INDICATOR_FIND,pos) ;
+    findlast = abc ;
     if( abc.IsNull() ) return false ;
 	abc.SetEnd(abc.Start() + findstr_length);
     ClearIndicator(abc);
     setSelection(abc);
-    findlast = abc ;
     return true ;
 }
 
