@@ -26,6 +26,7 @@ signals:
 public slots :
 	void onDocChanged();
 	void onSelectionChanged();
+	void onFindConditionChange();
 
 public slots:
     void FindNext() ;

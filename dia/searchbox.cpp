@@ -24,6 +24,10 @@ SearchBox::SearchBox(QWidget *parent) :
     sciedit = 0 ;
     firstshow = true ;
 
+	connect(iscase, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
+	connect(isregular, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
+	connect(isword, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
+
     h1->addWidget(lable1);
     h1->addWidget(edit);
     h1->addWidget(lable2);
@@ -60,7 +64,7 @@ SearchBox::SearchBox(QWidget *parent) :
 
 void SearchBox::onDocChanged()
 {
-	if (this->isVisible() && edit->text() == fstr)
+	if (this->isVisible() && edit->text() == fstr && !(sciedit->ChangeStateFlag & BkeScintilla::BKE_CHANGE_REPLACE))
 	{
 		sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
 	}
@@ -75,13 +79,18 @@ void SearchBox::onSelectionChanged()
 	}
 }
 
+void SearchBox::onFindConditionChange()
+{
+	sciedit->refind = true;
+}
+
 void SearchBox::FindNext()
 {
     if( edit->text().isEmpty() ){
         QMessageBox::information(this,"查找","请输入需要查找的内容！",QMessageBox::Ok) ;
         return ;
     }
-    else if( edit->text() != fstr ){
+	else if (sciedit->refind || edit->text() != fstr){
         fstr = edit->text() ;
         sciedit->findFirst1(fstr,iscase->isChecked(),isregular->isChecked(),isword->isChecked()) ;
         if( isalwaysbegin->isChecked() ) sciedit->FindForward(0);

@@ -89,13 +89,15 @@ private slots:
     void CurChange(int line , int index ) ;
     void CharHandle(int cc) ;
 
+public:
+    int ChangeStateFlag ;
+	bool refind;
 
 private:
     int AutoState ;
     int vautostate ;
     int StartWordPos ;
     int ChangeType ;
-    int ChangeStateFlag ;
     int LastKeywordEnd ;
     int ComPleteLeast ;
     int IndentCount ;

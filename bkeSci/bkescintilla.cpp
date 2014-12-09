@@ -8,6 +8,7 @@ QImage BKE_AUTOIMAGE_MATH(":/auto/source/auto_math.png") ;
 
 BkeScintilla::BkeScintilla(QWidget *parent)
     :QsciScintilla(parent)
+	, refind(true)
 {
     //setAttribute(Qt::WA_DeleteOnClose, true); //关闭后自动析构
     //setStyleSheet("QsciScintilla{border:0px solid red ;}");
@@ -349,7 +350,8 @@ int BkeScintilla::findFirst1(const QString fstr,bool cs,bool exp,bool word,bool 
     BkeIndicatorBase abc ;
     int a,len,b ;
     len = this->length() ;
-    for( a = 0 ; a < len ; ){
+	refind = false;
+	for (a = 0; a < len;){
         abc = simpleFind(ss,findflag,a,len) ;
         if( abc.IsNull() ) return findcount;
         //对结果进行标记
@@ -377,24 +379,25 @@ void BkeScintilla::ClearIndicators(int id)
 //
 bool BkeScintilla::FindForward(int pos)
 {
-	SetIndicator(BKE_INDICATOR_FIND, findlast);
-    clearSelection();
+	//SetIndicator(BKE_INDICATOR_FIND, findlast);
+	//clearSelection();
     if( findcount < 1){
         QMessageBox::information(this,"查找","没有找到任何匹配的文本！",QMessageBox::Ok) ;
         return false;
     }
 
     BkeIndicatorBase abc ;
-    if( !findlast.IsNull() ){ //上一个节点有效，则再寻找一次
-        abc = simpleFind(fstrdata.constData(),findflag,findlast.Start(),findlast.End()) ;
-        SetIndicator(BKE_INDICATOR_FIND,abc);
-    }
+    //if( !findlast.IsNull() ){ //上一个节点有效，则再寻找一次
+    //    abc = simpleFind(fstrdata.constData(),findflag,findlast.Start(),findlast.End()) ;
+    //    SetIndicator(BKE_INDICATOR_FIND,abc);
+    //}
     abc = findIndicator(BKE_INDICATOR_FIND,pos) ;
-    findlast = abc ;
+	abc = simpleFind(fstrdata.constData(), findflag, abc.Start(), abc.End());
     if( abc.IsNull() ) return false ;
-	abc.SetEnd(abc.Start() + findstr_length);
-    ClearIndicator(abc);
     setSelection(abc);
+    findlast = abc ;
+	//abc.SetEnd(abc.Start() + findstr_length);
+    ClearIndicator(abc);
     return true ;
 }
 
@@ -404,8 +407,8 @@ bool BkeScintilla::FindBack(int pos)
     if( hasSelectedText() ){ //光标总是在被选择文字的后面，搜索从选择文字之前
         pos = SendScintilla(SCI_GETSELECTIONSTART) -1 ;
     }
-	SetIndicator(BKE_INDICATOR_FIND, findlast);
-	clearSelection();   //清理光标必须放在这里
+	//SetIndicator(BKE_INDICATOR_FIND, findlast);
+	//clearSelection();   //清理光标必须放在这里
     if( findcount < 1){
 		QMessageBox::information(this, "查找", "没有找到任何匹配的文本！", QMessageBox::Ok);
         return false;
@@ -415,13 +418,18 @@ bool BkeScintilla::FindBack(int pos)
         SetIndicator(BKE_INDICATOR_FIND,findlast);
         clearSelection();
     }
-    BkeIndicatorBase abc = findIndicatorLast(BKE_INDICATOR_FIND,pos) ;
-	if (abc.IsNull() || abc.End() == 0)
+    BkeIndicatorBase abc2 = findIndicatorLast(BKE_INDICATOR_FIND,pos) ;
+	if (abc2.IsNull() || abc2.End() == 0)
 	{
 		QMessageBox::information(this, "查找", "再往前没有了！", QMessageBox::Ok);
 		return false;
 	}
-	abc.SetStart(abc.End() - findstr_length);
+	BkeIndicatorBase abc;
+	abc.SetEnd(abc2.Start());
+	do
+	{
+		abc = simpleFind(fstrdata.constData(), findflag, abc.End(), abc2.End());
+	} while (abc.End() < abc2.End());
 	ClearIndicator(abc);
     setSelection(abc);
     findlast = abc ;
@@ -434,7 +442,7 @@ void BkeScintilla::ReplaceAllFind(const QString &rstr)
     BkeIndicatorBase abc(0,0) ;
     while( FindForward(abc.End()) ){
         abc = ReplaceFind(rstr) ;
-        if( abc.IsNull() ) return ;
+        //if( abc.IsNull() ) return ;
     }
 }
 
@@ -443,24 +451,25 @@ BkeIndicatorBase BkeScintilla::ReplaceFind(const QString &rstr)
 {
     BkeIndicatorBase ntr ;
     if( !hasSelectedText() ) return ntr;
+
     QByteArray ak = rstr.toUtf8() ;
     const char *ss = ak.constData() ;
-    int from = SendScintilla(SCI_GETSELECTIONSTART) ;
-    SendScintilla(SCI_SETTARGETSTART,from) ;
-    SendScintilla(SCI_SETTARGETEND,SendScintilla(SCI_GETSELECTIONEND)) ;
+    //int from = SendScintilla(SCI_GETSELECTIONSTART) ;
+    //SendScintilla(SCI_SETTARGETSTART,from) ;
+    //SendScintilla(SCI_SETTARGETEND,SendScintilla(SCI_GETSELECTIONEND)) ;
 
-    //标记修改来自替换，将忽略某些改变
+    ////标记修改来自替换，将忽略某些改变
     ChangeStateFlag |= BKE_CHANGE_REPLACE ;
-    int len = SendScintilla(SCI_REPLACETARGET,strlen(ss),ss) ;
+    SendScintilla(SCI_REPLACESEL,(ulong)0,ss) ;
     ChangeStateFlag &= (~BKE_CHANGE_REPLACE) ;
 
-    ntr.SetStart(from);
-    ntr.SetEnd(from+len);
-    if( len < 1) return ntr;
-    //在已经替换过的内容上再次查找
-    BkeIndicatorBase abc = simpleFind(fstrdata.constData(),SendScintilla(SCI_GETSEARCHFLAGS),from,from+len) ;
-    if( !abc.IsNull() ) SetIndicator(BKE_INDICATOR_FIND,abc);
-    else findcount-- ;
+    //ntr.SetStart(from);
+	ntr.SetEnd(SendScintilla(SCI_GETSELECTIONEND));
+    return ntr;
+    //不在已经替换过的内容上再次查找
+    //BkeIndicatorBase abc = simpleFind(fstrdata.constData(),SendScintilla(SCI_GETSEARCHFLAGS),from,from+len) ;
+    //if( !abc.IsNull() ) SetIndicator(BKE_INDICATOR_FIND,abc);
+    //else findcount-- ;
 }
 
 int BkeScintilla::findIndicatorStart(int id,int from)
