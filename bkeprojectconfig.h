@@ -38,6 +38,7 @@ public slots:
     void readFile();
     void fileChanged();
     void writeFile();
+	void addScriptDir(const QString &dir);
 
 signals:
     void readFileError(QString s);

@@ -193,7 +193,7 @@ static QBkeVariable Str2Color(const QString &t)
 static QStringList getDirText( QLineEdit *e)
 {
     if( e->text().isEmpty() ) return QStringList();
-    QStringList ls = e->text().split(",") ;
+    QStringList ls = e->text().split("|") ;
     for(auto &i : ls)
     {
         i = i.trimmed();
@@ -289,8 +289,11 @@ void BkeConfigUiModel::UseDir()
     if( name.isEmpty() ) return ;
 
     QString t = edit->text() ;
+	auto lst = getDirText(edit);
     name = BkeFullnameToName(name,config->projDir) ;
-    if( !t.isEmpty() && !t.endsWith(",") ) t.append(","+name) ;
+	if (lst.contains(name))
+		return;
+    if( !t.isEmpty() && !t.endsWith("|") ) t.append("|"+name) ;
     else t.append(name) ;
     edit->setText( t );
 }

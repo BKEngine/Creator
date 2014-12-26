@@ -190,27 +190,28 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
     QString name = QInputDialog::getText(this,"新建脚本","输入脚本名称，如: \r\n   abc \r\n   abc/sence.bkscr") ;
     if( name.isEmpty()) return ;
     else if( !name.endsWith(".bkscr")) name.append(".bkscr") ;
-    name = name.replace(QRegExp("\\"),"/") ;
+    name = name.replace("\\","/") ;
 
     BkeProject *p = FindPro(f.ProName);
-    QFileInfo sk(p->absName(name)) ;
+    QFileInfo sk(p->FileDir() + info.getDir() + '/' + name) ;
     if( sk.exists() ){
         int sk = QMessageBox::information(this,"","文件已经存在，是否直接添加文件",QMessageBox::Yes|QMessageBox::No) ;
         if( sk == QMessageBox::No ) return ;
     }
     else LOLI_MAKE_NULL_FILE(sk.filePath()) ;
 
-    if( type == 1){
-        p->FindItem(p->Import,name) ;
-    }
-    else if( type == 2){
-        p->FindItem(p->Script,name) ;
-    }
-    else{
-        p->FindItem(p->Source,name) ;
-    }
+    //if( type == 1){
+    //    p->FindItem(p->Import,name) ;
+    //}
+    //else if( type == 2){
+    //    p->FindItem(info.Root,name) ;
+    //}
+    //else{
+    //    p->FindItem(p->Source,name) ;
+    //}
+	p->FindItem(info.Root, name);
 
-    p->AddFileToHash(p->typeHash(type),name);
+	p->AddFileToHash(p->typeHash(type), info.getDir().right(info.getDir().length() - 1) + '/' + name);
     p->WriteBkpFile() ;
 }
 
@@ -276,9 +277,9 @@ void ProjectWindow::Addfiles(const ItemInfo &f)
     BkeProject *p = FindPro(f.ProName);
     QStringList ls ;
     if( f.RootName == "初始化" || f.RootName == "脚本"){
-        ls = QFileDialog::getOpenFileNames(this,"添加文件",p->FileDir(),"bkscr脚本(*.bkscr)") ;
+        ls = QFileDialog::getOpenFileNames(this,"添加文件",p->FileDir() + f.getDir(),"bkscr脚本(*.bkscr)") ;
     }
-    else ls = QFileDialog::getOpenFileNames(this,"添加文件",p->FileDir(),"所有文件(*.*)") ;
+	else ls = QFileDialog::getOpenFileNames(this, "添加文件", p->FileDir() + f.getDir(), "所有文件(*.*)");
 
     if( ls.isEmpty() ) return ;
     QStringList errors;
@@ -308,7 +309,7 @@ void ProjectWindow::Addfiles(const ItemInfo &f)
 void ProjectWindow::AddDir(const ItemInfo &f)
 {
     BkeProject *p = FindPro(f.ProName);
-    QString d = QFileDialog::getExistingDirectory(this,"添加目录",p->FileDir()) ;
+	QString d = QFileDialog::getExistingDirectory(this, "添加目录", p->FileDir() + f.getDir());
     if(d.isEmpty())
         return;
     QString tmp = BkeFullnameToName(d,p->FileDir());
@@ -316,7 +317,7 @@ void ProjectWindow::AddDir(const ItemInfo &f)
         QMessageBox::information(this,"","工作目录之外的文件不能添加",QMessageBox::Ok) ;
         return ;
     }
-    p->AddDir(d,f);
+	p->AddDir(d, tmp, f);
 }
 
 void ProjectWindow::ReName()

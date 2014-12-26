@@ -17,29 +17,20 @@ void BKE_PROJECT_READITEM( QTreeWidgetItem *dest,ItemInfo &info)
         info.Dirs.append( list.at(i)) ;
         if( i != list.size()-1) info.Dirs.append("/") ;
     }
-
     info.Layer = list.size() ;
-    if( list.size() == 0){  //项目文件本身
+    info.Root = dest ;
+	if (list.size() == 0){  //项目文件本身
         info.ProName = info.Name ;
-        info.Root = dest ;
     }
     else if( list.size() == 1){  //导入，脚本，资源
         info.ProName = list.at(0) ;
         info.RootName = info.Name ;
-        info.Root = dest ;
     }
     else{
         info.ProName = list.at(0) ;
-        for( int i = 0 ; i < root->childCount() ; i++){
-            if( root->child(i)->text(0) == list.at(1)){
-                info.Root = root->child(i) ;
-                info.RootName = root->child(i)->text(0) ;
-                break ;
-            }
-        }
     }
 
-    if( info.Dirs.isEmpty()) info.FullName = info.Name ;
+	if (info.Dirs.isEmpty()) info.FullName = '/' + info.Name;
     else info.FullName = info.Dirs + "/" + info.Name ;
 }
 
@@ -127,9 +118,16 @@ bool BkeProject::OpenProject(const QString &name)
     bool lowVersion = false;
     if(bkpAdmin->value("version").toString() < "1.1")
         lowVersion = true;
-    JsonToHash(ImportHash,bkpAdmin->value("import").toObject(),lowVersion);
-    JsonToHash(ScriptHash,bkpAdmin->value("script").toObject(),lowVersion);
-    JsonToHash(SourceHash,bkpAdmin->value("source").toObject(),lowVersion);
+	if (bkpAdmin->value("version").toString() == "1.1")
+	{
+		JsonToHash(ImportHash, bkpAdmin->value("import").toObject(), lowVersion);
+		JsonToHash(ScriptHash, bkpAdmin->value("script").toObject(), lowVersion);
+		JsonToHash(SourceHash, bkpAdmin->value("source").toObject(), lowVersion);
+	}
+	int version = int(bkpAdmin->value("version").toString().toDouble() * 10);
+	JsonToTree(Root->child(0), bkpAdmin->value("import").toObject(), version);
+	JsonToTree(Root->child(1), bkpAdmin->value("script").toObject(), version);
+	JsonToTree(Root->child(2), bkpAdmin->value("source").toObject(), version);
 
     //检查路径是否已经改变
     /*
@@ -325,7 +323,7 @@ void BkeProject::SearchTree(BkeFilesHash &hash, QTreeWidgetItem *dest,const QStr
 }
 
 //设置图标
-void BkeProject::SetIconFromSuffix(QTreeWidgetItem *dest,const QString suffix)
+void BkeProject::SetIconFromSuffix(QTreeWidgetItem *dest,const QString &suffix)
 {
     QString temp = suffix.toLower() ;
     if( !temp.startsWith('.') && temp.lastIndexOf('.') > 0) temp = temp.right(temp.length()-temp.lastIndexOf('.')) ;
@@ -353,10 +351,13 @@ bool BkeProject::WriteBkpFile()
     bkpAdmin = new QJsonObject ;
     bkpAdmin->insert("name",pname) ;
 
-    bkpAdmin->insert("import",HashToJson(ImportHash)) ;
-    bkpAdmin->insert("script",HashToJson(ScriptHash)) ;
-    bkpAdmin->insert("source",HashToJson(SourceHash)) ;
-    bkpAdmin->insert("version",QString("1.1")) ;
+	//bkpAdmin->insert("import", HashToJson(ImportHash));
+	//bkpAdmin->insert("script", HashToJson(ScriptHash));
+	//bkpAdmin->insert("source", HashToJson(SourceHash));
+	bkpAdmin->insert("import", TreeToJson(Root->child(0)));
+	bkpAdmin->insert("script", TreeToJson(Root->child(1)));
+	bkpAdmin->insert("source", TreeToJson(Root->child(2)));
+	bkpAdmin->insert("version", QString("1.2"));
 
     QJsonDocument llm ;
     llm.setObject(*bkpAdmin);
@@ -373,6 +374,21 @@ QJsonObject BkeProject::HashToJson(BkeFilesHash &hash)
         llm.insert( ptr.key(),QJsonArray::fromStringList(*ls)) ;
     }
     return llm ;
+}
+QJsonObject BkeProject::TreeToJson(QTreeWidgetItem *tree)
+{
+	QJsonObject llm;
+	for (auto i = 0; i < tree->childCount(); i++)
+	{
+		auto ch = tree->child(i);
+		if (ch->icon(0).cacheKey() == dirsico->cacheKey())
+		{
+			llm.insert(ch->text(0), TreeToJson(ch));
+		}
+		else
+			llm.insert(ch->text(0), 0);
+	}
+	return llm;
 }
 
 void BkeProject::JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion)
@@ -391,6 +407,36 @@ void BkeProject::JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion)
     }
 }
 
+void BkeProject::JsonToTree(QTreeWidgetItem *tree, QJsonObject llm, int version)
+{
+	switch (version)
+	{
+		case 12:
+		{
+			for (auto it = llm.begin(); it != llm.end(); it++)
+			{
+				if (it.value().isObject())
+				{
+					//folder
+					auto tr = new QTreeWidgetItem();
+					tr->setText(0, it.key());
+					tr->setIcon(0, *dirsico);
+					tree->addChild(tr);
+					JsonToTree(tr, it.value().toObject(), version);
+				}
+				else
+				{
+					//file
+					auto tr = new QTreeWidgetItem();
+					tr->setText(0, it.key());
+					SetIconFromSuffix(tr, it.key());
+					tree->addChild(tr);
+					JsonToTree(tr, it.value().toObject(), version);
+				}
+			}
+		}
+	}
+}
 
 QString BkeProject::IconKey(qint64 key)
 {
@@ -724,7 +770,7 @@ void BkeProject::Addfiles(const QStringList &ls ,const ItemInfo &f)
     if( ls.size() > 0)  WriteBkpFile() ;
 }
 
-void BkeProject::AddDir(const QString &dir , const ItemInfo &f)
+void BkeProject::AddDir(const QString &dir, const QString &relativeName, const ItemInfo &f)
 {
     BkeFilesHash k1,k2 ;
     SearchDir(k1,dir,".bkscr") ;
@@ -734,15 +780,19 @@ void BkeProject::AddDir(const QString &dir , const ItemInfo &f)
     BkeFilesHash *h1 ;
     workItem(&la,&h1,f);
 
-    if( !k1.isEmpty() ){
+	auto ff = f.getLayer1ItemInfo();
+	if (ff.Name == "脚本")
+	{
+		config->addScriptDir(relativeName);
+		config->writeFile();
         ItemFromHash(la,k1);
-        QTreeWidgetItem *le = FindItem(la,dir) ;
-        SearchTree(*h1,le,dir);
-    }
+		QTreeWidgetItem *le = FindItem(la, relativeName);
+		SearchTree(*h1, le, relativeName);
+	}
     if( !k2.isEmpty() ){
         ItemFromHash(Source,k2);
-        QTreeWidgetItem *le = FindItem(Source,dir) ;
-        SearchTree(SourceHash,le,dir);
+		QTreeWidgetItem *le = FindItem(Source, relativeName);
+		SearchTree(SourceHash, le, relativeName);
     }
     WriteBkpFile() ;
 }
@@ -750,7 +800,7 @@ void BkeProject::AddDir(const QString &dir , const ItemInfo &f)
 
 void BkeProject::workItem(QTreeWidgetItem **la,BkeFilesHash **h1,const ItemInfo &f)
 {
-    if( f.Layer < 1 || f.RootName == "资源"){
+    if(!( f.Layer < 1 || f.RootName == "资源")){
         *la = Script ;
         *h1 = &ScriptHash ;
     }

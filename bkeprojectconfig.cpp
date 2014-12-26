@@ -167,3 +167,10 @@ void BkeProjectConfig::writeFile()
     QString result = results.join('\n');
     LOLI::AutoWrite(filePath, result);
 }
+
+void BkeProjectConfig::addScriptDir(const QString &dir)
+{
+	if (scriptAutoSearchPath.contains(dir))
+		return;
+	scriptAutoSearchPath.push_back(dir);
+}

@@ -7,6 +7,10 @@
 #include "bkeSci/bkemarks.h"
 #include "bkeprojectconfig.h"
 
+class ItemInfo;
+
+void BKE_PROJECT_READITEM( QTreeWidgetItem *dest,ItemInfo &info) ;
+
 class ItemInfo
 {
 public:
@@ -18,9 +22,40 @@ public:
     QString RootName ;
     QString FullName ;
     int Layer ;   //层级
+
+	ItemInfo getLastItemInfo() const
+	{
+		if (Layer == 0)
+			return *this;
+		ItemInfo p;
+		BKE_PROJECT_READITEM(Root->parent(), p);
+		return p;
+	}
+
+	ItemInfo getLayer1ItemInfo() const
+	{
+		if (Layer <= 1)
+			return *this;
+		QTreeWidgetItem *r = Root;
+		int L = Layer;
+		while (L > 1)
+		{
+			L--;
+			r = r->parent();
+		}
+		ItemInfo p;
+		BKE_PROJECT_READITEM(r, p);
+		return p;
+	}
+
+	QString getDir() const
+	{
+		if (Layer <= 1)
+			return QString();
+		return FullName;
+	}
 };
 
-void BKE_PROJECT_READITEM( QTreeWidgetItem *dest,ItemInfo &info) ;
 
 typedef QHash<QString,QStringList*> BkeFilesHash ;
 
@@ -52,7 +87,7 @@ public:
     bool SearchDir(BkeFilesHash &hash,const QString &dir,const QString &suffix) ;
     void ItemFromHash(QTreeWidgetItem *dest,BkeFilesHash &hash) ;
     void Addfiles(const QStringList &ls , const ItemInfo &f) ;
-    void AddDir(const QString &dir ,const ItemInfo &f) ;
+    void AddDir(const QString &dir ,const QString &relativeName, const ItemInfo &f) ;
 
     QStringList AllScriptFiles() ;
     QTreeWidgetItem *FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty = true) ;
@@ -98,13 +133,14 @@ private:
     void MakeImport() ;
     void ListToIni(QSettings *bkp,QStringList list) ;
     void BuildItem(const QString &name) ;
-    void SetIconFromSuffix(QTreeWidgetItem *dest,const QString suffix) ;
+    void SetIconFromSuffix(QTreeWidgetItem *dest,const QString &suffix) ;
     void SortItem(QTreeWidgetItem *dest) ;
     void SortTree(QTreeWidgetItem *tree) ;
     void SearchTree(BkeFilesHash &hash, QTreeWidgetItem *dest,const QString &dir) ;
     QJsonObject HashToJson(BkeFilesHash &hash) ;
+	QJsonObject TreeToJson(QTreeWidgetItem *tree);
     void JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion) ;
-
+	void JsonToTree(QTreeWidgetItem *tree, QJsonObject llm, int version);
     void workItem(QTreeWidgetItem **la,BkeFilesHash **h1, const ItemInfo &f) ;
     QHash<QString,QStringList*> *ItemToHashptr(const QTreeWidgetItem *root) ;
 
