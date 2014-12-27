@@ -165,11 +165,11 @@ QStringList ListDirsCopy(QStringList &list,const QString &dir,const QString &new
     for( int i = 0 ; i < list.size() ; i++){
         temp = list.at(i);
 
-        temp.prepend( newdir +"/" ) ;
+        temp.prepend( newdir ) ;
         //新建路径
         info.setFile(temp);
         k.mkpath( info.path() ) ;
-        file.setFileName( dir + "/" + list.at(i) );
+        file.setFileName( dir + list.at(i) );
 
         //拷贝
         if( !file.copy(temp) ) ls.append( list.at(i) );

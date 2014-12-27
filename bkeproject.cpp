@@ -12,7 +12,7 @@ void BKE_PROJECT_READITEM( QTreeWidgetItem *dest,ItemInfo &info)
         root = root->parent() ;
         list.prepend(root->text(0)); //父节点总是在前面
     }
-    info.Dirs.clear(); ;
+    info.Dirs = '/';
     for(int i = 2 ; i < list.size() ; i++){
         info.Dirs.append( list.at(i)) ;
         if( i != list.size()-1) info.Dirs.append("/") ;
@@ -30,7 +30,7 @@ void BKE_PROJECT_READITEM( QTreeWidgetItem *dest,ItemInfo &info)
         info.ProName = list.at(0) ;
     }
 
-	if (info.Dirs.isEmpty()) info.FullName = '/' + info.Name;
+	if (info.Dirs == "/") info.FullName = '/' + info.Name;
     else info.FullName = info.Dirs + "/" + info.Name ;
 }
 
@@ -397,7 +397,11 @@ void BkeProject::JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion)
     for( auto ptr = bugs.begin() ; ptr != bugs.end() ; ptr++){
 
         QString orname = ptr.key() ;
-        QStringList *ls = new QStringList ;
+ 		if (!files.contains(orname))
+			files.insert(orname, 1);
+		else
+			files[orname]++;
+       QStringList *ls = new QStringList ;
         *ls = ptr.value().toStringList() ;
         if( lowVersion ){
             orname = BkeFullnameToName(orname,FileDir()) ;
@@ -429,6 +433,10 @@ void BkeProject::JsonToTree(QTreeWidgetItem *tree, QJsonObject llm, int version)
 					//file
 					auto tr = new QTreeWidgetItem();
 					tr->setText(0, it.key());
+					if (!files.contains(it.key()))
+						files.insert(it.key(), 1);
+					else
+						files[it.key()]++;
 					SetIconFromSuffix(tr, it.key());
 					tree->addChild(tr);
 					JsonToTree(tr, it.value().toObject(), version);
@@ -592,15 +600,7 @@ bool BkeProject::RemoveItem(QTreeWidgetItem *Item)
 
 bool BkeProject::RemoveItem(const ItemInfo &f)
 {
-    QTreeWidgetItem *le = FindItem(f.Root,f.FullName,false) ;
-    if( le == 0) return false ;
-
-    BkeFilesHash *h = typeHash(f.RootName) ;
-
-    if( !removeFromHash(h,f) ) return false;
-    RemoveItem(le) ;
-    delete le ;
-    return true ;
+	return RemoveItem(f.Root);
 }
 
 bool BkeProject::RemoveItem(const QString &file)
@@ -626,25 +626,24 @@ QStringList BkeProject::ListFiles(int type)
 {
     QString path ;
     QStringList filelist ;
-    QStringList *list ;
-    QHash<QString,QStringList*> hash ;
 
-    if( type == 0) hash = ImportHash ;
-    else if( type == 1 ) hash = ScriptHash ;
-    else hash = SourceHash ;
+	auto root = Root->child(type);
 
-    for( auto ptr = hash.begin() ; ptr != hash.end() ; ptr++){
-        path = ptr.key() ;
-        list = ptr.value() ;
-        for( int i = 0 ; i < list->size() ; i++){
-            if( path.isEmpty() )
-                filelist << list->at(i) ;
-            else
-                filelist <<  path + "/" + list->at(i) ;
-        }
-    }
+	ListFiles(filelist, root, "");
 
     return filelist ;
+}
+
+void BkeProject::ListFiles(QStringList &ls, QTreeWidgetItem *root, const QString &parentdir)
+{
+	for (int i = 0; i < root->childCount(); i++)
+	{
+		auto r = root->child(i);
+		if (r->childCount() == 0)
+			ls.push_back(parentdir + '/' + r->text(0));
+		else
+			ListFiles(ls, r, parentdir + '/' + r->text(0));
+	}
 }
 
 QStringList BkeProject::AllScriptFiles()
@@ -750,23 +749,52 @@ QStringList BkeProject::ItemDirs(QTreeWidgetItem *dest)
     return ls ;
 }
 
-void BkeProject::Addfiles(const QStringList &ls ,const ItemInfo &f)
+void BkeProject::Addfiles(const QStringList &ls, const ItemInfo &f, bool autochange)
 {
-    QTreeWidgetItem *la ;
-    BkeFilesHash *h1 ;
-    workItem(&la,&h1,f);
+	auto la = f.getLayer1ItemInfo().Root;
+	ItemInfo lb = f;
+	QHash<QString, QString> change;
+	for (auto it : ls)
+	{
+		change[it] = it;
+	}
+	while (autochange && lb.Layer > 1)
+	{
+		bool c = true;
+		for (auto it : change)
+		{
+			if (checkFileExist(chopFileName(it)))
+			{
+				c = false;
+				break;
+			}
+		}
+		if (!c)
+		{
+			for (auto&& it : change)
+			{
+				it = lb.Name + '_' + it;
+			}
+			lb = lb.getLastItemInfo();
+		}
+		else
+			break;
+	}
 
-    for( int i = 0 ; i < ls.size() ; i++){
-        QString rfile = ls.at(i);
-        if( rfile.endsWith(".bkscr") || rfile.endsWith(".bkpsr") ){
-            FindItem(la,rfile) ;
-            AddFileToHash(h1,rfile);
-        }
-        else{
-            FindItem(Source,rfile) ;
-            AddFileToHash(&SourceHash,rfile);
-        }
-    }
+	for (auto it = change.begin(); it != change.end(); it++)
+	{
+		QString itt = chopFileName(it.value());
+		if (!checkFileExist(itt))
+		{
+			if (itt != it.key())
+			{
+				QFile(pdir + f.getDir() + '/' + it.key()).rename(pdir + f.getDir() + '/' + itt);
+			}
+			FindItem(f.Root, itt, true);
+		}
+	}
+
+
     if( ls.size() > 0)  WriteBkpFile() ;
 }
 

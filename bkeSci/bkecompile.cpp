@@ -5,14 +5,17 @@ BkeCompile::BkeCompile(QObject *parent) :
     QObject(parent)
 {
     codec = QTextCodec::codecForName("GBK");
+	cmd = NULL;
 }
 
 void BkeCompile::Compile(const QString dir)
 {
     result.clear();
+	if (cmd)
+		delete cmd;
     cmd = new QProcess(this) ;
     connect(cmd,SIGNAL(readyReadStandardOutput()),this,SLOT(StandardOutput())) ;
-    connect(cmd,SIGNAL(finished(int)),this,SLOT(finished(int))) ;
+	connect(cmd, SIGNAL(finished(int)), this, SLOT(finished(int)));
     connect(cmd,SIGNAL(error(QProcess::ProcessError)),this,SLOT(error(QProcess::ProcessError)));
     list.clear();
     cmd->start(BKE_CURRENT_DIR+"/tool/BKCompiler_Dev.exe",QStringList() << dir << "-nopause");
@@ -32,10 +35,9 @@ void BkeCompile::StandardOutput()
 void BkeCompile::finished(int exitCode )
 {
     emit CompliteFinish();
-    delete cmd ;
-    cmd = 0 ;
+    //delete cmd ;
+    //cmd = 0 ;
 }
-
 
 QString BkeCompile::Result()
 {

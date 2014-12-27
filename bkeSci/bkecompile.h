@@ -21,7 +21,7 @@ signals:
 public slots:
     void StandardOutput() ;
     void finished(int exitCode ) ;
-    void error(QProcess::ProcessError);
+	void error(QProcess::ProcessError);
 private:
     QByteArray result ;
     QProcess *cmd ;

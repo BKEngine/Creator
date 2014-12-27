@@ -37,7 +37,23 @@ namespace BkeCreator {
      QStringList CopyStencil(const QString &dir,const QStringList &ls) ;
 }
 
+inline QString chopFileExt(const QString &filename)
+{
+	int a1 = filename.lastIndexOf('.');
+	int a2 = filename.lastIndexOf('/');
+	int a3 = filename.lastIndexOf('\\');
+	if (a1 < a2 || a1 < a3)
+		return QString();
+	return filename.right(filename.length() - a1 - 1);
+}
 
-
+inline QString chopFileName(const QString &fullname)
+{
+	int a2 = fullname.lastIndexOf('/');
+	int a3 = fullname.lastIndexOf('\\');
+	if (a2 < a3)
+		a2 = a3;
+	return fullname.right(fullname.length() - a2 - 1);
+}
 
 #endif // FUNCTION_H

@@ -117,7 +117,7 @@ void ProjectWindow::ItemDoubleClick(QTreeWidgetItem * item, int column)
     BkeProject *p = FindPro(info.ProName);
     QString name = p->FileDir()+"/"+info.FullName ;
 
-    if( info.FullName == "config.bkpsr" ){
+    if( info.FullName == "/config.bkpsr" ){
         ConfigProject(p->config);
         return ;
     }
@@ -276,17 +276,22 @@ void ProjectWindow::Addfiles(const ItemInfo &f)
 {
     BkeProject *p = FindPro(f.ProName);
     QStringList ls ;
-    if( f.RootName == "初始化" || f.RootName == "脚本"){
+	if (f.RootName == "初始化" || f.RootName == "脚本"){
         ls = QFileDialog::getOpenFileNames(this,"添加文件",p->FileDir() + f.getDir(),"bkscr脚本(*.bkscr)") ;
     }
 	else ls = QFileDialog::getOpenFileNames(this, "添加文件", p->FileDir() + f.getDir(), "所有文件(*.*)");
 
     if( ls.isEmpty() ) return ;
     QStringList errors;
-    auto it = ls.begin();
+	QStringList errors2;
+	auto it = ls.begin();
     while(it != ls.end())
     {
-        QString rfile = BkeFullnameToName( *it, p->FileDir() );
+		QString rfile = BkeFullnameToName(*it, p->FileDir() + f.getDir());
+		if (p->checkFileExist(chopFileName(*it)))
+		{
+			errors2.append(*it);
+		}
         if(rfile.isEmpty())
         {
             errors.append(*it);
@@ -300,9 +305,15 @@ void ProjectWindow::Addfiles(const ItemInfo &f)
     }
     if(!errors.isEmpty())
     {
-        QMessageBox::warning(this,"警告","不允许添加工程目录之外的文件：\n" + errors.join('\n'));
+        QMessageBox::warning(this,"警告","不允许添加选中目录之外的文件：\n" + errors.join('\n'));
     }
-    p->Addfiles(ls,f);
+	int res = 0;
+	if (!errors2.isEmpty())
+	{
+		QMessageBox::warning(this, "警告", "以下文件由于工程里有同名文件故无法添加：\n" + errors2.join('\n'));
+		res = QMessageBox::warning(this, "警告", "是否自动加上文件夹作为前缀？", QMessageBox::Yes, QMessageBox::No);
+	}
+	p->Addfiles(ls, f, res == 16384);
 }
 
 //

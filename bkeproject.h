@@ -81,13 +81,15 @@ public:
     void MakeItems(QTreeWidgetItem *dest,const QStringList &list) ;
     void MakeItems(QTreeWidgetItem *dest,BkeFilesHash &hash) ;
     QStringList ListFiles(int type) ;
+	void ListFiles(QStringList &ls, QTreeWidgetItem *root, const QString &parentdir);
     QStringList ItemDirs(QTreeWidgetItem *dest) ;
     void AddFileToHash(BkeFilesHash *hash,const QString &filename) ;
     bool removeFromHash(BkeFilesHash *hash, const ItemInfo &f ) ;
     bool SearchDir(BkeFilesHash &hash,const QString &dir,const QString &suffix) ;
     void ItemFromHash(QTreeWidgetItem *dest,BkeFilesHash &hash) ;
-    void Addfiles(const QStringList &ls , const ItemInfo &f) ;
+    void Addfiles(const QStringList &ls , const ItemInfo &f, bool autochange) ;
     void AddDir(const QString &dir ,const QString &relativeName, const ItemInfo &f) ;
+	bool checkFileExist(const QString &f){ return files.contains(f); }
 
     QStringList AllScriptFiles() ;
     QTreeWidgetItem *FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty = true) ;
@@ -129,6 +131,8 @@ private:
     QJsonObject *bkpAdmin ;
     bool isnull ;
     int  currentptr ;
+
+	QMap<QString, long> files;
 
     void MakeImport() ;
     void ListToIni(QSettings *bkp,QStringList list) ;
