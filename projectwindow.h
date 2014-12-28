@@ -29,6 +29,7 @@ public:
         btn_search ,
         btn_remove ,
         btn_close ,
+		btn_rename, 
         BTN_COUNT
     };
 
@@ -48,7 +49,7 @@ signals:
     void DirWillBeInsert(const QString &text) ;
     void CheckFileOpen(const QString &file,bool &IsOpen) ;
     void ImportFileChange(const QString &text,int type) ;
-    void FileNameChange(const QString &oldname,const QString &newname,bool &c) ;
+    void FileNameChange(const QString &oldname,const QString &newname) ;
     void CurrentProChange(BkeProject *pro) ;
     void Compile() ;
     void TextToMarks(const QString &text,const QString &dir,int type) ;
@@ -59,7 +60,7 @@ public slots:
     void ItemDoubleClick(QTreeWidgetItem * item, int column) ;
     void ShowRmenu( const QPoint & pos ) ;
     void SetCurrentItem(const QString &file) ;
-    void ReName() ;
+    //void ReName() ;
     void OpenFile() ;
     void ActionAdmin() ;
 
@@ -81,6 +82,7 @@ private:
     void AddDir(const ItemInfo &f) ;
     void PreviewFile(const ItemInfo &f) ;
     void CloseProject(const ItemInfo &f);
+	void RenameFile(const ItemInfo &f);
     void Active(const ItemInfo &f);
     void ShowInDir(const ItemInfo &f);
     QTreeWidgetItem *findFileInProject(const QString &name) ;

@@ -23,7 +23,6 @@ public:
     QString saveDir;
     QStringList imageAutoSearchPath;
     QStringList audioAutoSearchPath;
-    QStringList scriptAutoSearchPath;
     int maxSaveDataNum;
     int defaultFontSize;
     QBkeVariable defaultFontColor;
@@ -33,12 +32,15 @@ public:
     QBkeVariable metaData;
 
     BkeProjectConfig &operator = (const BkeProjectConfig &r);
+private:
+    QStringList scriptAutoSearchPath;
 
 public slots:
     void readFile();
     void fileChanged();
     void writeFile();
-	void addScriptDir(const QString &dir);
+	void addScriptDir(QString dir);
+	void removeScriptDir(QString dir);
 
 signals:
     void readFileError(QString s);

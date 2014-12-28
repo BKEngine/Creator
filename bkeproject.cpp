@@ -825,6 +825,10 @@ void BkeProject::AddDir(const QString &dir, const QString &relativeName, const I
     WriteBkpFile() ;
 }
 
+bool BkeProject::checkIsDir(const ItemInfo &f)
+{
+	return f.IconKey== dirsico->cacheKey();
+}
 
 void BkeProject::workItem(QTreeWidgetItem **la,BkeFilesHash **h1,const ItemInfo &f)
 {

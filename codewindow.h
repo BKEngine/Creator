@@ -176,6 +176,7 @@ public slots:
     void ActCut() ;
     void ActPaste() ;
     void ActCopy() ;
+	void Rename(const QString &old, const QString &now);
 private:
     OtherWindow   *othwin ;
     ProjectWindow *prowin ;

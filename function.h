@@ -33,7 +33,8 @@ QStringList ListDirsCopy(QStringList &list,const QString &dir,const QString &new
 namespace BkeCreator {
      void AddRecentProject(const QString &file) ;
      void AddRecentFile(const QString &file) ;
-     void ReadApiList(QStringList *ls,const QString &name,int type) ;
+	 void ReNameRecentFile(const QString &old, const QString &now);
+	 void ReadApiList(QStringList *ls, const QString &name, int type);
      QStringList CopyStencil(const QString &dir,const QStringList &ls) ;
 }
 
@@ -54,6 +55,15 @@ inline QString chopFileName(const QString &fullname)
 	if (a2 < a3)
 		a2 = a3;
 	return fullname.right(fullname.length() - a2 - 1);
+}
+
+inline QString chopFileNameWithoutExt(const QString &fullname)
+{
+	auto f = chopFileName(fullname);
+	int a1 = f.lastIndexOf('.');
+	if (a1 < 0)
+		return f;
+	return f.left(a1);
 }
 
 #endif // FUNCTION_H

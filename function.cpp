@@ -212,6 +212,13 @@ void BkeCreator::AddRecentFile(const QString &file)
     LOLI::AutoWrite(BKE_CURRENT_DIR+"/files.txt",BKE_Recently_Files.join("\r\n")) ;
 }
 
+void BkeCreator::ReNameRecentFile(const QString &old, const QString &now)
+{
+	int i = BKE_Recently_Files.indexOf(old);
+	if (i >= 0)
+		BKE_Recently_Files[i] = now;
+}
+
 QStringList BkeCreator::CopyStencil(const QString &dir,const QStringList &ls)
 {
     QFile f;

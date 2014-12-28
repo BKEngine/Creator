@@ -90,6 +90,7 @@ public:
     void Addfiles(const QStringList &ls , const ItemInfo &f, bool autochange) ;
     void AddDir(const QString &dir ,const QString &relativeName, const ItemInfo &f) ;
 	bool checkFileExist(const QString &f){ return files.contains(f); }
+	bool checkIsDir(const ItemInfo &f);
 
     QStringList AllScriptFiles() ;
     QTreeWidgetItem *FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty = true) ;
@@ -107,6 +108,9 @@ public:
     QTreeWidgetItem *Root ;
     BkeParser *lex ;
     BkeProjectConfig *config;
+
+	QMap<QString, long> files;
+
 private:
     QIcon *fileico ;
     QIcon *dirsico ;
@@ -132,7 +136,6 @@ private:
     bool isnull ;
     int  currentptr ;
 
-	QMap<QString, long> files;
 
     void MakeImport() ;
     void ListToIni(QSettings *bkp,QStringList list) ;

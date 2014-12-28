@@ -192,8 +192,10 @@ void CodeWindow::OtherWinOtherwin(OtherWindow *win)
 void CodeWindow::OtherWinProject(ProjectWindow *p)
 {
     prowin = p ;
+	//rename
+	connect(p, SIGNAL(FileNameChange(QString, QString)), this, SLOT(Rename(QString, QString)));
     //打开文件
-    connect(p,SIGNAL(OpenThisFile(QString,QString)),this,SLOT(addFile(QString,QString))) ;
+	connect(p, SIGNAL(OpenThisFile(QString, QString)), this, SLOT(addFile(QString, QString)));
     //插入路径
     connect(p,SIGNAL(DirWillBeInsert(QString)),this,SLOT(TextInsert(QString))) ;
     //编译脚本
@@ -340,6 +342,22 @@ void CodeWindow::btnDisable()
     btnundoact->setEnabled(false);
     btncodeact->setEnabled(false);
     btnfly->setEnabled(false);
+}
+
+void CodeWindow::Rename(const QString &old, const QString &now)
+{
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(old), 0);
+	docStrHash.remove(LOLI_OS_QSTRING(old));
+	docStrHash.insert(LOLI_OS_QSTRING(now), loli);
+	if (loli)
+	{
+		SetCurrentEdit(loli->edit);
+		loli->SetFileName(now);
+		BkeCreator::ReNameRecentFile(old, now);
+		int pos = ItemTextList.indexOf(LOLI_OS_QSTRING(chopFileName(old)));
+		filewidget->item(pos)->setText(chopFileName(now));
+		lablelist->setItemText(pos, chopFileName(now));
+	}
 }
 
 //打开文件，文件列表是自动维护的

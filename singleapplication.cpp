@@ -7,6 +7,7 @@ SingleApplication::SingleApplication(int argc, char *argv[])
     :QApplication(argc,argv)
 {
     _running=0;
+	/*
     QString serverName = QCoreApplication::applicationName();
     QLocalSocket socket;
     socket.connectToServer(serverName);
@@ -31,7 +32,7 @@ SingleApplication::SingleApplication(int argc, char *argv[])
             m_localServer->listen(serverName);
         }
     }
-
+	*/
 }
 
 void SingleApplication::newLocalSocketConnection()

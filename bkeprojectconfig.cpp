@@ -168,9 +168,18 @@ void BkeProjectConfig::writeFile()
     LOLI::AutoWrite(filePath, result);
 }
 
-void BkeProjectConfig::addScriptDir(const QString &dir)
+void BkeProjectConfig::addScriptDir(QString dir)
 {
+	if (dir[0] == '/')
+		dir = dir.right(dir.length() - 1);
 	if (scriptAutoSearchPath.contains(dir))
 		return;
 	scriptAutoSearchPath.push_back(dir);
+}
+
+void BkeProjectConfig::removeScriptDir(QString dir)
+{
+	if (dir[0] == '/')
+		dir = dir.right(dir.length() - 1);
+	scriptAutoSearchPath.removeAll(dir);
 }

@@ -20,7 +20,7 @@ ProjectWindow::ProjectWindow(QWidget *parent)
     connect(this,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(ItemDoubleClick(QTreeWidgetItem*,int))) ;
     connect(this,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(ShowRmenu(QPoint))) ;
 
-    QStringList ls = QString("设为活动项目 编译脚本 发布游戏 插入路径 预览 新建脚本 新建导入脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭项目").split(" ") ;
+    QStringList ls = QString("设为活动项目 编译脚本 发布游戏 插入路径 预览 新建脚本 新建导入脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭项目 重命名").split(" ") ;
     for( int i = 0 ; i < BTN_COUNT ; i++){
         btns[i] = new QAction(ls.at(i),this);
         connect(btns[i],SIGNAL(triggered()),this,SLOT(ActionAdmin())) ;
@@ -115,7 +115,7 @@ void ProjectWindow::ItemDoubleClick(QTreeWidgetItem * item, int column)
     if( !ReadItemInfo(item,info) ) return ;
 
     BkeProject *p = FindPro(info.ProName);
-    QString name = p->FileDir()+"/"+info.FullName ;
+	QString name = p->FileDir() + info.FullName;
 
     if( info.FullName == "/config.bkpsr" ){
         ConfigProject(p->config);
@@ -160,7 +160,8 @@ void ProjectWindow::ShowRmenu( const QPoint & pos )
     }
     else if( info.Layer > 1){
         mn.addAction(btns[btn_remove]) ;
-    }
+		mn.addAction(btns[btn_rename]);
+	}
 
     pt.setX(pt.x()+10);
     mn.exec(pt) ;
@@ -331,32 +332,32 @@ void ProjectWindow::AddDir(const ItemInfo &f)
 	p->AddDir(d, tmp, f);
 }
 
-void ProjectWindow::ReName()
-{
-    QString name = QInputDialog::getText(this,"重命名","将要改变到的名称，后缀名可以省略。不能含有\/:*?\"<>|") ;
-    if( name.isEmpty() ) return ;
-    else if( !name.endsWith(".bkscr")) name.append(".bkscr") ;
-
-    QString oldname = workpro->FileDir()+"/"+info.FullName ;
-    QString newname = oldname.left(oldname.lastIndexOf("/")) + "/" + name ;
-
-    QFile temp(newname) ;
-    if( temp.exists() ){
-        QMessageBox::information(this,"重命名","文件已存在，不能再使用这个名称。",QMessageBox::Ok) ;
-        return ;
-    }
-
-    bool result ;
-    emit FileNameChange(oldname,newname,result);
-    if( !result){
-        QMessageBox::warning(this,"重命名","重命名失败") ;
-        return ;
-    }
-
-    QTreeWidgetItem *le = currentItem() ;
-    le->setText(0,name);
-    workpro->WriteBkpFile() ;
-}
+//void ProjectWindow::ReName()
+//{
+//    QString name = QInputDialog::getText(this,"重命名","将要改变到的名称，后缀名可以省略。不能含有\/:*?\"<>|") ;
+//    if( name.isEmpty() ) return ;
+//    else if( !name.endsWith(".bkscr")) name.append(".bkscr") ;
+//
+//    QString oldname = workpro->FileDir()+"/"+info.FullName ;
+//    QString newname = oldname.left(oldname.lastIndexOf("/")) + "/" + name ;
+//
+//    QFile temp(newname) ;
+//    if( temp.exists() ){
+//        QMessageBox::information(this,"重命名","文件已存在，不能再使用这个名称。",QMessageBox::Ok) ;
+//        return ;
+//    }
+//
+//    bool result ;
+//    emit FileNameChange(oldname,newname,result);
+//    if( !result){
+//        QMessageBox::warning(this,"重命名","重命名失败") ;
+//        return ;
+//    }
+//
+//    QTreeWidgetItem *le = currentItem() ;
+//    le->setText(0,name);
+//    workpro->WriteBkpFile() ;
+//}
 
 
 void ProjectWindow::OpenFile()
@@ -425,6 +426,63 @@ void ProjectWindow::ActionAdmin()
     else if( p == btns[btn_search]) ;
     else if( p == btns[btn_remove]) DeleteFile(info);
     else if( p == btns[btn_close]) CloseProject(info);
+	else if (p == btns[btn_rename]) RenameFile(info);
+}
+
+void ProjectWindow::RenameFile(const ItemInfo &f)
+{
+	BkeProject *p = FindPro(f.ProName);
+	if (f.Layer <= 1)
+		return;
+	if (!p->checkIsDir(f))
+	{
+		//file
+		QString name = QInputDialog::getText(this, "重命名", "输入新名称(文件路径和文件类型不可更改)");
+		QString ext = chopFileExt(f.Name);
+		name = chopFileNameWithoutExt(name) + '.' + ext;
+		QString rawname = p->FileDir() + f.FullName;
+		QString newname = p->FileDir() + f.Dirs + '/' + name;
+		QFile temp(newname);
+		if (temp.exists()){
+			QMessageBox::information(this, "重命名", "文件已存在，不能再使用这个名称。", QMessageBox::Ok);
+			return;
+		}
+		auto res = QFile(rawname).rename(newname);
+		if (!res)
+		{
+			QMessageBox::warning(this, "重命名", "重命名失败");
+			return;
+		}
+		f.Root->setText(0, name);
+		p->files.remove(f.Name);
+		p->files.insert(name, 1);
+		if (newname.endsWith(".bkscr"))
+		{
+			emit FileNameChange(rawname, newname);
+		}
+	}
+	else
+	{
+		QString name = QInputDialog::getText(this, "重命名", "输入新文件夹名(不可新建子文件夹)");
+		name = chopFileName(name);
+		QString rawname = p->FileDir() + f.FullName;
+		QString newname = p->FileDir() + f.Dirs + '/' + name;
+		QDir temp(newname);
+		if (temp.exists()){
+			QMessageBox::information(this, "重命名", "文件已存在，不能再使用这个名称。", QMessageBox::Ok);
+			return;
+		}
+		auto res = temp.rename(rawname, newname);
+		if (!res)
+		{
+			QMessageBox::warning(this, "重命名", "重命名失败");
+			return;
+		}
+		f.Root->setText(0, name);
+		p->config->removeScriptDir(f.FullName);
+		p->config->addScriptDir(f.Dirs + '/' + name);
+	}
+	p->WriteBkpFile();
 }
 
 void ProjectWindow::PreviewFile(const ItemInfo &f)
