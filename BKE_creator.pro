@@ -15,11 +15,14 @@ TEMPLATE = app
 CONFIG += warn_off
 CONFIG+= c++11
 #if use in linux,you must use a full name
-#LIBS += /usr/lib/i386-linux-gnu/libqscintilla2.a
+linux{
+    LIBS += /home/icemic/Dev/Qt5.3.2_x64/5.3/gcc_64/lib/libqscintilla2.a
+}
 
 #if use in windows
-LIBS += libqscintilla2
-
+win32 {
+    LIBS += libqscintilla2
+}
 
 RC_FILE += ico.rc
 

@@ -3,7 +3,9 @@
 #include <QSize>
 #include "dia/lablesuredialog.h"
 #include <QApplication>
+#ifdef WIN32
 #include <Windows.h>
+#endif
 #include <stdint.h>
 
 QList<BkeProject*> projectlist ;
@@ -98,7 +100,8 @@ void ProjectWindow::OpenProject(const QString &file)
     workpro->Import->setExpanded(true);
 
 	QString t = "BKE Creator - " + file;
-	SetProp(GetActiveWindow(), L"title", (HANDLE)BKE_hash(t.toStdWString().c_str()));
+    qApp->activeWindow()->setWindowTitle(t);
+    //SetProp(GetActiveWindow(), L"title", (HANDLE)BKE_hash(t.toStdWString().c_str()));
 }
 
 //读取项目，并发送

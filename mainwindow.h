@@ -3,7 +3,7 @@
 
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
-#include <qtnetwork/QNetworkReply>
+#include <QtNetwork/QNetworkReply>
 #include "weh.h"
 #include "codewindow.h"
 #include "projectwindow.h"
