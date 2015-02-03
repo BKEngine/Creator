@@ -352,5 +352,15 @@ source/编辑.png -text
 source/编辑.psd -text
 /topbarwindow.cpp -text
 /topbarwindow.h -text
+update/loli/loli_island.cpp -text
+update/loli/loli_island.h -text
+update/main.cpp -text
+update/mainwindow.cpp -text
+update/mainwindow.h -text
+update/mainwindow.ui -text
+update/update.pro -text
+update/update.pro.user -text
+update/weh.cpp -text
+update/weh.h -text
 /weh.cpp -text
 /weh.h -text
