@@ -16,7 +16,10 @@ CONFIG += warn_off
 CONFIG+= c++11
 #if use in linux,you must use a full name
 linux{
-    LIBS += /home/icemic/Dev/Qt5.3.2_x64/5.3/gcc_64/lib/libqscintilla2.a
+   LIBS += /home/icemic/Dev/Qt5.3.2_x86/5.3/gcc/lib/libqscintilla2.a
+    amd64{
+        LIBS += /home/icemic/Dev/Qt5.3.2_x64/5.3/gcc_64/lib/libqscintilla2.a
+    }
 }
 
 #if use in windows
@@ -92,3 +95,7 @@ FORMS += \
     dia/ctextedit.ui
 
 LIBS += -L$$PWD/ParserHelper -lParserHelper
+
+linux{
+    LIBS += -Wl,-rpath,./
+}

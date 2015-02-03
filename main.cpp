@@ -50,7 +50,9 @@ int main(int argc, char *argv[])
     QApplication::setApplicationName("BKE_Creator");
     QTextCodec *xcodec = QTextCodec::codecForLocale();
 #ifdef QT_DEBUG
+#ifdef WIN32
     BKE_CURRENT_DIR = QString("F:/work/qt/BKE_creator/file") ;
+#endif
 #endif
 
 #ifndef QT_DEBUG
@@ -131,9 +133,12 @@ int main(int argc, char *argv[])
     MainWindow test ;
 
     a.setActiveWidget(&test);
-
+#ifdef Q_OS_WIN
     if( BKE_CLOSE_SETTING->value("window/ismax").toBool() ) test.showMaximized();
     else test.show();
+#else
+    test.show();
+#endif
 
     if( argc > 1){
         projectedit->OpenProject(xcodec->toUnicode(QByteArray(argv[1])) );
