@@ -21,8 +21,21 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    if( argc < 3 ) HTTP_ADRESS = "http://bke.bakerist.info/update/" ;
-    else HTTP_ADRESS = "http://bke.bakerist.info/update/test/" ;
+    QString platform;
+
+#ifdef Q_OS_WIN
+    platform = "win/";
+#endif
+#ifdef Q_OS_LINUX
+    platform = "";
+#endif
+#ifdef Q_OS_Mac
+    platform = "mac/";
+#endif
+
+
+    if( argc < 3 ) HTTP_ADRESS = "http://bke.bakerist.info/update/"+platform ;
+    else HTTP_ADRESS = "http://bke.bakerist.info/update/test/"+platform ;
 
     w.DownInfo();
 

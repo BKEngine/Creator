@@ -80,15 +80,26 @@ void MainWindow::InfodownFinish(QNetworkReply* netfile)
     //断开信号和槽
     disconnect(netAdmin,SIGNAL(finished(QNetworkReply*)),this,SLOT(InfodownFinish(QNetworkReply*))) ;
 
+    QString fileName;
+
+#if defined(Q_OS_WIN)
+    fileName = "update.exe";
+#elif defined(Q_OS_LINUX)
+    fileName = "update";
+#elif defined(Q_OS_MAC)
+    fileName = "update";
+#endif
+
+
     //下载初始化
     if( !dc.isNull() ){
 
         downlist.clear();
         cmdString.clear();
 
-        if( isFileDiffrent("update.exe") ){    //优先升级update.exe
+        if( isFileDiffrent(fileName) ){    //优先升级update.exe
             isSelfUp = true ;
-            downlist << "update.exe" ;
+            downlist << fileName ;
         }
         else downlist = nfilejs.keys() ;
     }
@@ -128,12 +139,25 @@ void MainWindow::Nextfile()
         return ;
     }
 
+    QString fileName;
+
+#if defined(Q_OS_WIN)
+    fileName = "tool/bkengine_dev.exe";
+#elif defined(Q_OS_LINUX)
+    fileName = "tool/bkengine_dev";
+#elif defined(Q_OS_MAC)
+    fileName = "tool/bkengine_dev";
+#endif
+
+
     //绑定新文件
     currentfile = downlist.at(ptr) ;
-    if(currentfile.toLower() == "tool/bkengine_dev.exe")
+    if(currentfile.toLower() == fileName)
         isBkeUp = true;
     state = STATE_NEXT ;
     ptr++ ;
+
+    ui->filesBar->setValue(ui->filesBar->value()+1);
 
     ui->textEdit->append( currentfile+" 准备更新...\n");
     currentREP = netAdmin->get(QNetworkRequest(QUrl( HTTP_ADRESS+"bke_creator/"+currentfile))) ;
@@ -162,7 +186,12 @@ void MainWindow::downFinish(QNetworkReply* netfile)
 
     if( dmd5 != nfilejs.value(currentfile).toString() ) addError("md5校验失败...");
     else{
+#if defined(Q_OS_WIN)
         QFileInfo oinfo( CURRENT_DIR+"/"+currentfile+".new" ) ;
+#elif defined(Q_OS_LINUX)
+        QFileInfo oinfo( CURRENT_DIR+"/"+currentfile ) ;
+#elif defined(Q_OS_MAC)
+#endif
         outd.mkpath( oinfo.path() ) ;
         if( !LOLI::AutoWrite( oinfo.filePath(),dest ) ){
             addError("写出失败");
@@ -181,6 +210,7 @@ void MainWindow::downFinish(QNetworkReply* netfile)
 
     state = STATE_NEXT ;
     if( netfile != 0) netfile->deleteLater();
+
 }
 
 void MainWindow::updateDataReadProgress(qint64 from,qint64 to)
@@ -240,7 +270,7 @@ void MainWindow::simpleOK()
         autocheck->stop();
         ui->filesBar->setValue( ui->filesBar->maximum() );
         ui->textEdit->append("完成！请等待脚本运行...");
-
+#if defined(Q_OS_WIN)
         if( !cmdString.isEmpty() ){
             cmdString.prepend("@echo off\r\necho 准备覆盖....\r\nping -n 2 127.1>nul\r\necho 【 3 】\r\nping -n 2 127.1>nul\r\n"
                               "echo 【 2 】\r\n"
@@ -262,9 +292,6 @@ void MainWindow::simpleOK()
                 cmdString.append("start updatelog.txt");
         }
 
-        newJSON.insert("files",ofilejs) ; //替换新的文件列表为旧的，成功的文件md5被改变
-        QJsonDocument dc(newJSON) ;
-        LOLI::AutoWrite(CURRENT_DIR + "/version.txt",dc.toJson()) ;
 
         QFile temp( CURRENT_DIR+"/up.bat" ) ;
         temp.remove();
@@ -272,6 +299,14 @@ void MainWindow::simpleOK()
         temp.close();
 
         QDesktopServices::openUrl(QUrl::fromLocalFile( CURRENT_DIR+"/up.bat" )) ;
+#elif defined(Q_OS_LINUX)
+//        QDesktopServices::openUrl(QUrl::fromLocalFile( CURRENT_DIR+"/BKE_creator" )) ;
+        QMessageBox::information(this,"在线更新","更新成功！请重启BKECreator！");
+#elif defined(Q_OS_MAC)
+#endif
+        newJSON.insert("files",ofilejs) ; //替换新的文件列表为旧的，成功的文件md5被改变
+        QJsonDocument dc(newJSON) ;
+        LOLI::AutoWrite(CURRENT_DIR + "/version.txt",dc.toJson()) ;
         close() ;
     }
 

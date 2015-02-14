@@ -132,7 +132,8 @@ int main(int argc, char *argv[])
 
     MainWindow test ;
 
-    a.setActiveWidget(&test);
+//    a.setActiveWidget(&test);
+    a.setActiveWindow(&test);
 #ifdef Q_OS_WIN
     if( BKE_CLOSE_SETTING->value("window/ismax").toBool() ) test.showMaximized();
     else test.show();

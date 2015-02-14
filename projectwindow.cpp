@@ -3,6 +3,7 @@
 #include <QSize>
 #include "dia/lablesuredialog.h"
 #include <QApplication>
+#include <QWindow>
 #ifdef WIN32
 #include <Windows.h>
 #endif
@@ -100,7 +101,8 @@ void ProjectWindow::OpenProject(const QString &file)
     workpro->Import->setExpanded(true);
 
 	QString t = "BKE Creator - " + file;
-    //qApp->activeWindow()->setWindowTitle(t);
+
+    qApp->activeWindow()->setWindowTitle(t);
     //SetProp(GetActiveWindow(), L"title", (HANDLE)BKE_hash(t.toStdWString().c_str()));
 }
 
