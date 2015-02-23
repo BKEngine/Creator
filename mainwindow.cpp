@@ -96,6 +96,14 @@ MainWindow::MainWindow(QWidget *parent) :
     //注册事件过滤器
     QMainWindow::installEventFilter(this) ;
 
+    _instance = this;
+}
+
+MainWindow *MainWindow::_instance = NULL;
+
+MainWindow::~MainWindow()
+{
+    _instance = NULL;
 }
 
 void MainWindow::CreateMenu()

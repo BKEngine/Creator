@@ -25,6 +25,11 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = 0);
+    virtual ~MainWindow();
+private:
+    static MainWindow *_instance;
+public:
+    static MainWindow *getInstance(){return _instance;}
 
 signals:
 

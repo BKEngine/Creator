@@ -2,6 +2,7 @@
 #include "dia/newprodia.h"
 #include <QSize>
 #include "dia/lablesuredialog.h"
+#include "mainwindow.h"
 #include <QApplication>
 #include <QWindow>
 #ifdef WIN32
@@ -102,7 +103,7 @@ void ProjectWindow::OpenProject(const QString &file)
 
 	QString t = "BKE Creator - " + file;
 
-    qApp->activeWindow()->setWindowTitle(t);
+    MainWindow::getInstance()->setWindowTitle(t);
     //SetProp(GetActiveWindow(), L"title", (HANDLE)BKE_hash(t.toStdWString().c_str()));
 }
 

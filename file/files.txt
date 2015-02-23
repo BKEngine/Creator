@@ -1,10 +1,10 @@
-﻿F:/work/QT/BKE_Creator/file/test/effect/111.bkscr
+﻿C:/Users/taiga/Desktop/test_/BattleScene.bkscr
+C:/Users/taiga/Desktop/test_/macro.bkscr
+C:/Users/taiga/Desktop/test_/Character.bkscr
+F:/work/QT/BKE_Creator/file/test/effect/111.bkscr
 F:/work/QT/BKE_Creator/file/test/effect/123.bkscr
 F:/work/QT/BKE_Creator/file/test/effect/234/123_111.bkscr
 F:/work/QT/BKE_Creator/file/test//effect/123/123_111.bkscr
 F:/work/QT/BKE_Creator/file/test//scripts/start.bkscr
 F:/work/QT/BKE_Creator/file/test//effect/111.bkscr
 F:/work/QT/BKE_Creator/file/test//macro.bkscr
-F:/work/QT/BKE_Creator/file/test//main.bkscr
-F:/work/QT/BKE_Creator/file/test//config.bkpsr
-F:/work/QT/BKE_Creator/file/test/scripts/start.bkscr

@@ -129,7 +129,13 @@ QString WordSupport::GetWord(int from,int &end)
     if( IsAtEnd() ) return QString() ;
 
     if( cch == QChar('\"')){
-        QString temp = MachTo("\"") ;
+        QString temp = MatchToQuote() ;
+        end = from + temp.length() ;
+        Gopos(from);
+        return temp ;
+    }
+    else if( cch == QChar('\'')){
+        QString temp = MatchToSingleQuote() ;
         end = from + temp.length() ;
         Gopos(from);
         return temp ;
@@ -167,21 +173,30 @@ void WordSupport::NextTwoWord()
     NextWord();
 }
 
-QString WordSupport::MachTo(const QString &s)
+QString WordSupport::MatchToQuote()
 {
-    if( s.isEmpty() ) return QString() ;
-
     int be = currentpos ;
-    int pos = text.indexOf(s,currentpos+1) ;
-    if( pos < 0) return s ;
+    int pos = text.indexOf(QChar('"'),currentpos+1) ;
+    if( pos < 0) return text.mid(be);
 
-    if( s.length() == 1){   //单符号将跳过转意
-        while( SafeChar(pos-1) == QChar('\\') ){
-            pos = text.indexOf(s,pos+1) ;
-        }
+    while( SafeChar(pos+1) == QChar('"') ){
+        pos = text.indexOf(QChar('"'),pos+2) ;
+        if( pos < 0) return text.mid(be);
     }
+    Gopos(be);
+    return text.mid(be,pos-be+1) ;
+}
 
-    if( pos < 0) return QString() ;
+QString WordSupport::MatchToSingleQuote()
+{
+    int be = currentpos ;
+    int pos = text.indexOf(QChar('\''),currentpos+1) ;
+    if( pos < 0) return text.mid(be);
+
+    while( SafeChar(pos-1) == QChar('\\') ){
+        pos = text.indexOf(QChar('\''),pos+1) ;
+        if( pos < 0) return text.mid(be);
+    }
     Gopos(be);
     return text.mid(be,pos-be+1) ;
 }

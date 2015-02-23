@@ -562,7 +562,10 @@ QSize CodeWindow::sizeHint () const
 void CodeWindow::TextInsert(const QString &text)
 {
     if( stackwidget->count() < 1) return ;
-    currentedit->insert("\""+text+"\"");
+    if(!text.isEmpty() && (text.left(1)=="\\" || text.left(1)=="/"))
+        currentedit->insert("\""+text.mid(1)+"\"");
+    else
+        currentedit->insert("\""+text+"\"");
 }
 
 
