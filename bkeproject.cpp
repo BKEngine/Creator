@@ -124,10 +124,13 @@ bool BkeProject::OpenProject(const QString &name)
 		JsonToHash(ScriptHash, bkpAdmin->value("script").toObject(), lowVersion);
 		JsonToHash(SourceHash, bkpAdmin->value("source").toObject(), lowVersion);
 	}
-	int version = int(bkpAdmin->value("version").toString().toDouble() * 10);
-	JsonToTree(Root->child(0), bkpAdmin->value("import").toObject(), version);
-	JsonToTree(Root->child(1), bkpAdmin->value("script").toObject(), version);
-	JsonToTree(Root->child(2), bkpAdmin->value("source").toObject(), version);
+    else
+    {
+        int version = int(bkpAdmin->value("version").toString().toDouble() * 10 + 0.5);
+        JsonToTree(Root->child(0), bkpAdmin->value("import").toObject(), version);
+        JsonToTree(Root->child(1), bkpAdmin->value("script").toObject(), version);
+        JsonToTree(Root->child(2), bkpAdmin->value("source").toObject(), version);
+    }
 
     //检查路径是否已经改变
     /*
