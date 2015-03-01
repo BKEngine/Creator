@@ -7,7 +7,7 @@
 #include "bkeproject.h"
 #include "dia/bkeconfiguimodel.h"
 
-extern QList<BkeProject*> projectlist ;
+//extern QList<BkeProject*> projectlist ;
 
 
 // 项目树窗口
@@ -16,7 +16,7 @@ class ProjectWindow : public QTreeWidget
     Q_OBJECT
 public:
     enum{
-        btn_active,
+        //btn_active,
         btn_compile ,
         btn_release ,
         btn_insertdir ,
@@ -39,8 +39,8 @@ public:
     BkeProject *FindFileProject(const QString &file) ;
     BkeProject *FindProjectFromDir(const QString &dir) ;
     void OpenProject(const QString &file) ;
-    QList<BkeProject*> ProjectList(){ return projectlist ; }
-    bool hasProject(){ return projectlist.size() > 0 ; }
+    //QList<BkeProject*> ProjectList(){ return projectlist ; }
+    bool hasProject(){ return !!workpro ; }
 
     BkeProject *workpro ;
 
@@ -74,16 +74,17 @@ private:
     QAction *btns[BTN_COUNT] ;
 
     bool ReadItemInfo(QTreeWidgetItem *dest,ItemInfo &f) ;
-    void BkeChangeCurrentProject(BkeProject *p) ;
+    void BkeChangeCurrentProject(/*BkeProject *p*/) ;
     void ConfigProject(BkeProjectConfig *config) ;
     void NewFile(const ItemInfo &f, int type) ;
     void DeleteFile(const ItemInfo &f) ;
     void Addfiles(const ItemInfo &f) ;
     void AddDir(const ItemInfo &f) ;
     void PreviewFile(const ItemInfo &f) ;
-    void CloseProject(const ItemInfo &f);
+	void CloseProject();
+	void CloseProject(const ItemInfo &f);
 	void RenameFile(const ItemInfo &f);
-    void Active(const ItemInfo &f);
+    //void Active(const ItemInfo &f);
     void ShowInDir(const ItemInfo &f);
     QTreeWidgetItem *findFileInProject(const QString &name) ;
 };

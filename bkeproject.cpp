@@ -274,6 +274,11 @@ QString BkeProject::ProjectName() const
     return pname ;
 }
 
+QString BkeProject::ProjectFile() const
+{
+	return pdir + "/" + pname;
+}
+
 //寻找指定的文件，并把文件加入到hash中
 bool BkeProject::SearchDir(BkeFilesHash &hash,const QString &dir,const QString &suffix)
 {

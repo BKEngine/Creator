@@ -11,7 +11,7 @@
 #endif
 #include <stdint.h>
 
-QList<BkeProject*> projectlist ;
+//QList<BkeProject*> projectlist ;
 
 extern uint32_t BKE_hash(const wchar_t *str);
 
@@ -25,7 +25,7 @@ ProjectWindow::ProjectWindow(QWidget *parent)
     connect(this,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(ItemDoubleClick(QTreeWidgetItem*,int))) ;
     connect(this,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(ShowRmenu(QPoint))) ;
 
-    QStringList ls = QString("设为活动项目 编译脚本 发布游戏 插入路径 预览 新建脚本 新建导入脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭项目 重命名").split(" ") ;
+    QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建导入脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭项目 重命名").split(" ") ;
     for( int i = 0 ; i < BTN_COUNT ; i++){
         btns[i] = new QAction(ls.at(i),this);
         connect(btns[i],SIGNAL(triggered()),this,SLOT(ActionAdmin())) ;
@@ -39,23 +39,28 @@ void ProjectWindow::NewProject()
 {
     NewProDia use(this) ;
     use.WaitUser() ;
-    BkeProject *pro = new BkeProject ;
+	if (workpro)
+	{
+		CloseProject();
+	}
+    workpro = new BkeProject() ;
     if( use.type == 0 ){
-        pro->NewProject(use.okdir,use.okname) ;
+		workpro->NewProject(use.okdir, use.okname);
     }
     else if( use.type == 1){
 
     }
     else
     {
-        delete pro;
+		delete workpro;
+		workpro = NULL;
         return ;
     }
 
-    projectlist << pro ;
-    addTopLevelItem(pro->Root);
-    BkeChangeCurrentProject(pro);
-    BkeCreator::AddRecentProject(pro->FileDir()+"/"+BKE_PROJECT_NAME) ;
+    //projectlist << pro ;
+    addTopLevelItem(workpro->Root);
+    BkeChangeCurrentProject();
+	BkeCreator::AddRecentProject(workpro->FileDir() + "/" + BKE_PROJECT_NAME);
 }
 
 void ProjectWindow::OpenProject()
@@ -67,28 +72,30 @@ void ProjectWindow::OpenProject()
 void ProjectWindow::OpenProject(const QString &file)
 {
     if( file.isEmpty() ) return  ;
-
+	if (workpro && file == workpro->ProjectFile())
+		return;
+	CloseProject();
     QString path = QFileInfo(file).path();
-    for(auto it = projectlist.begin();it != projectlist.end();++it)
-    {
-        if((*it)->FileDir()==path)
-        {
-            BkeChangeCurrentProject(*it);
-            return;
-        }
-    }
-    BkeProject *pro ;
+    //for(auto it = projectlist.begin();it != projectlist.end();++it)
+    //{
+    //    if((*it)->FileDir()==path)
+    //    {
+    //        BkeChangeCurrentProject(*it);
+    //        return;
+    //    }
+    //}
 
-    pro = new BkeProject ;
-    if(!pro->OpenProject(file))
+    workpro = new BkeProject ;
+	if (!workpro->OpenProject(file))
     {
         QMessageBox::information(this,"错误","文件不存在，项目打开失败",QMessageBox::Ok) ;
-        delete pro;
+		delete workpro;
+		workpro = NULL;
         return;
     }
-    projectlist << pro ;
-    addTopLevelItem(pro->Root);
-    BkeChangeCurrentProject(pro);
+    //projectlist << pro ;
+	addTopLevelItem(workpro->Root);
+    BkeChangeCurrentProject();
 
 
 
@@ -96,7 +103,7 @@ void ProjectWindow::OpenProject(const QString &file)
 //    QString text ;
 //    LOLI::AutoRead(text,pro->FileDir()+"/BkeProject.bmk") ;
 //    emit TextToMarks(text,pro->FileDir(),0);
-    BkeCreator::AddRecentProject(pro->FileDir()+"/"+BKE_PROJECT_NAME) ;
+	BkeCreator::AddRecentProject(workpro->FileDir() + "/" + BKE_PROJECT_NAME);
     //默认展开节点
     workpro->Root->setExpanded(true);
     workpro->Script->setExpanded(true);
@@ -145,7 +152,7 @@ void ProjectWindow::ShowRmenu( const QPoint & pos )
     QMenu mn ;
 
     if( info.Layer < 1){
-        mn.addAction(btns[btn_active]) ;
+        //mn.addAction(btns[btn_active]) ;
         mn.addAction(btns[btn_compile]) ;
         mn.addAction(btns[btn_release]) ;
     }
@@ -179,18 +186,24 @@ void ProjectWindow::ShowRmenu( const QPoint & pos )
 //设置选中项
 void ProjectWindow::SetCurrentItem(const QString &file)
 {
-    BkeProject *abc ;
-    QTreeWidgetItem *le ;
-    for( int i = 0 ; i < projectlist.size() ; i++){
-        abc = projectlist.at(i) ;
-        le = abc->FindItem(abc->Import,file,false) ;
-        if( le == 0 ) le = abc->FindItem(abc->Script,file,false ) ;
-        if( le == 0 ) le = abc->FindItem(abc->Source,file,false ) ;
-        if( le != 0 ){
-            setCurrentItem(le);
-            return ;
-        }
-    }
+	if (!workpro)
+		return;
+	BkeProject *abc;
+	QTreeWidgetItem *le = workpro->FindItemAll(file);
+	if (le)
+	{
+		setCurrentItem(le);
+	}
+	//for (int i = 0; i < projectlist.size(); i++){
+ //       abc = projectlist.at(i) ;
+ //       le = abc->FindItem(abc->Import,file,false) ;
+ //       if( le == 0 ) le = abc->FindItem(abc->Script,file,false ) ;
+ //       if( le == 0 ) le = abc->FindItem(abc->Source,file,false ) ;
+ //       if( le != 0 ){
+ //           setCurrentItem(le);
+ //           return ;
+ //       }
+ //   }
 }
 
 void ProjectWindow::NewFile(const ItemInfo &f, int type)
@@ -227,31 +240,33 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
 //寻找项目
 BkeProject *ProjectWindow::FindPro(const QString &proname)
 {
-    BkeProject *abc ;
-    for( int i = 0 ; i < projectlist.size() ; i++){
-        abc = projectlist.at(i) ;
-        if( abc->ProjectName() == proname){
-            return abc ;
-        }
-    }
+	if (workpro && workpro->ProjectName() == proname)
+		return workpro;
+    //BkeProject *abc ;
+    //for( int i = 0 ; i < projectlist.size() ; i++){
+    //    abc = projectlist.at(i) ;
+    //    if( abc->ProjectName() == proname){
+    //        return abc ;
+    //    }
+    //}
     return 0 ;
 }
 
 QTreeWidgetItem *ProjectWindow::findFileInProject(const QString &name)
 {
     //没有项目返回0
-    if( projectlist.size() < 1) return 0 ;
+    if( !workpro) return 0 ;
+	return workpro->FindItemAll(name);
+    //temppro = workpro ;
+    //QTreeWidgetItem *le = temppro->FindItemAll(name) ;
+    //if( projectlist.size() == 1) return le ;
 
-    temppro = workpro ;
-    QTreeWidgetItem *le = temppro->FindItemAll(name) ;
-    if( projectlist.size() == 1) return le ;
-
-    for( int i = 0 ; i < projectlist.size() ; i++){
-        temppro = projectlist.at(i) ;
-        if( temppro != workpro) le = temppro->FindItemAll(name) ;
-        if( le != 0) break ;
-    }
-    return le ;
+    //for( int i = 0 ; i < projectlist.size() ; i++){
+    //    temppro = projectlist.at(i) ;
+    //    if( temppro != workpro) le = temppro->FindItemAll(name) ;
+    //    if( le != 0) break ;
+    //}
+    //return le ;
 }
 
 #undef DeleteFile
@@ -377,21 +392,23 @@ void ProjectWindow::OpenFile()
     else OpenThisFile(filename,temppro->FileDir());
 }
 
-void ProjectWindow::BkeChangeCurrentProject(BkeProject *p)
+void ProjectWindow::BkeChangeCurrentProject(/*BkeProject *p*/)
 {
-    if( workpro != 0){
-        workpro->SetTopLeveBold(false);
-    }
+	workpro->SetTopLeveBold(true);
+	emit CurrentProChange(workpro);
+	//if( workpro != 0){
+    //    workpro->SetTopLeveBold(false);
+    //}
 
-    if( p != 0){
-        workpro = p ;
-        workpro->SetTopLeveBold(true);
-        emit CurrentProChange(workpro);
-    }
-    else{
-        workpro = 0 ;
-        emit CurrentProChange(workpro);
-    }
+    //if( p != 0){
+    //    workpro = p ;
+    //    workpro->SetTopLeveBold(true);
+    //    emit CurrentProChange(workpro);
+    //}
+    //else{
+    //    workpro = 0 ;
+    //    emit CurrentProChange(workpro);
+    //}
 }
 
 BkeProject *ProjectWindow::FindFileProject(const QString &file)
@@ -403,9 +420,11 @@ BkeProject *ProjectWindow::FindFileProject(const QString &file)
 BkeProject *ProjectWindow::FindProjectFromDir(const QString &dir)
 {
     QString a = LOLI_OS_QSTRING( dir ) ;
-    for( int i = 0 ; i< projectlist.size() ; i++){
-        if( a == LOLI_OS_QSTRING(projectlist.at(i)->FileDir()) ) return projectlist.at(i) ;
-    }
+	if (workpro && a == LOLI_OS_QSTRING(workpro->FileDir()))
+		return workpro;
+    //for( int i = 0 ; i< projectlist.size() ; i++){
+    //    if( a == LOLI_OS_QSTRING(projectlist.at(i)->FileDir()) ) return projectlist.at(i) ;
+    //}
     return 0 ;
 }
 
@@ -420,7 +439,7 @@ void ProjectWindow::ActionAdmin()
     QAction *p = dynamic_cast<QAction*>(sender()) ;
 
     if( p == NULL ) return ;
-    else if( p == btns[btn_active] ) Active(info);
+    //else if( p == btns[btn_active] ) Active(info);
     else if( p == btns[btn_compile] ) emit Compile();
     else if( p == btns[btn_release] ) ;
     else if( p == btns[btn_insertdir] ) emit DirWillBeInsert(info.FullName);
@@ -502,34 +521,43 @@ void ProjectWindow::PreviewFile(const ItemInfo &f)
     }
 }
 
-void ProjectWindow::CloseProject(const ItemInfo &f)
+void ProjectWindow::CloseProject()
 {
-    BkeProject *p = FindPro(f.ProName);
-    if(p)
-    {
-        projectlist.removeOne(p);
-        p->deleteLater();
-        takeTopLevelItem(indexOfTopLevelItem(p->Root));
-        if(p == workpro)
-        {
-            p = NULL;
-            if(!projectlist.empty())
-            {
-                p = projectlist.first();
-            }
-            BkeChangeCurrentProject(p);
-        }
-    }
+	if (!workpro)
+		return;
+	workpro->deleteLater();
+	takeTopLevelItem(indexOfTopLevelItem(workpro->Root));
 }
 
-void ProjectWindow::Active(const ItemInfo &f)
+void ProjectWindow::CloseProject(const ItemInfo &f)
 {
-    BkeProject *p = FindPro(f.ProName);
-    if(p)
-    {
-        BkeChangeCurrentProject(p);
-    }
+	CloseProject();
+    //BkeProject *p = FindPro(f.ProName);
+    //if(p)
+    //{
+    //    projectlist.removeOne(p);
+    //    p->deleteLater();
+    //    takeTopLevelItem(indexOfTopLevelItem(p->Root));
+    //    if(p == workpro)
+    //    {
+    //        p = NULL;
+    //        if(!projectlist.empty())
+    //        {
+    //            p = projectlist.first();
+    //        }
+    //        BkeChangeCurrentProject(p);
+    //    }
+    //}
 }
+
+//void ProjectWindow::Active(const ItemInfo &f)
+//{
+//    BkeProject *p = FindPro(f.ProName);
+//    if(p)
+//    {
+//        BkeChangeCurrentProject(p);
+//    }
+//}
 
 #if defined(Q_OS_WIN)
 #include <windows.h>
@@ -539,11 +567,11 @@ void ProjectWindow::Active(const ItemInfo &f)
 
 void ProjectWindow::ShowInDir(const ItemInfo &f)
 {
-    BkeProject *p = FindPro(f.ProName);
-    QString n = p->FileDir()+"\\"+info.FullName ;
+	BkeProject *p = FindPro(f.ProName);
+	QString n = p->FileDir() + info.FullName;
 #if defined(Q_OS_WIN)
-    n.replace('/','\\');
-    QByteArray a = ("/select,"+n).toLocal8Bit();
-    ShellExecuteA(NULL,"open","explorer.exe",a.data(),NULL,true);
+	n.replace('/', '\\');
+	QByteArray a = ("/select," + n).toLocal8Bit();
+	ShellExecuteA(NULL, "open", "explorer.exe", a.data(), NULL, true);
 #endif
 }

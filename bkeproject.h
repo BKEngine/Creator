@@ -64,6 +64,7 @@ class BkeProject :public QObject
 public:
     BkeProject(QObject *parent = 0);
     ~BkeProject() ;
+	QString ProjectFile() const;
     QString FileDir() const;
     QString ProjectName() const ;
     QString IconKey(qint64 key) ;
