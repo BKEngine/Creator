@@ -178,7 +178,7 @@ public slots:
     void ActCopy() ;
 	void Rename(const QString &old, const QString &now);
 private:
-    OtherWindow   *othwin ;
+    OtherWindow *othwin ;
     ProjectWindow *prowin ;
     BkeProject *currentproject ;
     QStackedWidget *stackwidget ;

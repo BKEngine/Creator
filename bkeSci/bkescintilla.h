@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QToolTip>
 #include "bkeSci/qscilexerbkescript.h"
-#include "paper/parser.h"
+#include "paper/creator_parser.h"
 #include "bkeSci/BkeIndicatorBase.h"
 #include <weh.h>
 

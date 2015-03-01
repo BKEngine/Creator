@@ -3,7 +3,7 @@
 
 #include <QSettings>
 #include "weh.h"
-#include "paper/parser.h"
+#include "paper/creator_parser.h"
 #include "bkeSci/bkemarks.h"
 #include "bkeprojectconfig.h"
 

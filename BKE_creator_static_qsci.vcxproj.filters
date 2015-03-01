@@ -46,12 +46,12 @@
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{d8c06787-9510-4d3e-abfb-398c0db6e588}</UniqueIdentifier>
+      <UniqueIdentifier>{658a6b86-55e9-4616-8f48-8813769cb4b4}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{b8708ff5-2349-495a-8e2f-0b608d4a9e17}</UniqueIdentifier>
+      <UniqueIdentifier>{a5481506-ad7f-476c-833d-1f4ed1fbfd4b}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
@@ -228,9 +228,6 @@
     <ClCompile Include="otherwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="paper\parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="projectwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -372,12 +369,6 @@
     <ClCompile Include="Release\moc_otherwindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_parser.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_parser.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_projectwindow.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -453,6 +444,39 @@
     <ClCompile Include="GeneratedFiles\qrc_source.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParserHelper\ParserHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_creator_parser.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_creator_parser.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="paper\creator_parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_hash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_number.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_string.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_variable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\extend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -474,9 +498,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BKEscintilla\src\CharClassify.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BKEscintilla\lexlib\CharacterCategory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BKEscintilla\lexlib\CharacterSet.h">
@@ -650,9 +671,6 @@
     <CustomBuild Include="otherwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="paper\parser.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="projectwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -719,10 +737,46 @@
     <ClInclude Include="GeneratedFiles\ui_ctextedit.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParserHelper\parser\BKE_array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\BKE_hash.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\BKE_number.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\BKE_string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\BKE_variable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\extend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\memorypool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\vcode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\ctextedit.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="paper\creator_parser.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
