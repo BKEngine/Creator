@@ -100,7 +100,8 @@ public:
     BkeFilesHash *typeHash(int type) ;
     BkeFilesHash *typeHash(const QString &n) ;
 
-    QTreeWidgetItem *Import ;
+	QTreeWidgetItem *ConfigFile;
+	QTreeWidgetItem *Import;
     QTreeWidgetItem *Script ;
     QTreeWidgetItem *Source ;
     QTreeWidgetItem *BKAfile ;
@@ -137,7 +138,8 @@ private:
     bool isnull ;
     int  currentptr ;
 
-
+	QTreeWidgetItem* findItemIn(QTreeWidgetItem *p, const QString &name, bool createnew = false, QIcon *icon = NULL);
+	void ForceAddScript(const QString &f, QTreeWidgetItem* p);
     void MakeImport() ;
     void ListToIni(QSettings *bkp,QStringList list) ;
     void BuildItem(const QString &name) ;
