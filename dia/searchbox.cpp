@@ -1,4 +1,5 @@
-﻿#include "searchbox.h"
+﻿#include <weh.h>
+#include "searchbox.h"
 
 SearchBox::SearchBox(QWidget *parent) :
     QDockWidget(parent)

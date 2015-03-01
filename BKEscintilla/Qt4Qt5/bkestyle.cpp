@@ -1,3 +1,4 @@
+#include <weh.h>
 #include "bkestyle.h"
 
 BKEstyle::BKEstyle(QObject *parent)

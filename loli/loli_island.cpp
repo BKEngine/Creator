@@ -1,3 +1,4 @@
+#include <weh.h>
 #include "loli_island.h"
 
 int LOLI_AUTOWRITE_LEN ;

@@ -1,4 +1,5 @@
-﻿#include "mainwindow.h"
+﻿#include <weh.h>
+#include "mainwindow.h"
 
 QSplitter *ras[3] ;
 CodeWindow *codeedit ;

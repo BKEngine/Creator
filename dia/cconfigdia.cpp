@@ -1,4 +1,5 @@
-﻿#include "cconfigdia.h"
+﻿#include <weh.h>
+#include "cconfigdia.h"
 
 CConfigdia::CConfigdia(QWidget *parent) :
     QDialog(parent)

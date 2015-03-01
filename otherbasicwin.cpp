@@ -1,4 +1,5 @@
-﻿#include "otherbasicwin.h"
+﻿#include <weh.h>
+#include "otherbasicwin.h"
 #include "mainwindow.h"
 
 OtherBasicWin::OtherBasicWin(QWidget *parent)

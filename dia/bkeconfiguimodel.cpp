@@ -1,4 +1,5 @@
-﻿#include "bkeconfiguimodel.h"
+﻿#include <weh.h>
+#include "bkeconfiguimodel.h"
 
 #ifdef Q_OS_LINUX
 

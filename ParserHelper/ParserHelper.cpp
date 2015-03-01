@@ -1,4 +1,5 @@
-﻿#include "ParserHelper.h"
+﻿#include <weh.h>
+#include "ParserHelper.h"
 #include "parser/parser.h"
 
 QBkeVarExcept::QBkeVarExcept(const Var_Except &e)

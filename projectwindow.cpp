@@ -1,4 +1,5 @@
-﻿#include "projectwindow.h"
+﻿#include <weh.h>
+#include "projectwindow.h"
 #include "dia/newprodia.h"
 #include <QSize>
 #include "dia/lablesuredialog.h"
@@ -30,7 +31,7 @@ ProjectWindow::ProjectWindow(QWidget *parent)
         connect(btns[i],SIGNAL(triggered()),this,SLOT(ActionAdmin())) ;
     }
 
-    workpro = 0 ;
+	workpro = NULL;
 }
 
 

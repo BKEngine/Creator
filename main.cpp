@@ -1,9 +1,9 @@
-﻿#include <QApplication>
+﻿#include <weh.h>
+#include <QApplication>
 #include <QDesktopWidget>
 #include <QMainWindow>
 #include <QLibrary>
 #include "mainwindow.h"
-#include "weh.h"
 #include "singleapplication.h"
 #include <stdint.h>
 
@@ -68,7 +68,8 @@ int main(int argc, char *argv[])
    QApplication::addLibraryPath( BKE_CURRENT_DIR) ;
 #endif
 
-    SingleApplication a(argc, argv);
+    //SingleApplication a(argc, argv);
+    QApplication a(argc, argv);
 #ifndef WIN32
     if(a.isRunning())
         return -1;
@@ -145,10 +146,10 @@ int main(int argc, char *argv[])
         projectedit->OpenProject(xcodec->toUnicode(QByteArray(argv[1])) );
     }
 
-    QObject::connect(&a,&SingleApplication::newApplication,[=](QString args)
-        {if(args.count())
-            projectedit->OpenProject(args);}
-    );
+    //QObject::connect(&a,&SingleApplication::newApplication,[=](QString args)
+    //    {if(args.count())
+    //        projectedit->OpenProject(args);}
+    //);
 
 #ifndef QT_DEBUG
     if( !BKE_CLOSE_SETTING->value("update/close").toBool() ) QTimer::singleShot(3000,&test,SLOT(CheckUpdate()) ) ;

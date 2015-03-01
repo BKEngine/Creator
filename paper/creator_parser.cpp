@@ -1,4 +1,5 @@
-﻿#include "creator_parser.h"
+﻿#include <weh.h>
+#include "creator_parser.h"
 
 QStringList SYSlist ;
 

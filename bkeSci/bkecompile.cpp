@@ -1,5 +1,5 @@
-﻿#include "bkecompile.h"
-#include "weh.h"
+﻿#include <weh.h>
+#include "bkecompile.h"
 
 BkeCompile::BkeCompile(QObject *parent) :
 QObject(parent)

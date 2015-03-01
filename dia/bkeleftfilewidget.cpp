@@ -1,4 +1,5 @@
-﻿#include "bkeleftfilewidget.h"
+﻿#include <weh.h>
+#include "bkeleftfilewidget.h"
 
 BkeLeftFileWidget::BkeLeftFileWidget(QWidget *parent) :
     QListWidget(parent)

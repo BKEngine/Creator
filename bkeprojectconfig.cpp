@@ -1,4 +1,5 @@
-﻿#include "bkeprojectconfig.h"
+﻿#include <weh.h>
+#include "bkeprojectconfig.h"
 #include "loli/loli_island.h"
 
 BkeProjectConfig::BkeProjectConfig()
