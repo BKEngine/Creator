@@ -43,4 +43,6 @@
 #pragma execution_character_set("utf-8")
 #endif
 
+#define SAVE_VERSION 12
+
 #endif // WEH_H

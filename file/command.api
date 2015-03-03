@@ -1,163 +1,151 @@
-﻿##
-var f = %[];
-var vf = %[];
-var sf = %[] ;
-var basic_layer ;
-var message_layer ;
-function array() ;
-function dictionary() ;
-function log() ;
-function eval() ;
-function range() ;
-function randaom() ;
-function typeof() ;
-function itoa() ;
-function itoa2() ;
-function time() ;
-function hash() ;
-function hash16() ;
-function char() ;
-function saveFile() ;
-function loadFile() ;
-function appenFile() ;
-function evalFile() ;
-var Date.getYear() ;
-var Date.getMonth() ;
-var Date.getDay() ;
-var Date.getWDay() ;
-var Date.getHour() ;
-var Date.getMinute() ;
-var Date.getSecond() ;
-var Math.abs() ;
-var Math.sqrt() ;
-var Math.lg() ;
-var Math.ln() ;
-var Math.log() ;
-var Math.floor() ;
-var Math.ceil() ;
-var Math.round() ;
-var Math.sin() ;
-var Math.cos() ;
-var Math.tan() ;
-var Math.asin() ;
-var Math.acos() ;
-var Math.aton() ;
-##
-
-
-
 @macro name="action"  //创建一个命令队列，用于按顺序执行命令
-@macro name="action#\"callback\"" block file
-@macro name="action#\"copy\"" index
-@macro name="action#\"delay\"" time
-@macro name="action#\"fadeto\"" opacity time=0 target ease
-@macro name="action#\"flipx\"" target
-@macro name="action#\"flipy\"" target
-@macro name="action#\"jump\"" time height x=0 target times
-@macro name="action#\"moveby\"" pos time==0 target ease
-@macro name="action#\"moveto\"" pos time=0 target ease
-@macro name="action#\"quake\"" time rangex=0 rangey=0 target
-@macro name="action#\"remove\"" delete target
-@macro name="action#\"rotateby\"" rotate time=0 target ease
-@macro name="action#\"rotateto\"" rotate time=0 target ease
-@macro name="action#\"scaleby\"" time=0 x=100 y=100 target ease
-@macro name="action#\"scaleto\"" time=0 x=100 y=100 target ease
-@macro name="action#\"shake\"" time range target times
-@macro name="action#\"start\"" target times
-@macro name="action#\"tintby\"" r g b time=0 target ease
-@macro name="action#\"tintto\"" color time=0 target ease
-@macro name="action#\"visible\"" visible target
+@macro name="action#""callback""" label file exp param wait=true 
+@macro name="action#""delay""" time 
+@macro name="action#""end""" target times 
+@macro name="action#""fadeto""" opacity time=0 target ease 
+@macro name="action#""flipx""" force=false target 
+@macro name="action#""flipy""" force=false target 
+@macro name="action#""jump""" time height x=0 target times 
+@macro name="action#""moveby""" pos time==0 target ease 
+@macro name="action#""moveto""" pos time=0 target ease 
+@macro name="action#""parallel""" 无 
+@macro name="action#""quake""" time rangex=0 rangey=0 speed=1000 target 
+@macro name="action#""queue""" 无 
+@macro name="action#""remove""" delete target 
+@macro name="action#""rotateby""" rotate time=0 target ease 
+@macro name="action#""rotateto""" rotate time=0 target ease 
+@macro name="action#""scaleby""" time=0 x=100 y=100 target ease 
+@macro name="action#""scaleto""" time=0 x=100 y=100 target ease 
+@macro name="action#""scissorby""" rect time=0 target 
+@macro name="action#""scissorto""" rect time=0 target 
+@macro name="action#""shake""" time range vertical=false target times 
+@macro name="action#""shaky3d""" time hnum=10 vnum=10 offset=5 speed=1000 target 
+@macro name="action#""start""" target times 
+@macro name="action#""tintby""" r g b time=0 target ease 
+@macro name="action#""tintto""" color time=0 target ease 
+@macro name="action#""visible""" visible target 
 @macro name="addto" index target zorder=0 pos=[0,0] opacity=255 //添加一个精灵（源精灵）到另一个层或精灵（目标精灵）上，这里的透明度将会传递
-@macro name="anchor" index qset set keep=false //调整一个精灵的锚点。set和qset参数至多存在一个。//qset预设字符串有：center、topleft、topright、topcenter、leftcenter、//rightcenter、bottomleft、bottomcenter、bottomright
-@macro name="animate"  //从一个图片中创建一个动画，mode为剪裁方式（动画帧水平排列）
-@macro name="animate#\"cell\"" index frame
-@macro name="animate#\"horizontal\"" index file frame interval=33 loop=false delay=0
-@macro name="animate#\"multifiles\"" index frames interval=33 loop=false delay=0
-@macro name="animate#\"start\"" index
-@macro name="animate#\"stop\"" index
-@macro name="animate#\"vertical\"" index file frame interval=33 loop=false delay=0
-@macro name="b"  //开关粗体
+@macro name="anchor" index set get keep=false //调整一个精灵的锚点。set和get参数至多存在一个。set如果是字符串的话，其预设字符串有：center、topleft、topright、topcenter、leftcenter、rightcenter、bottomleft、bottomcenter、bottomright
+@macro name="animate"  //从一个图片中创建一个动画，水平模式（动画帧水平排列），即：
+一个frame为3，row为2的动画的帧播放顺序为：
+1 2 3
+4 5 6
+@macro name="animate#""cell""" index frame 
+@macro name="animate#""horizontal""" index file frame row=1 interval=33 loop="forward" 
+@macro name="animate#""multifiles""" index file interval=33 loop=true delay=0 
+@macro name="animate#""start""" index 
+@macro name="animate#""stop""" index 
+@macro name="animate#""vertical""" index file frame column=1 interval=33 loop="forward" 
+@macro name="b" 无 //开关粗体
 @macro name="bgm" file loop=true vol=100 fadein=0 loopto=0 //播放背景音乐
-@macro name="break" 
-@macro name="button" index idle hover click onenter onleave onclick //创建一个按钮（事件解释见说明）
-@macro name="buttonex" index idle hover click onenter onleave onclick //创建一个按钮
-@macro name="call" block file //call到指定标签
+@macro name="break" 无 
+@macro name="button" index idle hover click onenter onleave onclick enterse clickse threshold=0 //创建一个按钮（事件解释见说明）
+@macro name="buttonex" index idle hover click onenter onleave onclick enterse clickse threshold=0 //创建一个按钮
+@macro name="call" label file //call到指定标签
 @macro name="checkbox" index idle checked onchanged state=false //创建一个checkbox
 @macro name="checkboxex" index idle checked onchanged state=false //创建一个checkbox
-@macro name="click"  //等待鼠标左键点击后继续
-@macro name="continue" 
+@macro name="click" 无 //等待鼠标左键点击后继续
+@macro name="continue" 无 
 @macro name="deleteevent" name //删除自定义事件中的此事件，若有被覆盖的系统默认事件则系统默认事件被重新启用
-@macro name="else"  //跟if配合使用
+@macro name="effect"  //删除目标sp上的特定效果。name和index为二选一的选项。如果使用name，那么所有同名的效果都被移出，如果使用index，则指定次序的效果被移除。效果的次序为默认递增1，即最先加的effect的次序为0，下一个为1，以此类推。
+@macro name="effect#""BC""" target bright contrast 
+@macro name="effect#""add""" target mask masksp 
+@macro name="effect#""delete""" target name="" index=-1 
+@macro name="effect#""gamma""" target down up 
+@macro name="effect#""gray""" target 
+@macro name="effect#""invert""" target 
+@macro name="effect#""mask""" target mask masksp 
+@macro name="effect#""mono""" target mono 
+@macro name="effect#""stencil""" target rule 
+@macro name="else" 无 //跟if配合使用
 @macro name="elseif" exp //根据这个表达式判断执行下面的语句还是跳到下一个else或elseif后面执行。
-@macro name="endif"  //标志着if块的结束
-@macro name="er"  //清除文本层上文字
+@macro name="endif" 无 //标志着if块的结束
+@macro name="er" 无 //清除文本层上文字
 @macro name="eval" exp //执行一个表达式（赋值等等）
-@macro name="event" name block file exp enable=true iscall=false param //注册事件以及它的处理目标，若事件与系统事件重名则覆盖系统默认事件
+@macro name="event" name label file type="callback" exp param ignore=false enable=true condition="" //注册事件以及它的处理目标，若事件与系统事件重名则覆盖系统默认事件
 @macro name="fade" channel time to stop=false //将一个通道的音量渐变到目标值
 @macro name="fileexist" file result //若文件存在则变量置为true，否则为false
 @macro name="for" var range //var指定的变量遍历range数组的每一个值，每遍历一次执行一次for块。
 @macro name="history" output //设置是否开启历史记录
-@macro name="i"  //开关斜体
-@macro name="idlesp" get num //获得一个当前没有被占用的索引值（index），这个索引将保证安全（除非你刻意去冲撞它）。//当num为1时，get的变量返回的是一个数值，当num>1时，get的变量返回的是一个数组，包含了num个数值。
+@macro name="i" 无 //开关斜体
+@macro name="idlesp" get num //获得一个当前没有被占用的索引值（index），这个索引将保证安全（除非你刻意去冲撞它）。当num为1时，get的变量返回的是一个数值，当num>1时，get的变量返回的是一个数组，包含了num个数值。
 @macro name="if" exp //根据这个表达式判断执行下面的语句还是跳到else或elseif后面执行。
-@macro name="info" file get //获取一个图片的信息，获取一个字典保存至get字符串对应的变量。//字典成员有filename、width、height
-@macro name="infoex" index get //获取一个精灵的信息，获取一个字典保存至get字符串对应的变量。//字典成员有filename、width、height、type、pos、index、parent、children
-@macro name="inputbox" index back showcursor=true cursor align="left" onchanged //创建一个inputbox
-@macro name="jump" block file //跳转到指定标签
-@macro name="l"  //等待点击
-@macro name="layer" index width height color=0xFFFFFF opacity=255 //创建一个指定大小的颜色精灵，这里的透明度是这个精灵本身的透明度
+@macro name="import" file //导入一个外部库。只能用在库文件中。
+@macro name="info" file get //获取一个图片的信息，获取一个字典保存至get字符串对应的变量。字典成员有filename、width、height
+@macro name="infoex" index get //获取一个精灵的信息，获取一个字典保存至get字符串对应的变量。字典成员有filename、width、height、type、pos、index、parent、children
+@macro name="inputbox" index back text="" maxchars=-1 showcursor=true cursor align="left" onchanged onok //创建一个inputbox
+@macro name="inputboxex" index back text="" maxchars=-1 showcursor=true cursor align="left" onchanged onok //创建一个inputbox
+@macro name="jump" label file //跳转到指定标签
+@macro name="l" 无 //等待点击
+@macro name="layer" index width height color=0xFFFFFF opacity=0 //创建一个指定大小的颜色精灵，这里的透明度是这个精灵本身的透明度
 @macro name="load" index //读取存档
 @macro name="locate" x y //将下一个文字的输出位置改为x，y。
+@macro name="macro" name //注册macro。除name外所有参数名是macro的变量，参数值是macro变量的初始值。只能用在库文件中。
 @macro name="messagelayer" index active=true //若index所指的精灵就是一个消息层，则改变它的active状态，否则创建一个消息层。
-@macro name="next"  //for循环块的终止标记
-@macro name="p"  //换页等待，点击后换页
+@macro name="next" 无 //for循环块的终止标记
+@macro name="p" 无 //换页等待，点击后换页
+@macro name="particle" index file //载入一个粒子系统
+@macro name="particleopt" index paused updateparam //修改一个例子系统的暂停/运行状态或其他参数
 @macro name="pause" channel //暂停播放
 @macro name="pretrans" index=basic_layer //指定sp准备渐变
 @macro name="quit" force //退出游戏
-@macro name="r"  //手动换行
+@macro name="r" 无 //手动换行
 @macro name="remove" index delete=false //从一个精灵的parent上取下自己，该精灵变为不可见
-@macro name="removeall" index delete=flase //从一个精灵上取下所有精灵，所有子精灵变为不可见
+@macro name="removeall" index delete=false recursive=false //从一个精灵上取下所有精灵，所有子精灵变为不可见
+@macro name="restorefont" 无 
 @macro name="resume" channel //恢复播放
 @macro name="return" value //返回，返回值被存到调用macro时return参数给的变量中
-@macro name="returnto" block file value //从上一个call中返回，然后jump到指定的block和file
+@macro name="returnto" label file value //从上一个call中返回，然后jump到指定的block和file
 @macro name="ruby" text size=6 char=1 //显示小字注释
-@macro name="s"  //开关删除线
+@macro name="s" 无 //开关删除线
 @macro name="save" index str //存档
-@macro name="savepoint"  //表明该处是一个存档记录点，默认的存档记录点在每个[p]指令后
+@macro name="savepoint" 无 //表明该处是一个存档记录点，默认的存档记录点在每个[p]指令后
 @macro name="savetoimage" index file //将index精灵的图像保存至指定的文件
-@macro name="screenshot" index target width height //将target精灵截图并保存至index精灵，截完后的图会被缩放至width*height的大小。//若未指定width或height，则那个维度不会缩放，保留原target精灵的大小。
+@macro name="screenshot" index target width height //将target精灵截图并保存至index精灵，截完后的图会被缩放至width*height的大小。若未指定width或height，则那个维度不会缩放，保留原target精灵的大小。
 @macro name="se" file channel=0 loop vol=100 fadein=0 //播放音效
+@macro name="sendevent" name param //手动触发一个已经定义过的事件
+@macro name="sendsystemevent" name param //手动触发一个系统事件
 @macro name="slider" index back block fore onchanged length isblockabove min max value vertical //创建一个滑条
 @macro name="sliderex" index back block fore onchanged length isblockabove min max value vertical //创建一个滑条
 @macro name="sprite" index file rect=[0,0,0,0] //若index所指为一个sprite，则修改它的状态。否则将创建一个精灵。
+@macro name="spriteopt" index disable recursive=true index file //设置一个精灵的某些属性。如果一个参数不存在，将不改变原有的状态。
 @macro name="stop" channel fadeout=0 //停止播放
-@macro name="stopaction" index //强制终止动作
-@macro name="stoptrans" index //强制终止渐变
+@macro name="stopaction" index //强制终止某个精灵的动作
+@macro name="stopallaction" 无 //强制终止所有精灵的动作
+@macro name="stopallatrans" 无 //强制终止所有精灵的渐变
+@macro name="stoptrans" index //强制终止某个精灵的渐变
+@macro name="storefont" 无 //如果多次storefont，只会保存最后一次的结果。用restorefont命令可以将字体设为最后一次storefont时的状态。
 @macro name="tablegoto" exp target //计算表达式，根据返回的值跳转到标签数组对应的元素指示的标签，只能同一文件中跳转。
 @macro name="text" text //打印一句话
 @macro name="textcursor" index follow pos=[0,0] //设置文字光标
-@macro name="textoff"  //隐藏文本框
-@macro name="texton"  //显示文本框
-@macro name="textshadow" shadow color=0xFFFFFF //设置文字阴影
+@macro name="textoff" 无 //隐藏文本框
+@macro name="texton" 无 //显示文本框
 @macro name="textspeed" interval //设置文字显示速度
-@macro name="textsprite" index text color size font width height xinterval yinterval opacity extrachar="..." bold italic strike under //创建一个文字精灵。若可选参数没有设定且没有特殊说明的，将默认使用当前的字体设置。设置都是临时的，只对该文字精灵有效。
-@macro name="textstyle" name size color bold italic strike under //设置当前文字大小，颜色等属性。若可选参数没有设定且没有特殊说明的，//将默认使用当前的文本风格设置。其中字体默认使用系统字体，//size初始化为24，color初始化为0xFFFFFF，斜体等初始化为false
-@macro name="texttag" block file //相当于call一个macro，参数作为数组存在变量tag中。
-@macro name="textwindow" file color opacity pos rect xinterval yinterval //设置文本框属性,若可选参数没有设定且没有特殊说明的，将默认使用当前的文本框设置。//其中opacity初始化为255，pos初始化为[0,0]，xinterval初始化为0，yinterval初始化为6。//File和color参数至多存在一个。
-@macro name="trans" 
-@macro name="trans#\"crossfade\"" time index=basic_layer
-@macro name="trans#\"universal\"" rule time vague=64 index=basic_layer
-@macro name="u"  //开关下划线
+@macro name="textsprite" index text color size font width height xinterval yinterval extrachar="..." bold italic strike under shadow shadowcolor stroke strokecolor //创建一个文字精灵。若可选参数没有设定且没有特殊说明的，将默认使用当前的字体设置。设置都是临时的，只对该文字精灵有效。
+@macro name="textstyle" name size color bold italic strike under shadow shadowcolor stroke strokecolor //设置当前文字大小，颜色等属性。若可选参数没有设定且没有特殊说明的，将默认使用当前的文本风格设置。其中字体默认使用系统字体，size初始化为24，color初始化为0xFFFFFF，斜体等初始化为false，enableshadow和enablestroke初始化为false，shadow和stroke初始化为0x000000
+@macro name="texttag" label file //相当于call一个macro，参数作为字符串存在变量tag中。
+@macro name="textwindow" file color opacity pos rect xinterval yinterval //设置文本框属性,若可选参数没有设定且没有特殊说明的，将默认使用当前的文本框设置。其中opacity初始化为255，pos初始化为[0,0]，xinterval初始化为0，yinterval初始化为12。File和color参数至多存在一个。
+@macro name="trans"  
+@macro name="trans#""crossfade""" time index=basic_layer 
+@macro name="trans#""ripple""" time index=basic_layer center=[-1, -1] speed=6 rwidth=128 maxdrift=24 roundness=100 
+@macro name="trans#""rotateswap""" time index=basic_layer bgcolor=#000000 twist=1.0 
+@macro name="trans#""rotatevanish""" time index=basic_layer center=[-1, -1] accel=2.0 twist=2.0 twistaccel=2.0 
+@macro name="trans#""rotatezoom""" time index=basic_layer center=[-1, -1] accel=0.0 twist=2.0 twistaccel=-2.0 factor=1.0 
+@macro name="trans#""scroll""" time index=basic_layer from="left" stay="nostay" 
+@macro name="trans#""shutter""" time index=basic_layer from="left" num=16 
+@macro name="trans#""turn""" time index=basic_layer bgcolor=#000000 gridsize=64 
+@macro name="trans#""universal""" rule time vague=64 index=basic_layer 
+@macro name="trans#""wave""" time index=basic_layer maxh=50 maxomega=0.2 bgcolor1=#000000 bgcolor2=#000000 wavetype=0 
+@macro name="u" 无 //开关下划线
 @macro name="voice" file vol=100 //播放语音
-@macro name="volume" channel get set //获取或者更改音量。set和get参数至多且必须存在一个。
-@macro name="wait" time canskip=true //等待一段时间
-@macro name="waitaction" index canskip=false //等待动作执行完毕，若可以跳过，点击鼠标时将同时停止action
+@macro name="volume" channel get set //获取或者更改音量（仅针对本次播放有效）。set和get参数至多且必须存在一个。
+@macro name="wait" time canskip=false //等待一段时间
+@macro name="waitaction" index canskip=false //等待某个动作执行完毕，若可以跳过，点击鼠标时将同时停止action
+@macro name="waitallaction" canskip=false canskip=false //等待所有精灵的trans完毕，若可以跳过，点击鼠标时将同时停止所有精灵的trans
 @macro name="waitbgm" canskip=false //等待bgm播放完毕，若可以跳过，点击鼠标时将同时停止bgm
-@macro name="waitbutton"  //等待按钮事件触发
-@macro name="waitfade" canskip=false //等待渐变完毕，若可以跳过，点击鼠标时将立刻完成渐变
-@macro name="waittrans" index=basic_layer canskip=true //等待trans完毕，若可以跳过，点击鼠标时将同时停止trans
+@macro name="waitbutton" 无 //等待按钮事件触发
+@macro name="waitfade" channel canskip=false //等待音频渐变完毕，若可以跳过，点击鼠标时将立刻完成音频渐变
+@macro name="waitse" channel canskip=false //等待音效播放完毕，若可以跳过，点击鼠标时将同时停止音效
+@macro name="waittrans" index=basic_layer canskip=false //等待trans完毕，若可以跳过，点击鼠标时将同时停止trans
 @macro name="waitvoice" canskip=false //等待voice播放完毕，若可以跳过，点击鼠标时将同时停止voice
 @macro name="zorder" index set get //调整/获取一个精灵的z值（深度）。set和get参数至多且必须存在一个。
-@macro name="macro" name //创建一个宏命令
-
-

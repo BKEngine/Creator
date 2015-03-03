@@ -1,4 +1,5 @@
 ﻿#include <weh.h>
+#include <Qsci/qsciscintilla.h>
 #include "creator_parser.h"
 
 QStringList SYSlist ;
@@ -508,7 +509,7 @@ void BkeParser::TextBeChange(BkeModifiedBase *modbase,QsciScintilla *sciedit)
         return ;
     }
     else if( modbase->text.length() > 1) return ; //改变多个字，并没有增加新行，不做检查
-    else if( modbase->text == " " ) return ; //输入的是空格，什么也不会发生
+//    else if( modbase->text == " " ) return ; //输入的是空格，什么也不会发生
 
     QString t = sciedit->text( modbase->line ) ;
     WordSupport wow ;
@@ -550,6 +551,45 @@ void BkeParser::TextBeChange(BkeModifiedBase *modbase,QsciScintilla *sciedit)
     SetCommandList("..");
     QString key1 = wow.NextWord2() ;
     QString key2 = wow.NextWord2() ;
+	QString key3 = wow.NextWord2();
+
+	if (modbase->text == " ")
+	{
+		int style = sciedit->SendScintilla(QsciScintilla::SCI_GETSTYLEAT, modbase->pos);
+		if (style == SCE_BKE_DEFAULT)
+		{
+			if (!key1.isEmpty())
+			{
+				IfHasThenSet(key1);
+				if (!key2.isEmpty())
+					IfHasThenSet(key2);
+			}
+			showtype = SHOW_USECOMMANDLIST;
+			return;
+		}
+	}
+	if (modbase->text == "=")
+	{
+		int style = sciedit->SendScintilla(QsciScintilla::SCI_GETSTYLEAT, modbase->pos);
+		if (style == SCE_BKE_DEFAULT)
+		{
+			showtype = SHOW_NULL;
+			if (!key1.isEmpty())
+			{
+				IfHasThenSet(key1);
+				if (!key2.isEmpty() && IfHasThenSet(key2))
+				{
+					if (key3=="=")
+						showtype = SHOW_USECOMMANDLIST;
+					else if (!key3.isEmpty() && IfHasThenSet(key3))
+					{
+						showtype = SHOW_USECOMMANDLIST;
+					}
+				}
+			}
+			return;
+		}
+	}
 
     if( showtype == SHOW_NULL ) showtype = SHOW_AUTOCOMMANDLIST ;
 

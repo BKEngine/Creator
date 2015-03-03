@@ -1,5 +1,6 @@
 ﻿#include <weh.h>
 #include "bkescintilla.h"
+#include "../BKS_info.h"
 
 QImage BKE_AUTOIMAGE_KEY(":/auto/source/auto_key.png") ;
 QImage BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_funcotin.png") ;
@@ -644,14 +645,14 @@ void BkeScintilla::setLexer(QsciLexer *lex)
     QsciScintilla::setLexer(lex) ;
     //绕过qsci的bug
     QFont f ;
-    for( int i = 0 ; i < 32 ; i++){
-        f = lex->defaultFont(i) ;
-        SendScintilla(SCI_STYLESETFONT,i, f.family().toUtf8().constData() ) ;
-        SendScintilla(SCI_STYLESETSIZE,i,f.pointSize()) ;
-        SendScintilla(SCI_STYLESETITALIC, i , f.italic());
-        SendScintilla(SCI_STYLESETBOLD,f.bold()) ;
-        SendScintilla(SCI_STYLESETUNDERLINE, i , f.underline());
-    }
+	for (int i = 0; i < 32; i++){
+		f = lex->defaultFont(i);
+		SendScintilla(SCI_STYLESETFONT, i, f.family().toUtf8().constData());
+		SendScintilla(SCI_STYLESETSIZE, i, f.pointSize());
+		SendScintilla(SCI_STYLESETITALIC, i, f.italic());
+		SendScintilla(SCI_STYLESETBOLD, i, f.bold());
+		SendScintilla(SCI_STYLESETUNDERLINE, i, f.underline());
+	}
 
     QFont ft("Courier") ;
     ft.setPointSize(lex->defaultFont(0).pointSize());

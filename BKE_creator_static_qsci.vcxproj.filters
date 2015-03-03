@@ -99,9 +99,6 @@
     <ClCompile Include="BKEscintilla\src\KeyMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BKEscintilla\lexers\LexBke.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BKEscintilla\lexlib\LexerBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -471,6 +468,12 @@
     <ClCompile Include="weh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKS_info.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -759,6 +762,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="weh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKS_info.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

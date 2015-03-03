@@ -106,6 +106,7 @@ BKEscintilla/include/SciLexer.h -text
 BKEscintilla/include/Scintilla.h -text
 BKEscintilla/include/Scintilla.iface -text
 BKEscintilla/include/ScintillaWidget.h -text
+BKEscintilla/lexers/BKE_Lexer.cpp -text
 BKEscintilla/lexers/LexBke.cpp -text
 BKEscintilla/lexlib/Accessor.cpp -text
 BKEscintilla/lexlib/Accessor.h -text
@@ -200,6 +201,8 @@ BKEscintilla/src/ViewStyle.h -text
 BKEscintilla/src/XPM.cpp -text
 BKEscintilla/src/XPM.h -text
 BKEscintilla/自动.e -text
+/BKS_info.cpp -text
+/BKS_info.h -text
 CreatorPack/CreatorPack.pro -text
 CreatorPack/QtFtp/QFtp -text
 CreatorPack/QtFtp/QUrlInfo -text

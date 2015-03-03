@@ -308,9 +308,6 @@ void Parser::init()
 {
 	//init random seed
 	srand((unsigned int)time(NULL));
-	//init StringMap then Global
-	StringMap();
-	MemoryPool();
 
 	costTime = 0;
 	krmode = false;

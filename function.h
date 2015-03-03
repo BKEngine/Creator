@@ -1,10 +1,9 @@
 ﻿#ifndef FUNCTION_H
 #define FUNCTION_H
 
-#include <Qsci/qsciscintilla.h>
+//#include <Qsci/qsciscintilla.h>
 #include <QtCore>
 #include "loli/loli_island.h"
-
 
 //公用函数，公用的变量
 extern QString BKE_CURRENT_DIR ;

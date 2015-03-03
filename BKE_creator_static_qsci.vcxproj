@@ -150,6 +150,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp" />
     <ClCompile Include="BKEscintilla\lexlib\Accessor.cpp" />
     <ClCompile Include="BKEscintilla\src\AutoComplete.cpp" />
     <ClCompile Include="BKEscintilla\src\CallTip.cpp" />
@@ -164,7 +165,6 @@
     <ClCompile Include="BKEscintilla\src\ExternalLexer.cpp" />
     <ClCompile Include="BKEscintilla\src\Indicator.cpp" />
     <ClCompile Include="BKEscintilla\src\KeyMap.cpp" />
-    <ClCompile Include="BKEscintilla\lexers\LexBke.cpp" />
     <ClCompile Include="BKEscintilla\lexlib\LexerBase.cpp" />
     <ClCompile Include="BKEscintilla\lexlib\LexerModule.cpp" />
     <ClCompile Include="BKEscintilla\lexlib\LexerNoExceptions.cpp" />
@@ -190,6 +190,7 @@
     <ClCompile Include="bkeSci\bkecompile.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="BKS_info.cpp" />
     <ClCompile Include="Debug\moc_bkecompile.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -579,6 +580,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
+    <ClInclude Include="BKS_info.h" />
     <ClInclude Include="GeneratedFiles\ui_ctextedit.h" />
     <ClInclude Include="paper\completebase.h" />
     <CustomBuild Include="dia\ctextedit.h">

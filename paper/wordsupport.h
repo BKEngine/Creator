@@ -72,8 +72,8 @@ private:
     void ToLineEnd() ;
     void ToTlineEnd() ;
     void GoPos2(int pos) ;
-    QString MatchToQuote();
-    QString MatchToSingleQuote();
+    QString MatchToQuote(int &end);
+	QString MatchToSingleQuote(int &end);
     QString GetWord(int from,int &end) ;
     QString WordFromSeparate() ;
     void lRightExp(const QChar &t,int &pos) ;

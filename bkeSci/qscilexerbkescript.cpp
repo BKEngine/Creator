@@ -16,19 +16,25 @@ const char * QsciLexerBkeScript::lexer () const
 
 QString QsciLexerBkeScript::description(int style) const
 {
-    switch (style) {
-    case Default: return QString("Default") ;
-    case Command: return QString("Command") ;
-    case Attribute: return QString("Attribute") ;
-    case String:  return QString("String") ;
-    case Number:  return QString("Number") ;
-    case Lable:   return QString("Lable") ;
-    case Annotate: return QString("Annotate") ;
-    case Operators: return QString("Operators") ;
-    case Text :    return QString("Text") ;
-    case Error:    return QString("Error") ;
-    case UntypeA:  return QString("Untypea") ;
-	case TRANS:  return QString("TRANS");
+    switch (style & 31) {
+	case SCE_BKE_DEFAULT:
+	case SCE_BKE_PARSER:
+	case SCE_BKE_PARSER_DEFAULT: return QString("Default");
+	case SCE_BKE_COMMAND:
+	case SCE_BKE_COMMAND2: return QString("Command");
+	case SCE_BKE_ATTRIBUTE: return QString("Attribute");
+	case SCE_BKE_STRING:  return QString("String");
+	case SCE_BKE_STRING2:  return QString("String");
+	case SCE_BKE_NUMBER:  return QString("Number");
+	case SCE_BKE_LABEL:   return QString("Lable");
+	case SCE_BKE_ANNOTATE: return QString("LineComment");
+	case SCE_BKE_COMMENT: return QString("BlockComment");
+	case SCE_BKE_OPERATORS: return QString("Operators");
+	case SCE_BKE_TEXT:    return QString("Text");
+	case SCE_BKE_PARSER_KEYWORD:    return QString("Keyword");
+	case SCE_BKE_PARSER_VAR:    return QString("Variable");
+	case SCE_BKE_ERROR:    return QString("Error");
+	case SCE_BKE_TRANS:  return QString("TRANS");
 	}
 
     return QString() ;
@@ -36,19 +42,25 @@ QString QsciLexerBkeScript::description(int style) const
 
 QColor QsciLexerBkeScript::defaultColor (int style) const
 {
-    switch (style) {
-    case Default: return QColor( 0x00,0x00,0x00) ;
-    case Command: return QColor( 0x00,0x00,0xff) ;
-    case Attribute: return QColor( 0x9f,0x3c,0x00) ;
-    case String:  return QColor( 0x00,0x9f,0x3c) ;
-    case Number:  return QColor( 0xff,0x00,0x00) ;
-    case Lable:   return QColor( 0xff,0x00,0xff) ;
-    case Annotate: return QColor( 0x80,0x80,0x80) ;
-    case Operators: return QColor( 0x00,0x00,0x00) ;
-    case Text :    return QColor( 0x00,0x00,0x00) ;
-    case Error:    return QColor( 0xff,0x00,0x00) ;
-    case UntypeA:  return QColor( 0x80,0x80,0x00 ) ; //保留字，
-	case TRANS:  return QColor(0x7a, 0x0f, 0xd1); //转义字符，
+    switch (style & 31) {
+	case SCE_BKE_PARSER:
+	case SCE_BKE_DEFAULT: return QColor(0x00, 0x00, 0x00);
+	case SCE_BKE_PARSER_DEFAULT: return QColor(0x00, 0x00, 0x00);
+	case SCE_BKE_COMMAND: return QColor(0x00, 0x00, 0xff);
+	case SCE_BKE_COMMAND2: return QColor(0x00, 0x00, 0xff);
+	case SCE_BKE_ATTRIBUTE: return QColor(0x9f, 0x3c, 0x00);
+	case SCE_BKE_STRING:  return QColor(0x00, 0x9f, 0x3c);
+	case SCE_BKE_STRING2:  return QColor(0x00, 0x9f, 0x3c);
+	case SCE_BKE_NUMBER:  return QColor(0xff, 0x00, 0x00);
+	case SCE_BKE_LABEL:   return QColor(0xff, 0x00, 0xff);
+	case SCE_BKE_ANNOTATE: return QColor(0x80, 0x80, 0x80);
+	case SCE_BKE_COMMENT: return QColor(0x80, 0x80, 0x80);
+	case SCE_BKE_OPERATORS: return QColor(0x00, 0x00, 0x00);
+	case SCE_BKE_TEXT:    return QColor(0x00, 0x00, 0x00);
+	case SCE_BKE_PARSER_KEYWORD:    return QColor(0x00, 0x00, 0xff);
+	case SCE_BKE_PARSER_VAR:    return QColor(47, 79, 79);
+	case SCE_BKE_ERROR:    return QColor(0xff, 0x00, 0x00);
+	case SCE_BKE_TRANS:  return QColor(0x7a, 0x0f, 0xd1); //转义字符，
 	}
     return QColor( 0x00,0x00,0x00) ;
 }
@@ -74,6 +86,15 @@ const char * QsciLexerBkeScript::blockStart (int *style ) const
     return "{ @if if while @for for foreach" ;
 }
 
+const char *QsciLexerBkeScript::keywords(int set) const
+{
+	if (set == 2)	//parser
+	{
+		return "if for while do foreach function class propget propset continue break return var delete try throw this super global int string number const typeof instanceof extends in else then catch with static switch case";
+	}
+	else
+		return NULL;
+}
 
 //返回配置项的名字
 QString QsciLexerBkeScript::ConfigName()

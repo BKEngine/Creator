@@ -3,6 +3,23 @@
 
 //#define PARSER_PRO
 
+/********************
+
+改造为记录文档语法结构的类
+需要记录的块有
+标签
+注释
+命令
+BegalScript
+@if和@for块
+文字（作为默认）
+
+要求能从一个位置获得该位置对应的是命令还是标签等类型，并获得每个类型的起止位置。
+
+记录该文件是不是宏文件，并注册自定义宏
+
+********************/
+
 
 #include <QStringList>
 #include <QTextStream>
@@ -10,10 +27,11 @@
 #include <QStack>
 #include <QFile>
 #include <QObject>
-#include <Qsci/qsciscintilla.h>
 #include "wordsupport.h"
 #include "completebase.h"
 #include "bkeSci/BkeIndicatorBase.h"
+
+class QsciScintilla;
 
 #ifndef PARSER_PRO
 #include <function.h>

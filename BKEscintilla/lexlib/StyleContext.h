@@ -72,6 +72,13 @@ public:
 		}
 		GetNextChar(pos);
 	}
+	void setPos(int p)
+	{
+		currentPos = p;
+		chPrev = static_cast<unsigned char>(styler.SafeGetCharAt(p - 1));
+		ch = static_cast<unsigned char>(styler.SafeGetCharAt(p));
+		GetNextChar(p);
+	}
 	void resetState(int startPos, int endPos, int style)
 	{
 		if (startPos > endPos)

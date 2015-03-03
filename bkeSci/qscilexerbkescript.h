@@ -19,24 +19,6 @@ class QsciLexerBkeScript : public QsciLexer
 public:
     QsciLexerBkeScript(QObject *parent=0);
 
-    enum
-    {
-        Default = 0 ,
-        Command = 1 ,
-        Attribute = 2 ,
-        String = 3 ,
-        Number = 4 ,
-        Lable = 5 ,
-        Annotate = 6 ,
-        Operators = 7 ,
-        Text = 8 ,
-        Variable = 9 ,
-        UntypeA = 10 ,
-        StyleParser = 11 ,
-        TRANS = 12 ,
-        Error = 13
-    };
-
     const char *language() const ;
     const char * lexer () const ;
     QString description(int style) const ;
@@ -48,6 +30,7 @@ public:
     void ReadConfig(QString hname) ;
     QString ConfigName() ;
     QStringList ConfigList() ;
+	virtual const char *keywords(int set) const;
 
     HighlightAttribute hlb[32] ;
 private:

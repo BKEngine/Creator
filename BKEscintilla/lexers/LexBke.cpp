@@ -24,6 +24,8 @@
 #include "CharacterSet.h"
 #include "LexerModule.h"
 
+#include "../loli/loli_island.h"
+
 #ifdef SCI_NAMESPACE
 using namespace Scintilla;
 #endif
@@ -31,21 +33,6 @@ using namespace Scintilla;
 #include <QString>
 
 #define SCLEX_BKE 108
-#define SCE_BKE_DEFAULT         0
-#define SCE_BKE_COMMAND         1
-#define SCE_BKE_ATTRIBUTE       2
-#define SCE_BKE_STRING          3
-#define SCE_BKE_NUMBER          4
-#define SCE_BKE_LABEL           5
-#define SCE_BKE_ANNOTATE        6
-#define SCE_BKE_OPERATORS       7
-#define SCE_BKE_TEXT            8
-#define SCE_BKE_VARIABLE        9
-#define SCE_BKE_UNTYPEA         10
-#define SCE_BKE_PARSER         11
-//转义字符
-#define SCE_BKE_TRANS         12
-#define SCE_BKE_ERROR           13
 
 static const char *BKE_PARSER_KEY = " for foreach in extends do while function propset propget int string number typeof var delete class if else continue break return this super with true false void global" ;
 static const char *BKE_SEPARATEOR = " ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\";
@@ -103,18 +90,20 @@ static inline void AnnotateLine( StyleContext *sc )//整行注释掉
 static inline void AnnotateBlock(StyleContext *sc)//块注释
 {
 	int s = sc->state;
-	sc->SetState(SCE_BKE_ANNOTATE);   //注释状态
+	sc->SetState(SCE_BKE_COMMENT);   //注释状态
 	//这里是没有嵌套注释的版本，如果时机成熟会和Compiler同步修改
 	sc->Forward();	//pass * after /
 	while (sc->More())
 	{
 		if (sc->ch == '*' && sc->chNext == '/')
+		{
+			sc->Forward();
+			sc->Forward();
+			sc->SetState(s);   //恢复原状态
 			break;
+		}
 		sc->Forward();
 	}
-	sc->Forward();
-	sc->Forward();
-	sc->SetState(s);   //恢复原状态
 	return;
 }
 

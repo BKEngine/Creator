@@ -152,6 +152,8 @@ bool BkeProject::OpenProject(const QString &name)
 	bkpAdmin = new QJsonObject(kk.object());
 	if (bkpAdmin->isEmpty()) return false;
 
+	int version = int(bkpAdmin->value("version").toString().toDouble() * 10 + 0.5);
+
 	QFileInfo fi(name);
 	pdir = fi.path();
 	pname = bkpAdmin->value("name").toString();
@@ -159,9 +161,9 @@ bool BkeProject::OpenProject(const QString &name)
 
 	BuildItem(pname);
 	bool lowVersion = false;
-	if (bkpAdmin->value("version").toString() < "1.1")
+	if (version < 11)
 		lowVersion = true;
-	if (bkpAdmin->value("version").toString() == "1.1")
+	if (version == 11)
 	{
 		JsonToHash(ImportHash, bkpAdmin->value("import").toObject(), lowVersion);
 		JsonToHash(ScriptHash, bkpAdmin->value("script").toObject(), lowVersion);
@@ -173,7 +175,6 @@ bool BkeProject::OpenProject(const QString &name)
 	}
 	else
 	{
-		int version = int(bkpAdmin->value("version").toString().toDouble() * 10 + 0.5);
 		JsonToTree(Import, bkpAdmin->value("import").toObject(), version);
 		JsonToTree(Script, bkpAdmin->value("script").toObject(), version);
 		JsonToTree(Source, bkpAdmin->value("source").toObject(), version);
@@ -200,6 +201,9 @@ bool BkeProject::OpenProject(const QString &name)
 	delete config;
 	config = new BkeProjectConfig(pdir, pdir + "/config.bkpsr");
 	config->readFile();
+
+	if (version < SAVE_VERSION)
+		WriteBkpFile();
 
 	return true;
 }
@@ -419,9 +423,9 @@ bool BkeProject::WriteBkpFile()
 	//bkpAdmin->insert("import", HashToJson(ImportHash));
 	//bkpAdmin->insert("script", HashToJson(ScriptHash));
 	//bkpAdmin->insert("source", HashToJson(SourceHash));
-	bkpAdmin->insert("import", TreeToJson(Root->child(0)));
-	bkpAdmin->insert("script", TreeToJson(Root->child(1)));
-	bkpAdmin->insert("source", TreeToJson(Root->child(2)));
+	bkpAdmin->insert("import", TreeToJson(Import));
+	bkpAdmin->insert("script", TreeToJson(Script));
+	bkpAdmin->insert("source", TreeToJson(Source));
 	bkpAdmin->insert("version", QString("1.2"));
 
 	QJsonDocument llm;
