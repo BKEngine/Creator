@@ -42,6 +42,7 @@ public:
         BKE_CHANGE_REPLACE = 0x1
     };
     QList<BkeIndicatorBase> testlist ;
+	QString FileName;
 
     QString apiContext2(int pos , int &word_start , int &word_end) ;
     QString GetLatstError(){ return errorinfo; }

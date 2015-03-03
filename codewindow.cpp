@@ -384,7 +384,7 @@ void CodeWindow::addFile(const QString &file,const QString &prodir)
         loli->SetProjectDir(prodir);
         //新的编辑窗口
         simpleNew(loli,en);
-
+		loli->edit->FileName = file;
         BkeProject *tpro = prowin->FindProjectFromDir(prodir) ;
         if( prodir != 0 ) loli->edit->setParser( tpro->lex );
 
@@ -1006,6 +1006,7 @@ void CodeWindow::NewEmptyFile()
     BkeDocBase *llm = new BkeDocBase ;
     llm->SetFileName("New");
     simpleNew(llm,"");
+	llm->edit->FileName = "New";
     SetCurrentEdit(llm->edit);
 }
 

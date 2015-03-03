@@ -36,6 +36,7 @@ public slots:
     void ChangeModel() ;
     void ReplaceText() ;
     void ReplaceAllText() ;
+	void FindAll();
     void Show_() ;
 private:
     QVBoxLayout *h1 ;
@@ -44,13 +45,15 @@ private:
 
     QPushButton *btnsearchlast ;
     QPushButton *btnsearchnext ;
-    QPushButton *btnreplacemodel ;
+	QPushButton *btnsearchall;
+	QPushButton *btnreplacemodel;
     QPushButton *btnreplace ;
     QPushButton *btnreplaceall ;
     QCheckBox *iscase ;
     QCheckBox *isregular ;
     QCheckBox *isword ;
-    QCheckBox *isalwaysbegin ;
+	QCheckBox *findallpro;
+	QCheckBox *isalwaysbegin;
     QLineEdit *edit ;
     QLineEdit *edit1 ;
     QLabel *lable1 ;

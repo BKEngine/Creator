@@ -1,6 +1,6 @@
 ﻿F:/BKEProject/BKE demo/main.bkscr
-F:/BKEProject/BKE demo/extend.bkscr
 F:/BKEProject/BKE demo/script/story.bkscr
+F:/BKEProject/BKE demo/extend.bkscr
 F:/BKEProject/BKE demo/macro.bkscr
 F:/BKEProject/BKE demo/init.bkscr
 C:/Users/taiga/Desktop/test_/BattleScene.bkscr
