@@ -718,8 +718,9 @@ void BkeProject::ListFiles(QStringList &ls, QTreeWidgetItem *root, const QString
 QStringList BkeProject::AllScriptFiles()
 {
 	QStringList temp;
-	temp.append(ListFiles(0));
+	temp.push_back("/config.bkpsr");
 	temp.append(ListFiles(1));
+	temp.append(ListFiles(2));
 	return temp;
 }
 
