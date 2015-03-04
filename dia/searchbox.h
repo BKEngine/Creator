@@ -18,7 +18,8 @@ class SearchBox : public QDockWidget
     Q_OBJECT
 
 signals:
-	void searchOne(const QString &file, const QString &fullfile, int line);
+	void searchOne(const QString &file, const QString &str, bool iscase, bool isregular, bool isword);
+	void searchAll(const QString &str, bool iscase, bool isregular, bool isword);
 
 public:
     explicit SearchBox(QWidget *parent = 0);
@@ -28,6 +29,7 @@ public slots :
 	void onDocChanged();
 	void onSelectionChanged();
 	void onFindConditionChange();
+	void onSearcAllConditionChange();
 
 public slots:
     void FindNext() ;

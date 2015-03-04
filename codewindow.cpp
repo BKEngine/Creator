@@ -43,6 +43,8 @@ CodeWindow::CodeWindow(QWidget *parent)
     //查找
     connect(btnfindact,SIGNAL(triggered()),diasearch,SLOT(SearchModel())) ;
     connect(btnreplaceact,SIGNAL(triggered()),diasearch,SLOT(ReplaceModel())) ;
+	connect(diasearch, SIGNAL(searchOne(const QString &, const QString &, bool, bool, bool)), this, SLOT(searchOneFile(const QString &, const QString &, bool, bool, bool)));
+	connect(diasearch, SIGNAL(searchAll(const QString &, bool, bool, bool)), this, SLOT(searchAllFile(const QString &, bool, bool, bool)));
 	connect(&comtool, SIGNAL(CompliteFinish()), this, SLOT(CompileFinish()));
     connect(&comtool,SIGNAL(CompliteError(QString)),this,SLOT(CompileError(QString))) ;
     connect(btnrunact,SIGNAL(triggered()),this,SLOT(RunBKE())) ;
@@ -188,7 +190,7 @@ void CodeWindow::OtherWinOtherwin(OtherWindow *win)
     othwin = win ;
     //定位文件
     connect(win,SIGNAL(Location(BkeMarkerBase*,QString)),this,SLOT(ToLocation(BkeMarkerBase*,QString))) ;
-	connect(diasearch, SIGNAL(searchOne(const QString &, const QString &, int)), othwin, SLOT(onSearchOne(const QString &, const QString &, int)));
+	connect(this, SIGNAL(searchOne(const QString &, const QString &, int)), othwin, SLOT(onSearchOne(const QString &, const QString &, int)));
 }
 
 void CodeWindow::OtherWinProject(ProjectWindow *p)
@@ -362,6 +364,81 @@ void CodeWindow::Rename(const QString &old, const QString &now)
 	}
 }
 
+void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bool iscase, bool isregular, bool isword)
+{
+	if (!currentproject)
+		return;
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
+	bool close = !loli;
+	if (!loli)
+	{
+		loli = new BkeDocBase();
+		loli->SetFileName(file);
+		if (!loli->File()->exists())
+		{
+			delete loli;
+			return;
+		}
+		QString en;
+		if (!LOLI::AutoRead(en, loli->File()))
+		{
+			return;
+		}
+		loli->SetProjectDir(prowin->workpro->FileDir());
+		//新的编辑窗口
+		QDir d(loli->ProjectDir());
+		QString shortname = d.relativeFilePath(file);
+		loli->edit=new BkeScintilla(this);
+		loli->edit->basedoc = loli;
+		loli->edit->setText(en);
+		loli->edit->setModified(false);
+		if (shortname.startsWith("..") || shortname[1] == ':')
+			loli->edit->FileName = file;
+		else
+			loli->edit->FileName = shortname;
+	}
+	loli->edit->findFirst1(searchstr, iscase, isregular, isword);
+	for (auto &&p : loli->edit->testlist)
+	{
+		int line = loli->edit->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION, p.Start());
+		int linestart = loli->edit->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line);
+		int linelen = loli->edit->SendScintilla(QsciScintilla::SCI_LINELENGTH, line);
+		char *buf = new char[linelen + 1];
+		QString linetext = loli->edit->SendScintilla(QsciScintilla::SCI_GETLINE, line, buf);
+		buf[linelen] = 0;
+		linelen--;
+		while (buf[linelen] == '\r' || buf[linelen] == '\n')
+		{
+			buf[linelen--] = 0;
+		}
+		int offset = p.Start() - linestart;
+		othwin->searchlist->addItem(loli->edit->FileName + QString("(%1, %2)").arg(line).arg(offset) + ":\t" + buf);
+		emit searchOne(loli->edit->FileName, loli->FullName(), line);
+		delete[] buf;
+	}
+	if (close)
+	{
+		loli->edit->close();
+		loli->edit->deleteLater();
+		delete loli;
+	}
+}
+
+void CodeWindow::searchAllFile(const QString &searchstr, bool iscase, bool isregular, bool isword)
+{
+	if (!currentproject)
+	{
+		return;
+	}
+	QStringList ls;
+	ls.append(currentproject->ListFiles(1));
+	ls.append(currentproject->ListFiles(2));
+	QString base = currentproject->FileDir() + '/';
+	for (auto &&it : ls)
+	{
+		searchOneFile(base + it, searchstr, iscase, isregular, isword);
+	}
+}
 //打开文件，文件列表是自动维护的
 void CodeWindow::addFile(const QString &file,const QString &prodir)
 {

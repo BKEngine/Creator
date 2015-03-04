@@ -82,6 +82,16 @@ void OtherWindow::IfShow(QPushButton *btn, bool must)
 	//else if (btn == btnmark);
 }
 
+void OtherWindow::clearSearch()
+{
+	searchlist->clear();
+	for (auto &&t : memsearch)
+	{
+		delete t;
+	}
+	memsearch.clear();
+}
+
 void OtherWindow::onSearchOne(const QString &file, const QString &fullfile, int line)
 {
 	auto bm = new BkeMarkerBase();

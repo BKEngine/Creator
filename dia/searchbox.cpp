@@ -28,6 +28,7 @@ QDockWidget(parent)
 	sciedit = 0;
 	firstshow = true;
 
+	connect(findallpro, SIGNAL(stateChanged(int)), this, SLOT(onSearcAllConditionChange()));
 	connect(iscase, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
 	connect(isregular, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
 	connect(isword, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
@@ -91,35 +92,51 @@ void SearchBox::onFindConditionChange()
 	sciedit->refind = true;
 }
 
+void SearchBox::onSearcAllConditionChange()
+{
+	if (findallpro->isChecked())
+	{
+		btnsearchlast->setEnabled(false);
+		btnsearchnext->setEnabled(false);
+		btnreplacemodel->setEnabled(false);
+		btnreplace->setEnabled(false);
+		btnreplaceall->setEnabled(false);
+	}
+	else
+	{
+		btnsearchlast->setEnabled(true);
+		btnsearchnext->setEnabled(true);
+		btnreplacemodel->setEnabled(true);
+		btnreplace->setEnabled(true);
+		btnreplaceall->setEnabled(true);
+		if (this->windowTitle() == "替换")
+		{
+			ReplaceModel();
+		}
+		else
+		{
+			SearchModel();
+		}
+	}
+}
+
 void SearchBox::FindAll()
 {
-	otheredit->searchlist->clear();
+	otheredit->clearSearch();
 	bool all = findallpro->isChecked();
 	if (!all)
 	{
 		fstr = edit->text();
-		sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
-		for (auto &&p : sciedit->testlist)
-		{
-			int line = sciedit->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION, p.Start());
-			int linestart = sciedit->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line);
-			int linelen = sciedit->SendScintilla(QsciScintilla::SCI_LINELENGTH, line);
-			char *buf = new char[linelen + 1];
-			QString linetext = sciedit->SendScintilla(QsciScintilla::SCI_GETLINE, line, buf);
-			buf[linelen] = 0;
-			linelen--;
-			while (buf[linelen] == '\r' || buf[linelen] == '\n')
-			{
-				buf[linelen--] = 0;
-			}
-			int offset = p.Start() - linestart;
-			otheredit->searchlist->addItem(sciedit->FileName + QString("(%1, %2)").arg(line).arg(offset) + ":\t" + buf);
-			emit searchOne(sciedit->FileName, sciedit->basedoc->FullName(), line);
-			delete[] buf;
-		}
-		close();
+		emit searchOne(sciedit->basedoc->FullName(), fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
 		otheredit->IfShow(otheredit->btnsearch, true);
 	}
+	else
+	{
+		fstr = edit->text();
+		emit searchAll(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+		otheredit->IfShow(otheredit->btnsearch, true);
+	}
+	close();
 }
 
 void SearchBox::FindNext()
@@ -178,6 +195,8 @@ void SearchBox::SearchModel()
 	btnreplace->setEnabled(false);
 	btnreplaceall->setEnabled(false);
 	edit1->setEnabled(false);
+	//如果有选中部分，自动填入edit
+	edit->setText(sciedit->selectedText());
 	if (sciedit == 0) return;
 	Show_();
 }
@@ -190,6 +209,7 @@ void SearchBox::ReplaceModel()
 	btnreplace->setEnabled(true);
 	btnreplaceall->setEnabled(true);
 	edit1->setEnabled(true);
+	edit->setText(sciedit->selectedText());
 	if (sciedit == 0) return;
 	Show_();
 }

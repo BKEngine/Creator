@@ -132,6 +132,9 @@ signals:
     void CurrentFileChange(const QString &name,const QString &prodir);
     void FileAddProject(const QString &file) ;
     //void ComplileText(const QString &text) ;
+signals:
+	void searchOne(const QString &file, const QString &fullfile, int line);
+
 public:
 	bool CloseAll();
 
@@ -179,6 +182,9 @@ public slots:
     void ActPaste() ;
     void ActCopy() ;
 	void Rename(const QString &old, const QString &now);
+	void searchOneFile(const QString &file, const QString &searchstr, bool iscase, bool isregular, bool isword);
+	void searchAllFile(const QString &searchstr, bool iscase, bool isregular, bool isword);
+
 private:
     OtherWindow *othwin ;
     ProjectWindow *prowin ;

@@ -37,6 +37,7 @@ public:
     void ShowProblem(BkeMarkList *list,const QString &dir) ;
     void IfShow(QPushButton *btn,bool must = false) ;
     void RefreshBookMark(BkeMarkList *b) ;
+	void clearSearch();
 
 signals:
     void Location(BkeMarkerBase *mark,const QString &prodir) ;
