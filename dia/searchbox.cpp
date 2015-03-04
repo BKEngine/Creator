@@ -100,7 +100,7 @@ void SearchBox::onSearcAllConditionChange()
 		btnsearchnext->setEnabled(false);
 		btnreplacemodel->setEnabled(false);
 		btnreplace->setEnabled(false);
-		btnreplaceall->setEnabled(false);
+		//btnreplaceall->setEnabled(false);
 	}
 	else
 	{
@@ -239,10 +239,26 @@ void SearchBox::ReplaceText()
 
 void SearchBox::ReplaceAllText()
 {
-	sciedit->ClearIndicators(BkeScintilla::BKE_INDICATOR_FIND);
-	fstr = edit->text();
-	sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
-	sciedit->ReplaceAllFind(edit1->text());
+	if (!findallpro->isChecked())
+	{
+		sciedit->ClearIndicators(BkeScintilla::BKE_INDICATOR_FIND);
+		fstr = edit->text();
+		sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+		sciedit->ReplaceAllFind(edit1->text());
+	}
+	else
+	{
+		QMessageBox b;
+		b.setWindowTitle("警告");
+		b.setText("要启用撤销功能，必须打开所有受到影响的文件，确定打开吗？");
+		b.addButton("是", QMessageBox::AcceptRole);
+		b.addButton("否", QMessageBox::RejectRole);
+		b.addButton("放弃替换操作", QMessageBox::DestructiveRole);
+		auto res = b.exec();
+		if (res == QMessageBox::DestructiveRole)
+			return;
+		emit replaceAll(edit->text(), edit1->text(), iscase->isChecked(), isregular->isChecked(), isword->isChecked(), res == QMessageBox::AcceptRole);
+	}
 }
 
 void SearchBox::Show_()

@@ -45,6 +45,7 @@ CodeWindow::CodeWindow(QWidget *parent)
     connect(btnreplaceact,SIGNAL(triggered()),diasearch,SLOT(ReplaceModel())) ;
 	connect(diasearch, SIGNAL(searchOne(const QString &, const QString &, bool, bool, bool)), this, SLOT(searchOneFile(const QString &, const QString &, bool, bool, bool)));
 	connect(diasearch, SIGNAL(searchAll(const QString &, bool, bool, bool)), this, SLOT(searchAllFile(const QString &, bool, bool, bool)));
+	connect(diasearch, SIGNAL(replaceAll(const QString &, const QString &, bool, bool, bool, bool)), this, SLOT(replaceAllFile(const QString &, const QString &, bool, bool, bool, bool)));
 	connect(&comtool, SIGNAL(CompliteFinish()), this, SLOT(CompileFinish()));
     connect(&comtool,SIGNAL(CompliteError(QString)),this,SLOT(CompileError(QString))) ;
     connect(btnrunact,SIGNAL(triggered()),this,SLOT(RunBKE())) ;
@@ -382,6 +383,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 		QString en;
 		if (!LOLI::AutoRead(en, loli->File()))
 		{
+			delete loli;
 			return;
 		}
 		loli->SetProjectDir(prowin->workpro->FileDir());
@@ -424,6 +426,76 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 	}
 }
 
+void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen)
+{
+	if (!currentproject)
+		return;
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
+	bool close = !loli;
+	if (!loli)
+	{
+		loli = new BkeDocBase();
+		loli->SetFileName(file);
+		if (!loli->File()->exists())
+		{
+			delete loli;
+			return;
+		}
+		QString en;
+		if (!LOLI::AutoRead(en, loli->File()))
+		{
+			delete loli;
+			return;
+		}
+		loli->SetProjectDir(prowin->workpro->FileDir());
+		//新的编辑窗口
+		QDir d(loli->ProjectDir());
+		QString shortname = d.relativeFilePath(file);
+		loli->edit = new BkeScintilla(this);
+		loli->edit->basedoc = loli;
+		loli->edit->setText(en);
+		loli->edit->setModified(false);
+		if (shortname.startsWith("..") || shortname[1] == ':')
+			loli->edit->FileName = file;
+		else
+			loli->edit->FileName = shortname;
+	}
+	loli->edit->findFirst1(searchstr, iscase, isregular, isword);
+	if (!loli->edit->testlist.empty())
+	{
+		loli->edit->ReplaceAllFind(replacestr);
+		bool m = loli->edit->isModified();
+		if (!stayopen && close)
+		{
+			LOLI::AutoWrite(loli->File(), loli->edit->text(), "UTF-8");
+			loli->edit->close();
+			loli->edit->deleteLater();
+			delete loli;
+		}
+		else
+		{
+			//加到各种列表里去
+			BkeCreator::AddRecentFile(loli->FullName());
+			//为了恢复当前文档的currentpos
+			QString curopenfile = ItemTextList.at(currentpos);
+			int pos = LOLI_SORT_INSERT(ItemTextList, loli->Name() + "*");
+			currentpos = ItemTextList.indexOf(curopenfile);
+			filewidget->insertItem(pos, loli->Name() + "*");
+			lablelist->insertItem(pos, loli->Name() + "*");
+			stackwidget->insertWidget(pos, loli->edit);
+			docStrHash[LOLI_OS_QSTRING(loli->FullName())] = loli;
+			docWidgetHash[loli->edit] = loli;
+			//文件被改变
+			connect(loli->edit, SIGNAL(modificationChanged(bool)), this, SLOT(DocChange(bool)));
+			//右键菜单
+			connect(loli->edit, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(ShowRmenu(QPoint)));
+			//文件有改动
+			connect(loli->edit, SIGNAL(textChanged()), diasearch, SLOT(onDocChanged()));
+			connect(loli->edit, SIGNAL(selectionChanged()), diasearch, SLOT(onSelectionChanged()));
+		}
+	}
+}
+
 void CodeWindow::searchAllFile(const QString &searchstr, bool iscase, bool isregular, bool isword)
 {
 	if (!currentproject)
@@ -433,12 +505,29 @@ void CodeWindow::searchAllFile(const QString &searchstr, bool iscase, bool isreg
 	QStringList ls;
 	ls.append(currentproject->ListFiles(1));
 	ls.append(currentproject->ListFiles(2));
-	QString base = currentproject->FileDir() + '/';
+	QString base = currentproject->FileDir();
 	for (auto &&it : ls)
 	{
 		searchOneFile(base + it, searchstr, iscase, isregular, isword);
 	}
 }
+
+void CodeWindow::replaceAllFile(const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen)
+{
+	if (!currentproject)
+	{
+		return;
+	}
+	QStringList ls;
+	ls.append(currentproject->ListFiles(1));
+	ls.append(currentproject->ListFiles(2));
+	QString base = currentproject->FileDir();
+	for (auto &&it : ls)
+	{
+		replaceOneFile(base + it, searchstr, replacestr, iscase, isregular, isword, stayopen);
+	}
+}
+
 //打开文件，文件列表是自动维护的
 void CodeWindow::addFile(const QString &file,const QString &prodir)
 {
@@ -473,7 +562,6 @@ void CodeWindow::addFile(const QString &file,const QString &prodir)
 
         BkeCreator::AddRecentFile(loli->FullName()) ;
 
-        loli->File()->close();
         //添加文件监视
 //        bool ks = filewatcher->addPath(loli->FullName()) ;
 //        ks = false ;

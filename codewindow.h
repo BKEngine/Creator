@@ -184,6 +184,8 @@ public slots:
 	void Rename(const QString &old, const QString &now);
 	void searchOneFile(const QString &file, const QString &searchstr, bool iscase, bool isregular, bool isword);
 	void searchAllFile(const QString &searchstr, bool iscase, bool isregular, bool isword);
+	void replaceOneFile(const QString &file, const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen);
+	void replaceAllFile(const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen);
 
 private:
     OtherWindow *othwin ;

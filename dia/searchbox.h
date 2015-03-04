@@ -20,6 +20,7 @@ class SearchBox : public QDockWidget
 signals:
 	void searchOne(const QString &file, const QString &str, bool iscase, bool isregular, bool isword);
 	void searchAll(const QString &str, bool iscase, bool isregular, bool isword);
+	void replaceAll(const QString &str, const QString &str2, bool iscase, bool isregular, bool isword, bool stayopen);
 
 public:
     explicit SearchBox(QWidget *parent = 0);
