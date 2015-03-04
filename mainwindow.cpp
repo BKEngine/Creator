@@ -425,5 +425,5 @@ void MainWindow::OCupdate()
 void MainWindow::Config()
 {
     CConfigdia *ctk = new CConfigdia ;
-    ctk->show();
+    ctk->exec();
 }

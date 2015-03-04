@@ -129,6 +129,7 @@ void BkeScintilla::UiChange(int updated)
 
 	if (IsWorkingUndo && !ChangeIgnore) BkeEndUndoAction();
 
+	//缩进
 	if (modfieddata.lineadd == 1 && (modfieddata.text == "\n" || modfieddata.text == "\r\n")){
 
 		int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
@@ -140,6 +141,37 @@ void BkeScintilla::UiChange(int updated)
 			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - SendScintilla(SCI_GETTABWIDTH));
 			//本行就应该减了
 			InsertIndent(count - SendScintilla(SCI_GETTABWIDTH), modfieddata.line/* + 1*/);
+		}
+	}
+
+	//括号，引号补全
+	if (modfieddata.text == "(" || modfieddata.text == "[" || modfieddata.text == "{" || modfieddata.text == "\"" || modfieddata.text == "'")
+	{
+		int style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
+		int style2 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
+		char match[2];
+		switch (modfieddata.text[0].toLatin1())
+		{
+		case '(':
+			match[0] = ')';
+			break;
+		case '[':
+			match[0] = ']';
+			break;
+		case '{':
+			match[0] = '}';
+			break;
+		default:
+			match[0] = modfieddata.text[0].toLatin1();
+			break;
+		}
+		match[1] = 0;
+		char chNext;
+		//返回的是Length-1个字符和\0
+		chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + 1);
+		if (style != style2 || modfieddata.text[0] != chNext)
+		{
+			SendScintilla(SCI_INSERTTEXT, modfieddata.pos + 1, match);
 		}
 	}
 

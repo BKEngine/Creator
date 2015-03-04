@@ -16,7 +16,7 @@ const char * QsciLexerBkeScript::lexer () const
 
 QString QsciLexerBkeScript::description(int style) const
 {
-    switch (style & 31) {
+    switch (style & 63) {
 	case SCE_BKE_DEFAULT:
 	case SCE_BKE_PARSER:
 	case SCE_BKE_PARSER_DEFAULT: return QString("Default");
@@ -42,7 +42,8 @@ QString QsciLexerBkeScript::description(int style) const
 
 QColor QsciLexerBkeScript::defaultColor (int style) const
 {
-    switch (style & 31) {
+    switch (style & 63)
+	{
 	case SCE_BKE_PARSER:
 	case SCE_BKE_DEFAULT: return QColor(0x00, 0x00, 0x00);
 	case SCE_BKE_PARSER_DEFAULT: return QColor(0x00, 0x00, 0x00);
@@ -63,6 +64,15 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
 	case SCE_BKE_TRANS:  return QColor(0x7a, 0x0f, 0xd1); //转义字符，
 	}
     return QColor( 0x00,0x00,0x00) ;
+}
+
+QColor QsciLexerBkeScript::defaultPaper(int style) const
+{
+	if ((style & (1 << 6)) && (!(style & (1 << 7))))
+		return QColor(0xE0, 0xE0, 0xE0);
+	if (style == 65)
+		return QColor(0xE0, 0xE0, 0xE0);
+	return QsciLexer::defaultPaper();
 }
 
 QFont QsciLexerBkeScript::font (int style) const

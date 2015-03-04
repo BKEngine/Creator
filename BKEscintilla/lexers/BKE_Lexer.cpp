@@ -29,12 +29,10 @@
 
 #include "../paper/creator_parser.h"
 
-#define BASE_MASK 0
-#define BEGAL_MASK (1<<5)
+#define BASE_MASK 63
+#define BEGAL_MASK (1<<6)
 //in @ or [ command
-#define CMD_MASK (1<<6)
-//block comment
-#define COMMENT_MASK (1<<7)
+#define CMD_MASK (1<<7)
 
 class BKE_Lexer :public ILexer
 {
@@ -46,6 +44,8 @@ private:
 	StyleContext/*BKE_Accessor*/ *styler;
 
 	BKE_Info *info;
+
+	unsigned char cur_mask;
 public:
 	BKE_Lexer()
 	{
@@ -111,9 +111,26 @@ public:
 private:
 	int last_state;
 
+	void setMask(char m)
+	{
+		cur_mask |= m;
+	}
+	void removeMask(int m)
+	{
+		cur_mask &= ~m;
+	}
+
 	bool atComment()
 	{
 		return styler->ch == '/' && (styler->chNext == '/' || styler->chNext == '*');
+	}
+	bool atLineComment()
+	{
+		return styler->ch == '/' && styler->chNext == '/';
+	}
+	bool atBlockComment()
+	{
+		return styler->ch == '/' && styler->chNext == '*';
 	}
 	bool isHex(char c)
 	{
@@ -151,12 +168,12 @@ bool BKE_Lexer::ParseVarname()
 	}
 	if (info->BagelWords.contains(s))
 	{
-		styler->SetState(last_state);
+		styler->SetState(last_state | cur_mask);
 	}
 	else
 	{
-		styler->ChangeState(SCE_BKE_PARSER_VAR);
-		styler->SetState(last_state);
+		styler->ChangeState(SCE_BKE_PARSER_VAR | cur_mask);
+		styler->SetState(last_state | cur_mask);
 	}
 	return true;
 }
@@ -176,13 +193,13 @@ bool BKE_Lexer::ParseColor()
 	}
 	if (c == 3 || c == 4 || c == 6 || c == 8)
 	{
-		styler->SetState(last_state);
+		styler->SetState(last_state | cur_mask);
 		return true;
 	}
 	else
 	{
-		styler->ChangeState(SCE_BKE_ERROR);
-		styler->SetState(last_state);
+		styler->ChangeState(SCE_BKE_ERROR | cur_mask);
+		styler->SetState(last_state | cur_mask);
 		return false;
 	}
 }
@@ -232,7 +249,7 @@ bool BKE_Lexer::ParseNumber()
 			}
 		}
 		//over
-		styler->SetState(last_state);
+		styler->SetState(last_state | cur_mask);
 		return true;
 	}
 	else
@@ -272,7 +289,7 @@ bool BKE_Lexer::ParseNumber()
 			}
 		}
 		//over
-		styler->SetState(last_state);
+		styler->SetState(last_state | cur_mask);
 		return true;
 	}
 }
@@ -284,7 +301,7 @@ bool BKE_Lexer::ParseString()
 		if (styler->ch == '\"' && styler->chNext != '\"')
 		{
 			styler->Forward();
-			styler->SetState(last_state);
+			styler->SetState(last_state | cur_mask);
 			return true;
 		}
 		else
@@ -292,8 +309,8 @@ bool BKE_Lexer::ParseString()
 			styler->Forward();
 		}
 	}
-	styler->ChangeState(SCE_BKE_ERROR);
-	styler->SetState(last_state);
+	styler->ChangeState(SCE_BKE_ERROR | cur_mask);
+	styler->SetState(last_state | cur_mask);
 	return false;
 }
 
@@ -316,7 +333,7 @@ bool BKE_Lexer::ParseString2()
 			if (trans_info.empty())
 			{
 				styler->Forward();
-				styler->SetState(last_state);
+				styler->SetState(last_state | cur_mask);
 			}
 			else
 			{
@@ -326,13 +343,13 @@ bool BKE_Lexer::ParseString2()
 				while (it != trans_info.end())
 				{
 					styler->setPos(it->begin);
-					styler->SetState(it->correct ? SCE_BKE_TRANS : SCE_BKE_ERROR);
+					styler->SetState(it->correct ? SCE_BKE_TRANS | cur_mask : SCE_BKE_ERROR | cur_mask);
 					styler->setPos(it->begin + it->len);
-					styler->SetState(SCE_BKE_STRING2);
+					styler->SetState(SCE_BKE_STRING2 | cur_mask);
 					it++;
 				}
 				styler->setPos(pos2);
-				styler->SetState(last_state);
+				styler->SetState(last_state | cur_mask);
 			}
 			return true;
 		}
@@ -358,6 +375,8 @@ bool BKE_Lexer::ParseString2()
 			case L'b':
 			case L'f':
 			case L'v':
+			case '\"':
+			case '\'':
 				styler->Forward();
 				break;
 			case 'o':
@@ -401,8 +420,8 @@ bool BKE_Lexer::ParseString2()
 		}
 		styler->Forward();
 	}
-	styler->ChangeState(SCE_BKE_ERROR);
-	styler->SetState(last_state);
+	styler->ChangeState(SCE_BKE_ERROR | cur_mask);
+	styler->SetState(last_state | cur_mask);
 	return false;
 }
 
@@ -420,25 +439,29 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 		//judge end
 		if (styler->atLineEnd && !ignoreLineEnd)
 		{
-			styler->SetState(SCE_BKE_DEFAULT);
+			removeMask(BEGAL_MASK);
+			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			break;
 		}
 		if (isspace(styler->ch) && !ignoreSpace)
 		{
-			styler->SetState(SCE_BKE_DEFAULT);
+			removeMask(BEGAL_MASK);
+			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			break;
 		}
 		if (styler->ch == ']' && !atCommand)
 		{
-			styler->SetState(SCE_BKE_DEFAULT);
+			removeMask(BEGAL_MASK);
+			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			break;
 		}
 		if (styler->atLineStart && styler->ch == '#' && styler->chNext == '#')
 		{
 			int p = styler->currentPos;
-			styler->SetState(SCE_BKE_DEFAULT);
 			styler->Forward();
 			styler->Forward();
+			removeMask(BEGAL_MASK);
+			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			bool end = true;
 			while (!styler->atLineEnd)
 			{
@@ -454,26 +477,26 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			if (end)
 				break;
 		}
-		last_state = styler->state;
+		last_state = styler->state & BASE_MASK;
 		switch (styler->ch)
 		{
 		case '\"':
-			styler->SetState(SCE_BKE_STRING);
+			styler->SetState(SCE_BKE_STRING | cur_mask);
 			styler->Forward();
 			ParseString();
 			break;
 		case '\'':
-			styler->SetState(SCE_BKE_STRING2);
+			styler->SetState(SCE_BKE_STRING2 | cur_mask);
 			styler->Forward();
 			ParseString2();
 			break;
 		case 0:case 1:case 2:case 3:case 4:case 5:case 6:case 7:case 8:case 9:
-			styler->SetState(SCE_BKE_NUMBER);
+			styler->SetState(SCE_BKE_NUMBER | cur_mask);
 			styler->Forward();
 			ParseNumber();
 			break;
 		case '#':
-			styler->SetState(SCE_BKE_COLOR);
+			styler->SetState(SCE_BKE_COLOR | cur_mask);
 			styler->Forward();
 			ParseColor();
 			break;
@@ -481,16 +504,16 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 		case '/':
 			if (styler->chNext == '/')
 			{
-				styler->SetState(SCE_BKE_ANNOTATE);
+				styler->SetState(SCE_BKE_ANNOTATE | cur_mask);
 				styler->Forward();
 				styler->Forward();
 				ContinueLineComment();
-				styler->SetState(defaultState);
+				styler->SetState(defaultState | cur_mask);
 				break;
 			}
 			else if (styler->chNext == '*')
 			{
-				styler->SetState(SCE_BKE_COMMENT);
+				styler->SetState(SCE_BKE_COMMENT | cur_mask);
 				styler->Forward();
 				styler->Forward();
 				ContinueBlockComment();
@@ -499,18 +522,18 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 		default:
 			if (info->OperatorAncestor.indexOf(styler->ch) >= 0)
 			{
-				styler->SetState(SCE_BKE_OPERATORS);
+				styler->SetState(SCE_BKE_OPERATORS | cur_mask);
 				styler->Forward();
 			}
 			else if (isalpha(styler->ch) || styler->ch == '_' || styler->ch >= 0x80)
 			{
-				styler->SetState(SCE_BKE_PARSER_KEYWORD);
+				styler->SetState(SCE_BKE_PARSER_KEYWORD | cur_mask);
 				styler->Forward();
 				ParseVarname();
 			}
 			else if (isspace(styler->ch))
 			{
-				styler->SetState(defaultState);
+				styler->SetState(defaultState | cur_mask);
 				styler->Forward();
 				while (styler->More())
 				{
@@ -522,7 +545,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			}
 			else
 			{
-				styler->SetState(SCE_BKE_ERROR);
+				styler->SetState(SCE_BKE_ERROR | cur_mask);
 				styler->Forward();
 			}
 		}
@@ -532,6 +555,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 void BKE_Lexer::DoCommand()
 {
 	//check cmd name
+	setMask(CMD_MASK);
 	if (!styler->atLineEnd && !isspace(styler->ch) && styler->ch != ']')
 	{
 		while (styler->More())
@@ -544,9 +568,9 @@ void BKE_Lexer::DoCommand()
 	}
 	else
 	{
-		styler->ChangeState(SCE_BKE_ERROR);
+		styler->ChangeState(SCE_BKE_ERROR | cur_mask);
 	}
-	styler->SetState(SCE_BKE_DEFAULT);
+	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 	//prop-value
 	while (styler->More() && !styler->atLineEnd && styler->ch != ']')
 	{
@@ -555,7 +579,7 @@ void BKE_Lexer::DoCommand()
 			styler->Forward();
 			continue;
 		}
-		styler->SetState(SCE_BKE_ATTRIBUTE);
+		styler->SetState(SCE_BKE_ATTRIBUTE | cur_mask);
 		int startPos = styler->currentPos;
 		if (styler->ch >= 80 || styler->ch == '_' || isalpha(styler->ch))
 		{
@@ -570,34 +594,36 @@ void BKE_Lexer::DoCommand()
 			}
 			if (styler->ch == '=')
 			{
-				styler->ChangeState(SCE_BKE_DEFAULT);
+				styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 				styler->Forward();
 			}
 			else
 			{
 				//see as no attr
-				styler->ChangeState(SCE_BKE_DEFAULT);
+				styler->ChangeState(SCE_BKE_DEFAULT | cur_mask);
 				styler->setPos(startPos);
 			}
 		}
 		else
 		{
 			//no attr
-			styler->ChangeState(SCE_BKE_DEFAULT);
+			styler->ChangeState(SCE_BKE_DEFAULT | cur_mask);
 			styler->setPos(startPos);
 		}
 		ParseBegal(false, false, false);
 	}
+	removeMask(CMD_MASK);
 	if (styler->ch == ']')
 	{
-		styler->SetState(SCE_BKE_COMMAND);
+		styler->SetState(SCE_BKE_COMMAND | cur_mask);
 		styler->Forward();
-		styler->SetState(SCE_BKE_DEFAULT);
+		styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 	}
 }
 
 void BKE_Lexer::DoAtCommand()
 {
+	setMask(CMD_MASK);
 	//check cmd name
 	if (!styler->atLineEnd && !isspace(styler->ch))
 	{
@@ -611,9 +637,9 @@ void BKE_Lexer::DoAtCommand()
 	}
 	else
 	{
-		styler->ChangeState(SCE_BKE_ERROR);
+		styler->ChangeState(SCE_BKE_ERROR | cur_mask);
 	}
-	styler->SetState(SCE_BKE_DEFAULT);
+	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 	//prop-value
 	while (styler->More() && !styler->atLineEnd)
 	{
@@ -622,7 +648,7 @@ void BKE_Lexer::DoAtCommand()
 			styler->Forward();
 			continue;
 		}
-		styler->SetState(SCE_BKE_ATTRIBUTE);
+		styler->SetState(SCE_BKE_ATTRIBUTE | cur_mask);
 		int startPos = styler->currentPos;
 		if (styler->ch >= 80 || styler->ch == '_' || isalpha(styler->ch))
 		{
@@ -637,35 +663,47 @@ void BKE_Lexer::DoAtCommand()
 			}
 			if (styler->ch == '=')
 			{
-				styler->ChangeState(SCE_BKE_DEFAULT);
+				styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 				styler->Forward();
 			}
 			else
 			{
 				//see as no attr
-				styler->ChangeState(SCE_BKE_DEFAULT);
+				styler->ChangeState(SCE_BKE_DEFAULT | cur_mask);
 				styler->setPos(startPos);
 			}
 		}
 		else
 		{
 			//no attr
-			styler->ChangeState(SCE_BKE_DEFAULT);
+			styler->ChangeState(SCE_BKE_DEFAULT | cur_mask);
 			styler->setPos(startPos);
 		}
 		ParseBegal(false, false, true);
 	}
+	removeMask(CMD_MASK);
 }
 
 void BKE_Lexer::ContinueLabel()
 {
+	setMask(CMD_MASK);
+	styler->SetState(SCE_BKE_LABEL | cur_mask);
 	while (styler->More() && !styler->atLineEnd)
 	{
-		if (atComment())
+		if (atLineComment())
 			break;
+		else if (atBlockComment())
+		{
+			last_state = styler->state & BASE_MASK;
+			styler->SetState(SCE_BKE_COMMENT | cur_mask);
+			styler->Forward();
+			styler->Forward();
+			ContinueBlockComment();
+		}
 		styler->Forward();
 	}
-	styler->SetState(SCE_BKE_DEFAULT);
+	removeMask(CMD_MASK);
+	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 	return;
 }
 
@@ -678,7 +716,7 @@ void BKE_Lexer::ContinueBlockComment()
 			styler->Forward();
 			styler->Forward();
 			//styler->removeMaskState(COMMENT_MASK);
-			styler->SetState(last_state);   //恢复原状态
+			styler->SetState(last_state | cur_mask);   //恢复原状态
 			break;
 		}
 		styler->Forward();
@@ -692,69 +730,70 @@ void BKE_Lexer::ContinueLineComment()
 	{
 		styler->Forward();
 	}
-	styler->SetState(SCE_BKE_DEFAULT);
+	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 }
 
 void BKE_Lexer::JudgeStyle()
 {
-	//styler->setMaskState(0);
 	if (styler->ch == '@')
 	{
-		//styler->setMaskState(COMMENT_MASK);
-		styler->SetState(SCE_BKE_COMMAND);
+		styler->SetState(SCE_BKE_COMMAND | cur_mask);
 	}
 	else if (styler->ch == '[')
 	{
-		//styler->setMaskState(COMMENT_MASK);
-		styler->SetState(SCE_BKE_COMMAND2);
+		styler->SetState(SCE_BKE_COMMAND2 | cur_mask);
 	}
 	else if (styler->ch == '/' && styler->chNext == '/')
 	{
-		styler->SetState(SCE_BKE_ANNOTATE);
+		styler->SetState(SCE_BKE_ANNOTATE | cur_mask);
 		styler->Forward();
 	}
 	else if (styler->ch == ';' && styler->atLineStart)
-		styler->SetState(SCE_BKE_ANNOTATE);
+		styler->SetState(SCE_BKE_ANNOTATE | cur_mask);
 	else if (styler->ch == '/' && styler->chNext == '*')
 	{
 		//styler->setMaskState(COMMENT_MASK);
 		last_state = styler->state;
-		styler->SetState(SCE_BKE_COMMENT);
+		styler->SetState(SCE_BKE_COMMENT | cur_mask);
 		styler->Forward();
 	}
 	else if (styler->ch == '*' && styler->atLineStart)
-		styler->SetState(SCE_BKE_LABEL);
+	{
+		styler->SetState(SCE_BKE_LABEL | cur_mask);
+	}
 	else if (styler->ch == '#')
 	{
 		if (styler->chNext == '#')
 		{
-			styler->SetState(SCE_BKE_PARSER_DEFAULT);
+			setMask(BEGAL_MASK);
+			styler->SetState(SCE_BKE_PARSER_DEFAULT | cur_mask);
 			styler->Forward();
 		}
 		else
 		{
-			styler->SetState(SCE_BKE_PARSER);
+			setMask(BEGAL_MASK);
+			styler->SetState(SCE_BKE_PARSER | cur_mask);
 		}
 	}
 	else if (styler->ch == '\"')
 	{
 		//styler->setMaskState(BEGAL_MASK);
-		styler->SetState(SCE_BKE_STRING);
+		styler->SetState(SCE_BKE_STRING | cur_mask);
 	}
 	else if (styler->ch == '\'')
 	{
 		//styler->setMaskState(BEGAL_MASK);
-		styler->SetState(SCE_BKE_STRING2);
+		styler->SetState(SCE_BKE_STRING2 | cur_mask);
 	}
 	else if (styler->atLineEnd)
 	{
-		styler->SetState(SCE_BKE_DEFAULT);
+		styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 		if (styler->ch == '\r' && styler->chNext == '\n')
 			styler->Forward();
 	}
 	else
 	{
-		styler->SetState(SCE_BKE_TEXT);
+		styler->SetState(SCE_BKE_TEXT | cur_mask);
 	}
 	bool stillstart = false;
 	if (styler->atLineStart && styler->ch == '\t')
@@ -763,7 +802,7 @@ void BKE_Lexer::JudgeStyle()
 	if (!styler->atLineStart && stillstart)
 	{
 		styler->atLineStart = true;
-		styler->ChangeState(SCE_BKE_DEFAULT);
+		styler->ChangeState(SCE_BKE_DEFAULT | cur_mask);
 	}
 }
 
@@ -782,13 +821,38 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 {
 	LexAccessor accessor(pAccess);
 
-	StyleContext sc(startPos, lengthDoc, initStyle, accessor);
+	StyleContext sc(startPos, lengthDoc, initStyle, accessor, 0xFF);
 	styler = &sc;
+
+	unsigned char laststyle = (unsigned char)pAccess->StyleAt(startPos - 1);
+	unsigned char curstyle = (unsigned char)pAccess->StyleAt(startPos);
+	cur_mask = initStyle & ~BASE_MASK;
+
+	if (initStyle & CMD_MASK)
+	{
+		int endPos = startPos + lengthDoc;
+		//search begin of cmd
+		while (startPos-- > 0)
+		{
+			if ((curstyle & CMD_MASK) && !(laststyle & CMD_MASK))
+				break;
+			curstyle = pAccess->StyleAt(startPos);
+			laststyle = pAccess->StyleAt(startPos - 1);
+		}
+		Lex(startPos, endPos - startPos, pAccess->StyleAt(startPos - 1), pAccess);
+		return;
+	}
+
+	if (cur_mask & BEGAL_MASK)
+	{
+		//## or #
+
+	}
 	//styler->setRange(startPos, startPos + lengthDoc, initStyle);
 
 	while (styler->More())
 	{
-		switch (styler->state)
+		switch (styler->state & BASE_MASK)
 		{
 		case SCE_BKE_DEFAULT:
 			//judge next type

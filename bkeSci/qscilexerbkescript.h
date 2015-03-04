@@ -21,9 +21,10 @@ public:
 
     const char *language() const ;
     const char * lexer () const ;
-    QString description(int style) const ;
-    QColor defaultColor (int style) const ;
-    QFont font (int style) const ;
+	virtual QString description(int style) const;
+	virtual QColor defaultColor(int style) const;
+	virtual QColor defaultPaper(int style) const;
+	QFont font(int style) const;
     QFont defaultFont (int style) const ;
     QStringList autoCompletionWordSeparators() const ;
     const char * blockStart (int *style=0) const ;
