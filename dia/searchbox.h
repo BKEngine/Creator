@@ -16,12 +16,13 @@
 class SearchBox : public QDockWidget
 {
     Q_OBJECT
+
+signals:
+	void searchOne(const QString &file, const QString &fullfile, int line);
+
 public:
     explicit SearchBox(QWidget *parent = 0);
     void SetSci(BkeScintilla *sci);
-
-signals:
-
 
 public slots :
 	void onDocChanged();

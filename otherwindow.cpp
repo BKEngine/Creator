@@ -38,6 +38,7 @@ OtherWindow::OtherWindow(QWidget *parent)
 	connect(btncompiletext, SIGNAL(clicked()), this, SLOT(WINcomile()));
 	connect(btnbookmark, SIGNAL(clicked()), this, SLOT(WINbookmark()));
 	connect(btnmark, SIGNAL(clicked()), this, SLOT(WINmark()));
+	connect(searchlist, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(SearchDoubleClicked(QListWidgetItem*)));
 	connect(ProblemList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(ProblemDoubleClicked(QListWidgetItem*)));
 	connect(bookmarklist, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(BookMarkDoubleClicked(QListWidgetItem*)));
 	connect(marklist, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(MarkDoubleClicked(QListWidgetItem*)));
@@ -76,12 +77,26 @@ void OtherWindow::IfShow(QPushButton *btn, bool must)
 	lastbtn = btn;
 	btn->setStyleSheet("background: #808080");
 
-	if (btn == btnproblem);
-	else if (btn == btnbookmark);
-	else if (btn == btnmark);
+	//if (btn == btnproblem);
+	//else if (btn == btnbookmark);
+	//else if (btn == btnmark);
 }
 
+void OtherWindow::onSearchOne(const QString &file, const QString &fullfile, int line)
+{
+	auto bm = new BkeMarkerBase();
+	bm->Name = file;
+	bm->FullName = fullfile;
+	bm->Type = BkeMarkSupport::BKE_MARK_SEARCH;
+	bm->Atpos = line;
+	bm->Information = searchlist->item(memsearch.size())->text();
+	memsearch.push_back(bm);
+}
 
+void OtherWindow::SearchDoubleClicked(QListWidgetItem * item)
+{
+	emit Location(memsearch.at(searchlist->currentRow()), "");
+}
 
 //定位问题处
 void OtherWindow::ProblemDoubleClicked(QListWidgetItem * item)

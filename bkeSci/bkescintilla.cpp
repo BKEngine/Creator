@@ -1,6 +1,7 @@
 ﻿#include <weh.h>
 #include "bkescintilla.h"
 #include "../BKS_info.h"
+#include "../codewindow.h"
 
 QImage BKE_AUTOIMAGE_KEY(":/auto/source/auto_key.png");
 QImage BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_funcotin.png");
@@ -690,6 +691,24 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 	QFont ft("Courier");
 	ft.setPointSize(lex->defaultFont(0).pointSize());
 	setMarginsFont(ft);
+
+	// 折叠标签样式
+	SendScintilla(SCI_MARKERDEFINE, SC_MARKNUM_FOLDER, SC_MARK_CIRCLEPLUS);
+	SendScintilla(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPEN, SC_MARK_CIRCLEMINUS);
+	SendScintilla(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEREND, SC_MARK_CIRCLEPLUSCONNECTED);
+	SendScintilla(SCI_MARKERDEFINE, SC_MARKNUM_FOLDEROPENMID, SC_MARK_CIRCLEMINUSCONNECTED);
+	SendScintilla(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERMIDTAIL, SC_MARK_TCORNERCURVE);
+	SendScintilla(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERSUB, SC_MARK_VLINE);
+	SendScintilla(SCI_MARKERDEFINE, SC_MARKNUM_FOLDERTAIL, SC_MARK_LCORNERCURVE);
+
+	// 折叠标签颜色
+	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERSUB, 0xa0a0a0);
+	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERMIDTAIL, 0xa0a0a0);
+	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERTAIL, 0xa0a0a0);
+
+	SendScintilla(SCI_SETFOLDFLAGS, 16 | 4); //如果折叠就在折叠行的上下各画一条横线
+
+	//SendScintilla(SCI_SETMARGINSENSITIVEN, SC_MARKNUM_FOLDER, true);
 }
 
 void BkeScintilla::InsertIndent(int count, int lineID)

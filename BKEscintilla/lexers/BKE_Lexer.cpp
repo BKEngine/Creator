@@ -892,7 +892,10 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 
 void SCI_METHOD BKE_Lexer::Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess)
 {
+	LexAccessor styler(pAccess);
 
+	int levelCurrent = SC_FOLDLEVELBASE >> 16;
+	styler.SetLevel(0, (levelCurrent + 1) << 16 + 1);
 }
 
 #define SCLEX_BKE 108

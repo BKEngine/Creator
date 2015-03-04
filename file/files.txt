@@ -1,10 +1,10 @@
 ﻿F:/BKEProject/BKE demo/extend.bkscr
 F:/BKEProject/BKE demo/main.bkscr
-F:/BKEProject/BKE demo/script/story.bkscr
 F:/BKEProject/BKE demo/macro.bkscr
+F:/BKEProject/BKE demo/script/system_history.bkscr
+F:/BKEProject/BKE demo/script/story.bkscr
 F:/BKEProject/BKE demo/init.bkscr
 C:/Users/taiga/Desktop/test_/BattleScene.bkscr
 C:/Users/taiga/Desktop/test_/macro.bkscr
 C:/Users/taiga/Desktop/test_/Character.bkscr
 F:/work/QT/BKE_Creator/file/test/effect/111.bkscr
-F:/work/QT/BKE_Creator/file/test/effect/123.bkscr

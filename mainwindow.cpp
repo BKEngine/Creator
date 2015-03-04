@@ -217,7 +217,7 @@ void MainWindow::AboutBkeCreator()
     QString temp ;
     temp.append("  Bke Creator           \r\n\r\n") ;
     temp.append("  版本："+BKE_CREATOR_VERTION+"    \r\n") ;
-    temp.append("  开发：萝莉岛&歪鼻子&Taigacon\r\n\r\n") ;
+    temp.append("  开发：萝莉岛&歪鼻子&Taigacon&gjy_管\r\n\r\n") ;
     temp.append("  Bke Creator处于完善开发阶段，有些功能无效是正常的。\r\n"
                 "") ;
     msg.SetLable(temp);
@@ -229,7 +229,12 @@ void MainWindow::AboutBkeCreator()
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
-    codeedit->CloseAll();
+    bool res = codeedit->CloseAll();
+	if (!res)
+	{
+		e->ignore();
+		return;
+	}
     codeedit->ClearCompile();
 
     BKE_CLOSE_SETTING->setValue("window/width",width());

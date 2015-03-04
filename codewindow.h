@@ -132,6 +132,9 @@ signals:
     void CurrentFileChange(const QString &name,const QString &prodir);
     void FileAddProject(const QString &file) ;
     //void ComplileText(const QString &text) ;
+public:
+	bool CloseAll();
+
 public slots:
     void ChangeCurrentEdit(int pos) ;
     void SetCurrentEdit(int pos) ;
@@ -145,7 +148,6 @@ public slots:
     void SaveALL() ;
     void CloseFile() ;
     void CloseFile(int pos);
-    void CloseAll() ;
     void ImportBeChange(const QString &text,int type) ;
     void FileWillBeDel(const QString &file) ;
     void Compile() ;

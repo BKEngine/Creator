@@ -16,6 +16,8 @@ extern QImage BKE_AUTOIMAGE_DICTIONARIES ;
 extern QImage BKE_AUTOIMAGE_NORMAL ;
 extern QImage BKE_AUTOIMAGE_MATH ;
 
+class BkeDocBase;
+
 class BkeScintilla : public QsciScintilla
 {
     Q_OBJECT
@@ -69,6 +71,7 @@ public:
     int findcount ;
 	BkeIndicatorBase findlast;
 
+	BkeDocBase *basedoc;
 signals:
     void Undoready(bool is) ;
     void Redoready(bool is) ;

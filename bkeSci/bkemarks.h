@@ -24,7 +24,8 @@ class BkeMarkSupport
 public:
 
     enum MARKTYPE{
-        BKE_MARK_PROBLEEM = 3 ,
+		BKE_MARK_SEARCH,
+		BKE_MARK_PROBLEEM = 3,
         BKE_MARK_BOOKMARK = 4 ,
         BKE_MARK_MARKER = 8
     };

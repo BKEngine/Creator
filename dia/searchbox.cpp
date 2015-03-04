@@ -93,6 +93,7 @@ void SearchBox::onFindConditionChange()
 
 void SearchBox::FindAll()
 {
+	otheredit->searchlist->clear();
 	bool all = findallpro->isChecked();
 	if (!all)
 	{
@@ -113,6 +114,7 @@ void SearchBox::FindAll()
 			}
 			int offset = p.Start() - linestart;
 			otheredit->searchlist->addItem(sciedit->FileName + QString("(%1, %2)").arg(line).arg(offset) + ":\t" + buf);
+			emit searchOne(sciedit->FileName, sciedit->basedoc->FullName(), line);
 			delete[] buf;
 		}
 		close();

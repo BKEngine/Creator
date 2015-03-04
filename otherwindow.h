@@ -42,7 +42,8 @@ signals:
     void Location(BkeMarkerBase *mark,const QString &prodir) ;
 
 public slots:
-    void ProblemDoubleClicked(QListWidgetItem * item) ;
+	void SearchDoubleClicked(QListWidgetItem * item);
+	void ProblemDoubleClicked(QListWidgetItem * item);
     void BookMarkDoubleClicked(QListWidgetItem * item) ;
     void MarkDoubleClicked(QListWidgetItem * item) ;
     void WINproblem() ;
@@ -50,6 +51,7 @@ public slots:
     void WINcomile() ;
     void WINbookmark() ;
     void WINmark() ;
+	void onSearchOne(const QString &file, const QString &fullfile, int line);
 
 private:
     QPushButton *lastbtn ;
@@ -65,7 +67,8 @@ private:
     BkeMarkList membookmark ;
     BkeMarkList memmark ;
     BkeMarkList memproblem ;
-    QString problemdir ;
+	BkeMarkList memsearch;
+	QString problemdir;
 
     QHash<QPushButton*,QWidget*> emap ;
     void BuildBookMarker() ;

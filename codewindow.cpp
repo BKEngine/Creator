@@ -43,7 +43,7 @@ CodeWindow::CodeWindow(QWidget *parent)
     //查找
     connect(btnfindact,SIGNAL(triggered()),diasearch,SLOT(SearchModel())) ;
     connect(btnreplaceact,SIGNAL(triggered()),diasearch,SLOT(ReplaceModel())) ;
-    connect(&comtool,SIGNAL(CompliteFinish()),this,SLOT(CompileFinish())) ;
+	connect(&comtool, SIGNAL(CompliteFinish()), this, SLOT(CompileFinish()));
     connect(&comtool,SIGNAL(CompliteError(QString)),this,SLOT(CompileError(QString))) ;
     connect(btnrunact,SIGNAL(triggered()),this,SLOT(RunBKE())) ;
     connect(pannote,SIGNAL(triggered()),this,SLOT(AnnotateSelect())) ;
@@ -188,6 +188,7 @@ void CodeWindow::OtherWinOtherwin(OtherWindow *win)
     othwin = win ;
     //定位文件
     connect(win,SIGNAL(Location(BkeMarkerBase*,QString)),this,SLOT(ToLocation(BkeMarkerBase*,QString))) ;
+	connect(diasearch, SIGNAL(searchOne(const QString &, const QString &, int)), othwin, SLOT(onSearchOne(const QString &, const QString &, int)));
 }
 
 void CodeWindow::OtherWinProject(ProjectWindow *p)
@@ -383,8 +384,13 @@ void CodeWindow::addFile(const QString &file,const QString &prodir)
 
         loli->SetProjectDir(prodir);
         //新的编辑窗口
+		QDir d(prodir);
+		QString shortname = d.relativeFilePath(file);
         simpleNew(loli,en);
-		loli->edit->FileName = file;
+		if (shortname.startsWith("..") || shortname[1]==':')
+			loli->edit->FileName = file;
+		else
+			loli->edit->FileName = shortname;
         BkeProject *tpro = prowin->FindProjectFromDir(prodir) ;
         if( prodir != 0 ) loli->edit->setParser( tpro->lex );
 
@@ -408,6 +414,7 @@ void CodeWindow::simpleNew(BkeDocBase *loli,const QString &t)
     ignoreflag = true ; //忽略改变，在所有准备工作完成以后才改变
 
     loli->edit = new BkeScintilla(this) ;
+	loli->edit->basedoc = loli;
     int pos = LOLI_SORT_INSERT( ItemTextList, loli->Name()) ;
     filewidget->insertItem(pos,loli->Name()) ;
     lablelist->insertItem(pos,loli->Name()) ;
@@ -520,8 +527,10 @@ void CodeWindow::CloseFile()
 
         msg->setText( currentbase->FullName()+"\r\n已经被修改，是否保存？");
         int i = msg->exec() ;
-        if( i == QMessageBox::AcceptRole) SaveFile();
-        else if( i == QMessageBox::DestructiveRole ) return ;
+        if( i == QMessageBox::AcceptRole)
+			SaveFile();
+        else if( i == QMessageBox::DestructiveRole )
+			return ;
     }
 
     simpleClose( currentbase ) ;
@@ -534,7 +543,7 @@ void CodeWindow::CloseFile(int pos)
     simpleClose(llm);
 }
 
-void CodeWindow::CloseAll()
+bool CodeWindow::CloseAll()
 {
     QList<BkeDocBase*> ls = docWidgetHash.values() ;
 
@@ -543,14 +552,19 @@ void CodeWindow::CloseAll()
         ptr = ls.at(i) ;
         if( ptr->edit->isModified() ){
             SetCurrentEdit(ptr->edit);
-            if( QMessageBox::information(this,"","文件:\r\n"+ptr->FullName()+"\r\n已经修改，是否保存？"
-                                         ,QMessageBox::Save|QMessageBox::Close) == QMessageBox::Save) simpleSave(ptr);
-            simpleClose(ptr);
+			auto btn = QMessageBox::information(this, "", "文件:\r\n" + ptr->FullName() + "\r\n已经修改，是否保存？", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+			if (btn == QMessageBox::Yes)
+				simpleSave(ptr);
+			else if (btn == QMessageBox::No)
+				simpleClose(ptr);
+			else
+				return false;
         }
         else{
             simpleClose(ptr);
         }
     }
+	return true;
 }
 
 QSize CodeWindow::sizeHint () const
@@ -619,32 +633,33 @@ void CodeWindow::CompileAll()
     btncompileact->setEnabled(false);
     btncompilerunact->setEnabled(false);
     btnrunact->setEnabled(false);
-    //清理上次编译的项目
-    deleteCompileFile(ComList, cosdir);
+    ////清理上次编译的项目
+    //deleteCompileFile(ComList, cosdir);
 
     ComList = currentproject->AllScriptFiles() ;
     cosdir  = currentproject->FileDir() ;
 
-    //拷贝文件
-    if( !WriteOpenFile(currentproject->FileDir()) ){
-        btncompileact->setEnabled(true);
-        btncompilerunact->setEnabled(true);
-        btnrunact->setEnabled(true);
-        return ;
-    }
-    QStringList ls = ListDirsCopy(ComList,cosdir,BKE_CURRENT_DIR+"/temp") ;
+    ////拷贝文件
+    //if( !WriteOpenFile(currentproject->FileDir()) ){
+    //    btncompileact->setEnabled(true);
+    //    btncompilerunact->setEnabled(true);
+    //    btnrunact->setEnabled(true);
+    //    return ;
+    //}
+    //QStringList ls = ListDirsCopy(ComList,cosdir,BKE_CURRENT_DIR+"/temp") ;
 
-    if( ls.size() > 0){
-        QMessageBox msg ;
-        msg.setText("以下文件复制失败：\r\n" + ls.join("\r\n") );
-        msg.addButton(QMessageBox::Ok);
-        msg.exec() ;
-        return ;
-    }
+    //if( ls.size() > 0){
+    //    QMessageBox msg ;
+    //    msg.setText("以下文件复制失败：\r\n" + ls.join("\r\n") );
+    //    msg.addButton(QMessageBox::Ok);
+    //    msg.exec() ;
+    //    return ;
+    //}
 
     kag->show();
     //开始编译
-    comtool.Compile(BKE_CURRENT_DIR+"/temp");
+    //comtool.Compile(BKE_CURRENT_DIR+"/temp");
+	comtool.Compile(currentproject->FileDir());
 }
 
 bool CodeWindow::WriteOpenFile(const QString &dir)
@@ -805,18 +820,22 @@ void CodeWindow::FileNameChange(const QString &oldname,const QString &newname,bo
 }
 
 //转到文件
-void CodeWindow::ToLocation(BkeMarkerBase *p,const QString &prodir)
+void CodeWindow::ToLocation(BkeMarkerBase *p, const QString &prodir)
 {
-    if( prodir.isEmpty() ) addFile( p->FullName,0) ;
-    else addFile(p->FullName,prodir) ;
-//    BKEproject *pro = prowin->FindFileProject(p->FullName) ;
-//    if( pro == 0){
-//        addFile(p->FullName,0);
-//    }
-//    else  addFile(p->FullName,pro->FileDir());
+	if (prodir.isEmpty())
+		addFile(p->FullName, "");
+	else
+		addFile(p->FullName, prodir);
+	//    BKEproject *pro = prowin->FindFileProject(p->FullName) ;
+	//    if( pro == 0){
+	//        addFile(p->FullName,0);
+	//    }
+	//    else  addFile(p->FullName,pro->FileDir());
 
-    if( p->Atpos > 1) currentedit->setFirstVisibleLine(p->Atpos-1);
-    else currentedit->setFirstVisibleLine(p->Atpos);
+	if (p->Atpos > 1)
+		currentedit->setFirstVisibleLine(p->Atpos - 1);
+	else
+		currentedit->setFirstVisibleLine(p->Atpos);
 }
 
 void CodeWindow::ShowRmenu( const QPoint & pos )
@@ -1200,3 +1219,4 @@ void CodeWindow::ActCopy()
 {
     currentedit->copy();
 }
+
