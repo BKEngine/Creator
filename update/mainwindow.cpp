@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include <QMessageBox>
@@ -97,11 +97,13 @@ void MainWindow::InfodownFinish(QNetworkReply* netfile)
         downlist.clear();
         cmdString.clear();
 
-        if( isFileDiffrent(fileName) ){    //优先升级update.exe
-            isSelfUp = true ;
-            downlist << fileName ;
+        if( isFileDiffrent(fileName) )
+        {    //优先升级update.exe
+             isSelfUp = true ;
+             downlist << fileName ;
         }
-        else downlist = nfilejs.keys() ;
+        else
+            downlist = nfilejs.keys() ;
     }
 
     netfile->deleteLater();
@@ -125,11 +127,26 @@ void MainWindow::startUpdate()
     errorlist.clear();
     ptr = 0 ;
 
+    {
+        auto keys = ofilejs.keys();
+        auto i = 0;
+        while(i < keys.size())
+        {
+            if(isFileRemoved(keys.at(i)))
+            {
+                cmdString.append("del /Q \""+ keys.at(i) +"\"\r\n" ) ;
+                ofilejs.remove(keys.at(i));
+            }
+            i++;
+        }
+    }
+
     Nextfile();
 }
 
 void MainWindow::Nextfile()
 {
+
     //只更新md5值不同的文件
     while( ptr < downlist.size() && !isFileDiffrent(downlist.at(ptr)) ) ptr++ ;
 
@@ -325,6 +342,11 @@ bool MainWindow::isFileDiffrent(const QString &name)
     QString oldmd5 = ofilejs.value(name).toString() ;
     QString newmd5 = nfilejs.value(name).toString() ;
     return oldmd5 != newmd5 ;
+}
+
+bool MainWindow::isFileRemoved(const QString &name)
+{
+    return !nfilejs.contains(name);
 }
 
 //添加错误文件

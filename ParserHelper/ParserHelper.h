@@ -8,7 +8,7 @@
 #include "config.h"
 
 class Var_Except;
-class PARSERHELPERSHARED_EXPORT QBkeVarExcept
+class QBkeVarExcept
 {
     QString msg;
 public:
@@ -23,7 +23,7 @@ typedef QList<QBkeVariable> QBkeArray;
 typedef QVector<QBkeVariable> QBkeVector;
 
 class BKE_Variable;
-class PARSERHELPERSHARED_EXPORT QBkeVariableRef
+class QBkeVariableRef
 {
 protected:
     BKE_Variable *_var;
@@ -36,6 +36,10 @@ public:
     bool operator == (const QBkeVariableRef &r) const;
     QBkeVariableRef &operator = (const QBkeVariableRef &r);
     QBkeVariableRef &operator = (const QBkeVariable &r);
+    QBkeVariableRef &operator - (const QBkeVariableRef &r);
+    QBkeVariableRef &operator - (const QBkeVariable &r);
+    QBkeVariableRef &operator -= (const QBkeVariableRef &r);
+    QBkeVariableRef &operator -= (const QBkeVariable &r);
     void redirect(QBkeVariable &v);
     void redirect(const QBkeVariableRef &v){_var = v._var;}
 
@@ -73,7 +77,7 @@ public:
     QBkeVector toBkeVector() const;
 };
 
-class PARSERHELPERSHARED_EXPORT QBkeVariable
+class QBkeVariable
 {  
 protected:
     BKE_Variable *_var;
@@ -98,6 +102,10 @@ public:
     QBkeVariable(const BKE_Variable &v);
     QBkeVariable &operator = (const QBkeVariable &v);
     QBkeVariable &operator = (const QBkeVariableRef &v);
+    QBkeVariable &operator - (const QBkeVariable &v);
+    QBkeVariable &operator - (const QBkeVariableRef &v);
+    QBkeVariable &operator -= (const QBkeVariable &v);
+    QBkeVariable &operator -= (const QBkeVariableRef &v);
     operator BKE_Variable &(){return *_var;}
     bool operator == (const QBkeVariable &r) const;
     const QBkeVariable operator [](int i) const;
@@ -123,6 +131,8 @@ public:
     void loadFromBinary(const QByteArray &b);
     void loadFromString(const QString &s);
     void loadClosureDicFromString(const QString &s);
+
+    void setVoid();
 
     int toInt() const;
     QString toString() const;

@@ -1,4 +1,4 @@
-#include "weh.h"
+﻿#include "weh.h"
 
 QString CURRENT_DIR ;
 //QStringList DOWNLIST ;

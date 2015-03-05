@@ -1,5 +1,9 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
+#if _MSC_VER
+#pragma execution_character_set("utf-8")
+#endif
 
 #include <QMainWindow>
 #include <QObject>

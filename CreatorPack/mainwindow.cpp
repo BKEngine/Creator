@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <quazip/quazip.h>
 #include <quazip/JlCompress.h>
@@ -57,6 +57,7 @@ bool MainWindow::isFileDiffrent(const QString &name)
 //    QString oldmd5 = ofilejs.value(name).toString() ;
 //    QString newmd5 = nfilejs.value(name).toString() ;
 //    return oldmd5 != newmd5 ;
+    return false;
 }
 
 
@@ -196,6 +197,7 @@ void MainWindow::on_pushButton_clicked()
     ftpClient->login("ftpuser","ojjlolidaisuki123");
     ftpClient->cd("bke.bakery.moe");
     ftpClient->cd("update");
+    ftpClient->cd("win");
     ftpClient->put(bkecreator,"bkecreator");
     ftpClient->cd("bke_creator");
     //QString npath;
@@ -206,6 +208,7 @@ void MainWindow::on_pushButton_clicked()
         b->setData(it.value());
         ftpClient->put(b,it.key());
     }
+    ftpClient->cd("..");
     ftpClient->cd("..");
     ftpClient->cd("..");
     ftpClient->cd("download");

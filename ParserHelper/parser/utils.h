@@ -23,7 +23,6 @@
 
 #include "defines.h"
 
-
 #ifndef _WIN32
 #include <sys/time.h>
 #endif
@@ -144,7 +143,7 @@ public:
 #endif
 	Var_Except(const std::wstring &str) :msg(str), pos(-1), line(-1){};
 	Var_Except(const std::wstring &str, bkplong p) :msg(str), pos(p), line(-1){};
-	inline std::wstring getMsg() const{ return line == -1 ? (pos == -1 ? msg : L"在" + bkpInt2Str((int)pos) + L"处：" + msg) : L"在" + bkpInt2Str((int)line) + L"行" + bkpInt2Str((int)pos) + L"处：" + msg; };
+    inline std::wstring getMsg()const{ return line == -1 ? (pos == -1 ? msg : L"在" + bkpInt2Str((int)pos) + L"处：" + msg) : L"在" + bkpInt2Str((int)line) + L"行" + bkpInt2Str((int)pos) + L"处：" + msg; };
 	inline std::wstring getMsgWithoutPos(){ return msg; };
 	inline void setMsg(const std::wstring &str){ msg = str; };
 	inline void addPos(bkplong pos){ this->pos = pos; }

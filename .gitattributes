@@ -33,7 +33,6 @@ BKEscintilla/Qt4Qt5/ScintillaQt.cpp -text
 BKEscintilla/Qt4Qt5/ScintillaQt.h -text
 BKEscintilla/Qt4Qt5/bkestyle.cpp -text
 BKEscintilla/Qt4Qt5/bkestyle.h -text
-BKEscintilla/Qt4Qt5/main.cpp -text
 BKEscintilla/Qt4Qt5/qsciabstractapis.cpp -text
 BKEscintilla/Qt4Qt5/qsciapis.cpp -text
 BKEscintilla/Qt4Qt5/qscicommand.cpp -text
@@ -107,7 +106,6 @@ BKEscintilla/include/Scintilla.h -text
 BKEscintilla/include/Scintilla.iface -text
 BKEscintilla/include/ScintillaWidget.h -text
 BKEscintilla/lexers/BKE_Lexer.cpp -text
-BKEscintilla/lexers/LexBke.cpp -text
 BKEscintilla/lexlib/Accessor.cpp -text
 BKEscintilla/lexlib/Accessor.h -text
 BKEscintilla/lexlib/CharacterSet.cpp -text
@@ -209,8 +207,6 @@ CreatorPack/QtFtp/QUrlInfo -text
 CreatorPack/QtFtp/QtFtp -text
 CreatorPack/QtFtp/QtFtpDepends -text
 CreatorPack/QtFtp/QtFtpVersion -text
-CreatorPack/QtFtp/libQt5Ftp.a -text
-CreatorPack/QtFtp/libQt5Ftpd.a -text
 CreatorPack/QtFtp/qftp.h -text
 CreatorPack/QtFtp/qtftpversion.h -text
 CreatorPack/QtFtp/qurlinfo.h -text
@@ -223,10 +219,8 @@ CreatorPack/mainwindow.ui -text
 CreatorPack/weh.cpp -text
 CreatorPack/weh.h -text
 ParserHelper/ParserHelper.cpp -text
-ParserHelper/ParserHelper.dll -text
 ParserHelper/ParserHelper.h -text
 ParserHelper/config.h -text
-ParserHelper/libParserHelper.a -text
 ParserHelper/parser/BKE_array.h -text
 ParserHelper/parser/BKE_hash.cpp -text
 ParserHelper/parser/BKE_hash.hpp -text
@@ -324,8 +318,6 @@ paper/creator_parser.cpp -text
 paper/creator_parser.h -text
 paper/debugout.cpp -text
 paper/debugout.h -text
-paper/main.cpp -text
-paper/paper.pro -text
 paper/wordsupport.cpp -text
 paper/wordsupport.h -text
 /projectwindow.cpp -text

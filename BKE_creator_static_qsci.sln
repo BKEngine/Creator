@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31206.0
+VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BKE_creator_static_qsci", "BKE_creator_static_qsci.vcxproj", "{13428FFE-0998-3E76-8912-AD47D633D17B}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BKEApiGenerator", "BKEApiGenerator\BKEApiGenerator.vcxproj", "{372C5E63-8207-322A-8786-806AA187AE52}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BKE_creator_static_qsci", "BKE_creator_static_qsci.vcxproj", "{DBDED2A0-AA6F-3B40-85D6-E1978467784C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +11,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{13428FFE-0998-3E76-8912-AD47D633D17B}.Debug|Win32.ActiveCfg = Debug|Win32
-		{13428FFE-0998-3E76-8912-AD47D633D17B}.Debug|Win32.Build.0 = Debug|Win32
-		{13428FFE-0998-3E76-8912-AD47D633D17B}.Release|Win32.ActiveCfg = Release|Win32
-		{13428FFE-0998-3E76-8912-AD47D633D17B}.Release|Win32.Build.0 = Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug|Win32.ActiveCfg = Debug|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug|Win32.Build.0 = Debug|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Release|Win32.ActiveCfg = Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Release|Win32.Build.0 = Release|Win32
+		{DBDED2A0-AA6F-3B40-85D6-E1978467784C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DBDED2A0-AA6F-3B40-85D6-E1978467784C}.Debug|Win32.Build.0 = Debug|Win32
+		{DBDED2A0-AA6F-3B40-85D6-E1978467784C}.Release|Win32.ActiveCfg = Release|Win32
+		{DBDED2A0-AA6F-3B40-85D6-E1978467784C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,7 +5,7 @@
 #include <QSet>
 #include <QHash>
 
-#include "ParserHelper\parser\parser.h"
+#include "ParserHelper/parser/parser.h"
 
 struct ParamInfo
 {

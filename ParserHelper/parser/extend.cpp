@@ -419,7 +419,7 @@ namespace Parser_Util
 		MINIMUMPARAMNUM(2);
 		auto name = PARAM(0).asBKEStr();
 		auto var = BKE_VarClosure::global()->getMember(name);
-		if (var.getType() != VAR_CLASS || static_cast<BKE_VarClass*>(PARAM(0).obj)->isInstance())
+		if (var.getType() != VAR_CLASS || static_cast<BKE_VarClass*>(var.obj)->isInstance())
 		{
 			throw Var_Except(L"传入的第一个参数必须是一个类的名称。");
 		}

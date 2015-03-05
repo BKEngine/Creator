@@ -329,10 +329,21 @@ void MainWindow::HelpCreator()
 //检查更新
 void MainWindow::CheckUpdate()
 {
+    QString platform;
+
+#ifdef Q_OS_WIN
+    platform = "win/";
+#endif
+#ifdef Q_OS_LINUX
+    platform = "";
+#endif
+#ifdef Q_OS_Mac
+    platform = "mac/";
+#endif
     netAdimin = new QNetworkAccessManager(this) ;
     connect(netAdimin,SIGNAL(finished(QNetworkReply*)),this,SLOT(upfileFinish(QNetworkReply*))) ;
     isConnetct = true ;
-    netAdimin->get(QNetworkRequest(QUrl("http://bke.bakerist.info/update/bkecreator"))) ;
+    netAdimin->get(QNetworkRequest(QUrl("http://bke.bakery.moe/update"+platform+"/bkecreator"))) ;
 }
 
 //检查升级数据包

@@ -28,7 +28,7 @@ DEFINES += QT SCI_LEXER
 
 RC_FILE += ico.rc
 
-SOURCES += main.cpp \
+SOURCES += ./main.cpp \
     topbarwindow.cpp \
     projectwindow.cpp \
     codewindow.cpp \
@@ -42,7 +42,7 @@ SOURCES += main.cpp \
     bkeSci/bkecompile.cpp \
     function.cpp \
     paper/wordsupport.cpp \
-    paper/parser.cpp \
+    paper/creator_parser.cpp \
     paper/completebase.cpp \
     dia/searchbox.cpp \
     bkeSci/bkemarks.cpp \
@@ -51,7 +51,6 @@ SOURCES += main.cpp \
     otherbasicwin.cpp \
     dia/bkeleftfilewidget.cpp \
     dia/qsearchlineedit.cpp \
-    BKEscintilla/lexers/LexBke.cpp \
     BKEscintilla/src/AutoComplete.cpp \
     BKEscintilla/src/CallTip.cpp \
     BKEscintilla/src/Catalogue.cpp \
@@ -104,7 +103,9 @@ SOURCES += main.cpp \
     singleapplication.cpp \
     dia/cconfigdia.cpp \
     dia/ctextedit.cpp \
-    bkeprojectconfig.cpp
+    bkeprojectconfig.cpp \
+    BKS_info.cpp \
+    BKEscintilla/lexers/BKE_Lexer.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -122,7 +123,7 @@ HEADERS  += \
     function.h \
     function.h \
     paper/wordsupport.h \
-    paper/parser.h \
+    paper/creator_parser.h \
     paper/completebase.h \
     dia/searchbox.h \
     bkeSci/BkeIndicatorBase.h \
@@ -200,9 +201,6 @@ RESOURCES += \
     source.qrc
 
 INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKEscintilla/src ./BKEscintilla/Qt4Qt5
-
-OTHER_FILES += \
-    BKEscintilla/lexlib/License.txt
 
 FORMS += \
     dia/ctextedit.ui

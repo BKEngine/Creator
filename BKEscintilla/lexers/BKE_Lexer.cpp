@@ -43,7 +43,7 @@ private:
 
 	StyleContext/*BKE_Accessor*/ *styler;
 
-	BKE_Info *info;
+    BKE_Info *info;
 
 	unsigned char cur_mask;
 public:

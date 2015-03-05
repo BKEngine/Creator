@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "weh.h"
 #include <QApplication>
 
@@ -34,8 +34,8 @@ int main(int argc, char *argv[])
 #endif
 
 
-    if( argc < 3 ) HTTP_ADRESS = "http://bke.bakerist.info/update/"+platform ;
-    else HTTP_ADRESS = "http://bke.bakerist.info/update/test/"+platform ;
+    if( argc < 3 ) HTTP_ADRESS = "http://bke.bakery.moe/update/"+platform;
+    else HTTP_ADRESS = "http://bke.bakery.moe/update/test/"+platform;
 
     w.DownInfo();
 

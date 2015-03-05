@@ -30,6 +30,6 @@ HEADERS  += mainwindow.h \
 
 INCLUDEPATH += ./QtFtp
 
-LIBS += -lquazip -lz #-L$${PWD}/QtFtp -lQt5Ftp
+LIBS += -L$$PWD -lquazip
 
 FORMS    += mainwindow.ui
