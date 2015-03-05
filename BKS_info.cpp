@@ -1,4 +1,4 @@
-﻿#include "weh.h"
+﻿#include <weh.h>
 #include "BKS_info.h"
 
 GLOBALSTRUCTURES_INIT();
@@ -9,6 +9,7 @@ BKE_Info::BKE_Info()
 {
 	//Parser_GlobalInit();
 	Parser::getInstance();
+	glo = BKE_VarClosure::global();
 	QStringList ls = QString("if for while do foreach function class propget propset continue break return var delete try throw this super global int string number const typeof instanceof extends in else then catch with static switch case true false void").split(' ');
 	for (auto &&v : ls)
 	{
@@ -20,11 +21,11 @@ BKE_Info::BKE_Info()
 		BagelOperators.insert(v);
 	}
 	OperatorAncestor = "+-*/%^=!><&|([{)]}.?,:;";
-	BagelVars["tf"] = BKE_Variable::dic();
-	BagelVars["sf"] = BKE_Variable::dic();
-	BagelVars["f"] = BKE_Variable::dic();
-	BagelVars["basic_layer"] = -1;
-	BagelVars["message_layer"] = -1;
-	BagelVars["bgm"] = -1;
-	BagelVars["voice"] = -2;
+	glo->setConstMember(L"tf", BKE_Variable::dic());
+	glo->setConstMember(L"sf", BKE_Variable::dic());
+	glo->setConstMember(L"f", BKE_Variable::dic());
+	glo->setConstMember(L"basic_layer", -1);
+	glo->setConstMember(L"message_layer", -2);
+	glo->setConstMember(L"bgm", -1);
+	glo->setConstMember(L"voice", -2);
 }

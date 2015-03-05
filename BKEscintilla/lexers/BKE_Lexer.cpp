@@ -535,7 +535,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			{
 				styler->SetState(defaultState | cur_mask);
 				styler->Forward();
-				while (styler->More())
+				while (styler->More() && !styler->atLineEnd)
 				{
 					if (isspace(styler->ch))
 						styler->Forward();

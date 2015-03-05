@@ -234,9 +234,11 @@ ParserHelper/parser/BKE_variable.h -text
 ParserHelper/parser/defines.h -text
 ParserHelper/parser/extend.cpp -text
 ParserHelper/parser/extend.h -text
+ParserHelper/parser/extend_wrapper.cpp -text
 ParserHelper/parser/memorypool.h -text
 ParserHelper/parser/parser.cpp -text
 ParserHelper/parser/parser.h -text
+ParserHelper/parser/parserextend_wrapper.cpp -text
 ParserHelper/parser/utils.cpp -text
 ParserHelper/parser/utils.h -text
 ParserHelper/parser/vcode.h -text
