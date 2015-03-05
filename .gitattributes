@@ -220,6 +220,7 @@ CreatorPack/weh.cpp -text
 CreatorPack/weh.h -text
 ParserHelper/ParserHelper.cpp -text
 ParserHelper/ParserHelper.h -text
+ParserHelper/ParserHelper.lib -text
 ParserHelper/config.h -text
 ParserHelper/parser/BKE_array.h -text
 ParserHelper/parser/BKE_hash.cpp -text
