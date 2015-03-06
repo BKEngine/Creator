@@ -21,7 +21,6 @@ BKEscintilla/Qt4Qt5/Qsci/qscidocument.h -text
 BKEscintilla/Qt4Qt5/Qsci/qsciglobal.h -text
 BKEscintilla/Qt4Qt5/Qsci/qscilexer.h -text
 BKEscintilla/Qt4Qt5/Qsci/qscimacro.h -text
-BKEscintilla/Qt4Qt5/Qsci/qsciprinter.h -text
 BKEscintilla/Qt4Qt5/Qsci/qsciscintilla.h -text
 BKEscintilla/Qt4Qt5/Qsci/qsciscintillabase.h -text
 BKEscintilla/Qt4Qt5/Qsci/qscistyle.h -text
@@ -90,7 +89,6 @@ BKEscintilla/Qt4Qt5/qscintilla_pt_br.qm -text
 BKEscintilla/Qt4Qt5/qscintilla_pt_br.ts -text
 BKEscintilla/Qt4Qt5/qscintilla_ru.qm -text
 BKEscintilla/Qt4Qt5/qscintilla_ru.ts -text
-BKEscintilla/Qt4Qt5/qsciprinter.cpp -text
 BKEscintilla/Qt4Qt5/qsciscintilla.cpp -text
 BKEscintilla/Qt4Qt5/qsciscintillabase.cpp -text
 BKEscintilla/Qt4Qt5/qscistyle.cpp -text
@@ -220,7 +218,6 @@ CreatorPack/weh.cpp -text
 CreatorPack/weh.h -text
 ParserHelper/ParserHelper.cpp -text
 ParserHelper/ParserHelper.h -text
-ParserHelper/ParserHelper.lib -text
 ParserHelper/config.h -text
 ParserHelper/parser/BKE_array.h -text
 ParserHelper/parser/BKE_hash.cpp -text

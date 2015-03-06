@@ -9,7 +9,6 @@ QT += network
 
 greaterThan(QT_MAJOR_VERSION, 4): {
 QT += widgets
-QT += printsupport
 }
 
 TARGET = BKE_creator
@@ -92,7 +91,6 @@ SOURCES += ./main.cpp \
     BKEscintilla/Qt4Qt5/qscidocument.cpp \
     BKEscintilla/Qt4Qt5/qscilexer.cpp \
     BKEscintilla/Qt4Qt5/qscimacro.cpp \
-    BKEscintilla/Qt4Qt5/qsciprinter.cpp \
     BKEscintilla/Qt4Qt5/qsciscintilla.cpp \
     BKEscintilla/Qt4Qt5/qsciscintillabase.cpp \
     BKEscintilla/Qt4Qt5/qscistyle.cpp \
@@ -105,7 +103,17 @@ SOURCES += ./main.cpp \
     dia/ctextedit.cpp \
     bkeprojectconfig.cpp \
     BKS_info.cpp \
-    BKEscintilla/lexers/BKE_Lexer.cpp
+    BKEscintilla/lexers/BKE_Lexer.cpp \
+    ParserHelper/ParserHelper.cpp \
+    ParserHelper/parser/BKE_hash.cpp \
+    ParserHelper/parser/BKE_number.cpp \
+    ParserHelper/parser/BKE_string.cpp \
+    ParserHelper/parser/BKE_variable.cpp \
+    ParserHelper/parser/extend.cpp \
+    ParserHelper/parser/extend_wrapper.cpp \
+    ParserHelper/parser/parser.cpp \
+    ParserHelper/parser/parserextend_wrapper.cpp \
+    ParserHelper/parser/utils.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -187,7 +195,6 @@ HEADERS  += \
     BKEscintilla/Qt4Qt5/Qsci/qsciglobal.h \
     BKEscintilla/Qt4Qt5/Qsci/qscilexer.h \
     BKEscintilla/Qt4Qt5/Qsci/qscimacro.h \
-    BKEscintilla/Qt4Qt5/Qsci/qsciprinter.h \
     BKEscintilla/Qt4Qt5/Qsci/qsciscintilla.h \
     BKEscintilla/Qt4Qt5/Qsci/qsciscintillabase.h \
     BKEscintilla/Qt4Qt5/Qsci/qscistyle.h \
@@ -195,7 +202,19 @@ HEADERS  += \
     singleapplication.h \
     dia/cconfigdia.h \
     dia/ctextedit.h \
-    bkeprojectconfig.h
+    bkeprojectconfig.h \
+    ParserHelper/ParserHelper.h \
+    ParserHelper/parser/BKE_array.h \
+    ParserHelper/parser/BKE_hash.hpp \
+    ParserHelper/parser/BKE_number.h \
+    ParserHelper/parser/BKE_string.h \
+    ParserHelper/parser/BKE_variable.h \
+    ParserHelper/parser/defines.h \
+    ParserHelper/parser/extend.h \
+    ParserHelper/parser/memorypool.h \
+    ParserHelper/parser/parser.h \
+    ParserHelper/parser/utils.h \
+    ParserHelper/parser/vcode.h
 
 RESOURCES += \
     source.qrc
@@ -205,4 +224,3 @@ INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKE
 FORMS += \
     dia/ctextedit.ui
 
-LIBS += -L$$PWD/ParserHelper -lParserHelper

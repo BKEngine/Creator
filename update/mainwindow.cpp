@@ -96,7 +96,6 @@ void MainWindow::InfodownFinish(QNetworkReply* netfile)
 
         downlist.clear();
         cmdString.clear();
-
         if( isFileDiffrent(fileName) )
         {    //优先升级update.exe
              isSelfUp = true ;
@@ -132,6 +131,7 @@ void MainWindow::startUpdate()
         auto i = 0;
         while(i < keys.size())
         {
+            qDebug() << "here";
             if(isFileRemoved(keys.at(i)))
             {
                 cmdString.append("del /Q \""+ keys.at(i) +"\"\r\n" ) ;

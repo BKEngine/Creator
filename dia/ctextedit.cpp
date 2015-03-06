@@ -1,4 +1,4 @@
-#include <weh.h>
+﻿#include <weh.h>
 #include "ctextedit.h"
 #include "ui_ctextedit.h"
 
