@@ -33,6 +33,7 @@ QString QsciLexerBkeScript::description(int style) const
 	case SCE_BKE_TEXT:    return QString("Text");
 	case SCE_BKE_PARSER_KEYWORD:    return QString("Keyword");
 	case SCE_BKE_PARSER_VAR:    return QString("Variable");
+	case SCE_BKE_COLOR:    return QString("Color");
 	case SCE_BKE_ERROR:    return QString("Error");
 	case SCE_BKE_TRANS:  return QString("TRANS");
 	}
@@ -58,10 +59,11 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
 	case SCE_BKE_COMMENT: return QColor(0x80, 0x80, 0x80);
 	case SCE_BKE_OPERATORS: return QColor(0x00, 0x00, 0x00);
 	case SCE_BKE_TEXT:    return QColor(0x00, 0x00, 0x00);
+	case SCE_BKE_COLOR:    return QColor(43, 145, 175);
+	case SCE_BKE_TRANS:  return QColor(0x7a, 0x0f, 0xd1); //转义字符，
 	case SCE_BKE_PARSER_KEYWORD:    return QColor(0x00, 0x00, 0xff);
 	case SCE_BKE_PARSER_VAR:    return QColor(47, 79, 79);
 	case SCE_BKE_ERROR:    return QColor(0xff, 0x00, 0x00);
-	case SCE_BKE_TRANS:  return QColor(0x7a, 0x0f, 0xd1); //转义字符，
 	}
     return QColor( 0x00,0x00,0x00) ;
 }

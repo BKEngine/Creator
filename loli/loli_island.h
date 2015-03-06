@@ -16,7 +16,6 @@ enum
 	SCE_BKE_COMMENT,	//¿é×¢ÊÍ
 	SCE_BKE_OPERATORS,
 	SCE_BKE_TEXT,
-	SCE_BKE_VARIABLE,
 	SCE_BKE_PARSER,
 	SCE_BKE_COLOR,		//#xxxxxx
 	SCE_BKE_TRANS,		//µ¥×Ö·û×ªÒå

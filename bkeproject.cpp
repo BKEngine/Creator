@@ -861,6 +861,7 @@ void BkeProject::Addfiles(const QStringList &ls, const ItemInfo &f, bool autocha
 				QFile(pdir + f.getDir() + '/' + it.key()).rename(pdir + f.getDir() + '/' + itt);
 			}
 			FindItem(f.Root, itt, true);
+			files[itt] = 1;
 		}
 	}
 

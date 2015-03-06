@@ -1492,6 +1492,53 @@ bool BKE_Variable::operator > (const BKE_Variable &v) const
 
 #undef HANDLE_PROP
 
+BKE_Variable BKE_Variable::getAllDots()
+{
+	if (getType() == VAR_PROP)
+	{
+		return static_cast<BKE_VarProp*>(obj)->get().getAllDots();
+	}
+	if (getType() != VAR_CLASS)
+	{
+		if (getType() == VAR_NONE)
+			return new BKE_VarArray();
+		BKE_Variable &v = BKE_VarClosure::global()->getMember(getTypeBKEString());
+		if (v.getType() == VAR_NONE)
+			return new BKE_VarArray();
+		auto &&m = static_cast<BKE_VarClass*>(v.obj)->varmap;
+		auto arr = new BKE_VarArray();
+		for (auto &&it : m)
+		{
+			if (it.second.getType() != VAR_FUNC)
+				arr->pushMember(it.first);
+			else
+				arr->pushMember(it.first.getConstStr() + ((BKE_VarFunction*)it.second.obj)->functionSimpleInfo());
+		}
+		if (getType() == VAR_DIC)
+		{
+			auto &&m2 = static_cast<BKE_VarDic*>(obj)->varmap;
+			for (auto &&it : m2)
+			{
+				if (it.second.getType() != VAR_FUNC)
+					arr->pushMember(it.first);
+				else
+					arr->pushMember(it.first.getConstStr() + ((BKE_VarFunction*)it.second.obj)->functionSimpleInfo());
+			}
+		}
+		return arr;
+	}
+	auto arr = new BKE_VarArray();
+	auto &&m = static_cast<BKE_VarClass*>(obj)->varmap;
+	for (auto &&it : m)
+	{
+		if (it.second.getType() != VAR_FUNC)
+			arr->pushMember(it.first);
+		else
+			arr->pushMember(it.first.getConstStr() + ((BKE_VarFunction*)it.second.obj)->functionSimpleInfo());
+	}
+	return arr;
+}
+
 BKE_Variable BKE_Variable::dotFunc(const BKE_String &funcname)
 {
 	if (getType() != VAR_CLASS)

@@ -123,7 +123,8 @@ void BkeScintilla::UiChange(int updated)
 {
 	if (ChangeIgnore) return;
 
-	if (ChangeType&SC_MOD_INSERTTEXT){
+	if (ChangeType & SC_MOD_INSERTTEXT){
+		//自动补全
 		defparser->TextBeChange(&modfieddata, this);
 		CompliteFromApi();
 	}
@@ -136,9 +137,12 @@ void BkeScintilla::UiChange(int updated)
 		int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
 		int ly = defparser->GetIndentLayer(this, modfieddata.line);
 		//与上一行对其
-		if (ly == 0) InsertIndent(count, modfieddata.line + 1);
-		else if (ly > 0) InsertIndent(count + SendScintilla(SCI_GETTABWIDTH), modfieddata.line + 1);
-		else{
+		if (ly == 0)
+			InsertIndent(count, modfieddata.line + 1);
+		else if (ly > 0)
+			InsertIndent(count + SendScintilla(SCI_GETTABWIDTH), modfieddata.line + 1);
+		else
+		{
 			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - SendScintilla(SCI_GETTABWIDTH));
 			//本行就应该减了
 			InsertIndent(count - SendScintilla(SCI_GETTABWIDTH), modfieddata.line/* + 1*/);
@@ -708,6 +712,7 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 
 	SendScintilla(SCI_SETFOLDFLAGS, 16 | 4); //如果折叠就在折叠行的上下各画一条横线
 
+	SendScintilla(SCI_PRIVATELEXERCALL, 0, &global_bke_info);
 	//SendScintilla(SCI_SETMARGINSENSITIVEN, SC_MARKNUM_FOLDER, true);
 }
 

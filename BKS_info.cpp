@@ -1,5 +1,6 @@
 ﻿#include <weh.h>
 #include "BKS_info.h"
+#include "ParserHelper\parser\parserextend.h"
 
 GLOBALSTRUCTURES_INIT();
 
@@ -9,6 +10,7 @@ BKE_Info::BKE_Info()
 {
 	//Parser_GlobalInit();
 	Parser::getInstance();
+	registerExtendFunction();
 	glo = BKE_VarClosure::global();
 	QStringList ls = QString("if for while do foreach function class propget propset continue break return var delete try throw this super global int string number const typeof instanceof extends in else then catch with static switch case true false void").split(' ');
 	for (auto &&v : ls)

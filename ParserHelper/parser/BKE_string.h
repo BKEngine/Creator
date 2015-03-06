@@ -94,7 +94,7 @@ class BKE_Number;
 
 class BKE_String
 {
-	friend int32_t BKE_hash(const BKE_String &str);
+	friend int32_t _BKE_hash(const BKE_String &str);
 	StringType *var;
 public:
 
@@ -297,7 +297,7 @@ inline GlobalStringMap& StringMap()
 	return *_globalStructures.globalStringMap;
 }
 
-inline int32_t BKE_hash(const BKE_String &str)
+inline int32_t _BKE_hash(const BKE_String &str)
 {
 	if (!str.var->hashed)
 	{
@@ -315,6 +315,12 @@ inline int32_t BKE_hash(const BKE_String &str)
 		}
 	}
 	return str.var->hash;
+}
+
+template<>
+inline int32_t BKE_hash(const BKE_String &str)
+{
+	return _BKE_hash(str);
 }
 
 inline BKE_String::BKE_String(const wchar_t *str, bool hash)

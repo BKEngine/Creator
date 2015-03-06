@@ -35,14 +35,18 @@ QString LOLI_OS_QSTRING(const QString &text)
 bool    LOLI_MAKE_NULL_FILE(const QString &filename,const QString &stencilname)
 {
     QFileInfo temp(filename) ;
-    if( temp.exists() ) return true ;
+    if( temp.exists() )
+		return true ;
 
-    QFile t1(BKE_CURRENT_DIR+"/Stencil/"+temp.fileName()) ;
-    if( t1.exists() ) return t1.copy(filename) ;
-    else{
+	QFile t1(BKE_CURRENT_DIR + "/Stencil/" + (stencilname.isEmpty() ? temp.fileName() : stencilname));
+    if( t1.exists() )
+		return t1.copy(filename) ;
+    else
+	{
         QDir().mkpath(temp.path()) ;
         QFile abc( filename) ;
-        if( !abc.open(QFile::ReadWrite)) return false ;
+        if( !abc.open(QFile::ReadWrite))
+			return false ;
         abc.close();
     }
     return true ;

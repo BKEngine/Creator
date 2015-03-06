@@ -42,6 +42,7 @@ CompleteBase *CompleteBase::indexOf(const QString &name,int type)
 
 void CompleteBase::clear()
 {
+	clearChild();
     Name.clear();
     type = BKE_TYPE_NORMAL ;
     resulttype = BKE_TYPE_NORMAL ;
@@ -55,6 +56,7 @@ void CompleteBase::clearChild()
         CompleteBase *le = ptr.value() ;
         le->deleteLater();
     }
+	hash.clear();
 }
 
 QStringList CompleteBase::TheWords(int type )

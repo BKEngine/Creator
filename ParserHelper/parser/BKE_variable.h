@@ -478,6 +478,8 @@ public:
 	inline BKE_Variable& operator %= (const BKE_Variable &v){ return operator %=(v.asNumber()); };
 	inline BKE_Variable& operator ^= (const BKE_Variable &v){ return operator ^=(v.asNumber()); };
 
+	BKE_Variable getAllDots();		//获得.后面能接的东西
+
 	bool equals(const BKE_Variable &v) const;
 
 	bkplong getCount() const;
@@ -1180,6 +1182,31 @@ public:
 	inline void setSelf(BKE_Variable &v){ self = &v; };
 	inline void setClosure(BKE_VarClosure *c){ closure->extraref--;  closure->release(); closure = c; c->addRef(); c->extraref++; }
 	inline bool isNativeFunction(){ return func->native != NULL; };
+	wstring functionSimpleInfo() const
+	{
+		wstring s = L"(";
+		for (int i = 0; i < paramnames.size(); i++)
+		{
+			if (i > 0)
+				s += L", ";
+		}
+		s += L")";
+		return s;
+	}
+	wstring functionInfo()
+	{
+		wstring s = L"(";
+		for (int i = 0; i < paramnames.size(); i++)
+		{
+			if (i > 0)
+				s += L", ";
+			s += paramnames[i];
+			if (initials[paramnames[i]].getType() != VAR_NONE)
+				s += L" = " + initials[paramnames[i]].save(false);
+		}
+		s += L")";
+		return s;
+	}
 	//inline void release(){ ref--; if (ref <= 0)delete this; };
 };
 

@@ -81,7 +81,8 @@ public:
 
     int showtype ;
     CompleteBase VariablesBase ; //类、字典、变量
-    CompleteBase CommandBase ;
+	CompleteBase tempBase;
+	CompleteBase CommandBase;
     CompleteBase *valBase ;
     CompleteBase *apiBase ;
 

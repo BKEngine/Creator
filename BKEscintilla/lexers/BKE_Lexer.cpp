@@ -46,6 +46,11 @@ private:
     BKE_Info *info;
 
 	unsigned char cur_mask;
+
+	bool firstLex;
+
+	int start, end;
+	unsigned char startStyle;
 public:
 	BKE_Lexer()
 	{
@@ -68,6 +73,13 @@ public:
 	}
 	virtual int SCI_METHOD PropertyType(const char *name)
 	{
+		//hahahaha, we use this to return prop value of Lexer
+		if (!strcmp(name, "start"))
+			return start;
+		if (!strcmp(name, "end"))
+			return end;
+		if (!strcmp(name, "startstyle"))
+			return startStyle;
 		return 0;
 	}
 	virtual const char * SCI_METHOD DescribeProperty(const char *name)
@@ -103,9 +115,10 @@ public:
 
 	static ILexer * LexerFactory()
 	{
-		auto lex = new BKE_Lexer();
-		lex->PrivateCall(0, &global_bke_info);
-		return lex;
+		return new BKE_Lexer();
+		//auto lex = new BKE_Lexer();
+		//lex->PrivateCall(0, &global_bke_info);
+		//return lex;
 	}
 
 private:
@@ -824,39 +837,44 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 	StyleContext sc(startPos, lengthDoc, initStyle, accessor, 0xFF);
 	styler = &sc;
 
-	unsigned char laststyle = (unsigned char)pAccess->StyleAt(startPos - 1);
-	unsigned char curstyle = (unsigned char)pAccess->StyleAt(startPos);
-	cur_mask = initStyle & ~BASE_MASK;
-
-	if (initStyle & CMD_MASK)
+	if (firstLex)
 	{
-		int endPos = startPos + lengthDoc;
-		//search begin of cmd
-		while (startPos-- > 0)
-		{
-			if ((curstyle & CMD_MASK) && !(laststyle & CMD_MASK))
-				break;
-			curstyle = pAccess->StyleAt(startPos);
-			laststyle = pAccess->StyleAt(startPos - 1);
-		}
-		Lex(startPos, endPos - startPos, pAccess->StyleAt(startPos - 1), pAccess);
-		return;
-	}
+		firstLex = false;
 
-	if (cur_mask & BEGAL_MASK)
-	{
-		//## or #
-		int endPos = startPos + lengthDoc;
-		//search begin of cmd
-		while (startPos-- > 0)
+		unsigned char laststyle = (unsigned char)pAccess->StyleAt(startPos - 1);
+		unsigned char curstyle = (unsigned char)pAccess->StyleAt(startPos);
+		cur_mask = initStyle & ~BASE_MASK;
+
+		if (initStyle & CMD_MASK)
 		{
-			if ((curstyle & BEGAL_MASK) && !(laststyle & BEGAL_MASK))
-				break;
-			curstyle = pAccess->StyleAt(startPos);
-			laststyle = pAccess->StyleAt(startPos - 1);
+			int endPos = startPos + lengthDoc;
+			//search begin of cmd
+			while (startPos-- > 0)
+			{
+				if ((curstyle & CMD_MASK) && !(laststyle & CMD_MASK))
+					break;
+				curstyle = pAccess->StyleAt(startPos);
+				laststyle = pAccess->StyleAt(startPos - 1);
+			}
+			Lex(startPos, endPos - startPos, pAccess->StyleAt(startPos - 1), pAccess);
+			return;
 		}
-		Lex(startPos, endPos - startPos, pAccess->StyleAt(startPos - 1), pAccess);
-		return;
+
+		if (cur_mask & BEGAL_MASK)
+		{
+			//## or #
+			int endPos = startPos + lengthDoc;
+			//search begin of cmd
+			while (startPos-- > 0)
+			{
+				if ((curstyle & BEGAL_MASK) && !(laststyle & BEGAL_MASK))
+					break;
+				curstyle = pAccess->StyleAt(startPos);
+				laststyle = pAccess->StyleAt(startPos - 1);
+			}
+			Lex(startPos, endPos - startPos, pAccess->StyleAt(startPos - 1), pAccess);
+			return;
+		}
 	}
 	//styler->setRange(startPos, startPos + lengthDoc, initStyle);
 
@@ -898,6 +916,10 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 	}
 	//styler->continueStateToPos(startPos + lengthDoc);
 	styler->Complete();
+	firstLex = true;
+	start = startPos;
+	end = startPos + lengthDoc;
+	startStyle = pAccess->StyleAt(startPos);
 }
 
 void SCI_METHOD BKE_Lexer::Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess)
@@ -905,7 +927,7 @@ void SCI_METHOD BKE_Lexer::Fold(unsigned int startPos, int lengthDoc, int initSt
 	LexAccessor styler(pAccess);
 
 	int levelCurrent = SC_FOLDLEVELBASE >> 16;
-	styler.SetLevel(0, (levelCurrent + 1) << 16 + 1);
+	styler.SetLevel(0, 0xFFFFFFFF);
 }
 
 #define SCLEX_BKE 108

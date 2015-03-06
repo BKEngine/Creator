@@ -307,8 +307,10 @@ const char* BkeParser::GetValList( const QString &t)
     if( valBase == 0 ) return 0 ;
 
     QStringList list = valBase->TheWords() ;
-    if( valBase == &VariablesBase ) list.append( KEYlist );
-    else list.append( SYSlist );
+	if (valBase == &VariablesBase)
+		list.append(KEYlist);
+	else if (valBase != &tempBase)
+		list.append(SYSlist);
 
     if( t.isEmpty() ){
         list.sort(Qt::CaseInsensitive);
@@ -355,13 +357,34 @@ void BkeParser::SetCommandList(const QString &t)
 
 void BkeParser::SetVarList(const QString &t)
 {
-    CompleteBase *le ;
-    if( t == ".." ) valBase = &VariablesBase ;
-    else if( valBase != 0 ){
-        le = valBase->indexOf(t,CompleteBase::BKE_TYPE_NORMAL) ;
-        if( le == 0) le = valBase->indexOf(t,CompleteBase::BKE_TYPE_DICTIONARIES) ;
-        else if( le == 0) le = valBase->indexOf(t,CompleteBase::BKE_TYPE_FUNCTION) ;
-        valBase = le ;
+    //CompleteBase *le ;
+    if( t == ".." )
+		valBase = &VariablesBase ;
+    else/* if( valBase != 0 )*/
+	{
+        //le = valBase->indexOf(t,CompleteBase::BKE_TYPE_NORMAL) ;
+        //if( le == 0) le = valBase->indexOf(t,CompleteBase::BKE_TYPE_DICTIONARIES) ;
+        //else if( le == 0) le = valBase->indexOf(t,CompleteBase::BKE_TYPE_FUNCTION) ;
+        //valBase = le ;
+
+		//search global;
+		auto &&m = BKE_VarClosure::global()->varmap;
+		auto it = m.find(t.toStdWString());
+		if (it != m.end())
+		{
+			auto v = it->second.getAllDots();
+			auto &&arr = ((BKE_VarArray*)(v.obj))->vararray;
+			tempBase.clear();
+			for (int i = 0; i < arr.size(); i++)
+			{
+				tempBase.AddChild(QString::fromStdWString(arr[i].toString()), CompleteBase::BKE_TYPE_NORMAL);
+			}
+			valBase = &tempBase;
+		}
+		else if (!valBase)
+		{
+			valBase = valBase->indexOf(t, CompleteBase::BKE_TYPE_FUNCTION);
+		}
     }
 }
 
@@ -520,9 +543,21 @@ void BkeParser::TextBeChange(BkeModifiedBase *modbase,QsciScintilla *sciedit)
 
     //优先检查光标左侧，确定显示的具体内容
     QStringList ls = wow.context(t,modbase->index-1) ;
-    if( ls.size() > 0 && ls.at(0) == "*" ){   //显示标签，不是严谨的界定
-        showtype = SHOW_LABEL ;
-        return ;
+    if( ls.size() > 0 && ls.back() == "*" ){   //显示标签，不是严谨的界定
+		if (ls.size() == 1)
+		{
+			showtype = SHOW_LABEL;
+			return;
+		}
+		else
+		{
+			char ch = (ls.end() - 2)->operator[](0).toLatin1();
+			if (!isalpha(ch) && ch != ')' && ch != ']' && ch != '}')
+			{
+				showtype = SHOW_LABEL;
+				return;
+			}
+		}
     }
 
 
@@ -532,10 +567,15 @@ void BkeParser::TextBeChange(BkeModifiedBase *modbase,QsciScintilla *sciedit)
         st++ ;  //如果输入的是.那么填充的参数为列表最后
         showtype = SHOW_USEVALLIST ;
     }
-    else showtype = SHOW_AUTOVALLIST ;
-    for( int i = 1 ; i < st ; i++) {
-        SetVarList(ls.at(i)) ;
-    }
+    else
+		showtype = SHOW_AUTOVALLIST ;
+	if (ls[ls.length() - 2] != ".")
+	{
+		SetVarList(ls.back());
+	}
+    //for( int i = 1 ; i < st ; i++) {
+    //    SetVarList(ls.at(i)) ;
+    //}
 
     if( ls.size() > 1 && valBase == 0){
         showtype = SHOW_SYS ;
@@ -612,20 +652,41 @@ int  BkeParser::GetIndentLayer(QsciScintilla *edit,int line)
     w.setText(t);
     w.NextWord();
 
-    if( t.endsWith("{") ) return 1 ;
-    else if( w.cWord == "}"  ) return GetLessIndent(edit,line) ;
-    else if( w.cWord == "@" ){
-        if( w.nWord =="if" || w.nWord == "for" ) return 1 ;
-        else if( w.nWord == "elseif" || w.nWord == "next" || w.nWord == "else"
-                 || w.nWord == "endif"){
-                QString tt ;
-                if( line > 1 ) tt = edit->text(line-1).trimmed() ;
+    if( t.endsWith("{") )
+		return 1 ;
+    else if( w.cWord == "}"  )
+		return GetLessIndent(edit,line) ;
+    else if( w.cWord == "@" || w.cWord=="[" )
+	{
+		unsigned char style = edit->SendScintilla(edit->SCI_GETSTYLEAT, w.NowAt());
+		if (style & 0x80)
+		{
+			//cmd
+			if (w.nWord == "if" || w.nWord == "for")
+				return 1;
+			else if (w.nWord == "elseif" || w.nWord == "next" || w.nWord == "else" || w.nWord == "endif")
+			{
+				//QString tt;
+				//if (line > 1) tt = edit->text(line - 1).trimmed();
 
-                if( tt.isEmpty() ) return 0 ;
-                else if( tt.startsWith("@if") || tt.startsWith("@for") ) return 0 ;
-                else return GetLessIndent(edit,line) ;
-        }
-        else return 0 ;
+				//           if( tt.isEmpty() ) 
+				//return 0 ;
+				//           else if( tt.startsWith("@if") || tt.startsWith("@for") ) 
+				//return 0 ;
+				//           else 
+				return GetLessIndent(edit, line);
+			}
+			else
+				return 0;
+		}
+		else if (style & 0x40)
+		{
+			//parser
+			if (w.cWord == "[")
+				return 1;
+			else
+				return 0;
+		}
     }
     else return 0 ;
 }
@@ -633,12 +694,16 @@ int  BkeParser::GetIndentLayer(QsciScintilla *edit,int line)
 int  BkeParser::GetLessIndent(QsciScintilla *edit,int line)
 {
     int pos_f , pos_n ;
-    if( line < 1) pos_f = 0 ;
-    else pos_f = edit->indentation(line-1) ;
+    if( line < 1)
+		pos_f = 0 ;
+    else
+		pos_f = edit->indentation(line-1) ;
     pos_n = edit->indentation(line) ;
 
-    if( pos_n >= pos_f ) return -1 ;
-    else return 0 ;
+    if( pos_n >= pos_f )
+		return -1 ;
+    else
+		return 0 ;
 }
 
 //取得信息

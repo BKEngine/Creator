@@ -25,7 +25,7 @@ ProjectWindow::ProjectWindow(QWidget *parent)
     connect(this,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(ItemDoubleClick(QTreeWidgetItem*,int))) ;
     connect(this,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(ShowRmenu(QPoint))) ;
 
-    QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建导入脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭项目 重命名").split(" ") ;
+    QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭项目 重命名").split(" ") ;
     for( int i = 0 ; i < BTN_COUNT ; i++){
         btns[i] = new QAction(ls.at(i),this);
         connect(btns[i],SIGNAL(triggered()),this,SLOT(ActionAdmin())) ;
@@ -162,7 +162,16 @@ void ProjectWindow::ShowRmenu( const QPoint & pos )
     }
 
     mn.addSeparator() ;
-    for( int i = btn_newscript ; i <= btn_search ; i++){
+
+	if (info.Layer == 1)
+	{
+		if (info.Name == "宏")
+			mn.addAction(btns[btn_newimport]);
+		if (info.Name == "脚本")
+			mn.addAction(btns[btn_newscript]);
+	}
+
+	for (int i = btn_addfile; i <= btn_search; i++){
         mn.addAction( btns[i] ) ;
         if( i == btn_adddir ) mn.addSeparator() ;
         else if( i == btn_newimport ) mn.addSeparator() ;
@@ -209,17 +218,31 @@ void ProjectWindow::SetCurrentItem(const QString &file)
 void ProjectWindow::NewFile(const ItemInfo &f, int type)
 {
     QString name = QInputDialog::getText(this,"新建脚本","输入脚本名称，如: \r\n   abc \r\n   abc/sence.bkscr") ;
-    if( name.isEmpty()) return ;
-    else if( !name.endsWith(".bkscr")) name.append(".bkscr") ;
+    if( name.isEmpty())
+		return ;
+    else if( !name.endsWith(".bkscr"))
+		name.append(".bkscr") ;
     name = name.replace("\\","/") ;
 
-    BkeProject *p = FindPro(f.ProName);
+	bool ismacro = false;
+	if (type == 1)
+	{
+		//macro
+		//自动添加一些内容
+		ismacro = true;
+	}
+	
+	BkeProject *p = workpro;
     QFileInfo sk(p->FileDir() + info.getDir() + '/' + name) ;
     if( sk.exists() ){
         int sk = QMessageBox::information(this,"","文件已经存在，是否直接添加文件",QMessageBox::Yes|QMessageBox::No) ;
-        if( sk == QMessageBox::No ) return ;
+        if( sk == QMessageBox::No )
+			return ;
     }
-    else LOLI_MAKE_NULL_FILE(sk.filePath()) ;
+	else
+	{
+		LOLI_MAKE_NULL_FILE(sk.filePath(), (ismacro ? "macro.bkscr" : ""));
+	}
 
     //if( type == 1){
     //    p->FindItem(p->Import,name) ;
@@ -230,10 +253,12 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
     //else{
     //    p->FindItem(p->Source,name) ;
     //}
-	p->FindItem(info.Root, name);
+	p->Addfiles(QStringList() << name, info, true);
+	//p->FindItem(info.Root, name);
 
-	p->AddFileToHash(p->typeHash(type), info.getDir().right(info.getDir().length() - 1) + '/' + name);
+	//p->AddFileToHash(p->typeHash(type), info.getDir().right(info.getDir().length() - 1) + '/' + name);
     p->WriteBkpFile() ;
+
 }
 
 

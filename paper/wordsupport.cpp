@@ -288,6 +288,7 @@ QStringList WordSupport::context(const QString &t, int pos)
 		else if (cch == QChar('.')){
 			Gopos(i + 1);
 			list.prepend(NextWord2());
+			list.prepend(".");
 		}
 		else if (cch == QChar(']')){
 			lRightExp(QChar('['), --i);
