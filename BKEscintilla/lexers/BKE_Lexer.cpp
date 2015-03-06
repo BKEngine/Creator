@@ -846,7 +846,17 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 	if (cur_mask & BEGAL_MASK)
 	{
 		//## or #
-
+		int endPos = startPos + lengthDoc;
+		//search begin of cmd
+		while (startPos-- > 0)
+		{
+			if ((curstyle & BEGAL_MASK) && !(laststyle & BEGAL_MASK))
+				break;
+			curstyle = pAccess->StyleAt(startPos);
+			laststyle = pAccess->StyleAt(startPos - 1);
+		}
+		Lex(startPos, endPos - startPos, pAccess->StyleAt(startPos - 1), pAccess);
+		return;
 	}
 	//styler->setRange(startPos, startPos + lengthDoc, initStyle);
 
