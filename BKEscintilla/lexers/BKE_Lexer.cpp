@@ -311,11 +311,19 @@ bool BKE_Lexer::ParseString()
 {
 	while (styler->More() && !styler->atLineEnd)
 	{
-		if (styler->ch == '\"' && styler->chNext != '\"')
+		if (styler->ch == '\"')
 		{
-			styler->Forward();
-			styler->SetState(last_state | cur_mask);
-			return true;
+			if(styler->chNext != '\"')
+			{
+				styler->Forward();
+				styler->SetState(last_state | cur_mask);
+				return true;
+			}
+			else
+			{
+				styler->Forward();
+				styler->Forward();
+			}
 		}
 		else
 		{
@@ -788,16 +796,17 @@ void BKE_Lexer::JudgeStyle()
 			styler->SetState(SCE_BKE_PARSER | cur_mask);
 		}
 	}
-	else if (styler->ch == '\"')
-	{
-		//styler->setMaskState(BEGAL_MASK);
-		styler->SetState(SCE_BKE_STRING | cur_mask);
-	}
-	else if (styler->ch == '\'')
-	{
-		//styler->setMaskState(BEGAL_MASK);
-		styler->SetState(SCE_BKE_STRING2 | cur_mask);
-	}
+	//leave string for Begal
+	//else if (styler->ch == '\"')
+	//{
+	//	//styler->setMaskState(BEGAL_MASK);
+	//	styler->SetState(SCE_BKE_STRING | cur_mask);
+	//}
+	//else if (styler->ch == '\'')
+	//{
+	//	//styler->setMaskState(BEGAL_MASK);
+	//	styler->SetState(SCE_BKE_STRING2 | cur_mask);
+	//}
 	else if (styler->atLineEnd)
 	{
 		styler->SetState(SCE_BKE_DEFAULT | cur_mask);
@@ -872,6 +881,7 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 				curstyle = pAccess->StyleAt(startPos);
 				laststyle = pAccess->StyleAt(startPos - 1);
 			}
+			startPos++;
 			Lex(startPos, endPos - startPos, pAccess->StyleAt(startPos - 1), pAccess);
 			return;
 		}

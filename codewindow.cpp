@@ -784,7 +784,11 @@ void CodeWindow::Compile()
     else abc.SetBtn(QStringList()<<"编译全部脚本"<<"编译当前脚本");
     int i = abc.WaitUser(330,200) ;
 
-    if( i == 0) CompileAll();
+	if (i == 0)
+	{
+		SaveALL();
+		CompileAll();
+	}
 }
 
 
@@ -824,6 +828,7 @@ void CodeWindow::CompileAll()
     kag->show();
     //开始编译
     //comtool.Compile(BKE_CURRENT_DIR+"/temp");
+	SaveALL();
 	comtool.Compile(currentproject->FileDir());
 }
 

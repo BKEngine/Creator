@@ -87,7 +87,8 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 
 	int xline, xindex;
 	lineIndexFromPosition(pos, &xline, &xindex);
-	if (mtype&SC_MOD_INSERTTEXT){  //文字被插入
+	if (mtype & SC_MOD_INSERTTEXT)
+	{  //文字被插入
 
 		if ((mtype&SC_PERFORMED_USER) > 0 && !IsWorkingUndo) BkeStartUndoAction();
 		ChangeType = mtype;
@@ -99,7 +100,8 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 		modfieddata.text = QString(text);
 
 	}
-	else if (mtype&SC_MOD_DELETETEXT){
+	else if (mtype & SC_MOD_DELETETEXT)
+	{
 		//if( xindex < LastKeywordEnd) CheckLine(xline); //一旦删除超过关键点，则需要重新进行解析
 
 		ChangeType = mtype;
@@ -108,7 +110,25 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 		modfieddata.line = xline;
 		modfieddata.index = xindex;
 		modfieddata.lineadd = added;
-		modfieddata.text = QString(text);
+		//modfieddata.text = QString(text);
+	}
+	else if (mtype & SC_MOD_BEFOREDELETE)
+	{
+		ChangeType = SC_MOD_DELETETEXT;
+		modfieddata.pos = pos;
+		modfieddata.type = mtype;
+		modfieddata.line = xline;
+		modfieddata.index = xindex;
+		modfieddata.lineadd = added;
+		int l = 0;
+		QString q;
+		while (l < len)
+		{
+			char ch = SendScintilla(SCI_GETCHARAT, pos + l);
+			q.push_back(ch);
+			l++;
+		}
+		modfieddata.text = q;
 
 		ChangeType = mtype;
 	}
@@ -150,33 +170,65 @@ void BkeScintilla::UiChange(int updated)
 	}
 
 	//括号，引号补全
-	if (modfieddata.text == "(" || modfieddata.text == "[" || modfieddata.text == "{" || modfieddata.text == "\"" || modfieddata.text == "'")
+	if (modfieddata.text.length() == 1 && (modfieddata.text == "(" || modfieddata.text == "[" || modfieddata.text == "{" || modfieddata.text == "\"" || modfieddata.text == "'" || modfieddata.text == ")" || modfieddata.text == "]" || modfieddata.text == "}"))
 	{
-		int style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
-		int style2 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
-		char match[2];
-		switch (modfieddata.text[0].toLatin1())
+		QString lefts = "([{\"\'";
+		QString rights = ")]}\"\'";
+		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
+		unsigned char style2 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
+		unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
+		char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
+		char ch = SendScintilla(SCI_GETCHARAT, modfieddata.pos);
+		char chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + 1);
+		if ((style & 63 == SCE_BKE_STRING) || (style & 63 == SCE_BKE_STRING2))
+			return;
+		if (ChangeType & SC_MOD_INSERTTEXT)
 		{
-		case '(':
-			match[0] = ')';
-			break;
-		case '[':
-			match[0] = ']';
-			break;
-		case '{':
-			match[0] = '}';
-			break;
-		default:
-			match[0] = modfieddata.text[0].toLatin1();
-			break;
+			char match[2];
+			bool caret = false;
+			switch (ch)
+			{
+			case '(':
+				match[0] = ')';
+				break;
+			case '[':
+				match[0] = ']';
+				break;
+			case '{':
+				match[0] = '}';
+				break;
+			case '\"':
+			case '\'':
+				match[0] = ch;
+				//判断是leading还是ending的"'
+				if (chPrev == ch && ch == chNext)
+					caret = true;
+				break;
+			default:
+				if (style == style2 || style == SCE_BKE_COMMAND)
+					caret = true;	//光标前进一格，同时忽略本次输入
+				match[0] = 0;
+				break;
+			}
+			match[1] = 0;
+			if (caret)
+			{
+				SendScintilla(SCI_GOTOPOS, modfieddata.pos + 2);
+				SendScintilla(SCI_DELETERANGE, modfieddata.pos, 1);
+			}
+			else if (style != style2 || modfieddata.text[0] != chNext)
+			{
+				SendScintilla(SCI_INSERTTEXT, modfieddata.pos + 1, match);
+			}
 		}
-		match[1] = 0;
-		char chNext;
-		//返回的是Length-1个字符和\0
-		chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + 1);
-		if (style != style2 || modfieddata.text[0] != chNext)
+		else if (ChangeType & SC_MOD_DELETETEXT)
 		{
-			SendScintilla(SCI_INSERTTEXT, modfieddata.pos + 1, match);
+			char del = modfieddata.text[0].toLatin1();
+			if (lefts.indexOf(del) >= 0 && lefts.indexOf(del) == rights.indexOf(ch))
+			{
+				if ((del != '\"' && del != '\'') || (style2 & 63) == SCE_BKE_ERROR)
+					SendScintilla(SCI_DELETERANGE, modfieddata.pos, 1);
+			}
 		}
 	}
 

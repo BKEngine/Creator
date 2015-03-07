@@ -569,7 +569,7 @@ void BkeParser::TextBeChange(BkeModifiedBase *modbase,QsciScintilla *sciedit)
     }
     else
 		showtype = SHOW_AUTOVALLIST ;
-	if (ls[ls.length() - 2] != ".")
+	if (ls.length()>=2 && ls[ls.length() - 2] != ".")
 	{
 		SetVarList(ls.back());
 	}
