@@ -163,7 +163,7 @@ static bool Str2Size(int s[], const QString &str)
 
 static QString SearchPath2Str(const QStringList &v)
 {
-    return v.join(", ");
+    return v.join(" | ");
 }
 
 static QString Int2Hex(int a)

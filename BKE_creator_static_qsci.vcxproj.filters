@@ -255,9 +255,6 @@
     <ClCompile Include="BKEscintilla\Qt4Qt5\qscimacro.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BKEscintilla\Qt4Qt5\qsciprinter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BKEscintilla\Qt4Qt5\qsciscintilla.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -348,7 +348,6 @@
     <ClCompile Include="BKEscintilla\Qt4Qt5\qscilexer.cpp" />
     <ClCompile Include="bkeSci\qscilexerbkescript.cpp" />
     <ClCompile Include="BKEscintilla\Qt4Qt5\qscimacro.cpp" />
-    <ClCompile Include="BKEscintilla\Qt4Qt5\qsciprinter.cpp" />
     <ClCompile Include="BKEscintilla\Qt4Qt5\qsciscintilla.cpp" />
     <ClCompile Include="BKEscintilla\Qt4Qt5\qsciscintillabase.cpp" />
     <ClCompile Include="BKEscintilla\Qt4Qt5\qscistyle.cpp" />

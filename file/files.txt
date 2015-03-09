@@ -1,9 +1,9 @@
-﻿F:/BKEProject/BKE demo/extend.bkscr
+﻿F:/BKEProject/BKE demo/main.bkscr
+F:/BKEProject/BKE demo/script/title.bkscr
+F:/BKEProject/BKE demo/extend.bkscr
 F:/BKEProject/BKE demo/2333.bkscr
 F:/BKEProject/BKE demo//script/system_option.bkscr
 F:/BKEProject/BKE demo//script/system_history.bkscr
-F:/BKEProject/BKE demo/main.bkscr
-F:/BKEProject/BKE demo/script/title.bkscr
 F:/BKEProject/BKE demo/script/system_option.bkscr
 F:/BKEProject/BKE demo/script/system_history.bkscr
 F:/BKEProject/BKE demo/script/story.bkscr
