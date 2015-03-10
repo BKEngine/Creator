@@ -109,7 +109,6 @@ SOURCES += ./main.cpp \
     ParserHelper/parser/BKE_number.cpp \
     ParserHelper/parser/BKE_string.cpp \
     ParserHelper/parser/BKE_variable.cpp \
-    ParserHelper/parser/extend.cpp \
     ParserHelper/parser/extend_wrapper.cpp \
     ParserHelper/parser/parser.cpp \
     ParserHelper/parser/parserextend_wrapper.cpp \

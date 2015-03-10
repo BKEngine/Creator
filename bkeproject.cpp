@@ -22,6 +22,7 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 	info.Root = dest;
 	if (list.size() == 0){  //项目文件本身
 		info.ProName = info.Name;
+		info.RootName = "";
 	}
 	else if (list.size() == 1){  //导入，脚本，资源
 		info.ProName = list.at(0);
@@ -686,7 +687,7 @@ bool BkeProject::RemoveItem(const QString &file)
 
 QHash<QString, QStringList*> *BkeProject::ItemToHashptr(const QTreeWidgetItem *root)
 {
-	if (root->text(0) == "初始化") return &ImportHash;
+	if (root->text(0) == "宏") return &ImportHash;
 	else if (root->text(0) == "脚本") return &ScriptHash;
 	else return &SourceHash;
 }
@@ -804,7 +805,7 @@ BkeFilesHash *BkeProject::typeHash(int type)
 
 BkeFilesHash *BkeProject::typeHash(const QString &n)
 {
-	if (n == "初始化") return &ImportHash;
+	if (n == "宏") return &ImportHash;
 	else if (n == "脚本") return &ScriptHash;
 	else return &SourceHash;
 }
@@ -877,7 +878,20 @@ void BkeProject::AddDir(const QString &dir, const QString &relativeName, const I
 
 	QTreeWidgetItem *la;
 	BkeFilesHash *h1;
-	workItem(&la, &h1, f);
+
+	//fixme
+	la = Script;
+	h1 = &ScriptHash;
+	//项目上右键，扫描所有文件
+// 	if (f.Layer < 1)
+// 	{
+// 		if (!(f.Layer < 1)){
+// 		}
+// 		else{
+// 			la = f.Root;
+// 			h1 = typeHash(f.RootName);
+// 		}
+// 	}
 
 	auto ff = f.getLayer1ItemInfo();
 	if (ff.Name == "脚本")
@@ -900,19 +914,6 @@ bool BkeProject::checkIsDir(const ItemInfo &f)
 {
 	return f.IconKey == dirsico->cacheKey();
 }
-
-void BkeProject::workItem(QTreeWidgetItem **la, BkeFilesHash **h1, const ItemInfo &f)
-{
-	if (!(f.Layer < 1 || f.RootName == "资源")){
-		*la = Script;
-		*h1 = &ScriptHash;
-	}
-	else{
-		*la = f.Root;
-		*h1 = typeHash(f.RootName);
-	}
-}
-
 
 void BkeProject::CheckDir(BkeFilesHash *hash, const QString dirnow)
 {

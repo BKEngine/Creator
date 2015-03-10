@@ -151,7 +151,6 @@ private:
 	QJsonObject TreeToJson(QTreeWidgetItem *tree);
     void JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion) ;
 	void JsonToTree(QTreeWidgetItem *tree, QJsonObject llm, int version);
-    void workItem(QTreeWidgetItem **la,BkeFilesHash **h1, const ItemInfo &f) ;
     QHash<QString,QStringList*> *ItemToHashptr(const QTreeWidgetItem *root) ;
 
     void FindSection(const QString &section , int &from , int &end) ;

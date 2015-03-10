@@ -1311,6 +1311,8 @@ void CodeWindow::BackstageSearchLable(BkeScintilla *edit)
         return ;
     }
 
+	isSearLable = true;
+
     int fline = edit->firstVisibleLine() ;
     edit->findFirst1("^[*].*",false,true,false,false) ;
 
@@ -1329,6 +1331,8 @@ void CodeWindow::BackstageSearchLable(BkeScintilla *edit)
             slablels.append( "*"+wow.NextWord2() );
         }
     }
+
+	isSearLable = false;
 
     if(searchlablelater != 0){
         BackstageSearchLable(searchlablelater);

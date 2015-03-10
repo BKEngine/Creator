@@ -135,10 +135,8 @@ signals:
 signals:
 	void searchOne(const QString &file, const QString &fullfile, int line);
 
-public:
-	bool CloseAll();
-
 public slots:
+	bool CloseAll();
     void ChangeCurrentEdit(int pos) ;
     void SetCurrentEdit(int pos) ;
     void addFile(const QString &file,const QString &prodir) ;
