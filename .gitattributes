@@ -215,6 +215,8 @@ CreatorPack/mainwindow.h -text
 CreatorPack/mainwindow.ui -text
 CreatorPack/weh.cpp -text
 CreatorPack/weh.h -text
+Lisence/GPL_EXCEPTION.TXT -text
+Lisence/GPL_EXCEPTION_ADDENDUM.TXT -text
 ParserHelper/ParserHelper.cpp -text
 ParserHelper/ParserHelper.h -text
 ParserHelper/config.h -text
