@@ -57,6 +57,8 @@ public:
 		accessor = NULL;
 		styler = NULL;
 		info = NULL;
+		cur_mask = 0;
+		firstLex = false;
 	}
 
 	virtual int SCI_METHOD Version() const
