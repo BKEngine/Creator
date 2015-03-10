@@ -1327,8 +1327,9 @@ void CodeWindow::BackstageSearchLable(BkeScintilla *edit)
         edit->lineIndexFromPosition(llm.Start(),&xl,&xi);
         wow.setText(edit->text(xl));
         if( wow.NextWord2() == "*" ){
-            slablelist->addItem("*"+wow.NextWord2(),xl);
-            slablels.append( "*"+wow.NextWord2() );
+            QString labelName = wow.NextWord2();
+            slablelist->addItem("*"+labelName,xl);
+            slablels.append( "*"+labelName );
         }
     }
 

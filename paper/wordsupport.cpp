@@ -1,4 +1,5 @@
 ﻿#include "wordsupport.h"
+#include <QtDebug>
 
 QString BKE_WORD_KEY = QString(" for foreach in extends do while function propset propget int string number typeof var delete class if else continue break return this true false void global ");
 QString BKE_WORD_OPERATOR = QString("+,-,*,/,^,%,!,~,++,--,&,|,&&,||");
@@ -20,6 +21,7 @@ void WordSupport::setText(const QString &t, int pos)
 
 void WordSupport::Gopos(int pos)
 {
+    Q_ASSERT(pos <= 9000000);
 	cch = SafeChar(pos);
 	nch = SafeChar(pos + 1);
 	currentpos = pos;
