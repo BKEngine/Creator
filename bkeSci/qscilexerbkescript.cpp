@@ -5,7 +5,7 @@ QsciLexerBkeScript::QsciLexerBkeScript(QObject *parent)
     :QsciLexer(parent)
 {
     Lfont.setFamily("微软雅黑");
-    Lfont.setPointSize(12);
+    Lfont.setPointSize(13);
     ReadConfig(ConfigName());
 }
 

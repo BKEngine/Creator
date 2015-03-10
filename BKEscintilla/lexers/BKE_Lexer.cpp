@@ -57,8 +57,8 @@ public:
 		accessor = NULL;
 		styler = NULL;
 		info = NULL;
+		firstLex = false;	//反正第一次是一下高亮完的
 		cur_mask = 0;
-		firstLex = false;
 	}
 
 	virtual int SCI_METHOD Version() const
@@ -847,7 +847,6 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 
 	StyleContext sc(startPos, lengthDoc, initStyle, accessor, 0xFF);
 	styler = &sc;
-
 	if (firstLex)
 	{
 		firstLex = false;
@@ -923,6 +922,7 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 			ParseBegal(false, true, true);
 			break;
 		default:
+			__asm int 3;
 			styler->Forward();
 		}
 	}
