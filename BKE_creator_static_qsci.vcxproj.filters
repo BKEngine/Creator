@@ -186,9 +186,6 @@
     <ClCompile Include="bkeSci\bkescintilla.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BKEscintilla\Qt4Qt5\bkestyle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dia\cconfigdia.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

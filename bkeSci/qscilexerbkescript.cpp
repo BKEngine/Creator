@@ -1,4 +1,5 @@
 ﻿#include "qscilexerbkescript.h"
+#include "weh.h"
 
 QsciLexerBkeScript::QsciLexerBkeScript(QObject *parent)
     :QsciLexer(parent)
@@ -134,15 +135,5 @@ void QsciLexerBkeScript::ReadConfig(QString hname)
             hlb[i].bc = qRgb(255,255,255) ;
         }
         return ;
-    }
-
-    QString akb ;
-    QFont ft ;
-    for( int i = 0 ; i < 32 ; i++ ){
-        akb.setNum(i) ;
-        ft.fromString(BKE_USER_SETTING->value(hname+"/"+akb+"_font").toString()) ;
-        hlb[i].font = ft ;
-        hlb[i].fc   = BKE_USER_SETTING->value(hname+"/"+akb+"_fc").toUInt();
-        hlb[i].bc   = BKE_USER_SETTING->value(hname+"/"+akb+"_bc").toUInt();
     }
 }

@@ -30,7 +30,6 @@ BKEscintilla/Qt4Qt5/SciClasses.h -text
 BKEscintilla/Qt4Qt5/SciNamespace.h -text
 BKEscintilla/Qt4Qt5/ScintillaQt.cpp -text
 BKEscintilla/Qt4Qt5/ScintillaQt.h -text
-BKEscintilla/Qt4Qt5/bkestyle.cpp -text
 BKEscintilla/Qt4Qt5/bkestyle.h -text
 BKEscintilla/Qt4Qt5/qsciabstractapis.cpp -text
 BKEscintilla/Qt4Qt5/qsciapis.cpp -text

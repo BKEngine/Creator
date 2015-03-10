@@ -97,7 +97,7 @@ void QsciStyle::apply(QsciScintillaBase *sci) const
     sci->SendScintilla(QsciScintillaBase::SCI_STYLESETBACK, style_nr,
             style_paper);
     sci->SendScintilla(QsciScintillaBase::SCI_STYLESETFONT, style_nr,
-            style_font.family().toLatin1().data());
+            style_font.family().toUtf8().constData());
     sci->SendScintilla(QsciScintillaBase::SCI_STYLESETSIZE, style_nr,
             style_font.pointSize());
 

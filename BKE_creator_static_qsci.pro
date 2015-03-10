@@ -81,7 +81,6 @@ SOURCES += ./main.cpp \
     BKEscintilla/lexlib/PropSetSimple.cpp \
     BKEscintilla/lexlib/StyleContext.cpp \
     BKEscintilla/lexlib/WordList.cpp \
-    BKEscintilla/Qt4Qt5/bkestyle.cpp \
     BKEscintilla/Qt4Qt5/ListBoxQt.cpp \
     BKEscintilla/Qt4Qt5/PlatQt.cpp \
     BKEscintilla/Qt4Qt5/qsciabstractapis.cpp \
