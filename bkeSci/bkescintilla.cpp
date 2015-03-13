@@ -538,6 +538,48 @@ void BkeScintilla::ReplaceAllFind(const QString &rstr)
 	}
 }
 
+void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word)
+{
+	int flag = (cs ? SCFIND_MATCHCASE : 0) |
+		(word ? SCFIND_WHOLEWORD : 0) |
+		(exp ? SCFIND_REGEXP : 0);
+
+	int from = 0;
+	int to = this->length();
+
+	QByteArray rdata = rstr.toUtf8();
+	QByteArray ddata = dstr.toUtf8();
+	const char *ss = rdata.constData();
+	const char *dd = ddata.constData();
+
+	int srclen = strlen(ss);
+	int dstlen = strlen(dd);
+
+	while (from < to)
+	{
+		SendScintilla(SCI_SETSEARCHFLAGS, flag);
+		SendScintilla(SCI_SETTARGETSTART, from);
+		SendScintilla(SCI_SETTARGETEND, to);
+
+		if (SendScintilla(SCI_SEARCHINTARGET, strlen(ss), ss) < 0)
+		{
+			break;
+		}
+
+		ChangeStateFlag |= BKE_CHANGE_REPLACE;
+		if (exp)
+		{
+			SendScintilla(SCI_REPLACETARGETRE, dstlen, dd);
+		}
+		else
+		{
+			SendScintilla(SCI_REPLACETARGET, dstlen, dd);
+		}
+		ChangeStateFlag &= (~BKE_CHANGE_REPLACE);
+
+		from = SendScintilla(SCI_GETTARGETEND) + 1;
+	}
+}
 
 BkeIndicatorBase BkeScintilla::ReplaceFind(const QString &rstr)
 {

@@ -460,10 +460,9 @@ void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, c
 		else
 			loli->edit->FileName = shortname;
 	}
-	loli->edit->findFirst1(searchstr, iscase, isregular, isword);
+	loli->edit->ReplaceAllText(searchstr, replacestr, iscase, isregular, isword);
 	if (!loli->edit->testlist.empty())
 	{
-		loli->edit->ReplaceAllFind(replacestr);
 		bool m = loli->edit->isModified();
 		if (!stayopen && close)
 		{

@@ -53,7 +53,8 @@ public:
     void ClearIndicator(BkeIndicatorBase &p) ;
     int findFirst1(const QString fstr,bool cs,bool exp,bool word,bool mark = true) ;
     void ReplaceAllFind(const QString &rstr) ;
-    BkeIndicatorBase ReplaceFind(const QString &rstr) ;
+	void ReplaceAllText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word);
+	BkeIndicatorBase ReplaceFind(const QString &rstr);
     int findIndicatorStart(int id,int from) ;
     int findIndicatorEnd(int id,int from) ; //不是以ID开头直接返回-1
     BkeIndicatorBase findIndicatorLast(int id,int from) ;

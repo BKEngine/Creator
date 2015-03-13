@@ -243,8 +243,7 @@ void SearchBox::ReplaceAllText()
 	{
 		sciedit->ClearIndicators(BkeScintilla::BKE_INDICATOR_FIND);
 		fstr = edit->text();
-		sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
-		sciedit->ReplaceAllFind(edit1->text());
+		sciedit->ReplaceAllText(fstr, edit1->text(), iscase->isChecked(), isregular->isChecked(), isword->isChecked());
 	}
 	else
 	{

@@ -1,10 +1,10 @@
-﻿F:/BKEProject/BKE demo/main.bkscr
-F:/BKEProject/BKE demo/script/title.bkscr
-F:/BKEProject/BKE demo/extend.bkscr
-F:/BKEProject/BKE demo/2333.bkscr
-F:/BKEProject/BKE demo//script/system_option.bkscr
-F:/BKEProject/BKE demo//script/system_history.bkscr
-F:/BKEProject/BKE demo/script/system_option.bkscr
-F:/BKEProject/BKE demo/script/system_history.bkscr
-F:/BKEProject/BKE demo/script/story.bkscr
-F:/BKEProject/BKE demo/macro.bkscr
+﻿F:/BKEProject/BKE demo/script/system_option.bkscr
+F:/BKEProject/Mazu/CharacterDB.bkscr
+F:/BKEProject/Mazu/main.bkscr
+F:/BKEProject/Mazu/macro.bkscr
+F:/BKEProject/Mazu/EnemyEntity.bkscr
+F:/BKEProject/Mazu/kag_bar.bkscr
+F:/BKEProject/Mazu/extend.bkscr
+F:/BKEProject/Mazu/Character.bkscr
+F:/BKEProject/Mazu/Unit.bkscr
+F:/BKEProject/Mazu/Maze.bkscr
