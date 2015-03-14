@@ -163,11 +163,12 @@ void ProjectWindow::ShowRmenu( const QPoint & pos )
 
     mn.addSeparator() ;
 
-	if (info.Layer == 1)
+	if (info.Layer >= 1 && info.IconKey == workpro->dirsico->cacheKey())
 	{
-		if (info.Name == "宏")
+		auto info2 = info.getLayer1ItemInfo();
+		if (info2.Name == "宏")
 			mn.addAction(btns[btn_newimport]);
-		if (info.Name == "脚本")
+		if (info2.Name == "脚本")
 			mn.addAction(btns[btn_newscript]);
 	}
 

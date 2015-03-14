@@ -113,7 +113,6 @@ public:
 
 	QMap<QString, long> files;
 
-private:
     QIcon *fileico ;
     QIcon *dirsico ;
     QIcon *baseico ;
@@ -125,6 +124,7 @@ private:
     QIcon *volfileico ;
     QIcon *movfileico ;
 
+private:
     QString pdir ;
     QString pname ;
     QString ErrorInfo ;
