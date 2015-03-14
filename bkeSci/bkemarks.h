@@ -10,8 +10,9 @@ public:
     QString Name ;  //相对路径
     QString Information ;   //对于问题，是信息，对于标签是用户输入标记名称
     int Type ;
-    int Atpos ;
-
+    int Atpos ;//line
+	int start;
+	int end;
 };
 
 typedef QList<BkeMarkerBase*> BkeMarkList ;

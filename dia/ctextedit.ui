@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>431</width>
+    <width>465</width>
     <height>353</height>
    </rect>
   </property>
@@ -78,6 +78,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="currentText">
+         <string>微软雅黑</string>
+        </property>
        </widget>
        <widget class="QLabel" name="label_2">
         <property name="geometry">
@@ -118,6 +121,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="currentText">
+         <string>13</string>
+        </property>
         <item>
          <property name="text">
           <string>6</string>
@@ -151,6 +157,11 @@
         <item>
          <property name="text">
           <string>12</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>13</string>
          </property>
         </item>
         <item>
@@ -244,6 +255,107 @@
           </item>
           <item>
            <layout class="QGridLayout" name="gridLayout">
+            <item row="1" column="3">
+             <widget class="QLabel" name="label_4">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>背景颜色 </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="label_3">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>前景颜色 </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" rowspan="3">
+             <widget class="QListWidget" name="listWidget">
+              <item>
+               <property name="text">
+                <string>普通的文字</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>命令（@action)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>属性名（time=100)</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>字符串（&quot;面包工坊&quot;）</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>数字（123456789）</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>颜色（#FFFFFF）</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>转义字符（'\r\n'）</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>标签（*main）</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>注释（//设置）</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>运算符（+-*/）</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>错误（&amp;^$%%^#）</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>关键字（class,false,if）</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Begal脚本内容</string>
+               </property>
+              </item>
+             </widget>
+            </item>
             <item row="0" column="4">
              <widget class="QPushButton" name="fcbtn">
               <property name="sizePolicy">
@@ -294,91 +406,16 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="3">
-             <widget class="QLabel" name="label_3">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>前景颜色 </string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="3">
-             <widget class="QLabel" name="label_4">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>20</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>背景颜色 </string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2" rowspan="3">
-             <widget class="QListWidget" name="listWidget">
-              <item>
-               <property name="text">
-                <string>普通的文字</string>
-               </property>
+            <item row="2" column="3">
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <item alignment="Qt::AlignBottom">
+               <widget class="QPushButton" name="pushButton_2">
+                <property name="text">
+                 <string>确定</string>
+                </property>
+               </widget>
               </item>
-              <item>
-               <property name="text">
-                <string>命令（@action)</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>属性（time=100)</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>字符串（&quot;面包工坊&quot;）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>数字（123456789）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>标签（*main）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>注释（//设置）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>运算符（+-*/）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>错误（&amp;^$%%^#）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>关键字（class,false,if）</string>
-               </property>
-              </item>
-             </widget>
+             </layout>
             </item>
            </layout>
           </item>

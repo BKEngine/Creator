@@ -52,7 +52,7 @@ public slots:
     void WINcomile() ;
     void WINbookmark() ;
     void WINmark() ;
-	void onSearchOne(const QString &file, const QString &fullfile, int line);
+	void onSearchOne(const QString &file, const QString &fullfile, int line, int start, int end);
 
 private:
     QPushButton *lastbtn ;

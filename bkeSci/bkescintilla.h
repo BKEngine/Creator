@@ -68,6 +68,7 @@ public:
     int GetTrueCurrentLine() ;
     void setLexer(QsciLexer *lex = 0);
     void setParser( BkeParser *p){ defparser = p ; }
+	void setSelection(BkeIndicatorBase &p);
 
     int findcount ;
 	BkeIndicatorBase findlast;
@@ -134,7 +135,6 @@ private:
     bool IsIndicator(int id,int pos) ;
     int  GetByte(int pos) ;
     void RemoveDou() ;
-    void setSelection( BkeIndicatorBase &p);
     void BkeStartUndoAction() ;
     void BkeEndUndoAction() ;
     void InsertIndent(int count,int lineID) ;

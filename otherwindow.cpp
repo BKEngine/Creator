@@ -92,13 +92,15 @@ void OtherWindow::clearSearch()
 	memsearch.clear();
 }
 
-void OtherWindow::onSearchOne(const QString &file, const QString &fullfile, int line)
+void OtherWindow::onSearchOne(const QString &file, const QString &fullfile, int line, int start, int end)
 {
 	auto bm = new BkeMarkerBase();
 	bm->Name = file;
 	bm->FullName = fullfile;
 	bm->Type = BkeMarkSupport::BKE_MARK_SEARCH;
 	bm->Atpos = line;
+	bm->start = start;
+	bm->end = end;
 	bm->Information = searchlist->item(memsearch.size())->text();
 	memsearch.push_back(bm);
 }

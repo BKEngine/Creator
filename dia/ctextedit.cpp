@@ -2,6 +2,9 @@
 #include "ctextedit.h"
 #include "ui_ctextedit.h"
 
+int list_colors[] = { SCE_BKE_DEFAULT, SCE_BKE_COMMAND, SCE_BKE_ATTRIBUTE, SCE_BKE_STRING, SCE_BKE_NUMBER, SCE_BKE_COLOR, SCE_BKE_TRANS,
+SCE_BKE_LABEL, SCE_BKE_COMMENT, SCE_BKE_OPERATORS, SCE_BKE_ERROR, SCE_BKE_PARSER_KEYWORD, (1 << 6) };
+
 CTextEdit::CTextEdit(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CTextEdit)
@@ -15,6 +18,11 @@ CTextEdit::CTextEdit(QWidget *parent) :
     QStringList lst = lex->ConfigList() ;
     lst.prepend("默认");
     ui->listBox->addItems( lst ) ;
+
+	cdia = new QColorDialog(this);
+
+	connect(ui->fcbtn, SIGNAL(clicked()), this, SLOT(onForecolorClicked()));
+	connect(ui->bcbtn, SIGNAL(clicked()), this, SLOT(onBackcolorClicked()));
 }
 CTextEdit::~CTextEdit()
 {
@@ -32,7 +40,7 @@ void CTextEdit::configchange(int ci)
 void CTextEdit::upColour()
 {
     for( int i = 0 ; i < 10 ; i++ ){
-        QBrush br( QColor(lex->hlb[i].fc) ) ;
+		QBrush br(QColor(lex->defaultColor(list_colors[i])));
         ui->listWidget->item(i)->setForeground(br);
     }
 }
@@ -40,13 +48,23 @@ void CTextEdit::upColour()
 void CTextEdit::itemchange(int index)
 {
     if( index < 0 || index > ui->listWidget->count() ) return ;
+	curindex = index;
     QString temp ;
-    temp.setNum( lex->hlb[index].fc,16) ;
+	temp.setNum(lex->defaultColor(list_colors[index]).rgb(), 16);
     temp = "QPushButton{background-color:#" + temp.right(temp.length()-2) + ";}" ;
     ui->fcbtn->setStyleSheet(temp);
-    temp.setNum( lex->hlb[index].bc,16) ;
+	temp.setNum(lex->defaultPaper(list_colors[index]).rgb(), 16);
     temp = "QPushButton{background-color:#" + temp.right(temp.length()-2) + ";}" ;
     ui->bcbtn->setStyleSheet(temp);
     return ;
 }
 
+void CTextEdit::onForecolorClicked()
+{
+	auto color = cdia->getColor();
+}
+
+void CTextEdit::onBackcolorClicked()
+{
+
+}

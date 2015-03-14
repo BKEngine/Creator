@@ -191,7 +191,7 @@ void CodeWindow::OtherWinOtherwin(OtherWindow *win)
     othwin = win ;
     //定位文件
     connect(win,SIGNAL(Location(BkeMarkerBase*,QString)),this,SLOT(ToLocation(BkeMarkerBase*,QString))) ;
-	connect(this, SIGNAL(searchOne(const QString &, const QString &, int)), othwin, SLOT(onSearchOne(const QString &, const QString &, int)));
+	connect(this, SIGNAL(searchOne(const QString &, const QString &, int, int, int)), othwin, SLOT(onSearchOne(const QString &, const QString &, int, int, int)));
 }
 
 void CodeWindow::OtherWinProject(ProjectWindow *p)
@@ -414,8 +414,9 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 			buf[linelen--] = 0;
 		}
 		int offset = p.Start() - linestart;
-		othwin->searchlist->addItem(loli->edit->FileName + QString("(%1, %2)").arg(line).arg(offset) + ":\t" + buf);
-		emit searchOne(loli->edit->FileName, loli->FullName(), line);
+		//实际行号从1开始
+		othwin->searchlist->addItem(loli->edit->FileName + QString("(%1, %2)").arg(line + 1).arg(offset) + ":\t" + buf);
+		emit searchOne(loli->edit->FileName, loli->FullName(), line, p.Start(), p.End());
 		delete[] buf;
 	}
 	if (close)
@@ -1005,6 +1006,14 @@ void CodeWindow::ToLocation(BkeMarkerBase *p, const QString &prodir)
 		currentedit->setFirstVisibleLine(p->Atpos - 1);
 	else
 		currentedit->setFirstVisibleLine(p->Atpos);
+	if (p->Type == BkeMarkSupport::BKE_MARK_SEARCH)
+	{
+		BkeIndicatorBase in;
+		in.SetStart(p->start);
+		in.SetEnd(p->end);
+		//currentedit->setSelection(in);
+		currentedit->SetIndicator(BkeScintilla::BKE_INDICATOR_FIND, in);
+	}
 }
 
 void CodeWindow::ShowRmenu( const QPoint & pos )

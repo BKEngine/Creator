@@ -133,7 +133,7 @@ signals:
     void FileAddProject(const QString &file) ;
     //void ComplileText(const QString &text) ;
 signals:
-	void searchOne(const QString &file, const QString &fullfile, int line);
+	void searchOne(const QString &file, const QString &fullfile, int line, int start, int end);
 
 public slots:
 	bool CloseAll();

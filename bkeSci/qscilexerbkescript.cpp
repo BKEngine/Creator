@@ -24,7 +24,7 @@ QString QsciLexerBkeScript::description(int style) const
 	case SCE_BKE_COMMAND:
 	case SCE_BKE_COMMAND2: return QString("Command");
 	case SCE_BKE_ATTRIBUTE: return QString("Attribute");
-	case SCE_BKE_STRING:  return QString("String");
+	case SCE_BKE_STRING:
 	case SCE_BKE_STRING2:  return QString("String");
 	case SCE_BKE_NUMBER:  return QString("Number");
 	case SCE_BKE_LABEL:   return QString("Lable");
@@ -47,12 +47,12 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
     switch (style & 63)
 	{
 	case SCE_BKE_PARSER:
-	case SCE_BKE_DEFAULT: return QColor(0x00, 0x00, 0x00);
 	case SCE_BKE_PARSER_DEFAULT: return QColor(0x00, 0x00, 0x00);
-	case SCE_BKE_COMMAND: return QColor(0x00, 0x00, 0xff);
+	case SCE_BKE_DEFAULT: return QColor(0x00, 0x00, 0x00);
+	case SCE_BKE_COMMAND:
 	case SCE_BKE_COMMAND2: return QColor(0x00, 0x00, 0xff);
 	case SCE_BKE_ATTRIBUTE: return QColor(0x9f, 0x3c, 0x00);
-	case SCE_BKE_STRING:  return QColor(0x00, 0x9f, 0x3c);
+	case SCE_BKE_STRING:
 	case SCE_BKE_STRING2:  return QColor(0x00, 0x9f, 0x3c);
 	case SCE_BKE_NUMBER:  return QColor(0xff, 0x00, 0x00);
 	case SCE_BKE_LABEL:   return QColor(0xff, 0x00, 0xff);
