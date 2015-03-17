@@ -184,6 +184,7 @@ public slots:
 	void searchAllFile(const QString &searchstr, bool iscase, bool isregular, bool isword);
 	void replaceOneFile(const QString &file, const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen);
 	void replaceAllFile(const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen);
+	void resetLexer();
 
 private:
     OtherWindow *othwin ;

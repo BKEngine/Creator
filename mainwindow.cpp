@@ -240,7 +240,7 @@ void MainWindow::closeEvent(QCloseEvent *e)
     BKE_CLOSE_SETTING->setValue("window/width",width());
     BKE_CLOSE_SETTING->setValue("window/height",height());
 
-    QStringList ls ;
+	QStringList ls;
     for( int i = 1 ; i < ras[0]->count() ; i++){
         OtherBasicWin *le = dynamic_cast<OtherBasicWin*>(ras[0]->widget(i)) ;
         if( le->isHidden() ) continue ;
@@ -252,8 +252,6 @@ void MainWindow::closeEvent(QCloseEvent *e)
     BKE_CLOSE_SETTING->setValue("window/leftpos1",ras[1]->saveState());
     BKE_CLOSE_SETTING->setValue("window/leftpos2",ras[2]->saveState());
     BKE_CLOSE_SETTING->setValue("window/ismax",isMaximized());
-
-
 }
 
 QList<QAction*> MainWindow::SetMenuList(QMenu *mn,const QStringList &list)
@@ -442,4 +440,5 @@ void MainWindow::Config()
 {
     CConfigdia *ctk = new CConfigdia ;
     ctk->exec();
+	delete ctk;
 }

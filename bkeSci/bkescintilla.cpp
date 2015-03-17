@@ -775,18 +775,19 @@ int BkeScintilla::GetTrueCurrentLine()
 void BkeScintilla::setLexer(QsciLexer *lex)
 {
 	QsciScintilla::setLexer(lex);
-	//绕过qsci的bug
-    /*
-	QFont f;
-	for (int i = 0; i < 32; i++){
-		f = lex->defaultFont(i);
-        SendScintilla(SCI_STYLESETFONT, STYLE_DEFAULT, f.family().toUtf8().constData());
-		SendScintilla(SCI_STYLESETSIZE, i, f.pointSize());
-		SendScintilla(SCI_STYLESETITALIC, i, f.italic());
-		SendScintilla(SCI_STYLESETBOLD, i, f.bold());
-		SendScintilla(SCI_STYLESETUNDERLINE, i, f.underline());
-	}
-    */
+	//读取用户设置
+//	QFont f;
+//	for (int i = 0; i < 256; i++){
+//		f = lex->defaultFont(i);
+//        SendScintilla(SCI_STYLESETFONT, i, f.family().toUtf8().constData());
+//		SendScintilla(SCI_STYLESETSIZE, i, f.pointSize());
+//		SendScintilla(SCI_STYLESETITALIC, i, f.italic());
+//		SendScintilla(SCI_STYLESETBOLD, i, f.bold());
+//		SendScintilla(SCI_STYLESETUNDERLINE, i, f.underline());
+//
+////		SendScintilla(SCI_STYLESETFORE, i, lex->color(i));
+////		SendScintilla(SCI_STYLESETBACK, i, lex->paper(i));
+//	}
 
 	QFont ft("Courier");
 	ft.setPointSize(lex->defaultFont(0).pointSize());

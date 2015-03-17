@@ -217,7 +217,7 @@ HEADERS  += \
 RESOURCES += \
     source.qrc
 
-INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKEscintilla/src ./BKEscintilla/Qt4Qt5
+INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKEscintilla/src ./BKEscintilla/Qt4Qt5 ./
 
 FORMS += \
     dia/ctextedit.ui

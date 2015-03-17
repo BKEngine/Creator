@@ -24,6 +24,8 @@ public:
 	virtual QString description(int style) const;
 	virtual QColor defaultColor(int style) const;
 	virtual QColor defaultPaper(int style) const;
+	virtual QColor color(int style) const;
+	virtual QColor paper(int style) const;
 	QFont font(int style) const;
     QFont defaultFont (int style) const ;
     QStringList autoCompletionWordSeparators() const ;
@@ -33,7 +35,7 @@ public:
     QStringList ConfigList() ;
 	virtual const char *keywords(int set) const;
 
-    HighlightAttribute hlb[32] ;
+    HighlightAttribute hlb[20] ;
 private:
 
     QFont Lfont ;

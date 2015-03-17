@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     QTextCodec *xcodec = QTextCodec::codecForLocale();
 #ifdef QT_DEBUG
 #ifdef WIN32
-    BKE_CURRENT_DIR = QString("F:/work/qt/BKE_creator/file") ;
+    BKE_CURRENT_DIR = QString("G:/BKE_Creator/file") ;
 #endif
 #endif
 
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     BKE_CLOSE_SETTING = new QSettings(BKE_CURRENT_DIR+"/setting.ini",QSettings::IniFormat) ;
     BKE_USER_SETTING = new QSettings(BKE_CURRENT_DIR+"/user.ini",QSettings::IniFormat) ;
 
-    //颜色配置项
+	//颜色配置项
     QFile sa;
     sa.setFileName(BKE_CURRENT_DIR+"/css.json");
     sa.open(QFile::ReadOnly) ;

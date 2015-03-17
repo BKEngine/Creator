@@ -74,6 +74,8 @@ public:
 	BkeIndicatorBase findlast;
 
 	BkeDocBase *basedoc;
+	QsciLexerBkeScript *deflex;
+
 signals:
     void Undoready(bool is) ;
     void Redoready(bool is) ;
@@ -119,7 +121,6 @@ private:
     int findflag ;
     const char *comss ;
     QByteArray fstrdata ;
-    QsciLexerBkeScript *deflex ;
     QString Separate ;
     QString LaterInsertWord ;   //Ui更新后插入
 

@@ -11,13 +11,19 @@ class CConfigdia : public QDialog
 public:
     explicit CConfigdia(QWidget *parent = 0);
 
-    QListWidget *itemlist ;
-    QStackedWidget *stk ;
+    QListWidget *itemlist;
+    QStackedWidget *stk;
+	CTextEdit *cns;
+
+	QSet<int> modify;
 
 signals:
+	void onSave();
 
 public slots:
     void itemChange() ;
+	void onOK();
+
 private:
     int low ;
 

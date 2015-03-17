@@ -351,12 +351,12 @@
               </item>
               <item>
                <property name="text">
-                <string>Begal脚本内容</string>
+                <string>Bagel脚本内容</string>
                </property>
               </item>
              </widget>
             </item>
-            <item row="0" column="4">
+            <item row="0" column="4" alignment="Qt::AlignHCenter">
              <widget class="QPushButton" name="fcbtn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -381,7 +381,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="4">
+            <item row="1" column="4" alignment="Qt::AlignHCenter">
              <widget class="QPushButton" name="bcbtn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -409,9 +409,20 @@
             <item row="2" column="3">
              <layout class="QVBoxLayout" name="verticalLayout_5">
               <item alignment="Qt::AlignBottom">
-               <widget class="QPushButton" name="pushButton_2">
+               <widget class="QPushButton" name="btnOK">
                 <property name="text">
                  <string>确定</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="2" column="4">
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+              <item alignment="Qt::AlignBottom">
+               <widget class="QPushButton" name="btnReset">
+                <property name="text">
+                 <string>重置</string>
                 </property>
                </widget>
               </item>

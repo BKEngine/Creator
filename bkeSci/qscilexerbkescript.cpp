@@ -1,11 +1,14 @@
-﻿#include "qscilexerbkescript.h"
-#include "weh.h"
+﻿#include <weh.h>
+#include "qscilexerbkescript.h"
+
+//int list_colors[] = { SCE_BKE_DEFAULT, SCE_BKE_COMMAND, SCE_BKE_ATTRIBUTE, SCE_BKE_STRING, SCE_BKE_NUMBER, SCE_BKE_COLOR, SCE_BKE_TRANS,
+//SCE_BKE_LABEL, SCE_BKE_COMMENT, SCE_BKE_OPERATORS, SCE_BKE_ERROR, SCE_BKE_PARSER_KEYWORD, (1 << 6) };
 
 QsciLexerBkeScript::QsciLexerBkeScript(QObject *parent)
     :QsciLexer(parent)
 {
-    Lfont.setFamily("微软雅黑");
-    Lfont.setPointSize(13);
+    //Lfont.setFamily("微软雅黑");
+    //Lfont.setPointSize(13);
     ReadConfig(ConfigName());
 }
 
@@ -47,7 +50,7 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
     switch (style & 63)
 	{
 	case SCE_BKE_PARSER:
-	case SCE_BKE_PARSER_DEFAULT: return QColor(0x00, 0x00, 0x00);
+	case SCE_BKE_PARSER_DEFAULT:
 	case SCE_BKE_DEFAULT: return QColor(0x00, 0x00, 0x00);
 	case SCE_BKE_COMMAND:
 	case SCE_BKE_COMMAND2: return QColor(0x00, 0x00, 0xff);
@@ -69,12 +72,66 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
     return QColor( 0x00,0x00,0x00) ;
 }
 
+QColor QsciLexerBkeScript::color(int style) const
+{
+	switch (style & 63)
+	{
+	case SCE_BKE_PARSER:
+	case SCE_BKE_PARSER_DEFAULT:
+	case SCE_BKE_DEFAULT: return hlb[0].fc;
+	case SCE_BKE_COMMAND:
+	case SCE_BKE_COMMAND2: return hlb[1].fc;
+	case SCE_BKE_ATTRIBUTE: return hlb[2].fc;
+	case SCE_BKE_STRING:
+	case SCE_BKE_STRING2:  return hlb[3].fc;
+	case SCE_BKE_NUMBER:  return hlb[4].fc;
+	case SCE_BKE_LABEL:   return hlb[7].fc;
+	case SCE_BKE_ANNOTATE:
+	case SCE_BKE_COMMENT: return hlb[8].fc;
+	case SCE_BKE_OPERATORS: return hlb[9].fc;
+	case SCE_BKE_TEXT:    return QColor(0x00, 0x00, 0x00);
+	case SCE_BKE_COLOR:    return hlb[5].fc;
+	case SCE_BKE_TRANS:  return hlb[6].fc; //转义字符，
+	case SCE_BKE_PARSER_KEYWORD:    return hlb[11].fc;
+	case SCE_BKE_PARSER_VAR:    return QColor(47, 79, 79);
+	case SCE_BKE_ERROR:    return hlb[10].fc;
+	}
+	return QColor(0x00, 0x00, 0x00);
+}
+
 QColor QsciLexerBkeScript::defaultPaper(int style) const
 {
 	if ((style & (1 << 6)) && (!(style & (1 << 7))))
 		return QColor(0xE0, 0xE0, 0xE0);
-	if (style == 65)
-		return QColor(0xE0, 0xE0, 0xE0);
+	return QsciLexer::defaultPaper();
+}
+
+QColor QsciLexerBkeScript::paper(int style) const
+{
+	if ((style & (1 << 6)) && (!(style & (1 << 7))))
+		return hlb[12].bc;
+	switch (style & 63)
+	{
+	case SCE_BKE_PARSER:
+	case SCE_BKE_PARSER_DEFAULT:
+	case SCE_BKE_TEXT:
+	case SCE_BKE_DEFAULT: return hlb[0].bc;
+	case SCE_BKE_COMMAND:
+	case SCE_BKE_COMMAND2: return hlb[1].bc;
+	case SCE_BKE_ATTRIBUTE: return hlb[2].bc;
+	case SCE_BKE_STRING:
+	case SCE_BKE_STRING2:  return hlb[3].bc;
+	case SCE_BKE_NUMBER:  return hlb[4].bc;
+	case SCE_BKE_LABEL:   return hlb[7].bc;
+	case SCE_BKE_ANNOTATE:
+	case SCE_BKE_COMMENT: return hlb[8].bc;
+	case SCE_BKE_OPERATORS: return hlb[9].bc;
+	case SCE_BKE_COLOR:    return hlb[5].bc;
+	case SCE_BKE_TRANS:  return hlb[6].bc; //转义字符，
+	case SCE_BKE_PARSER_KEYWORD:    return hlb[11].bc;
+	case SCE_BKE_PARSER_VAR:    return QsciLexer::defaultPaper();
+	case SCE_BKE_ERROR:    return hlb[10].bc;
+	}
 	return QsciLexer::defaultPaper();
 }
 
@@ -128,12 +185,34 @@ QStringList QsciLexerBkeScript::ConfigList()
 //从文件中读取配置
 void QsciLexerBkeScript::ReadConfig(QString hname)
 {
-    if( hname == "默认" ){
-        for( int i = 0 ; i < 32 ; i++ ){
-            hlb[i].font = defaultFont(0) ;
-            hlb[i].fc = defaultColor(i).rgb() ;
-            hlb[i].bc = qRgb(255,255,255) ;
-        }
-        return ;
-    }
+	QStringList v = BKE_USER_SETTING->value("sys/Highlight-" + hname, QStringList()).toStringList();
+	if (v.empty())
+	{
+		for (int i = 0; i < sizeof(list_colors) / sizeof(int); i++)
+		{
+			hlb[i].font = Lfont;
+			hlb[i].fc = defaultColor(list_colors[i]).rgb();
+			hlb[i].bc = defaultPaper(list_colors[i]).rgb();
+		}
+		QStringList c;
+		for (int i = 0; i < sizeof(list_colors) / sizeof(int); i++)
+		{
+			c.push_back(QString("%1").arg(hlb[i].fc));
+			c.push_back(QString("%1").arg(hlb[i].bc));
+		}
+		BKE_USER_SETTING->setValue("sys/Highlight-"+hname, c);
+		return;
+	}
+	for (int i = 0; i < sizeof(list_colors) / sizeof(int); i++)
+	{
+		hlb[i].font = Lfont;
+		hlb[i].fc = v[2 * i].toUInt();
+		hlb[i].bc = v[2 * i + 1].toUInt();
+	}
+
+	QString font = BKE_USER_SETTING->value("sys/HighlightFont", "微软雅黑").toString();
+	QString fontsize = BKE_USER_SETTING->value("sys/HighlightFontSize", "13").toString();
+
+	Lfont.setFamily(font);
+	Lfont.setPointSize(fontsize.toInt());
 }

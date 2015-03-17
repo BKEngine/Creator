@@ -45,4 +45,16 @@
 
 #define SAVE_VERSION 12
 
+class CodeWindow;
+class OtherWindow;
+class ProjectWindow;
+class BkeLeftFileWidget;
+
+extern int list_colors[13];
+extern QSplitter *ras[3];
+extern CodeWindow *codeedit;
+extern OtherWindow *otheredit;
+extern ProjectWindow *projectedit;
+extern BkeLeftFileWidget *fileListWidget;
+
 #endif // WEH_H

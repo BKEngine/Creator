@@ -23,6 +23,7 @@ CodeWindow::CodeWindow(QWidget *parent)
 //    watcherflag = 1 ;
 
     currentpos = -1 ;
+	currentbase = NULL;
     stackwidget = new QStackedWidget(this) ;
     setCentralWidget(stackwidget);
     DrawLine(true);
@@ -242,6 +243,16 @@ void CodeWindow::SetCurrentEdit(int pos)
     ChangeCurrentEdit(pos);
 }
 
+void CodeWindow::resetLexer()
+{
+	if (currentbase)
+	{
+		auto lex = currentbase->edit->deflex;
+		lex->ReadConfig(lex->ConfigName());
+		currentbase->edit->setLexer(currentbase->edit->deflex);
+	}
+}
+
 void CodeWindow::SetCurrentEdit(QWidget *w)
 {
     stackwidget->setCurrentWidget(w);
@@ -271,6 +282,9 @@ void CodeWindow::ChangeCurrentEdit(int pos)
     //改变项目
     ChangeProject( prowin->FindProjectFromDir( currentbase->ProjectDir()) );
     currentedit = currentbase->edit ;
+	//reset lexer
+	currentedit->deflex->ReadConfig(currentedit->deflex->ConfigName());
+	currentedit->setLexer(currentedit->deflex);
     //连接文档改变信号
     CurrentConnect(true);
 
