@@ -31,6 +31,7 @@ private:
      QLabel *k1 ;
      QLabel *k2 ;
      QLabel *k3 ;
+	 QCheckBox *cb;
 };
 
 #endif // NEWPRODIA_H

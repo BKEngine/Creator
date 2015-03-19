@@ -15,6 +15,9 @@ NewProDia::NewProDia(QWidget *parent) :
     k2 = new QLabel("    名称",prodialog) ;
     k3 = new QLabel("存储位置",prodialog);
 
+	cb = new QCheckBox("为该项目单独创建一个文件夹", this);
+	cb->setChecked(true);
+
     k1->setWordWrap(true);
     k1->setGeometry(42,34,326,146);
     k2->setGeometry(12,191,60,20);
@@ -65,7 +68,15 @@ void NewProDia::SureOK()
     okname = s1->text() ;
 
     okdir.replace(QRegExp("\\\\"),"/") ;
-    if( okdir.endsWith("/") ) okdir = okdir.left(okdir.length()-1) ; //"不以/结尾"
+    if( okdir.endsWith("/") )
+		okdir = okdir.left(okdir.length()-1) ; //"不以/结尾"
+
+	if (cb->isChecked())
+	{
+		okdir += okname;
+		if (okdir.endsWith("/"))
+			okdir = okdir.left(okdir.length() - 1); //"不以/结尾"
+	}
 
     QFile temp(okdir + "/" + BKE_PROJECT_NAME) ;
     if( temp.exists()){

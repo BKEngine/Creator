@@ -128,7 +128,7 @@ QTreeWidgetItem* BkeProject::findItemIn(QTreeWidgetItem *p, const QString &name,
 void BkeProject::ForceAddScript(const QString &f, QTreeWidgetItem* p)
 {
 	int pos = f.indexOf(QRegExp("[/\\]"));
-	if (pos)
+	if (pos >= 0)
 	{
 		QString f1 = f.left(pos);
 		QString f2 = f.mid(pos + 1);
