@@ -894,19 +894,17 @@ void BkeProject::AddDir(const QString &dir, const QString &relativeName, const I
 // 	}
 
 	auto ff = f.getLayer1ItemInfo();
-	if (ff.Name == "脚本")
+	if (ff.Name == "脚本" || ff.Name=="宏")
 	{
 		config->addScriptDir(relativeName);
 		config->writeFile();
-		ItemFromHash(la, k1);
-		QTreeWidgetItem *le = FindItem(la, relativeName);
-		SearchTree(*h1, le, relativeName);
 	}
-	if (!k2.isEmpty()){
-		ItemFromHash(Source, k2);
-		QTreeWidgetItem *le = FindItem(Source, relativeName);
-		SearchTree(SourceHash, le, relativeName);
-	}
+	FindItem(ff.Root, relativeName);
+	//if (!k2.isEmpty()){
+	//	ItemFromHash(Source, k2);
+	//	QTreeWidgetItem *le = FindItem(Source, relativeName);
+	//	//SearchTree(SourceHash, le, relativeName);
+	//}
 	WriteBkpFile();
 }
 

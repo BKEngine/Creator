@@ -148,7 +148,10 @@ void ProjectWindow::ShowRmenu( const QPoint & pos )
 {
     if( !ReadItemInfo(currentItem(),info) ) return ;
 
-    QPoint pt = QCursor::pos() ;
+	if (info.Layer == 1 && info.Name == "config.bkpsr")
+		return;
+	
+	QPoint pt = QCursor::pos();
     QMenu mn ;
 
     if( info.Layer < 1){
