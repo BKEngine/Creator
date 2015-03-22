@@ -513,7 +513,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			styler->Forward();
 			ParseString2();
 			break;
-		case 0:case 1:case 2:case 3:case 4:case 5:case 6:case 7:case 8:case 9:
+		case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
 			styler->SetState(SCE_BKE_NUMBER | cur_mask);
 			styler->Forward();
 			ParseNumber();
@@ -560,7 +560,19 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 				styler->Forward();
 				while (styler->More() && !styler->atLineEnd)
 				{
-					if (isspace(styler->ch))
+					if (styler->ch == '\t')
+					{
+						if (styler->atLineStart)
+						{
+							styler->Forward();
+							styler->atLineStart = true;
+						}
+						else
+						{
+							styler->Forward();
+						}
+					}
+					else if (isspace(styler->ch))
 						styler->Forward();
 					else
 						break;
