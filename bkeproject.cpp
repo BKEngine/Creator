@@ -59,7 +59,8 @@ BkeProject::BkeProject(QObject *parent)
 
 BkeProject::~BkeProject()
 {
-	lex->deleteLater();
+	delete lex;
+	//lex->deleteLater();
 }
 
 

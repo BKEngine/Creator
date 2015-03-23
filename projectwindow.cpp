@@ -554,8 +554,9 @@ void ProjectWindow::CloseProject()
 {
 	if (!workpro)
 		return;
-	workpro->deleteLater();
+	//workpro->deleteLater();
 	takeTopLevelItem(indexOfTopLevelItem(workpro->Root));
+	delete workpro;
 }
 
 void ProjectWindow::CloseProject(const ItemInfo &f)

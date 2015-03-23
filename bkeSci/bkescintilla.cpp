@@ -320,7 +320,27 @@ void BkeScintilla::UseListChoose(const char* text, int id)
 {
 	ChangeIgnore = true;
 	BkeStartUndoAction();
-	ChooseComplete(text, -1);
+	//我们需要检测重复字符
+	int line, index;
+	getCursorPosition(&line, &index);
+	int length = lineLength(line);
+	char *buf = new char[length + 1];
+	SendScintilla(SCI_GETLINE, line, buf);
+	buf[index] = 0;	//截断在index
+	QString t(text);
+	int maxre = min(t.length(), index);
+	int i = 1;
+	while (i <= maxre)
+	{
+		QString tmp(buf + index - i);
+		if (t.startsWith(tmp))
+			break;
+		i++;
+	}
+	if (i<=maxre)
+		ChooseComplete(text, positionFromLineIndex(line, index) - i);
+	else
+		ChooseComplete(text, positionFromLineIndex(line, index));
 	ChangeIgnore = false;
 }
 
@@ -339,17 +359,20 @@ void BkeScintilla::ChooseComplete(const char *text, int pos)
 {
 	int i = SendScintilla(SCI_AUTOCGETCURRENT);
 	QString temp(text);
-	if (pos < 0) pos = SendScintilla(SCI_GETCURRENTPOS);
+	if (pos < 0)
+		pos = SendScintilla(SCI_GETCURRENTPOS);
 	bool iscommand = (GetByte(pos - 1) == ';');
 
-	if (temp.endsWith("\""));
-	else if (iscommand && !defparser->HasTheChileOf(temp)) temp.append("=");
+	if (!temp.endsWith("\"") && iscommand && !defparser->HasTheChileOf(temp))
+		temp.append("=");
 
-	if (iscommand){
+	if (iscommand)
+	{
 		SendScintilla(SCI_SETSELECTIONSTART, pos - 1); //移除逗号
 		if (GetByte(pos - 2) != ' ') temp.prepend(" "); //逗号之前不是空格，增加空格
 	}
-	else  SendScintilla(SCI_SETSELECTIONSTART, pos);
+	else 
+		SendScintilla(SCI_SETSELECTIONSTART, pos);
 
 	defparser->showtype = BkeParser::SHOW_NULL;
 	modfieddata.clear();
