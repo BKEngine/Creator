@@ -1,0 +1,18 @@
+CREATE release\libquazip.a
+ADDMOD release\qioapi.o
+ADDMOD release\JlCompress.o
+ADDMOD release\quaadler32.o
+ADDMOD release\quacrc32.o
+ADDMOD release\quagzipfile.o
+ADDMOD release\quaziodevice.o
+ADDMOD release\quazip.o
+ADDMOD release\quazipdir.o
+ADDMOD release\quazipfile.o
+ADDMOD release\quazipfileinfo.o
+ADDMOD release\quazipnewinfo.o
+ADDMOD release\unzip.o
+ADDMOD release\zip.o
+ADDMOD release\moc_quagzipfile.o
+ADDMOD release\moc_quaziodevice.o
+ADDMOD release\moc_quazipfile.o
+SAVE

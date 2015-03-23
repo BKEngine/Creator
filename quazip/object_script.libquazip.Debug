@@ -1,0 +1,18 @@
+CREATE debug\libquazip.a
+ADDMOD debug\qioapi.o
+ADDMOD debug\JlCompress.o
+ADDMOD debug\quaadler32.o
+ADDMOD debug\quacrc32.o
+ADDMOD debug\quagzipfile.o
+ADDMOD debug\quaziodevice.o
+ADDMOD debug\quazip.o
+ADDMOD debug\quazipdir.o
+ADDMOD debug\quazipfile.o
+ADDMOD debug\quazipfileinfo.o
+ADDMOD debug\quazipnewinfo.o
+ADDMOD debug\unzip.o
+ADDMOD debug\zip.o
+ADDMOD debug\moc_quagzipfile.o
+ADDMOD debug\moc_quaziodevice.o
+ADDMOD debug\moc_quazipfile.o
+SAVE
