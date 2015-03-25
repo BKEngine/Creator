@@ -261,6 +261,9 @@ bkeSci/qscilexerbkescript.h -text
 /bkeprojectconfig.h -text
 /codewindow.cpp -text
 /codewindow.h -text
+dia/WaitWindow.cpp -text
+dia/WaitWindow.h -text
+dia/WaitWindow.ui -text
 dia/bkeconfiguimodel.cpp -text
 dia/bkeconfiguimodel.h -text
 dia/bkeleftfilewidget.cpp -text
