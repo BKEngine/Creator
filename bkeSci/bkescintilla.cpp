@@ -466,16 +466,18 @@ int BkeScintilla::findFirst1(const QString fstr, bool cs, bool exp, bool word, b
 	int a, len, b;
 	len = this->length();
 	refind = false;
+	findlast.Clear();
 	for (a = 0; a < len;){
 		abc = simpleFind(ss, findflag, a, len);
-		if (abc.IsNull()) return findcount;
+		if (abc.IsNull())
+			return findcount;
 		//对结果进行标记
 		testlist.append(abc);
-		if (mark) SetIndicator(BKE_INDICATOR_FIND, abc);
+		if (mark)
+			SetIndicator(BKE_INDICATOR_FIND, abc);
 		findcount++;
 		a = abc.End();
 	}
-	findlast.Clear();
 	return findcount;
 }
 
@@ -561,6 +563,55 @@ void BkeScintilla::ReplaceAllFind(const QString &rstr)
 	}
 }
 
+bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word)
+{
+	int flag = (cs ? SCFIND_MATCHCASE : 0) |
+		(word ? SCFIND_WHOLEWORD : 0) |
+		(exp ? SCFIND_REGEXP : 0);
+
+	int from = SendScintilla(SCI_GETCURRENTPOS);
+	int to = this->length();
+
+	QByteArray rdata = rstr.toUtf8();
+	QByteArray ddata = dstr.toUtf8();
+	const char *ss = rdata.constData();
+	const char *dd = ddata.constData();
+
+	int srclen = strlen(ss);
+	int dstlen = strlen(dd);
+
+	ChangeStateFlag |= BKE_CHANGE_REPLACE;
+
+	//if (from < to)
+	//do
+	{
+		SendScintilla(SCI_SETSEARCHFLAGS, flag);
+		SendScintilla(SCI_SETTARGETSTART, from);
+		SendScintilla(SCI_SETTARGETEND, to);
+
+		if (SendScintilla(SCI_SEARCHINTARGET, strlen(ss), ss) < 0)
+		{
+			return false;
+		}
+
+		if (exp)
+		{
+			SendScintilla(SCI_REPLACETARGETRE, dstlen, dd);
+		}
+		else
+		{
+			SendScintilla(SCI_REPLACETARGET, dstlen, dd);
+		}
+		ChangeStateFlag &= (~BKE_CHANGE_REPLACE);
+
+		//from = SendScintilla(SCI_GETTARGETEND) + 1;
+		SendScintilla(SCI_SETANCHOR, SendScintilla(SCI_GETTARGETEND) + 1);
+		SendScintilla(SCI_SETCURRENTPOS, SendScintilla(SCI_GETTARGETEND) + 1);
+	}while(0);
+
+	return true;
+}
+
 void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word)
 {
 	int flag = (cs ? SCFIND_MATCHCASE : 0) |
@@ -578,6 +629,8 @@ void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool
 	int srclen = strlen(ss);
 	int dstlen = strlen(dd);
 
+	ChangeStateFlag |= BKE_CHANGE_REPLACE;
+
 	while (from < to)
 	{
 		SendScintilla(SCI_SETSEARCHFLAGS, flag);
@@ -589,7 +642,6 @@ void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool
 			break;
 		}
 
-		ChangeStateFlag |= BKE_CHANGE_REPLACE;
 		if (exp)
 		{
 			SendScintilla(SCI_REPLACETARGETRE, dstlen, dd);
@@ -655,9 +707,11 @@ BkeIndicatorBase BkeScintilla::simpleFind(const char *ss, int flag, int from, in
 	SendScintilla(SCI_SETTARGETEND, to);
 
 	BkeIndicatorBase abc;
-	if (from >= to || from < 0) return abc;
+	if (from >= to || from < 0)
+		return abc;
 
-	if (SendScintilla(SCI_SEARCHINTARGET, strlen(ss), ss) < 0) return abc;
+	if (SendScintilla(SCI_SEARCHINTARGET, strlen(ss), ss) < 0)
+		return abc;
 	abc.SetStart(SendScintilla(SCI_GETTARGETSTART));
 	abc.SetEnd(SendScintilla(SCI_GETTARGETEND));
 	return abc;

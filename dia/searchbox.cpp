@@ -222,19 +222,29 @@ void SearchBox::ChangeModel()
 
 void SearchBox::ReplaceText()
 {
-	if (!sciedit->hasSelectedText()){
-		QMessageBox::information(this, "替换", "没有可以替换的位置!", QMessageBox::Ok);
+	fstr = edit->text();
+	bool res = sciedit->ReplaceText(fstr, edit1->text(), iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+
+	if (!res)
+	{
+		QMessageBox::information(this, "替换", "哼，再往前，没有可以替换的内容啦~", QMessageBox::Ok);
 		return;
 	}
 
-	BkeIndicatorBase abc = sciedit->ReplaceFind(edit1->text());
-	if (abc.IsNull()){
-		QMessageBox::information(this, "替换", "o(︶︿︶)o ，替换似乎出现了一个错误。", QMessageBox::Ok);
-		return;
-	}
-	if (!sciedit->FindForward(abc.End())){
-		QMessageBox::information(this, "替换", "哼，再往前，没有需要替换的内容啦~", QMessageBox::Ok);
-	}
+	sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+	//if (!sciedit->hasSelectedText()){
+	//	QMessageBox::information(this, "替换", "没有可以替换的位置!", QMessageBox::Ok);
+	//	return;
+	//}
+
+	//BkeIndicatorBase abc = sciedit->ReplaceFind(edit1->text());
+	//if (abc.IsNull()){
+	//	QMessageBox::information(this, "替换", "o(︶︿︶)o ，替换似乎出现了一个错误。", QMessageBox::Ok);
+	//	return;
+	//}
+	//if (!sciedit->FindForward(abc.End())){
+	//	QMessageBox::information(this, "替换", "哼，再往前，没有需要替换的内容啦~", QMessageBox::Ok);
+	//}
 }
 
 void SearchBox::ReplaceAllText()

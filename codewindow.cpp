@@ -1,6 +1,7 @@
 ﻿#include <weh.h>
 #include "codewindow.h"
 #include "dia/lablesuredialog.h"
+#include "dia/WaitWindow.h"
 
 CodeWindow::CodeWindow(QWidget *parent)
     :QMainWindow(parent)
@@ -510,6 +511,33 @@ void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, c
 	}
 }
 
+/*
+class SearchThread :public QThread
+{
+public:
+	CodeWindow *cw;
+
+	virtual void run()
+	{
+		QStringList ls;
+		ls.append(cw->currentproject->ListFiles(1));
+		ls.append(cw->currentproject->ListFiles(2));
+		QString base = cw->currentproject->FileDir();
+		if (ls.empty())
+			return;
+		WaitWindow *w = new WaitWindow();
+		w->setInfo("正在工程中搜索", ls.count());
+		w->show();
+		w->update();
+		for (auto &&it : ls)
+		{
+			cw->searchOneFile(base + it, searchstr, iscase, isregular, isword);
+			w->addNum();
+		}
+	}
+};
+*/
+
 void CodeWindow::searchAllFile(const QString &searchstr, bool iscase, bool isregular, bool isword)
 {
 	if (!currentproject)
@@ -520,10 +548,19 @@ void CodeWindow::searchAllFile(const QString &searchstr, bool iscase, bool isreg
 	ls.append(currentproject->ListFiles(1));
 	ls.append(currentproject->ListFiles(2));
 	QString base = currentproject->FileDir();
+	if (ls.empty())
+		return;
+	//WaitWindow *w = new WaitWindow();
+	//w->setInfo("正在工程中搜索", ls.count());
+	//w->show();
+	//w->update();
 	for (auto &&it : ls)
 	{
 		searchOneFile(base + it, searchstr, iscase, isregular, isword);
+		//w->addNum();
 	}
+	//w->hide();
+	//delete w;
 }
 
 void CodeWindow::replaceAllFile(const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen)

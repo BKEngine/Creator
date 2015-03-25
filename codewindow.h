@@ -83,8 +83,11 @@ private:
 
 class CodeWindow : public QMainWindow
 {
-    Q_OBJECT
+	Q_OBJECT
+
 public:
+
+	friend class SearchThread;
 
     CodeWindow(QWidget *parent = 0);
     QSize sizeHint () const ;
