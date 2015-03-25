@@ -934,7 +934,9 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 			ParseBegal(false, true, true);
 			break;
 		default:
-			__asm int 3;
+#ifdef Q_WS_WIN
+            __asm int 3;
+#endif
 			styler->Forward();
 		}
 	}

@@ -1,6 +1,6 @@
 ﻿#include <weh.h>
 #include "BKS_info.h"
-#include "ParserHelper\parser\parserextend.h"
+#include "ParserHelper/parser/parserextend.h"
 
 GLOBALSTRUCTURES_INIT();
 

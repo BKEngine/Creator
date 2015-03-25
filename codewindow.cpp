@@ -420,8 +420,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 		int line = loli->edit->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION, p.Start());
 		int linestart = loli->edit->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line);
 		int linelen = loli->edit->SendScintilla(QsciScintilla::SCI_LINELENGTH, line);
-		char *buf = new char[linelen + 1];
-		QString linetext = loli->edit->SendScintilla(QsciScintilla::SCI_GETLINE, line, buf);
+        char *buf = new char[linelen + 1];
 		buf[linelen] = 0;
 		linelen--;
 		while (buf[linelen] == '\r' || buf[linelen] == '\n')
@@ -1178,10 +1177,26 @@ void CodeWindow::RunBKE()
 {
     QString ndir;
     if(!currentproject->config->live2DKey.isEmpty())
+#ifdef Q_OS_WIN
         ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Live2D_Dev.exe";
+#elif defined(Q_OS_MAC)
+        ndir = BKE_CURRENT_DIR+"/BKEngine_Dev.app"; // Mac上没有Live2D
+#else
+        ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev"; // Linux上没有Live2D
+#endif
     else
+#ifdef Q_OS_WIN
         ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev.exe";
-    QProcess::startDetached( ndir,QStringList(), currentproject->FileDir() ) ;
+#elif defined(Q_OS_MAC)
+        ndir = BKE_CURRENT_DIR+"/BKEngine_Dev.app";
+#else
+        ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev";
+#endif
+#ifdef Q_OS_MAC
+    QProcess::startDetached( "open",QStringList() << ndir << "--args" << currentproject->FileDir() << "-nologo") ;
+#else
+    QProcess::startDetached( ndir,QStringList() << "-nologo", currentproject->FileDir() ) ;
+#endif
 }
 
 void CodeWindow::AnnotateSelect()

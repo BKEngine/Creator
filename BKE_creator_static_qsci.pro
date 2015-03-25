@@ -222,3 +222,5 @@ INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKE
 FORMS += \
     dia/ctextedit.ui
 
+LIBS += -L$$PWD/quazip -lquazip
+

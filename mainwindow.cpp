@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     isConnetct = false ;
 
-    setWindowTitle("Bke Creator");
+    setWindowTitle("BKE Creator");
     codeedit = new CodeWindow(this) ;
     otheredit = new OtherWindow(this) ;
     projectedit = new ProjectWindow(this) ;
@@ -215,10 +215,10 @@ void MainWindow::AboutBkeCreator()
 {
     LableSureDialog msg ;
     QString temp ;
-    temp.append("  Bke Creator           \r\n\r\n") ;
+    temp.append("  BKE Creator           \r\n\r\n") ;
     temp.append("  版本："+BKE_CREATOR_VERTION+"    \r\n") ;
     temp.append("  开发：萝莉岛&歪鼻子&Taigacon&gjy_管\r\n\r\n") ;
-    temp.append("  Bke Creator处于完善开发阶段，有些功能无效是正常的。\r\n"
+    temp.append("  BKE Creator处于完善开发阶段，有些功能无效是正常的。\r\n"
                 "") ;
     msg.SetLable(temp);
     msg.SetBtn(QStringList()<<"查看源代码(SVN)"<<"确认(OK)");
@@ -312,8 +312,8 @@ void MainWindow::Bedestroy()
 void MainWindow::CurrentFileChange(const QString &name,const QString &prodir)
 {
     QString title ;
-    if( prodir.isEmpty() ) title = "["+name+"] - Bke Creator" ;
-    else title = projectedit->workpro->ProjectName() +" ["+name+"] - Bke Creator" ;
+    if( prodir.isEmpty() ) title = "["+name+"] - BKE Creator" ;
+    else title = projectedit->workpro->ProjectName() +" ["+name+"] - BKE Creator" ;
     setWindowTitle(title);
 }
 
@@ -335,7 +335,7 @@ void MainWindow::CheckUpdate()
 #ifdef Q_OS_LINUX
     platform = "";
 #endif
-#ifdef Q_OS_Mac
+#ifdef Q_OS_MAC
     platform = "mac/";
 #endif
     netAdimin = new QNetworkAccessManager(this) ;
@@ -371,7 +371,7 @@ void MainWindow::isUpdate(QJsonObject &newJSON)
     temp.append("\n更新日志：\n") ;
     temp.append(newJSON.value("info").toString() ) ;
     temp.append("\n以下文件需要更新:\n"+upList.join("\n")) ;
-    msg.SetLable("Bke Creator已经有了新版本，是否更新？\n\n"+temp);
+    msg.SetLable("BKE Creator已经有了新版本，是否更新？\n\n"+temp);
     msg.SetCheckbox(QStringList()<<"不再提示自动更新");
     msg.SetBtn(QStringList()<<"【立即更新】"<<"下次再说");
 
@@ -386,7 +386,13 @@ void MainWindow::isUpdate(QJsonObject &newJSON)
 
 void MainWindow::startUp()
 {
+#ifdef Q_OS_WIN
     QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/update.exe")) ;
+#elif defined(Q_OS_MAC)
+    QDesktopServices::openUrl(QUrl::fromLocalFile(qApp->applicationDirPath()+"/update"));
+#else
+    QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/update")) ;
+#endif
     close() ;
 }
 

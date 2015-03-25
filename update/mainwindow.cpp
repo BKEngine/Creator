@@ -98,8 +98,12 @@ void MainWindow::InfodownFinish(QNetworkReply* netfile)
         cmdString.clear();
         if( isFileDiffrent(fileName) )
         {    //优先升级update.exe
-             isSelfUp = true ;
-             downlist << fileName ;
+#ifdef Q_OS_MAC
+
+#else
+            isSelfUp = true ;
+            downlist << fileName ;
+#endif
         }
         else
             downlist = nfilejs.keys() ;
@@ -163,7 +167,7 @@ void MainWindow::Nextfile()
 #elif defined(Q_OS_LINUX)
     fileName = "tool/bkengine_dev";
 #elif defined(Q_OS_MAC)
-    fileName = "tool/bkengine_dev";
+    fileName = "tool/bkengine_dev.app/Contents/MacOS/BKEngine_Dev";
 #endif
 
 
@@ -208,6 +212,7 @@ void MainWindow::downFinish(QNetworkReply* netfile)
 #elif defined(Q_OS_LINUX)
         QFileInfo oinfo( CURRENT_DIR+"/"+currentfile ) ;
 #elif defined(Q_OS_MAC)
+        QFileInfo oinfo( CURRENT_DIR+"/"+currentfile ) ;
 #endif
         outd.mkpath( oinfo.path() ) ;
         if( !LOLI::AutoWrite( oinfo.filePath(),dest ) ){

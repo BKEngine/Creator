@@ -4,8 +4,12 @@
 BkeCompile::BkeCompile(QObject *parent) :
 QObject(parent)
 {
+#ifdef Q_OS_WIN
 	codec = QTextCodec::codecForName("GBK");
-	cmd = NULL;
+#else
+    codec = QTextCodec::codecForName("UTF-8");
+#endif
+    cmd = NULL;
 }
 
 void BkeCompile::Compile(const QString dir)
@@ -18,7 +22,23 @@ void BkeCompile::Compile(const QString dir)
 	connect(cmd, SIGNAL(finished(int)), this, SLOT(finished(int)));
 	connect(cmd, SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
 	list.clear();
-	cmd->start(BKE_CURRENT_DIR + "/tool/BKCompiler_Dev.exe", QStringList() << dir << "-nopause");
+#ifdef Q_OS_WIN
+    cmd->start(BKE_CURRENT_DIR + "/tool/BKCompiler_Dev.exe", QStringList() << dir << "-nopause");
+#elif defined(Q_OS_MAC)
+    QString str = "./BKCompiler_Dev '" + dir + "'-nopause";
+    QFile file(BKE_CURRENT_DIR + "/run_bkc.sh");
+    if(!file.open(QFile::WriteOnly))
+    {
+        QMessageBox::information(0, "Error", "Cannot write run_bkc.sh.");
+        return;
+    }
+    file.write(str.toUtf8());
+    file.close();
+    //cmd->start("open", QStringList() << "-a" << "Terminal.app sh" << BKE_CURRENT_DIR + "/run_bkc.sh");
+    cmd->start(BKE_CURRENT_DIR + "/BKCompiler_Dev", QStringList() << dir << "-nopause");
+#else
+    cmd->start(BKE_CURRENT_DIR + "/tool/BKCompiler_Dev", QStringList() << dir << "-nopause");
+#endif
 }
 
 void BkeCompile::StandardOutput()

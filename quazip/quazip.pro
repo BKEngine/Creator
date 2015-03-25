@@ -2,8 +2,6 @@ TEMPLATE = lib
 CONFIG += qt warn_on
 QT -= gui
 
-CONFIG   += staticlib
-
 TARGET = quazip
 
 # The ABI version.
@@ -86,4 +84,8 @@ symbian {
     for(header, exportheaders.sources) {
         BLD_INF_RULES.prj_exports += "$$header $$exportheaders.path/$$basename(header)"
     }
+}
+
+mac {
+    QMAKE_LFLAGS += -Wl,-install_name,@executable_path/../Frameworks/libquazip.dylib
 }

@@ -166,16 +166,14 @@ static QString SearchPath2Str(const QStringList &v)
     return v.join(" | ");
 }
 
+#include <stdlib.h>
+#include <stdio.h>
+
 static QString Int2Hex(int a)
 {
-    char tmp[8];
-    itoa(a, tmp, 16);
-    QString num = QString(tmp).toUpper();
-    if(num.size() < 6)
-    {
-        num.prepend(QString(6-num.size(),'0'));
-    }
-    return QString("0x") + num;
+    char tmp[12];
+    sprintf(tmp, "0x%06X", a);
+    return QString(tmp);
 }
 
 static QString Color2Str(const QBkeVariable &v)

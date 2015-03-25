@@ -6,6 +6,7 @@
 #include "mainwindow.h"
 #include "singleapplication.h"
 #include <stdint.h>
+#include "quazip/JlCompress.h"
 
 QString title = "BKE Creator - ";
 uint32_t titlehash = 0;
@@ -63,16 +64,41 @@ int main(int argc, char *argv[])
 #else
     QString exeDir = xcodec->toUnicode( QByteArray(argv[0]) ) ;
 #endif
+#ifndef Q_OS_MAC
     BKE_CURRENT_DIR = QFileInfo( exeDir ).path() ;
     //qt has a bug in 5.2.1(windows)? so I use setLibraryPaths
-   QApplication::addLibraryPath( BKE_CURRENT_DIR) ;
+    QApplication::addLibraryPath( BKE_CURRENT_DIR) ;
+#else
+    {
+        QDir d = QFileInfo( exeDir ).dir();
+        d.cdUp();
+        d.cd("PlugIns");
+        QApplication::addLibraryPath(d.absolutePath());
+        qDebug() << QApplication::libraryPaths();
+    }
+#endif
 #endif
 
+   QApplication a(argc, argv);
+
+#ifdef Q_OS_MAC
+   BKE_CURRENT_DIR = QDir::homePath() + "/Documents/BKE_Creator";
+   QDir dir(BKE_CURRENT_DIR);
+   if(!dir.exists())
+   {
+       QDir d(qApp->applicationDirPath());
+       d.cdUp();
+       d.cd("Resources");
+       if(JlCompress::extractDir(d.filePath("data.compress"), dir.absolutePath()).count()==0)
+       {
+           QMessageBox::information(0, "Error", "Cannot uncompress the resources. :( \nPlease unzip .app/Resources/data.compress to ~/Documents/BKE_Creator yourself and restart the application.");
+           exit(0);
+       }
+   }
+#endif
     //SingleApplication a(argc, argv);
-    QApplication a(argc, argv);
+
 #ifndef WIN32
-    if(a.isRunning())
-        return -1;
 #else
 	if (argc > 1)
 		title += argv[1];
