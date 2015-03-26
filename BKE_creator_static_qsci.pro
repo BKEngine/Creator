@@ -24,8 +24,13 @@ DEFINES += QT SCI_LEXER
 #if use in windows
 #LIBS += libqscintilla2
 
-
+win{
 RC_FILE += ico.rc
+}
+
+mac{
+ICON = icon.icns
+}
 
 SOURCES += ./main.cpp \
     topbarwindow.cpp \

@@ -22,7 +22,7 @@ uint32_t BKE_hash(const wchar_t *str)
 	while (*c)
 	{
 		ret ^= (uint32_t)*c;
-		ret *= _FNV_prime;
+        ret *= _FNV_prime;
 		c++;
 	}
 	return ret;
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
         QDir d = QFileInfo( exeDir ).dir();
         d.cdUp();
         d.cd("PlugIns");
-        QApplication::addLibraryPath(d.absolutePath());
+        QApplication::setLibraryPaths(QStringList() << d.absolutePath());
         qDebug() << QApplication::libraryPaths();
     }
 #endif
