@@ -450,6 +450,7 @@ bool BKE_Lexer::ParseString2()
 
 void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 {
+	string stack;//']' '}' 栈
 	int defaultState;
 	if (ignoreLineEnd)
 		defaultState = SCE_BKE_PARSER_DEFAULT;
@@ -460,19 +461,19 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 	while (styler->More())
 	{
 		//judge end
-		if (styler->atLineEnd && !ignoreLineEnd)
+		if (styler->atLineEnd && !ignoreLineEnd && stack.empty())
 		{
 			removeMask(BEGAL_MASK);
 			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			break;
 		}
-		if (isspace(styler->ch) && !ignoreSpace)
+		if (isspace(styler->ch) && !ignoreSpace && stack.empty())
 		{
 			removeMask(BEGAL_MASK);
 			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			break;
 		}
-		if (styler->ch == ']' && !atCommand)
+		if (styler->ch == ']' && !atCommand && stack.empty())
 		{
 			removeMask(BEGAL_MASK);
 			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
@@ -545,7 +546,24 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 		default:
 			if (info->OperatorAncestor.indexOf(styler->ch) >= 0)
 			{
-				styler->SetState(SCE_BKE_OPERATORS | cur_mask);
+				if (styler->ch == ']' && (stack.empty() || stack.back() != ']'))
+				{
+					styler->SetState(SCE_BKE_ERROR | cur_mask);
+				}
+				else if (styler->ch == '}' && (stack.empty() || stack.back() != '}'))
+				{
+					styler->SetState(SCE_BKE_ERROR | cur_mask);
+				}
+				else
+				{
+					styler->SetState(SCE_BKE_OPERATORS | cur_mask);
+					if (styler->ch == '[')
+						stack.push_back(']');
+					else if (styler->ch == '{')
+						stack.push_back('}');
+					else if (styler->ch == ']' || styler->ch == '}')	//正确性已在上面检验过
+						stack.pop_back();
+				}
 				styler->Forward();
 			}
 			else if (isalpha(styler->ch) || styler->ch == '_' || styler->ch >= 0x80)
