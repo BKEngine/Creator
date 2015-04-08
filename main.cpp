@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
         QDir d = QFileInfo( exeDir ).dir();
         d.cdUp();
         d.cd("PlugIns");
-        QApplication::setLibraryPaths(QStringList() << d.absolutePath());
+        //QApplication::setLibraryPaths(QStringList() << d.absolutePath());
         qDebug() << QApplication::libraryPaths();
     }
 #endif
