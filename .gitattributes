@@ -304,6 +304,7 @@ file/tool/编辑脚本.mht -text
 /function.cpp -text
 /function.h -text
 /ico.rc -text
+/icon.icns -text
 loli/loli_island.cpp -text
 loli/loli_island.h -text
 /main.cpp -text
@@ -335,6 +336,7 @@ quazip/doc/faq.dox -text
 quazip/doc/index.dox -text
 quazip/doc/usage.dox -text
 quazip/ioapi.h -text
+quazip/libquazip.dylib -text
 quazip/object_script.libquazip.Debug -text
 quazip/object_script.libquazip.Release -text
 quazip/object_script.quazip.Debug -text
