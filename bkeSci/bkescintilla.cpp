@@ -152,7 +152,10 @@ void BkeScintilla::UiChange(int updated)
 	if (IsWorkingUndo && !ChangeIgnore) BkeEndUndoAction();
 
 	//缩进
-	if (modfieddata.lineadd == 1 && (modfieddata.text == "\n" || modfieddata.text == "\r\n")){
+	if (modfieddata.lineadd == 1 && (modfieddata.text == "\n" || modfieddata.text == "\r\n"))
+	{
+		char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
+		char chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + modfieddata.text.count());
 
 		int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
 		int ly = defparser->GetIndentLayer(this, modfieddata.line);
@@ -176,7 +179,7 @@ void BkeScintilla::UiChange(int updated)
 		QString rights = ")]}\"\'";
 		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
 		unsigned char style2 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
-		unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
+		//unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
 		char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
 		char ch = SendScintilla(SCI_GETCHARAT, modfieddata.pos);
 		char chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + 1);

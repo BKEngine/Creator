@@ -10,12 +10,12 @@ NewProDia::NewProDia(QWidget *parent) :
     no = new QPushButton("取消",prodialog);
     s1 = new QLineEdit(prodialog);
     s2 = new QLineEdit(prodialog) ;
-	k1 = new QLabel("创建一个Bke项目，Bke项目能有效的帮你维护文件关系，方便编译脚本，测试与发布游戏。\r\n"
+	QLabel *k1 = new QLabel("创建一个Bke项目，Bke项目能有效的帮你维护文件关系，方便编译脚本，测试与发布游戏。\r\n"
                     "存储位置不存在时，将自动创建",prodialog) ;
-    k2 = new QLabel("    名称",prodialog) ;
-    k3 = new QLabel("存储位置",prodialog);
+	QLabel *k2 = new QLabel("名    称", prodialog);
+	QLabel *k3 = new QLabel("存储位置", prodialog);
 
-	cb = new QCheckBox("为该项目单独创建一个文件夹", this);
+	cb = new QCheckBox("为该项目创建一个文件夹", prodialog);
 	cb->setChecked(true);
 
     k1->setWordWrap(true);
@@ -27,6 +27,7 @@ NewProDia::NewProDia(QWidget *parent) :
     dir->setGeometry(385,221,50,20);
     yes->setGeometry(300,261,54,30);
     no->setGeometry(362,261,54,30);
+	cb->setGeometry(42, 160, 290, 20);
 
     resize(400,300);
     prodialog->setWindowTitle("新建项目");
@@ -73,6 +74,7 @@ void NewProDia::SureOK()
 
 	if (cb->isChecked())
 	{
+		okdir.push_back('/');
 		okdir += okname;
 		if (okdir.endsWith("/"))
 			okdir = okdir.left(okdir.length() - 1); //"不以/结尾"
@@ -81,7 +83,7 @@ void NewProDia::SureOK()
     QFile temp(okdir + "/" + BKE_PROJECT_NAME) ;
     if( temp.exists()){
         QMessageBox tk(prodialog) ;
-        tk.setText("项目已存,在是否覆盖？");
+        tk.setText("项目已存在，是否覆盖？");
         tk.setStandardButtons(QMessageBox::Yes|QMessageBox::Cancel|QMessageBox::Open);
         tk.setDefaultButton(QMessageBox::Open);
         int i = tk.exec() ;

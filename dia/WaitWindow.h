@@ -3,7 +3,7 @@
 #include <QDialog>
 
 namespace Ui {
-	class WaitWindow;
+	class Dialog;
 }
 
 class WaitWindow :public QDialog
@@ -21,7 +21,7 @@ public:
 	void addNum();
 
 private:
-	Ui::WaitWindow *ui;
+	Ui::Dialog *ui;
 
 	int m_cur;
 	int m_max;

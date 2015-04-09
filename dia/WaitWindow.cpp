@@ -5,7 +5,7 @@
 
 WaitWindow::WaitWindow(QWidget *parent)
 	:QDialog(parent),
-	ui(new Ui::WaitWindow)
+	ui(new Ui::Dialog)
 {
 	ui->setupUi(this);
 }

@@ -28,9 +28,6 @@ private:
      QPushButton *no ;
      QLineEdit *s1 ;
      QLineEdit *s2 ;
-     QLabel *k1 ;
-     QLabel *k2 ;
-     QLabel *k3 ;
 	 QCheckBox *cb;
 };
 
