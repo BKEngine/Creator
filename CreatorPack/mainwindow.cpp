@@ -195,7 +195,7 @@ void MainWindow::on_pushButton_clicked()
     ui->progressBar->setValue(0);
     ftpClient->connectToHost("icemaple.info", 21);
     ftpClient->login("ftpuser","ojjlolidaisuki123");
-    ftpClient->cd("bke.bakery.moe");
+    ftpClient->cd("bkengine");
     ftpClient->cd("update");
     ftpClient->cd("win");
     ftpClient->put(bkecreator,"bkecreator");
@@ -212,9 +212,10 @@ void MainWindow::on_pushButton_clicked()
     ftpClient->cd("..");
     ftpClient->cd("..");
     ftpClient->cd("download");
+	ftpClient->cd("BKECreator");
     ftpClient->put(new MyBuffer(zipBuffer.buffer(), "bke_creator.zip", this),"bke_creator.zip.new");
-    ftpClient->remove("bke_creator.zip");
-    ftpClient->rename("bke_creator.zip.new","bke_creator.zip");
+    ftpClient->remove("BKECreator.zip");
+    ftpClient->rename("bke_creator.zip.new","BKECreator.zip");
     ftpClient->close();
 }
 
@@ -324,6 +325,7 @@ QByteArray MainWindow::MakeMD5(QString &dir,QString rdir,QString &info)
     QSet<QString> exceptions = {
         dir + "/version.txt",
         dir + "/setting.ini",
+		dir + "/user.ini",
         dir + "/files.txt",
         dir + "/projects.txt",
         dir + "/up.bat",

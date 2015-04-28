@@ -208,7 +208,7 @@ void BkeScintilla::UiChange(int updated)
 					caret = true;
 				break;
 			default:
-				if (style == style2 || style == SCE_BKE_COMMAND)
+				if ((ch==chNext && style==style2) || style == SCE_BKE_COMMAND)
 					caret = true;	//光标前进一格，同时忽略本次输入
 				match[0] = 0;
 				break;

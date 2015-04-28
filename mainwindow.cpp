@@ -341,7 +341,7 @@ void MainWindow::CheckUpdate()
     netAdimin = new QNetworkAccessManager(this) ;
     connect(netAdimin,SIGNAL(finished(QNetworkReply*)),this,SLOT(upfileFinish(QNetworkReply*))) ;
     isConnetct = true ;
-    netAdimin->get(QNetworkRequest(QUrl("http://bke.bakery.moe/update"+platform+"/bkecreator"))) ;
+    netAdimin->get(QNetworkRequest(QUrl("http://bke.bakery.moe/update/"+platform+"bkecreator"))) ;
 }
 
 //检查升级数据包
