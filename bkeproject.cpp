@@ -938,3 +938,8 @@ QString BkeProject::AllNameToName(const QString &allname)
 	}
 	else return allname;
 }
+
+void BkeProject::ReleaseGame()
+{
+
+}

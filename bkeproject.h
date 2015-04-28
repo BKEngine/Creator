@@ -94,6 +94,9 @@ public:
 	bool checkFileExist(const QString &f){ return files.contains(f); }
 	bool checkIsDir(const ItemInfo &f);
 
+	//发布游戏
+	void ReleaseGame();
+
     QStringList AllScriptFiles() ;
     QTreeWidgetItem *FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty = true) ;
     QTreeWidgetItem *FindItemAll(const QString &name) ;

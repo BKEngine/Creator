@@ -50,6 +50,11 @@ public slots:
     void OCupdate() ;
     void Config() ;
 
+	//发布游戏
+	void ReleaseGame();
+
+	void CurrentProChange(BkeProject *pro);
+
 private:
 //    CodeWindow *codeedit ;
 //    FileWindow *fileedit ;
@@ -68,6 +73,7 @@ private:
     QAction *btnopenprojectact ;
     QAction *btnopenfileact ;
     QAction *btnnewfileact ;
+	QAction *btnReleaseGame;
     QToolBar *btnbar ;
 
     QSearchLineEdit *editsearch ;

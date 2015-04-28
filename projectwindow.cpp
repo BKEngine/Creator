@@ -24,6 +24,7 @@ ProjectWindow::ProjectWindow(QWidget *parent)
 
     connect(this,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(ItemDoubleClick(QTreeWidgetItem*,int))) ;
     connect(this,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(ShowRmenu(QPoint))) ;
+	connect(this,SIGNAL(CurrentProChange(BkeProject *)), (MainWindow*)parent, SLOT(CurrentProChange(BkeProject *)));
 
     QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭项目 重命名").split(" ") ;
     for( int i = 0 ; i < BTN_COUNT ; i++){
@@ -418,7 +419,7 @@ void ProjectWindow::OpenFile()
 
     QTreeWidgetItem *llm = findFileInProject(filename) ;
     if( llm == 0) emit OpenThisFile(filename,"");
-    else OpenThisFile(filename,temppro->FileDir());
+    else OpenThisFile(filename,workpro->FileDir());
 }
 
 void ProjectWindow::BkeChangeCurrentProject(/*BkeProject *p*/)
@@ -604,4 +605,18 @@ void ProjectWindow::ShowInDir(const ItemInfo &f)
 	QByteArray a = ("/select," + n).toLocal8Bit();
 	ShellExecuteA(NULL, "open", "explorer.exe", a.data(), NULL, true);
 #endif
+}
+
+void ProjectWindow::ReleaseGame(const ItemInfo &f)
+{
+	BkeProject *p = FindPro(f.ProName);
+	p->ReleaseGame();
+}
+
+void ProjectWindow::ReleaseCurrentGame()
+{
+	if (workpro)
+	{
+		workpro->ReleaseGame();
+	}
 }

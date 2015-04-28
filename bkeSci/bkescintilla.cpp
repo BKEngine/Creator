@@ -177,6 +177,7 @@ void BkeScintilla::UiChange(int updated)
 	{
 		QString lefts = "([{\"\'";
 		QString rights = ")]}\"\'";
+		unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos - 1);
 		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
 		unsigned char style2 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
 		//unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
@@ -208,7 +209,7 @@ void BkeScintilla::UiChange(int updated)
 					caret = true;
 				break;
 			default:
-				if ((ch==chNext && style==style2) || style == SCE_BKE_COMMAND)
+				if ((ch==chNext && style3==style) || style & 63 == SCE_BKE_COMMAND)
 					caret = true;	//光标前进一格，同时忽略本次输入
 				match[0] = 0;
 				break;

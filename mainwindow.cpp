@@ -111,6 +111,11 @@ void MainWindow::CreateMenu()
 {
     QAction *tp ;
 
+	btnnewprojectact = new QAction(QIcon(":/project/source/newproject.png"), "新建项目", this);
+	btnopenprojectact = new QAction(QIcon(":/project/source/open_file.png"), "打开项目", this);
+	btnopenfileact = new QAction(QIcon(":/project/source/openfile.png"), "打开文件", this);
+	btnnewfileact = new QAction(QIcon(":/project/source/newfile.png"), "新建脚本", this);
+
     this->menuBar()->setStyleSheet(BKE_QCSS_OBJECT.value("menubar").toString());
     wmenu = this->menuBar()->addMenu("&文件");
     wmenu->addAction(btnopenprojectact) ;
@@ -151,6 +156,8 @@ void MainWindow::CreateMenu()
 
     wmenu = this->menuBar()->addMenu("&工具");
     connect(wmenu->addAction("选项..."),SIGNAL(triggered()),this,SLOT(Config())) ;
+	btnReleaseGame = wmenu->addAction("发布游戏");
+	connect(btnReleaseGame, SIGNAL(triggered()), this, SLOT(ReleaseGame()));
     wmenu = this->menuBar()->addMenu("&帮助");
     wmenu->addAction("帮助文件") ;
     connect(wmenu->addAction("检查更新"),SIGNAL(triggered()),this,SLOT(startUp())) ;
@@ -187,10 +194,6 @@ void MainWindow::CreateDownBar()
     downbar->addWidget(otheredit->btnbookmark) ;
     downbar->addWidget(otheredit->btnmark) ;
 
-    btnnewprojectact = new QAction(QIcon(":/project/source/newproject.png"),"新建项目",this) ;
-    btnopenprojectact = new QAction( QIcon(":/project/source/open_file.png"),"打开项目",this) ;
-    btnopenfileact = new QAction( QIcon(":/project/source/openfile.png"),"打开文件",this) ;
-    btnnewfileact = new QAction( QIcon(":/project/source/newfile.png"),"新建脚本",this) ;
     btnbar = new QToolBar(this) ;
     btnbar->setFixedHeight(24);
     btnbar->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
@@ -447,4 +450,21 @@ void MainWindow::Config()
     CConfigdia *ctk = new CConfigdia ;
     ctk->exec();
 	delete ctk;
+}
+
+void MainWindow::CurrentProChange(BkeProject *pro)
+{
+	if (pro)
+	{
+		btnReleaseGame->setEnabled(true);
+	}
+	else
+	{
+		btnReleaseGame->setEnabled(false);
+	}
+}
+
+void MainWindow::ReleaseGame()
+{
+	projectedit->ReleaseCurrentGame();
 }

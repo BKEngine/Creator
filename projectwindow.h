@@ -64,10 +64,9 @@ public slots:
     void OpenFile() ;
     void ActionAdmin() ;
 
-
 private:
     //QList<BKEproject*> projectlist ;
-    BkeProject *temppro ;
+    //BkeProject *temppro ;
     ItemInfo info ;
 
 
@@ -86,7 +85,11 @@ private:
 	void RenameFile(const ItemInfo &f);
     //void Active(const ItemInfo &f);
     void ShowInDir(const ItemInfo &f);
+	void ReleaseGame(const ItemInfo &f);
     QTreeWidgetItem *findFileInProject(const QString &name) ;
+
+public:
+	void ReleaseCurrentGame();
 };
 
 

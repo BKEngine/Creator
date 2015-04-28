@@ -51,6 +51,64 @@ private:
 
 	int start, end;
 	unsigned char startStyle;
+
+	class BracketsStack
+	{
+	public:
+		enum BracketType
+		{
+			Parenthesis, //小括号
+			Bracket, //中括号
+			Brace, //大括号
+		};
+		typedef vector<pair<int, BracketType>>::iterator iterator;
+	private:
+		vector<pair<int, BracketType>> _stack;
+	public:
+		void pushParenthesis(int pos){ _stack.push_back(make_pair(pos, Parenthesis)); } //加入小括号
+		void pushBracket(int pos){ _stack.push_back(make_pair(pos, Bracket)); }; //加入中括号
+		void pushBrace(int pos){ _stack.push_back(make_pair(pos, Brace)); }; ////加入大括号
+
+		bool has(BracketType type)
+		{
+			for (auto it = begin(); it != end(); ++it)
+			{
+				if (it->second == type)
+					return true;
+			}
+			return false;
+		}
+		iterator find(BracketType type)
+		{
+			for (auto it = begin(); it != end(); ++it)
+			{
+				if (it->second == type)
+					return it;
+			}
+			return end();
+		}
+		bool hasParenthesis(){ return has(Parenthesis); }
+		bool hasBracket(){ return has(Bracket); }
+		bool hasBrace(){ return has(Brace); }
+
+		iterator findParenthesis(){ return find(Parenthesis); }
+		iterator findBracket(){ return find(Bracket); }
+		iterator findBrace(){ return find(Brace); }
+
+		pair<int, BracketType> back(){ return _stack.back(); }
+		bool empty(){ return _stack.empty(); }
+		int backPos(){ return _stack.back().first; }
+		BracketType backType(){ return _stack.back().second; }
+
+		void pop(){ _stack.pop_back(); }
+
+		iterator begin(){ return _stack.begin(); }
+		iterator end(){ return _stack.end(); }
+		iterator erase(iterator it){ return _stack.erase(it); }
+	};
+
+	void handleBracketsError(BracketsStack &stack);
+
 public:
 	BKE_Lexer()
 	{
@@ -448,9 +506,17 @@ bool BKE_Lexer::ParseString2()
 	return false;
 }
 
+void BKE_Lexer::handleBracketsError(BracketsStack &stack)
+{
+	for (auto it = stack.begin(); it != stack.end(); ++it)
+	{
+		styler->resetState(it->first, it->first, SCE_BKE_ERROR | cur_mask);
+	}
+}
+
 void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 {
-	string stack;//']' '}' 栈
+	BracketsStack stack; //栈
 	int defaultState;
 	if (ignoreLineEnd)
 		defaultState = SCE_BKE_PARSER_DEFAULT;
@@ -461,8 +527,13 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 	while (styler->More())
 	{
 		//judge end
-		if (styler->atLineEnd && !ignoreLineEnd && stack.empty())
+		if (styler->atLineEnd && !ignoreLineEnd)
 		{
+			styler->SetState(SCE_BKE_DEFAULT | cur_mask); //加上这句的原因是，handleBracketsError中最后一个（当前）的括号会被之后的setstate覆盖掉……
+			if (!stack.empty())
+			{
+				handleBracketsError(stack);
+			}
 			removeMask(BEGAL_MASK);
 			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			break;
@@ -473,8 +544,13 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			break;
 		}
-		if (styler->ch == ']' && !atCommand && stack.empty())
+		if (styler->ch == ']' && !atCommand && !stack.hasBracket())
 		{
+			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
+			if (!stack.empty())
+			{
+				handleBracketsError(stack);
+			}
 			removeMask(BEGAL_MASK);
 			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			break;
@@ -546,11 +622,15 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 		default:
 			if (info->OperatorAncestor.indexOf(styler->ch) >= 0)
 			{
-				if (styler->ch == ']' && (stack.empty() || stack.back() != ']'))
+				if (styler->ch == ']' && (stack.empty() || stack.backType() != BracketsStack::Bracket))
 				{
 					styler->SetState(SCE_BKE_ERROR | cur_mask);
 				}
-				else if (styler->ch == '}' && (stack.empty() || stack.back() != '}'))
+				else if (styler->ch == '}' && (stack.empty() || stack.backType() != BracketsStack::Brace))
+				{
+					styler->SetState(SCE_BKE_ERROR | cur_mask);
+				}
+				else if (styler->ch == ')' && (stack.empty() || stack.backType() != BracketsStack::Parenthesis))
 				{
 					styler->SetState(SCE_BKE_ERROR | cur_mask);
 				}
@@ -558,11 +638,13 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 				{
 					styler->SetState(SCE_BKE_OPERATORS | cur_mask);
 					if (styler->ch == '[')
-						stack.push_back(']');
+						stack.pushBracket(styler->currentPos);
 					else if (styler->ch == '{')
-						stack.push_back('}');
-					else if (styler->ch == ']' || styler->ch == '}')	//正确性已在上面检验过
-						stack.pop_back();
+						stack.pushBrace(styler->currentPos);
+					else if (styler->ch == '(')
+						stack.pushParenthesis(styler->currentPos);
+					else if (styler->ch == ']' || styler->ch == '}' || styler->ch == ')')	//正确性已在上面检验过
+						stack.pop();
 				}
 				styler->Forward();
 			}
@@ -609,6 +691,7 @@ void BKE_Lexer::DoCommand()
 {
 	//check cmd name
 	setMask(CMD_MASK);
+	bool error = false;
 	if (!styler->atLineEnd && !isspace(styler->ch) && styler->ch != ']')
 	{
 		while (styler->More())
@@ -621,6 +704,7 @@ void BKE_Lexer::DoCommand()
 	}
 	else
 	{
+		error = true;
 		styler->ChangeState(SCE_BKE_ERROR | cur_mask);
 	}
 	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
@@ -634,7 +718,7 @@ void BKE_Lexer::DoCommand()
 		}
 		styler->SetState(SCE_BKE_ATTRIBUTE | cur_mask);
 		int startPos = styler->currentPos;
-		if (styler->ch >= 80 || styler->ch == '_' || isalpha(styler->ch))
+		if (styler->ch >= 0x80 || styler->ch == '_' || isalpha(styler->ch))
 		{
 			while (styler->More())
 			{
@@ -668,7 +752,10 @@ void BKE_Lexer::DoCommand()
 	removeMask(CMD_MASK);
 	if (styler->ch == ']')
 	{
-		styler->SetState(SCE_BKE_COMMAND | cur_mask);
+		if (error)
+			styler->SetState(SCE_BKE_ERROR | cur_mask);
+		else
+			styler->SetState(SCE_BKE_COMMAND | cur_mask);
 		styler->Forward();
 		styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 	}
@@ -703,11 +790,11 @@ void BKE_Lexer::DoAtCommand()
 		}
 		styler->SetState(SCE_BKE_ATTRIBUTE | cur_mask);
 		int startPos = styler->currentPos;
-		if (styler->ch >= 80 || styler->ch == '_' || isalpha(styler->ch))
+		if (styler->ch >= 0x80 || styler->ch == '_' || isalpha(styler->ch))
 		{
 			while (styler->More())
 			{
-				if (styler->ch >= 80 || styler->ch == '_' || isalnum(styler->ch))
+				if (styler->ch >= 0x80 || styler->ch == '_' || isalnum(styler->ch))
 				{
 					styler->Forward();
 				}
