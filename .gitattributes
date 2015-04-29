@@ -238,6 +238,8 @@ ParserHelper/parser/utils.cpp -text
 ParserHelper/parser/utils.h -text
 ParserHelper/parser/vcode.h -text
 ParserHelper/parserhelper_global.h -text
+back/cconfigdia.cpp -text
+back/cconfigdia.h -text
 bkeSci/BkeIndicatorBase.h -text
 bkeSci/autolex.cpp -text
 bkeSci/autolex.h -text
@@ -260,6 +262,9 @@ bkeSci/qscilexerbkescript.h -text
 /bkeprojectconfig.h -text
 /codewindow.cpp -text
 /codewindow.h -text
+dia/Setoptiondia.cpp -text
+dia/Setoptiondia.h -text
+dia/Setoptiondia.ui -text
 dia/WaitWindow.cpp -text
 dia/WaitWindow.h -text
 dia/WaitWindow.ui -text
@@ -269,6 +274,12 @@ dia/bkeleftfilewidget.cpp -text
 dia/bkeleftfilewidget.h -text
 dia/cconfigdia.cpp -text
 dia/cconfigdia.h -text
+dia/cdiroption.cpp -text
+dia/cdiroption.h -text
+dia/cdiroption.ui -text
+dia/cskinoption.cpp -text
+dia/cskinoption.h -text
+dia/cskinoption.ui -text
 dia/ctextedit.cpp -text
 dia/ctextedit.h -text
 dia/ctextedit.ui -text
@@ -293,6 +304,8 @@ file/files.txt -text
 file/parser.api -text
 file/projects.txt -text
 file/qt_zh_CN.qm -text
+file/setting.ini -text
+file/skin.ini -text
 file/tool/BKCompiler_Dev.exe -text
 file/tool/BKEngine_Dev.exe -text
 file/tool/OpenAL.exe -text
@@ -301,6 +314,7 @@ file/tool/简介.html -text
 file/tool/编译与运行.mht -text
 file/tool/编辑工程.mht -text
 file/tool/编辑脚本.mht -text
+file/user.ini -text
 /function.cpp -text
 /function.h -text
 /ico.rc -text
@@ -426,6 +440,7 @@ source/openfile.png -text
 source/paste.png -text
 source/pin.png -text
 source/pinsmall.png -text
+source/product-design.png -text
 source/redo.png -text
 source/replace(1).png -text
 source/replace(2).png -text
@@ -434,6 +449,8 @@ source/save.png -text
 source/saveas.png -text
 source/search1.png -text
 source/sourcedoc.png -text
+source/terminal.png -text
+source/textarea.png -text
 source/undo.png -text
 source/wainningsmall.png -text
 source/前后按钮.psd -text

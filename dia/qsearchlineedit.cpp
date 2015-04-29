@@ -11,7 +11,7 @@ QSearchLineEdit::QSearchLineEdit(const QString &backtext , QWidget *parent) :
     btns = new QToolButton(this) ;
     btns->setIcon(QIcon(":/left/source/search1.png"));
     btns->setText("历史记录");
-    setStyleSheet(BKE_QCSS_OBJECT.value("lineedit").toString());
+    setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/lineedit").toString());
     connect(this,SIGNAL(returnPressed()),this,SLOT(CheckText())) ;
 }
 

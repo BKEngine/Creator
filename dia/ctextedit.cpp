@@ -11,39 +11,20 @@ CTextEdit::CTextEdit(QWidget *parent) :
     ui(new Ui::CTextEdit)
 {
     ui->setupUi(this);
-    //setAttribute(Qt::WA_DeleteOnClose, true);
-    connect(ui->listBox,SIGNAL(currentIndexChanged(int)),this,SLOT(configchange(int))) ;
-    connect(ui->listWidget,SIGNAL(currentRowChanged(int)),this,SLOT(itemchange(int))) ;
-
     lex = new QsciLexerBkeScript ;
-    QStringList lst = lex->ConfigList() ;
-	if (lst.empty() || lst.front()!="默认")
-	    lst.prepend("默认");
-    ui->listBox->addItems( lst ) ;
-	int i = lst.indexOf(lex->ConfigName());
-	cdia = new QColorDialog();
-	QString curFont = BKE_USER_SETTING->value("sys/HighlightFont", "微软雅黑").toString();
-	ui->fontComboBox->setCurrentText(curFont);
-	QString curFontSize = BKE_USER_SETTING->value("sys/HighlightFontSize", "13").toString();
-	ui->comboBox_2->setCurrentText(curFontSize);
 
-	connect(ui->fcbtn, SIGNAL(clicked()), this, SLOT(onForecolorClicked()));
-	connect(ui->bcbtn, SIGNAL(clicked()), this, SLOT(onBackcolorClicked()));
-	connect(ui->btnOK, SIGNAL(clicked()), this, SLOT(onOKClicked()));
-	connect(ui->btnReset, SIGNAL(clicked()), this, SLOT(resetColor()));
+    ui->listBox->addItems( lex->ConfigList() ) ;
 
-	if (codeedit)
-	{
-		connect(this, SIGNAL(onRefreshLexer()), codeedit, SLOT(resetLexer()));
-	}
+    connect(ui->listWidget,SIGNAL(currentRowChanged(int)),this,SLOT(itemchange(int))) ;
+    connect(ui->listBox,SIGNAL(currentIndexChanged(int)),this,SLOT(configchange(int))) ;
+    connect(ui->fcbtn, SIGNAL(clicked()), this, SLOT(onForecolorClicked()));
+    connect(ui->bcbtn, SIGNAL(clicked()), this, SLOT(onBackcolorClicked()));
+    connect(ui->cpybtn,SIGNAL(clicked()),this,SLOT(onCopy())) ;
+    connect(ui->fontComboBox,SIGNAL(currentTextChanged(QString)),this,SLOT(upFont())) ;
+    connect(ui->comboBox_2,SIGNAL(currentTextChanged(QString)),this,SLOT(upFont())) ;
 
-	if (i >= 0)
-		ui->listBox->setCurrentIndex(i);
-	else
-		ui->listBox->setCurrentIndex(0);
-
-	configchange(0);
-	itemchange(0);
+    ui->listBox->setCurrentText( lex->ConfigName() );
+    upFont();
 }
 
 CTextEdit::~CTextEdit()
@@ -51,56 +32,29 @@ CTextEdit::~CTextEdit()
     delete ui;
 }
 
-void CTextEdit::resetColor()
-{
-	for (int i = 0; i < ui->listWidget->count(); i++)
-	{
-		setcolor[i] = lex->defaultColor(list_colors[i]);
-		setcolor_b[i] = lex->defaultPaper(list_colors[i]);
-		QBrush br(setcolor[i]);
-		ui->listWidget->item(i)->setForeground(br);
-		QBrush br2(setcolor_b[i]);
-		ui->listWidget->item(i)->setBackground(br2);
-	}
-	int r = ui->listWidget->currentRow();
-	itemchange(r);
-	//auto reset font and font size
-	ui->fontComboBox->setCurrentText("微软雅黑");
-	ui->comboBox_2->setCurrentText("13");
-}
-
 void CTextEdit::configchange(int ci)
 {
     QString hname = ui->listBox->currentText() ;
     if( hname == "默认" ) ui->delbtn->setEnabled(false);
-    readConfig(hname);
+    lex->ReadConfig(ui->listBox->currentText());
+
+    ui->fontComboBox->setCurrentText(lex->Lfont.family());
+    ui->comboBox_2->setCurrentText( QString("%1").arg(lex->Lfont.pointSize()));
     upColour();
 }
 
-void CTextEdit::readConfig(const QString &name)
+void CTextEdit::upColour(int Row)
 {
-	QStringList v = BKE_USER_SETTING->value("sys/Highlight-" + name, QStringList()).toStringList();
-	if (v.empty())
-	{
-		resetColor();
-		onOKClicked();
-		return;
-	}
-	for (int i = 0; i < v.count(); i += 2)
-	{
-		setcolor[i / 2] = v[i].toUInt();
-		setcolor_b[i / 2] = v[i + 1].toUInt();
-	}
-}
+    int begin,end ;
+    if( Row < 0){ begin = 0 ; end = ui->listWidget->count() ; }
+    else{ begin = Row ; end = Row+1 ; }
 
-void CTextEdit::upColour()
-{
-	for (int i = 0; i < ui->listWidget->count(); i++)
+    for (;begin < end ; begin++ )
 	{
-		QBrush br(setcolor[i]);
-        ui->listWidget->item(i)->setForeground(br);
-		QBrush br2(setcolor_b[i]);
-		ui->listWidget->item(i)->setBackground(br2);
+        QBrush br( QColor(lex->hlb[begin].fc) );
+        ui->listWidget->item(begin)->setForeground(br);
+        QBrush br2(QColor(lex->hlb[begin].bc));
+        ui->listWidget->item(begin)->setBackground(br2);
 	}
 }
 
@@ -108,38 +62,36 @@ void CTextEdit::itemchange(int index)
 {
     if( index < 0 || index > ui->listWidget->count() ) return ;
 	curindex = index;
-    QString temp ;
-	temp.setNum(setcolor[index].rgb(), 16);
-    temp = "QPushButton{background-color:#" + temp.right(temp.length()-2) + ";}" ;
-    ui->fcbtn->setStyleSheet(temp);
-	temp.setNum(setcolor_b[index].rgb(), 16);
-    temp = "QPushButton{background-color:#" + temp.right(temp.length()-2) + ";}" ;
-    ui->bcbtn->setStyleSheet(temp);
+    ui->fcbtn->setStyleSheet( "QPushButton{background-color:#" + BkeCreator::IntToRgbString( lex->hlb[index].fc )+ ";}" );
+    ui->bcbtn->setStyleSheet("QPushButton{background-color:#" + BkeCreator::IntToRgbString( lex->hlb[index].bc )+ ";}" );
     return ;
 }
 
 void CTextEdit::onForecolorClicked()
 {
-	auto color = cdia->getColor(setcolor[curindex]);
-	if (!color.isValid())
-		return;
-	setcolor[curindex] = color;
-	QString temp;
-	temp.setNum(color.rgb(), 16);
-	temp = "QPushButton{background-color:#" + temp.right(temp.length() - 2) + ";}";
-	ui->fcbtn->setStyleSheet(temp);
+    if( !CheckBtn() ) return ;
+    lex->hlb[curindex].fc = setcolor.rgb() ;
+    ui->fcbtn->setStyleSheet("QPushButton{background-color:#" + BkeCreator::IntToRgbString(lex->hlb[curindex].fc) + ";}");
+    upColour(curindex);
 }
 
 void CTextEdit::onBackcolorClicked()
 {
-	auto color = cdia->getColor(setcolor_b[curindex]);
-	if (!color.isValid())
-		return;
-	setcolor_b[curindex] = color;
-	QString temp;
-	temp.setNum(color.rgb(), 16);
-	temp = "QPushButton{background-color:#" + temp.right(temp.length() - 2) + ";}";
-	ui->bcbtn->setStyleSheet(temp);
+    if( !CheckBtn() ) return ;
+    lex->hlb[curindex].bc = setcolor.rgb() ;
+    ui->bcbtn->setStyleSheet("QPushButton{background-color:#" + BkeCreator::IntToRgbString(lex->hlb[curindex].bc) + ";}");
+    upColour(curindex);
+}
+
+bool CTextEdit::CheckBtn()
+{
+    if( ui->listBox->currentText() == "默认" ){
+        QMessageBox::information(this,"","默认的颜色方案不可以更改！请新建一个新的方案或更改其他方案") ;
+        return false ;
+    }
+    setcolor = QColorDialog::getColor() ;
+    if (!setcolor.isValid()) return false;
+    return true ;
 }
 
 void CTextEdit::onOKClicked()
@@ -149,16 +101,53 @@ void CTextEdit::onOKClicked()
 
 void CTextEdit::onSave()
 {
+    QString stylename = ui->listBox->currentText() ;
+    if( stylename.isEmpty() || stylename == "默认" ) return ;
+
 	QStringList c;
 	for (int i = 0; i < ui->listWidget->count(); i++)
 	{
-		c.push_back(QString("%1").arg(setcolor[i].rgb()));
-		c.push_back(QString("%1").arg(setcolor_b[i].rgb()));
+        c.push_back(QString("%1").arg(lex->hlb[i].fc));
+        c.push_back(QString("%1").arg(lex->hlb[i].bc));
 	}
-	BKE_USER_SETTING->setValue("sys/Highlight-" + ui->listBox->currentText(), c);
-	BKE_USER_SETTING->setValue("sys/Highlight", ui->listBox->currentText());
-	BKE_USER_SETTING->setValue("sys/HighlightFont", ui->fontComboBox->currentText());
-	BKE_USER_SETTING->setValue("sys/HighlightFontSize", ui->comboBox_2->currentText());
 
-	emit onRefreshLexer();
+    BKE_USER_SETTING->setValue(stylename+"/colour", c);
+    BKE_USER_SETTING->setValue(stylename+"/font", ui->fontComboBox->currentText());
+    BKE_USER_SETTING->setValue(stylename+"/size", ui->comboBox_2->currentText());
+    BKE_USER_SETTING->setValue(stylename+"/valid", QVariant(true) );
 }
+
+void CTextEdit::SetCurrentStyle(QString stylename)
+{
+    if( stylename.isEmpty() ) stylename = ui->listBox->currentText() ;
+    BKE_USER_SETTING->setValue("SyleCurrent",stylename);
+}
+
+
+//复制当前样式
+void CTextEdit::onCopy()
+{
+    QString NewStyleName ;
+    bool gww ;
+    do{
+        NewStyleName = QInputDialog::getText(this,"","请输入新样式的名字",QLineEdit::Normal,"",&gww) ;
+        if( !gww ) return  ;
+        if( ui->listBox->findText(NewStyleName) >= 0 ){
+            QMessageBox::information(this,"","重复的类型名字") ;
+            NewStyleName.clear();
+        }
+    } while( NewStyleName.isEmpty() ) ;
+
+    ui->listBox->insertItem(0,NewStyleName);
+    ui->listBox->setCurrentText(NewStyleName);
+}
+
+
+void CTextEdit::upFont()
+{
+    QFont ss ;
+    ss.setFamily(ui->fontComboBox->currentText());
+    ss.setPointSize(ui->comboBox_2->currentText().toInt()-2);
+    ui->listWidget->setFont(ss);
+}
+

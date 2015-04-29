@@ -24,7 +24,8 @@ public slots:
 	void onBackcolorClicked();
 	void onOKClicked();
 	void onSave();
-	void resetColor();
+    void onCopy() ;
+    void SetCurrentStyle(QString stylename) ;
 
 signals:
 	void onOK();
@@ -36,16 +37,16 @@ private:
 	QColorDialog *cdia;
 	int curindex;
 
-    void upColour() ;
-	void readConfig(const QString &name);
+    void upColour(int Row = -1) ;
+    bool CheckBtn() ;
 
 private slots:
     void configchange(int ci) ;
     void itemchange(int index) ;
+    void upFont() ;
 
 private:
-	QColor setcolor[20];
-	QColor setcolor_b[20];
+    QColor setcolor;
 };
 
 #endif // CTEXTEDIT_H

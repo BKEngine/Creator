@@ -122,7 +122,7 @@
          </sizepolicy>
         </property>
         <property name="currentText">
-         <string>13</string>
+         <string>6</string>
         </property>
         <item>
          <property name="text">
@@ -226,7 +226,7 @@
              <widget class="QComboBox" name="listBox"/>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="cpybtn">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -234,7 +234,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>复制</string>
+               <string>新建</string>
               </property>
              </widget>
             </item>

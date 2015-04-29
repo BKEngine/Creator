@@ -90,8 +90,7 @@ void CodeWindow::CreateBtn()
 {
     toolbar = new QToolBar ;
     toolbar->setFixedHeight(24);
-    toolbar->setStyleSheet(BKE_QCSS_OBJECT.value("toolbar2").toString());
-
+    toolbar->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/codetoolbar").toString());
 
     btnlastact = new QAction(QIcon(":/cedit/source/btnlast.png"),"上一个窗口",this) ;
     btnnextact = new QAction(QIcon(":/cedit/source/btnnext.png"),"下一个窗口",this) ;
@@ -135,7 +134,7 @@ void CodeWindow::CreateBtn()
 
     lablelist = new QComboBox ;
     lablelist->setFixedSize(150,22);
-    lablelist->setStyleSheet(BKE_QCSS_OBJECT.value("combox2").toString());
+    lablelist->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/codecombox").toString());
     lablelist->setView(new QListView());
     toolbar->addWidget(lablelist) ;
 
@@ -161,7 +160,7 @@ void CodeWindow::CreateBtn()
 
     slablelist = new QComboBox ;
     slablelist->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-    slablelist->setStyleSheet(BKE_QCSS_OBJECT.value("combox2").toString());
+    slablelist->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/codecombox").toString());
     slablelist->setView(new QListView());
     toolbar->addWidget(slablelist);
     toolbar->addAction(btncloseact) ;
@@ -183,7 +182,8 @@ void CodeWindow::CreateBtn()
     toolbar2->addWidget(space);
     kag = new QProgressBar(this) ;
     kag->setFixedSize(200,20);
-    kag->setStyleSheet(BKE_QCSS_OBJECT.value("processbar").toString());
+
+    kag->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/processbar").toString());
     toolbar2->addWidget(kag) ;
 
 }

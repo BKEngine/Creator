@@ -13,7 +13,10 @@ QStringList BKE_Recently_Files ;
 QJsonObject BKE_MARKS_OBJECT ;
 QSettings *BKE_CLOSE_SETTING ;
 QSettings *BKE_USER_SETTING ;
-QJsonObject BKE_QCSS_OBJECT ;
+QSettings *BKE_SKIN_SETTING ;
+QString BKE_SKIN_CURRENT ;
+
+//QJsonObject BKE_QCSS_OBJECT ;
 bool isSYSTEMP_LOWDER = true ;  //系统是否忽略大小写，默认为真
 
 QString LOLI_MID(const QString &text,const QString from , const QString to,int pos )
@@ -248,4 +251,14 @@ void BkeCreator::ReadApiList(QStringList *ls,const QString &name,int type)
 
     ls->sort(Qt::CaseInsensitive);
     return ;
+}
+
+
+QString BkeCreator::IntToRgbString(unsigned int rgb)
+{
+    QString temp ;
+    temp.setNum(rgb,16) ;
+    while( temp.length() < 6) temp.prepend("0" ) ;
+    while( temp.length() > 6) return temp.right(6) ;
+    return temp ;
 }

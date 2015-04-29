@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CSkinOption</class>
+ <widget class="QWidget" name="CSkinOption">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>444</width>
+    <height>340</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>421</width>
+     <height>321</height>
+    </rect>
+   </property>
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
+    <property name="topMargin">
+     <number>5</number>
+    </property>
+    <property name="rightMargin">
+     <number>5</number>
+    </property>
+    <property name="bottomMargin">
+     <number>5</number>
+    </property>
+    <item row="1" column="2">
+     <widget class="QPushButton" name="btnno">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>撤销</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="3">
+     <widget class="QTextEdit" name="textEdit"/>
+    </item>
+    <item row="0" column="0">
+     <widget class="QComboBox" name="stylenamebox"/>
+    </item>
+    <item row="0" column="1">
+     <widget class="QPushButton" name="btnnew">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>新建</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QComboBox" name="unitbox">
+      <item>
+       <property name="text">
+        <string>codecombox</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>codetoolbar</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>lineedit</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>menu</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>menubar</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>processbar</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>projectbar</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>projectbtn</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>projectcombox</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>projectSUBmenu</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>projectRightmenu</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>projectList</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>filesList</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QPushButton" name="btnyes">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>保存</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QPushButton" name="btndel">
+      <property name="text">
+       <string>删除</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

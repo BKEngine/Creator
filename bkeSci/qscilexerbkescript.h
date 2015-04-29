@@ -6,6 +6,8 @@
 #include <Qsci/qscistyle.h>
 #include "function.h"
 
+
+
 class HighlightAttribute{
 public:
     QFont font ;
@@ -33,12 +35,14 @@ public:
     void ReadConfig(QString hname) ;
     QString ConfigName() ;
     QStringList ConfigList() ;
+    bool ConfigVoid(QString stylename) ;
 	virtual const char *keywords(int set) const;
 
     HighlightAttribute hlb[20] ;
+    QFont Lfont ;
 private:
 
-    QFont Lfont ;
+
 };
 
 #endif // QSCILEXERBKESCRIPT_H

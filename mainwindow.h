@@ -12,7 +12,8 @@
 #include "dia/bkeleftfilewidget.h"
 #include "dia/qsearchlineedit.h"
 #include "dia/lablesuredialog.h"
-#include "dia/cconfigdia.h"
+//#include "dia/cconfigdia.h"
+#include "dia/Setoptiondia.h"
 
 extern QSplitter *ras[3] ;
 extern CodeWindow *codeedit ;

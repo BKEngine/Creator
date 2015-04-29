@@ -16,7 +16,9 @@ extern QStringList BKE_Recently_Files ;
 extern QJsonObject BKE_MARKS_OBJECT ;
 extern QSettings *BKE_CLOSE_SETTING ;
 extern QSettings *BKE_USER_SETTING ;
-extern QJsonObject BKE_QCSS_OBJECT ;
+extern QSettings *BKE_SKIN_SETTING ;
+extern QString BKE_SKIN_CURRENT ;
+//extern QJsonObject BKE_QCSS_OBJECT ;
 extern bool isSYSTEMP_LOWDER ;
 
 QString LOLI_MID(const QString &text,const QString from , const QString to,int pos=0) ;
@@ -35,6 +37,7 @@ namespace BkeCreator {
 	 void ReNameRecentFile(const QString &old, const QString &now);
 	 void ReadApiList(QStringList *ls, const QString &name, int type);
      QStringList CopyStencil(const QString &dir,const QStringList &ls) ;
+     QString IntToRgbString(unsigned int rgb) ;
 }
 
 inline QString chopFileExt(const QString &filename)

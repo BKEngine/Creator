@@ -7,8 +7,6 @@
 QsciLexerBkeScript::QsciLexerBkeScript(QObject *parent)
     :QsciLexer(parent)
 {
-    //Lfont.setFamily("微软雅黑");
-    //Lfont.setPointSize(13);
     ReadConfig(ConfigName());
 }
 
@@ -169,23 +167,34 @@ const char *QsciLexerBkeScript::keywords(int set) const
 //返回配置项的名字
 QString QsciLexerBkeScript::ConfigName()
 {
-    QString hname = BKE_USER_SETTING->value("sys/Highlight",QString("默认")).toString() ;
-    return hname ;
+    QString temp = BKE_USER_SETTING->value("SyleCurrent",QString("默认")).toString() ;
+    if( ConfigVoid(temp) ) return temp ;
+    else return "默认" ;
 }
 
 //返回配置列表
 QStringList QsciLexerBkeScript::ConfigList()
 {
-    QString temp = BKE_USER_SETTING->value("sys/HighlightList").toString() ;
-    if( temp.isEmpty() ) return QStringList() ;
-    else return temp.split("&&") ;
+    QStringList res,temp = BKE_USER_SETTING->childGroups() ;
+    for( int i = 0 ;i < temp.size();i++){
+        if( ConfigVoid( temp.at(i)) ){
+            res.append( temp.at(i) );
+        }
+    }
+    res.prepend("默认");
+    return res ;
+}
+
+bool QsciLexerBkeScript::ConfigVoid(QString stylename)
+{
+    return BKE_USER_SETTING->value(stylename+"/valid",false).toBool() ;
 }
 
 
 //从文件中读取配置
 void QsciLexerBkeScript::ReadConfig(QString hname)
 {
-	QStringList v = BKE_USER_SETTING->value("sys/Highlight-" + hname, QStringList()).toStringList();
+    QStringList v = BKE_USER_SETTING->value(hname+"/colour", QStringList()).toStringList();
 	if (v.empty())
 	{
 		for (int i = 0; i < sizeof(list_colors) / sizeof(int); i++)
@@ -194,15 +203,17 @@ void QsciLexerBkeScript::ReadConfig(QString hname)
 			hlb[i].fc = defaultColor(list_colors[i]).rgb();
 			hlb[i].bc = defaultPaper(list_colors[i]).rgb();
 		}
+
 		QStringList c;
 		for (int i = 0; i < sizeof(list_colors) / sizeof(int); i++)
 		{
 			c.push_back(QString("%1").arg(hlb[i].fc));
 			c.push_back(QString("%1").arg(hlb[i].bc));
 		}
-		BKE_USER_SETTING->setValue("sys/Highlight-"+hname, c);
+        BKE_USER_SETTING->setValue(hname+"/colour", c);
 		return;
 	}
+
 	for (int i = 0; i < sizeof(list_colors) / sizeof(int); i++)
 	{
 		hlb[i].font = Lfont;
@@ -210,9 +221,6 @@ void QsciLexerBkeScript::ReadConfig(QString hname)
 		hlb[i].bc = v[2 * i + 1].toUInt();
 	}
 
-	QString font = BKE_USER_SETTING->value("sys/HighlightFont", "微软雅黑").toString();
-	QString fontsize = BKE_USER_SETTING->value("sys/HighlightFontSize", "13").toString();
-
-	Lfont.setFamily(font);
-	Lfont.setPointSize(fontsize.toInt());
+    Lfont.setFamily(BKE_USER_SETTING->value(hname+"/font", "微软雅黑").toString());
+    Lfont.setPointSize(BKE_USER_SETTING->value(hname+"/size", "13").toInt());
 }

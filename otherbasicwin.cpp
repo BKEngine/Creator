@@ -17,7 +17,8 @@ OtherBasicWin::OtherBasicWin(QWidget *parent)
 
     winlist->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     winlist->addItems(QStringList()<<" 项目"<<" 打开文档"<<" 书签"<<" 标记"<<" 标签区段");
-    winlist->setStyleSheet(BKE_QCSS_OBJECT.value("combox").toString());
+
+    winlist->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectcombox").toString());
     winlist->setView(new QListView());
 
     connect(winlist,SIGNAL(currentTextChanged(QString)),this,SLOT(ChangeShow(QString))) ;
@@ -26,17 +27,18 @@ OtherBasicWin::OtherBasicWin(QWidget *parent)
     QToolButton *llm = new QToolButton(this) ;
     llm->setIcon(QIcon(":/left/source/column.png"));
     llm->setText("分栏");
-    llm->setStyleSheet(BKE_QCSS_OBJECT.value("toolbtn").toString());
+
+    llm->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectbtn").toString());
     bar->addWidget(llm) ;
     connect(llm,SIGNAL(clicked()),this,SLOT(AddWindow())) ;
 
     llm = new QToolButton(this) ;
     llm->setIcon(QIcon(":/left/source/close2.png"));
     llm->setText("关闭");
-    llm->setStyleSheet(BKE_QCSS_OBJECT.value("toolbtn").toString());
+    llm->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectbtn").toString());
     bar->addWidget(llm) ;
     connect( llm,SIGNAL(clicked()),this,SLOT(close())) ;
-    bar->setStyleSheet(BKE_QCSS_OBJECT.value("toolbar").toString());
+    bar->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectbar").toString());
 
     //setAttribute(Qt::WA_DeleteOnClose);
     hl->setMenuBar(bar);

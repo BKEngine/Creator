@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     QTextCodec *xcodec = QTextCodec::codecForLocale();
 #ifdef QT_DEBUG
 #ifdef WIN32
-    BKE_CURRENT_DIR = QString("G:/BKE_Creator/file") ;
+    BKE_CURRENT_DIR = QString("F:/work/qt/BKE_creator/file") ;
 #endif
 #endif
 
@@ -116,7 +116,6 @@ int main(int argc, char *argv[])
     QTranslator translator;
     if( !translator.load("qt_zh_CN",BKE_CURRENT_DIR,"",".qm") ) QMessageBox::information(0,"错误","加载中文翻译失败",QMessageBox::Ok) ;
     a.installTranslator(&translator);
-
 //启动------->>>>>>>>>>
 
     //创建文件夹
@@ -147,13 +146,9 @@ int main(int argc, char *argv[])
     //setting
     BKE_CLOSE_SETTING = new QSettings(BKE_CURRENT_DIR+"/setting.ini",QSettings::IniFormat) ;
     BKE_USER_SETTING = new QSettings(BKE_CURRENT_DIR+"/user.ini",QSettings::IniFormat) ;
+    BKE_SKIN_SETTING = new QSettings(BKE_CURRENT_DIR+"/skin.ini",QSettings::IniFormat) ;
+    BKE_SKIN_CURRENT = BKE_SKIN_SETTING->value("StyleName","默认").toString() ;	//颜色配置项
 
-	//颜色配置项
-    QFile sa;
-    sa.setFileName(BKE_CURRENT_DIR+"/css.json");
-    sa.open(QFile::ReadOnly) ;
-    BKE_QCSS_OBJECT = QJsonDocument::fromJson(sa.readAll()).object() ;
-    sa.close();
     //<<<<<<<---------------
 
 
