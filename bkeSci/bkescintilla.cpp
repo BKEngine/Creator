@@ -47,7 +47,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	//setIndentationGuides(true) ;
 	Separate = QString(" ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\\n\r");
 	AutoState = AUTO_NULL;
-	ChangeIgnore = false;
+	ChangeIgnore = 0;
 	UseCallApi = false;
 	LastKeywordEnd = -1;
 	LastLine = -1;
@@ -89,8 +89,6 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 	lineIndexFromPosition(pos, &xline, &xindex);
 	if (mtype & SC_MOD_INSERTTEXT)
 	{  //文字被插入
-
-		if ((mtype&SC_PERFORMED_USER) > 0 && !IsWorkingUndo) BkeStartUndoAction();
 		ChangeType = mtype;
 		modfieddata.pos = pos;
 		modfieddata.type = mtype;
@@ -103,7 +101,6 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 	else if (mtype & SC_MOD_DELETETEXT)
 	{
 		//if( xindex < LastKeywordEnd) CheckLine(xline); //一旦删除超过关键点，则需要重新进行解析
-
 		ChangeType = mtype;
 		modfieddata.pos = pos;
 		modfieddata.type = mtype;
@@ -143,6 +140,12 @@ void BkeScintilla::UiChange(int updated)
 {
 	if (ChangeIgnore) return;
 
+	ChangeIgnore++;
+	if (ChangeType & SC_PERFORMED_USER)
+	{
+		BkeStartUndoAction();
+	}
+
 	if (ChangeType & SC_MOD_INSERTTEXT){
 		//自动补全
 		defparser->TextBeChange(&modfieddata, this);
@@ -157,18 +160,37 @@ void BkeScintilla::UiChange(int updated)
 		char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
 		char chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + modfieddata.text.count());
 
-		int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
-		int ly = defparser->GetIndentLayer(this, modfieddata.line);
-		//与上一行对其
-		if (ly == 0)
-			InsertIndent(count, modfieddata.line + 1);
-		else if (ly > 0)
-			InsertIndent(count + SendScintilla(SCI_GETTABWIDTH), modfieddata.line + 1);
+		if ((chPrev == '{' && chNext == '}') ||
+			(chPrev == '[' && chNext == ']') ||
+			(chPrev == '(' && chNext == ')')
+			)
+		{
+			int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
+			SendScintilla(SCI_INSERTTEXT, modfieddata.pos, modfieddata.text.toLatin1());
+			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + SendScintilla(SCI_GETTABWIDTH));
+			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 2, count);
+			SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
+		}
 		else
 		{
-			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - SendScintilla(SCI_GETTABWIDTH));
-			//本行就应该减了
-			InsertIndent(count - SendScintilla(SCI_GETTABWIDTH), modfieddata.line/* + 1*/);
+			int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
+			int ly = defparser->GetIndentLayer(this, modfieddata.line);
+			//与上一行对其
+			if (ly > 0)
+			{
+				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + SendScintilla(SCI_GETTABWIDTH));
+				SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
+			}
+			else if (ly < 0)
+			{
+				//本行就应该减了
+				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - SendScintilla(SCI_GETTABWIDTH));
+			}
+			else
+			{
+				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+				SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
+			}
 		}
 	}
 
@@ -209,7 +231,7 @@ void BkeScintilla::UiChange(int updated)
 					caret = true;
 				break;
 			default:
-				if ((ch==chNext && style3==style) || style & 63 == SCE_BKE_COMMAND)
+				if (ch==chNext && style3==style)
 					caret = true;	//光标前进一格，同时忽略本次输入
 				match[0] = 0;
 				break;
@@ -235,6 +257,12 @@ void BkeScintilla::UiChange(int updated)
 			}
 		}
 	}
+
+	if (ChangeType & SC_PERFORMED_USER)
+	{
+		BkeEndUndoAction();
+	}
+	ChangeIgnore--;
 
 	defparser->showtype = BkeParser::SHOW_NULL;
 	ChangeType = 0;
@@ -322,7 +350,7 @@ int BkeScintilla::GetByte(int pos)
 //用户列表被选择
 void BkeScintilla::UseListChoose(const char* text, int id)
 {
-	ChangeIgnore = true;
+	ChangeIgnore++;
 	BkeStartUndoAction();
 	//我们需要检测重复字符
 	int line, index;
@@ -345,17 +373,19 @@ void BkeScintilla::UseListChoose(const char* text, int id)
 		ChooseComplete(text, positionFromLineIndex(line, index) - i);
 	else
 		ChooseComplete(text, positionFromLineIndex(line, index));
-	ChangeIgnore = false;
+	BkeEndUndoAction();
+	ChangeIgnore--;
 }
 
 //自动完成列表被选择
 void BkeScintilla::AutoListChoose(const char* text, int pos)
 {
-	ChangeIgnore = true;
+	ChangeIgnore++;
 	BkeStartUndoAction();
 	SendScintilla(SCI_AUTOCCANCEL);  //取消自动完成，手动填充
 	ChooseComplete(text, pos);
-	ChangeIgnore = false;
+	BkeEndUndoAction();
+	ChangeIgnore--;
 }
 
 
@@ -819,8 +849,18 @@ void BkeScintilla::BkeAnnotateSelect()
 }
 
 
-void BkeScintilla::BkeStartUndoAction()
+void BkeScintilla::BkeStartUndoAction(bool newUndo/* = true*/)
 {
+	if (IsWorkingUndo)
+	{
+		if (newUndo)
+		{
+			QsciScintilla::endUndoAction();
+			emit Undoready(isUndoAvailable());
+			QsciScintilla::beginUndoAction();
+		}
+		return;
+	}
 	IsWorkingUndo = true;
 	QsciScintilla::beginUndoAction();
 }
@@ -894,23 +934,13 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 	//SendScintilla(SCI_SETMARGINSENSITIVEN, SC_MARKNUM_FOLDER, true);
 }
 
-void BkeScintilla::InsertIndent(int count, int lineID)
+int BkeScintilla::GetActualIndentCharLength(int lineID)
 {
-	if (count <= 0) return;
-	int wi = SendScintilla(SCI_GETTABWIDTH);
-	int i = count / wi;
-	QString emp;
-	if (i > 0) emp.fill(QChar('\t'), i);
-	if (count - i*wi > 0){
-		emp += QString(count - i*wi, QChar(0x20));
-	}
-
-	bool back = ChangeIgnore;
-	ChangeIgnore = true;
-	SendScintilla(SCI_SETCURRENTPOS, positionFromLineIndex(lineID, 0));
-	InsertAndMove(emp);
-	ChangeIgnore = back;
-
+	QString text = this->text(lineID);
+	int length = 0;
+	while (length < text.size() && (text[length] == '\t' || text[length] == ' '))
+		length++;
+	return length;
 }
 
 

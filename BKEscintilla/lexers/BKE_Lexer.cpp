@@ -749,7 +749,6 @@ void BKE_Lexer::DoCommand()
 		}
 		ParseBegal(false, false, false);
 	}
-	removeMask(CMD_MASK);
 	if (styler->ch == ']')
 	{
 		if (error)
@@ -757,7 +756,12 @@ void BKE_Lexer::DoCommand()
 		else
 			styler->SetState(SCE_BKE_COMMAND | cur_mask);
 		styler->Forward();
+		removeMask(CMD_MASK);
 		styler->SetState(SCE_BKE_DEFAULT | cur_mask);
+	}
+	else
+	{
+		removeMask(CMD_MASK);
 	}
 }
 

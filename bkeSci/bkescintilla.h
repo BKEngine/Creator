@@ -110,7 +110,7 @@ private:
     int LastKeywordEnd ;
     int ComPleteLeast ;
     int IndentCount ;
-    bool ChangeIgnore ;
+    int ChangeIgnore ;
     bool UseCallApi ;
     bool IsNewLine ;
     bool IsWorkingUndo ;
@@ -137,9 +137,9 @@ private:
     bool IsIndicator(int id,int pos) ;
     int  GetByte(int pos) ;
     void RemoveDou() ;
-    void BkeStartUndoAction() ;
+    void BkeStartUndoAction(bool newUndo = true) ;//记录Undo，如果当前正在记录，那么newUndo决定是记录一个新的还是继续当前记录
     void BkeEndUndoAction() ;
-    void InsertIndent(int count,int lineID) ;
+    int GetActualIndentCharLength(int lineID) ;
     void ShowInfomation() ;
 
     BkeIndicatorBase simpleFind(const char *ss , int flag,int from,int to) ;

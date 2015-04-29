@@ -652,9 +652,9 @@ int  BkeParser::GetIndentLayer(QsciScintilla *edit,int line)
     w.setText(t);
     w.NextWord();
 
-    if( t.endsWith("{") )
+    if( t.endsWith("{") || t.endsWith("[") || t.endsWith("(") )
 		return 1 ;
-    else if( w.cWord == "}"  )
+	else if (w.cWord == "}" || w.cWord == "]" || w.cWord == ")")
 		return GetLessIndent(edit,line) ;
     else if( w.cWord == "@" || w.cWord=="[" )
 	{
