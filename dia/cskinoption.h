@@ -1,4 +1,4 @@
-#ifndef CSKINOPTION_H
+﻿#ifndef CSKINOPTION_H
 #define CSKINOPTION_H
 
 #include <QWidget>

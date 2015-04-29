@@ -1,4 +1,4 @@
-#ifndef CTEXTEDIT_H
+﻿#ifndef CTEXTEDIT_H
 #define CTEXTEDIT_H
 
 #include "bkeSci/qscilexerbkescript.h"

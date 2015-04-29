@@ -701,7 +701,7 @@ int  BkeParser::GetLessIndent(QsciScintilla *edit,int line)
     pos_n = edit->indentation(line) ;
 
     if( pos_n >= pos_f )
-		return -1 ;
+		return pos_f - pos_n - 1 ;
     else
 		return 0 ;
 }

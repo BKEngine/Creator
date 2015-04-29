@@ -116,7 +116,11 @@ SOURCES += ./main.cpp \
     ParserHelper/parser/extend_wrapper.cpp \
     ParserHelper/parser/parser.cpp \
     ParserHelper/parser/parserextend_wrapper.cpp \
-    ParserHelper/parser/utils.cpp
+    ParserHelper/parser/utils.cpp \
+    dia/cdiroption.cpp \
+    dia/cskinoption.cpp \
+    dia/Setoptiondia.cpp \
+    dia/WaitWindow.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -217,7 +221,11 @@ HEADERS  += \
     ParserHelper/parser/memorypool.h \
     ParserHelper/parser/parser.h \
     ParserHelper/parser/utils.h \
-    ParserHelper/parser/vcode.h
+    ParserHelper/parser/vcode.h \
+    dia/cdiroption.h \
+    dia/cskinoption.h \
+    dia/Setoptiondia.h \
+    dia/WaitWindow.h
 
 RESOURCES += \
     source.qrc
@@ -225,7 +233,12 @@ RESOURCES += \
 INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKEscintilla/src ./BKEscintilla/Qt4Qt5 ./
 
 FORMS += \
-    dia/ctextedit.ui
+    dia/ctextedit.ui \
+    dia/cdiroption.ui \
+    dia/cskinoption.ui \
+    dia/Setoptiondia.ui \
+    dia/WaitWindow.ui
 
-LIBS += -L$$PWD/quazip -lquazip
-
+mac{
+    LIBS += -L$$PWD/quazip -lquazip
+}

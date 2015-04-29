@@ -165,6 +165,7 @@ void MainWindow::CreateMenu()
     wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
     connect(wmenu->addAction("选项..."),SIGNAL(triggered()),this,SLOT(Config())) ;
 	btnReleaseGame = wmenu->addAction("发布游戏");
+	btnReleaseGame->setEnabled(false);
 	connect(btnReleaseGame, SIGNAL(triggered()), this, SLOT(ReleaseGame()));
     wmenu = this->menuBar()->addMenu("&帮助");
     wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());

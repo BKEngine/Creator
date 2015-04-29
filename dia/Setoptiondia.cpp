@@ -1,4 +1,4 @@
-#include "Setoptiondia.h"
+﻿#include "Setoptiondia.h"
 #include "ui_Setoptiondia.h"
 
 SetOptionDia::SetOptionDia(QWidget *parent) :

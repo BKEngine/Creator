@@ -1,4 +1,4 @@
-#ifndef CDIROPTION_H
+﻿#ifndef CDIROPTION_H
 #define CDIROPTION_H
 
 #include <QWidget>

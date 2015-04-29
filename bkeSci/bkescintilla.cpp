@@ -87,6 +87,10 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 
 	int xline, xindex;
 	lineIndexFromPosition(pos, &xline, &xindex);
+	if (ChangeType & SC_PERFORMED_USER)
+	{
+		BkeStartUndoAction();
+	}
 	if (mtype & SC_MOD_INSERTTEXT)
 	{  //文字被插入
 		ChangeType = mtype;
@@ -166,7 +170,7 @@ void BkeScintilla::UiChange(int updated)
 			)
 		{
 			int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
-			SendScintilla(SCI_INSERTTEXT, modfieddata.pos, modfieddata.text.toLatin1());
+			SendScintilla(SCI_INSERTTEXT, modfieddata.pos, modfieddata.text.toLatin1().data());
 			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + SendScintilla(SCI_GETTABWIDTH));
 			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 2, count);
 			SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
@@ -175,22 +179,18 @@ void BkeScintilla::UiChange(int updated)
 		{
 			int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
 			int ly = defparser->GetIndentLayer(this, modfieddata.line);
-			//与上一行对其
-			if (ly > 0)
+			if (ly < 0)
 			{
-				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + SendScintilla(SCI_GETTABWIDTH));
-				SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
+				count += SendScintilla(SCI_GETTABWIDTH) * ly;
+				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count);
+				modfieddata.pos--; //我也不知道为啥会这样，总之偏移了一个字节
 			}
-			else if (ly < 0)
+			else if (ly > 0)
 			{
-				//本行就应该减了
-				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - SendScintilla(SCI_GETTABWIDTH));
+				count += SendScintilla(SCI_GETTABWIDTH);
 			}
-			else
-			{
-				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
-				SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
-			}
+			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+			SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
 		}
 	}
 

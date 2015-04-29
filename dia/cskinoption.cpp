@@ -1,4 +1,4 @@
-#include "cskinoption.h"
+﻿#include "cskinoption.h"
 #include "ui_cskinoption.h"
 
 CSkinOption::CSkinOption(QWidget *parent) :

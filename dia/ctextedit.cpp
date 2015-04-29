@@ -25,6 +25,7 @@ CTextEdit::CTextEdit(QWidget *parent) :
 
     ui->listBox->setCurrentText( lex->ConfigName() );
     upFont();
+	upColour();
 }
 
 CTextEdit::~CTextEdit()
@@ -36,6 +37,7 @@ void CTextEdit::configchange(int ci)
 {
     QString hname = ui->listBox->currentText() ;
     if( hname == "默认" ) ui->delbtn->setEnabled(false);
+	else ui->delbtn->setEnabled(true);
     lex->ReadConfig(ui->listBox->currentText());
 
     ui->fontComboBox->setCurrentText(lex->Lfont.family());

@@ -1,4 +1,4 @@
-#ifndef SETOPTIONDIA_H
+﻿#ifndef SETOPTIONDIA_H
 #define SETOPTIONDIA_H
 
 #include <QDialog>
