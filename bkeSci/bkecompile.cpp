@@ -12,7 +12,7 @@ QObject(parent)
     cmd = NULL;
 }
 
-void BkeCompile::Compile(const QString dir)
+void BkeCompile::Compile(const QString &dir, bool release/* = false*/)
 {
 	result.clear();
 	if (cmd)
@@ -22,10 +22,11 @@ void BkeCompile::Compile(const QString dir)
 	connect(cmd, SIGNAL(finished(int)), this, SLOT(finished(int)));
 	connect(cmd, SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
 	list.clear();
+    QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
 #ifdef Q_OS_WIN
-    cmd->start(BKE_CURRENT_DIR + "/tool/BKCompiler_Dev.exe", QStringList() << dir << "-nopause");
+    cmd->start(BKE_CURRENT_DIR + "/tool/"+exeName+".exe", QStringList() << dir << "-nopause");
 #elif defined(Q_OS_MAC)
-    QString str = "./BKCompiler_Dev '" + dir + "'-nopause";
+    /*QString str = "./BKCompiler_Dev '" + dir + "'-nopause";
     QFile file(BKE_CURRENT_DIR + "/run_bkc.sh");
     if(!file.open(QFile::WriteOnly))
     {
@@ -34,10 +35,10 @@ void BkeCompile::Compile(const QString dir)
     }
     file.write(str.toUtf8());
     file.close();
-    //cmd->start("open", QStringList() << "-a" << "Terminal.app sh" << BKE_CURRENT_DIR + "/run_bkc.sh");
-    cmd->start(BKE_CURRENT_DIR + "/BKCompiler_Dev", QStringList() << dir << "-nopause");
+    cmd->start("open", QStringList() << "-a" << "Terminal.app sh" << BKE_CURRENT_DIR + "/run_bkc.sh");*/
+    cmd->start(BKE_CURRENT_DIR + "/"+exeName, QStringList() << dir << "-nopause");
 #else
-    cmd->start(BKE_CURRENT_DIR + "/tool/BKCompiler_Dev", QStringList() << dir << "-nopause");
+    cmd->start(BKE_CURRENT_DIR + "/tool/"+exeName, QStringList() << dir << "-nopause");
 #endif
 }
 

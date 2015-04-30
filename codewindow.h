@@ -134,7 +134,8 @@ signals:
 	void CurrentFileChange(const QString &file);
     void CurrentFileChange(const QString &name,const QString &prodir);
     void FileAddProject(const QString &file) ;
-    //void ComplileText(const QString &text) ;
+
+    void CompileFinish(int errors);
 signals:
 	void searchOne(const QString &file, const QString &fullfile, int line, int start, int end);
 
@@ -155,7 +156,7 @@ public slots:
     void ImportBeChange(const QString &text,int type) ;
     void FileWillBeDel(const QString &file) ;
     void Compile() ;
-    void CompileAll() ;
+    void CompileAll(bool release = false) ;
     void CompileFinish() ;
     void CompileError(QString s) ;
     void CompileAndRun() ;
@@ -171,7 +172,7 @@ public slots:
     void FileReadyToCompile(int i) ;
     void ChangeProject(BkeProject *p) ;
     void TextToMarks(const QString &text,const QString &dir,int type) ;
-    void deleteCompileFile(const QStringList &list, const QString &path) ;
+    void deleteCompileFile() ;
     void SelectAll() ;
     void QfileChange(const QString &path) ;
     void GotoLine() ;
@@ -196,7 +197,6 @@ private:
     QStackedWidget *stackwidget ;
 
     QStringList ItemTextList ;
-    QStringList ComList ;
     QComboBox *lablelist ;
 
     BkeScintilla *currentedit ;
@@ -218,8 +218,6 @@ private:
     SearchBox *diasearch ;
     QProgressBar *kag ;
     BkeScintilla *searchlablelater ;
-    QString cosdir ;
-
 
     int currentpos ;
     int errorinfo ;
@@ -247,8 +245,7 @@ private:
     void btnDisable() ;
     //void btnAble() ;
     void CurrentConnect(bool c) ;
-    bool ReadyCompile(const QString &file) ;
-    void copyCompileFile(QStringList &list) ;
+    //bool ReadyCompile(const QString &file) ;
     void CheckProblemMarks(BkeScintilla *edit,BkeMarkList *list) ;
     void CheckBookMarks(BkeScintilla *edit,BkeMarkList *list) ;
     void CheckMarks(BkeScintilla *edit,BkeMarkList *list) ;

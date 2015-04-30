@@ -120,7 +120,11 @@ SOURCES += ./main.cpp \
     dia/cdiroption.cpp \
     dia/cskinoption.cpp \
     dia/Setoptiondia.cpp \
-    dia/WaitWindow.cpp
+    dia/WaitWindow.cpp \
+    dia/versioninfo.cpp \
+    dia/newversiondatawizard.cpp \
+    dia/newversioninfowizardpage.cpp \
+    dia/newversioninfowizardpage2.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -225,7 +229,11 @@ HEADERS  += \
     dia/cdiroption.h \
     dia/cskinoption.h \
     dia/Setoptiondia.h \
-    dia/WaitWindow.h
+    dia/WaitWindow.h \
+    dia/versioninfo.h \
+    dia/newversiondatawizard.h \
+    dia/newversioninfowizardpage.h \
+    dia/newversioninfowizardpage2.h
 
 RESOURCES += \
     source.qrc
@@ -237,8 +245,14 @@ FORMS += \
     dia/cdiroption.ui \
     dia/cskinoption.ui \
     dia/Setoptiondia.ui \
-    dia/WaitWindow.ui
+    dia/WaitWindow.ui \
+    dia/versioninfo.ui \
+    dia/newversiondatawizard.ui
 
 mac{
     LIBS += -L$$PWD/quazip -lquazip
 }
+
+DISTFILES += \
+    ico.rc \
+    bkeico.ico

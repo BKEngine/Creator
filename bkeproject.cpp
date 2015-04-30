@@ -1,5 +1,7 @@
 ﻿#include <weh.h>
 #include "bkeproject.h"
+#include "dia/newversiondatawizard.h"
+#include "dia/versioninfo.h"
 
 //读取一个item信息s
 void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
@@ -39,7 +41,7 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 
 //新建一个项目
 BkeProject::BkeProject(QObject *parent)
-	:QObject(parent)
+    :QObject(parent)
 {
 	isnull = true;
 	currentptr = 0;
@@ -710,20 +712,28 @@ void BkeProject::ListFiles(QStringList &ls, QTreeWidgetItem *root, const QString
 	for (int i = 0; i < root->childCount(); i++)
 	{
 		auto r = root->child(i);
+        QString relatePath = parentdir.isEmpty()?r->text(0):parentdir + '/' + r->text(0);
 		if (r->childCount() == 0)
-			ls.push_back(parentdir + '/' + r->text(0));
+            ls.push_back(relatePath);
 		else
-			ListFiles(ls, r, parentdir + '/' + r->text(0));
+            ListFiles(ls, r, relatePath);
 	}
 }
 
 QStringList BkeProject::AllScriptFiles()
 {
 	QStringList temp;
-	temp.push_back("/config.bkpsr");
+    temp.push_back("config.bkpsr");
 	temp.append(ListFiles(1));
 	temp.append(ListFiles(2));
 	return temp;
+}
+
+QStringList BkeProject::AllSourceFiles()
+{
+    QStringList temp;
+    temp.append(ListFiles(3));
+    return temp;
 }
 
 void BkeProject::copyStencil(const QString &file)
@@ -780,7 +790,7 @@ bool BkeProject::WriteMarkFile(BkeMarkSupport *m)
 		akb.append(MarksToString(mks));
 	}
 
-	return LOLI::AutoWrite(FileDir() + "/BkeProject.bmk", akb);
+    return LOLI::AutoWrite(FileDir() + "/BkeProject.bkpmk", akb);
 }
 
 QString BkeProject::MarksToString(BkeMarkList *mk)
@@ -926,7 +936,20 @@ void BkeProject::CheckDir(BkeFilesHash *hash, const QString dirnow)
 	}
 
 	hash->clear();
-	*hash = th;
+    *hash = th;
+}
+
+int BkeProject::addVersionData(QWidget *parent)
+{
+    NewVersionDataWizard wizard(this, parent);
+    wizard.exec();
+    if(wizard.isAccepted())
+    {
+        int index = _versionData.size();
+        _versionData.append(VersionData{wizard.name,wizard.time,wizard.info,wizard.data});
+        return index;
+    }
+    return -1;
 }
 
 QString BkeProject::AllNameToName(const QString &allname)
@@ -941,5 +964,6 @@ QString BkeProject::AllNameToName(const QString &allname)
 
 void BkeProject::ReleaseGame()
 {
-
+    VersionInfo info(this);
+    info.exec();
 }

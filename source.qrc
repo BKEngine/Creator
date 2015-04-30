@@ -63,4 +63,9 @@
         <file>source/auto_funcotin.png</file>
         <file>source/auto_math.png</file>
     </qresource>
+    <qresource prefix="/newversioninfo">
+        <file>source/728.GIF</file>
+        <file>source/error_big.png</file>
+        <file>source/check_big.png</file>
+    </qresource>
 </RCC>

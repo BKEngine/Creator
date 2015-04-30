@@ -2,6 +2,7 @@
 #define BKEPROJECT_H
 
 #include <QSettings>
+#include <QMap>
 #include "weh.h"
 #include "paper/creator_parser.h"
 #include "bkeSci/bkemarks.h"
@@ -60,8 +61,11 @@ public:
 
 typedef QHash<QString,QStringList*> BkeFilesHash ;
 
+class CodeWindow;
+
 class BkeProject :public QObject
 {
+    CodeWindow *_codeWindow;
 public:
     BkeProject(QObject *parent = 0);
     ~BkeProject() ;
@@ -98,6 +102,7 @@ public:
 	void ReleaseGame();
 
     QStringList AllScriptFiles() ;
+    QStringList AllSourceFiles() ;
     QTreeWidgetItem *FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty = true) ;
     QTreeWidgetItem *FindItemAll(const QString &name) ;
     QTreeWidgetItem *MakeItem(QTreeWidgetItem *dest,const QString &dir) ;
@@ -162,6 +167,20 @@ private:
     void copyStencil(const QString &file) ;
     QString MarksToString(BkeMarkList *mk) ;
     void CheckDir(BkeFilesHash *hash, const QString dirnow) ;
+
+public:
+    struct VersionData
+    {
+        QString name;
+        QDateTime date; //这里储存的时间是UTC时间
+        QString info;
+        QMap<QString, QDateTime> data;  //这里储存的时间是UTC时间
+    };
+private:
+    QList<VersionData> _versionData;
+public:
+    QList<VersionData> &getVersionDataList(){return _versionData;}
+    int addVersionData(QWidget *parent); //返回编号，如果是-1表明没有添加成功或者用户取消了添加操作
 };
 
 #endif // BKEPROJECT_H

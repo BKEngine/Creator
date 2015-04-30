@@ -842,7 +842,7 @@ void CodeWindow::Compile()
 }
 
 
-void CodeWindow::CompileAll()
+void CodeWindow::CompileAll(bool release /*= false*/)
 {
     LOLI_CLEAR_TEMP(BKE_CURRENT_DIR+"/temp");
     //当前编辑项不是项目的话，什么也不会发生
@@ -854,9 +854,6 @@ void CodeWindow::CompileAll()
     btnrunact->setEnabled(false);
     ////清理上次编译的项目
     //deleteCompileFile(ComList, cosdir);
-
-    ComList = currentproject->AllScriptFiles() ;
-    cosdir  = currentproject->FileDir() ;
 
     ////拷贝文件
     //if( !WriteOpenFile(currentproject->FileDir()) ){
@@ -874,12 +871,14 @@ void CodeWindow::CompileAll()
     //    msg.exec() ;
     //    return ;
     //}
-
+    QStringList ls = currentproject->AllScriptFiles();
+    kag->setMaximum(ls.size());
+    kag->setValue(0);
     kag->show();
     //开始编译
     //comtool.Compile(BKE_CURRENT_DIR+"/temp");
 	SaveALL();
-	comtool.Compile(currentproject->FileDir());
+    comtool.Compile(currentproject->FileDir(), release);
 }
 
 bool CodeWindow::WriteOpenFile(const QString &dir)
@@ -926,6 +925,7 @@ bool CodeWindow::WriteOpenFile(const QString &dir)
     return true ;
 }
 
+/*
 //拷贝编译过的脚本
 void CodeWindow::copyCompileFile(QStringList &list)
 {
@@ -943,22 +943,48 @@ void CodeWindow::copyCompileFile(QStringList &list)
             temp.copy(ft) ;
         }
     }
+}*/
+
+QStringList fileEntries(const QString &dir, const QStringList &suffixes)
+{
+    QStringList l;
+    QDir d(dir);
+    QFileInfoList a = d.entryInfoList();
+    for(int i = 0;i < a.size(); i++)
+    {
+        QFileInfo &info = a[i];
+        if(info.isDir())
+        {
+            if(info.fileName()!=".." && info.fileName()!=".")
+                l.append(fileEntries(info.absoluteFilePath(), suffixes));
+        }
+        else
+        {
+            for(auto s : suffixes)
+            {
+                 if(info.fileName().endsWith(s))
+                 {
+                     l.append(info.absoluteFilePath());
+                 }
+            }
+        }
+    }
+    return l;
 }
 
 //删除编译过的文件
-void CodeWindow::deleteCompileFile(const QStringList &list, const QString &path)
+void CodeWindow::deleteCompileFile()
 {
-    QFileInfo info ;
-    QFile llm ;
-    for( int i = 0 ; i < list.size() ; i++){
-        info.setFile(list.at(i));
-        if( info.suffix() == "bkscr" ){
-            llm.setFileName(path + "/" + info.path()+"/"+info.baseName()+".bkbin");
-            llm.remove() ;
-        }
+    if(currentproject==0)
+        return;
+    QStringList l = fileEntries(currentproject->FileDir(), QStringList() << ".bkbin");
+    for(auto i : l)
+    {
+        QFile(i).remove();
     }
 }
 
+/*
 bool CodeWindow::ReadyCompile(const QString &file)
 {
     //不复制觉得路径
@@ -979,7 +1005,7 @@ bool CodeWindow::ReadyCompile(const QString &file)
         return LOLI::AutoWrite(info.filePath(),ak->edit->text()) ;
     }
 
-}
+}*/
 
 
 void CodeWindow::CompileError(QString s)
@@ -1017,14 +1043,13 @@ void CodeWindow::CompileFinish()
     othwin->compileedit->setText(ComText);
     othwin->ShowProblem(problemslist,currentproject->FileDir());
 
-    copyCompileFile(ComList);
-
     //按钮可用
     btncompileact->setEnabled(true);
     btncompilerunact->setEnabled(true);
     QTimer::singleShot(8*1000,kag,SLOT(reset())) ; //8秒之后隐藏
     if( markadmin.errorcount < 1 ) btnrunact->setEnabled(true) ;  //编译完成并且没有问题运行按钮才可用
     if( markadmin.errorcount < 1 && isRun ) RunBKE();
+    emit CompileFinish(markadmin.errorcount);
     isRun = false ;
 }
 
@@ -1206,7 +1231,7 @@ void CodeWindow::AnnotateSelect()
 
 void CodeWindow::ClearCompile()
 {
-    deleteCompileFile(ComList, cosdir) ;
+    deleteCompileFile() ;
     btnrunact->setEnabled(false) ; //清理后运行按钮不可用
     btndebugact->setEnabled(false); //debug按钮也不可用
 }
@@ -1235,7 +1260,6 @@ void CodeWindow::ChangeCodec()
 
 void CodeWindow::FileReadyToCompile(int i)
 {
-    if( i >= ComList.size()) return ;
     kag->setValue(i);
 }
 

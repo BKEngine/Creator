@@ -10,7 +10,7 @@ class BkeCompile : public QObject
 public:
 	explicit BkeCompile(QObject *parent = 0);
 
-	void Compile(const QString dir);
+    void Compile(const QString &dir, bool release = false);
 	QString Result();
 
 signals:

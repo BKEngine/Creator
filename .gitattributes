@@ -287,10 +287,20 @@ dia/lablesuredialog.cpp -text
 dia/lablesuredialog.h -text
 dia/newprodia.cpp -text
 dia/newprodia.h -text
+dia/newversiondatawizard.cpp -text
+dia/newversiondatawizard.h -text
+dia/newversiondatawizard.ui -text
+dia/newversioninfowizardpage.cpp -text
+dia/newversioninfowizardpage.h -text
+dia/newversioninfowizardpage2.cpp -text
+dia/newversioninfowizardpage2.h -text
 dia/qsearchlineedit.cpp -text
 dia/qsearchlineedit.h -text
 dia/searchbox.cpp -text
 dia/searchbox.h -text
+dia/versioninfo.cpp -text
+dia/versioninfo.h -text
+dia/versioninfo.ui -text
 file/Stencil/config.bkpsr -text
 file/Stencil/macro.bkscr -text
 file/Stencil/main.bkscr -text
@@ -395,6 +405,7 @@ quazip/zlib.h -text
 source/.bmp.png -text
 source/.jpg.png -text
 source/.png.png -text
+source/728.GIF -text
 source/Bookmark.png -text
 source/Bookmarksmall.png -text
 source/alert.png -text
@@ -409,6 +420,7 @@ source/bksfile.png -text
 source/bksfile.psd -text
 source/btnlast.png -text
 source/btnnext.png -text
+source/check_big.png -text
 source/clear.png -text
 source/close.png -text
 source/close2.png -text
@@ -423,6 +435,7 @@ source/doc.png -text
 source/documents.psd -text
 source/edit_cut.png -text
 source/error.png -text
+source/error_big.png -text
 source/errorsmall.png -text
 source/file.png -text
 source/find.png -text
