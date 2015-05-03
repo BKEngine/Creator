@@ -167,8 +167,7 @@ bool LOLI::AutoRead(QByteArray &dest,const QString &name)
     if( !file.exists() ) return false ;
     if( !file.open(QFile::ReadWrite) ) return false ;
 
-    if( file.size() < 50000000 ) dest = file.readAll() ;
-    else dest = file.read( 50000000 ) ;
+    dest = file.readAll();
     file.close();
     return true ;
 }
