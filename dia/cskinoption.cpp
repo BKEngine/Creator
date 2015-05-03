@@ -21,6 +21,7 @@ CSkinOption::CSkinOption(QWidget *parent) :
     connect(ui->btnnew,SIGNAL(clicked()),this,SLOT(NewStyle())) ;
     connect(ui->btndel,SIGNAL(clicked()),this,SLOT(DelStyle())) ;
 
+    if( ui->stylenamebox->findText("默认")<0 ) ui->stylenamebox->addItem("默认");
     ui->stylenamebox->setCurrentText(BKE_SKIN_CURRENT);
     UnitChange(ui->unitbox->currentText());
 }

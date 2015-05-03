@@ -18,7 +18,7 @@ extern uint32_t BKE_hash(const wchar_t *str);
 ProjectWindow::ProjectWindow(QWidget *parent)
     :QTreeWidget(parent)
 {
-    setStyleSheet("QTreeWidget{ border:0px; }");
+    setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectlist").toString()) ;
     setHeaderHidden(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -61,7 +61,7 @@ void ProjectWindow::NewProject()
     //projectlist << pro ;
     addTopLevelItem(workpro->Root);
     BkeChangeCurrentProject();
-	BkeCreator::AddRecentProject(workpro->FileDir() + "/" + BKE_PROJECT_NAME);
+    BkeCreator::AddRecent(workpro->FileDir() + "/" + BKE_PROJECT_NAME,RECENT_PROJECT) ;
 }
 
 void ProjectWindow::OpenProject()
@@ -104,7 +104,8 @@ void ProjectWindow::OpenProject(const QString &file)
 //    QString text ;
 //    LOLI::AutoRead(text,pro->FileDir()+"/BkeProject.bmk") ;
 //    emit TextToMarks(text,pro->FileDir(),0);
-	BkeCreator::AddRecentProject(workpro->FileDir() + "/" + BKE_PROJECT_NAME);
+
+    BkeCreator::AddRecent(workpro->FileDir() + "/" + BKE_PROJECT_NAME,RECENT_PROJECT);
     //默认展开节点
     workpro->Root->setExpanded(true);
     workpro->Script->setExpanded(true);

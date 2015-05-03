@@ -132,13 +132,6 @@ int main(int argc, char *argv[])
         QMessageBox::information(0,"初始化","读取API列表失败",QMessageBox::Ok) ;
     }
 
-    //读取最近使用列表
-    QString ks ;
-    LOLI::AutoRead(ks,BKE_CURRENT_DIR+"/projects.txt") ;
-    BKE_Recently_Project = ks.split("\r\n") ;
-    LOLI::AutoRead(ks,BKE_CURRENT_DIR+"/files.txt") ;
-    BKE_Recently_Files = ks.split("\r\n") ;
-
     //读取默认方法api列表
     BkeCreator::ReadApiList(&SYSlist,BKE_CURRENT_DIR+"/class.api",8) ;
     BkeCreator::ReadApiList(&KEYlist,BKE_CURRENT_DIR+"/parser.api",9) ;
@@ -148,6 +141,9 @@ int main(int argc, char *argv[])
     BKE_USER_SETTING = new QSettings(BKE_CURRENT_DIR+"/user.ini",QSettings::IniFormat) ;
     BKE_SKIN_SETTING = new QSettings(BKE_CURRENT_DIR+"/skin.ini",QSettings::IniFormat) ;
     BKE_SKIN_CURRENT = BKE_SKIN_SETTING->value("StyleName","默认").toString() ;	//颜色配置项
+    //读取最近使用列表
+    BKE_Recently_Project = BKE_CLOSE_SETTING->value("RecentProjects").toStringList() ;
+    BKE_Recently_Files   = BKE_CLOSE_SETTING->value("RecentFiles").toStringList() ;
 
     //<<<<<<<---------------
 

@@ -186,38 +186,33 @@ QStringList ListDirsCopy(QStringList &list,const QString &dir,const QString &new
     return ls ;
 }
 
-void BkeCreator::AddRecentProject(const QString &file)
+
+void BkeCreator::AddRecent(const QString &file,int type)
 {
-    if( file == "##" ){
-        BKE_Recently_Project.clear();
-        LOLI::AutoWrite(BKE_CURRENT_DIR+"/projects.txt",QString()) ;
-        return ;
+    QString user ;
+    QStringList *dps ;
+    if( type == RECENT_FILE ){
+        user = "RecentFiles" ;
+        dps  = &BKE_Recently_Files ;
     }
-    //QRegExp exp(file) ;
-    //if( isSYSTEMP_LOWDER ) exp.setCaseSensitivity(Qt::CaseInsensitive);
+    else if(type == RECENT_PROJECT ){
+        user = "RecentProjects" ;
+        dps  = &BKE_Recently_Project ;
+    }
+    else return ;
 
-    int i = BKE_Recently_Project.indexOf(file) ;
-    if( i > 0 ) BKE_Recently_Project.takeAt(i) ;
-    else if( i == 0 ) return ;
-    BKE_Recently_Project.prepend( file );
-    while( BKE_Recently_Project.size() > 10 )BKE_Recently_Project.takeLast() ;
-    LOLI::AutoWrite(BKE_CURRENT_DIR+"/projects.txt",BKE_Recently_Project.join("\r\n")) ;
-}
-
-void BkeCreator::AddRecentFile(const QString &file)
-{
     if( file == "##" ){
-        BKE_Recently_Files.clear();
-        LOLI::AutoWrite(BKE_CURRENT_DIR+"/files.txt",QString()) ;
+        dps->clear();
+        BKE_CLOSE_SETTING->setValue(user,"");
         return ;
     }
 
-    int i = BKE_Recently_Files.indexOf(file) ;
-    if( i > 0 ) BKE_Recently_Files.takeAt(i) ;
-    else if( i == 0 ) return ;
-    BKE_Recently_Files.prepend( file );
-    while( BKE_Recently_Files.size() > 10 )BKE_Recently_Files.takeLast() ;
-    LOLI::AutoWrite(BKE_CURRENT_DIR+"/files.txt",BKE_Recently_Files.join("\r\n")) ;
+    int i = dps->indexOf(file) ;
+    if( i == 0) return ;
+    else if( i > 0 ) dps->takeAt(i) ;
+    dps->prepend(file);
+    while( dps->size()>10 ) dps->takeLast() ;
+    BKE_CLOSE_SETTING->setValue(user,*dps);
 }
 
 void BkeCreator::ReNameRecentFile(const QString &old, const QString &now)

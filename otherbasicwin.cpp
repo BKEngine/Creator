@@ -38,7 +38,7 @@ OtherBasicWin::OtherBasicWin(QWidget *parent)
     llm->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectbtn").toString());
     bar->addWidget(llm) ;
     connect( llm,SIGNAL(clicked()),this,SLOT(close())) ;
-    bar->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectbar").toString());
+    bar->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projecttoolbar").toString());
 
     //setAttribute(Qt::WA_DeleteOnClose);
     hl->setMenuBar(bar);

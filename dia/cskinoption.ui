@@ -71,7 +71,12 @@
      <widget class="QComboBox" name="unitbox">
       <item>
        <property name="text">
-        <string>codecombox</string>
+        <string>mainmenu</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>mainmenubar</string>
        </property>
       </item>
       <item>
@@ -81,32 +86,22 @@
       </item>
       <item>
        <property name="text">
-        <string>lineedit</string>
+        <string>codecombox</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>menu</string>
+        <string>codewindow</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>menubar</string>
+        <string>searchbox</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>processbar</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>projectbar</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>projectbtn</string>
+        <string>projecttoolbar</string>
        </property>
       </item>
       <item>
@@ -116,22 +111,42 @@
       </item>
       <item>
        <property name="text">
-        <string>projectSUBmenu</string>
+        <string>projectbtn</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>projectRightmenu</string>
+        <string>projectlist</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>projectList</string>
+        <string>filelist</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>filesList</string>
+        <string>bookmarklist</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>marklist</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>othertoolbar</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>otherwindow</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>otherbtn</string>
        </property>
       </item>
      </widget>
