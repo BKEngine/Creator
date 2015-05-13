@@ -211,7 +211,7 @@ void MainWindow::CreateDownBar()
     //btnbar->setStyleSheet(BKE_QCSS_OBJECT.value("toolbar2").toString());
     btnbar->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/codetoolbar").toString());
 
-    editsearch = new QSearchLineEdit("快速搜索",this) ;
+    editsearch = new QSearchLineEdit(this) ;
     btnbar->addWidget(editsearch) ;
 }
 

@@ -4,30 +4,32 @@
 #include <QLineEdit>
 #include <QToolButton>
 #include <QAction>
+#include <QAction>
 #include <QtCore>
 #include <QLayout>
 #include <QListWidget>
 #include <QTreeWidgetItem>
+#include <QToolBar>
+#include <QComboBox>
 #include "function.h"
 
-class QSearchLineEdit : public QLineEdit
+class QSearchLineEdit : public QToolBar
 {
     Q_OBJECT
 public:
-    explicit QSearchLineEdit(const QString &backtext , QWidget *parent = 0);
-
-signals:
+    explicit QSearchLineEdit(QWidget *parent = 0);
+    void addHistory(const QString &text) ;
 
 public slots:
-    void CheckText() ;
-    void ItemDClick(QListWidgetItem* le) ;
+    void CheckText(const QString &text) ;
+    void SearchText() ;
+    void showHistory() ;
 
 private:
-    QString BackText ;
-    QToolButton *btns ;
-    QListWidget *listwidget ;
-    QList<QTreeWidgetItem*> ils ;
-
-};
+    QToolButton *btnrecord ;
+    QAction *btnclose ;
+    QComboBox *edittext ;
+    QStringList history ;
+} ;
 
 #endif // QSEARCHLINEEDIT_H

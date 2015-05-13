@@ -33,6 +33,11 @@ public:
         BTN_COUNT
     };
 
+    enum{
+        state_no = 0,
+        state_search = 1
+    };
+
 
     ProjectWindow(QWidget *parent = 0);
     BkeProject *FindPro(const QString &proname) ;
@@ -41,6 +46,8 @@ public:
     void OpenProject(const QString &file) ;
     //QList<BkeProject*> ProjectList(){ return projectlist ; }
     bool hasProject(){ return !!workpro ; }
+    void ShowFindItems(const QString &text) ;
+    void ClearFindItems() ;
 
     BkeProject *workpro ;
 
@@ -71,6 +78,9 @@ private:
 
 
     QAction *btns[BTN_COUNT] ;
+    QList<QTreeWidgetItem*> searchresult ;
+    QTreeWidgetItem searchroot ;
+    int state ;
 
     bool ReadItemInfo(QTreeWidgetItem *dest,ItemInfo &f) ;
     void BkeChangeCurrentProject(/*BkeProject *p*/) ;

@@ -101,6 +101,11 @@
       </item>
       <item>
        <property name="text">
+        <string>searchclear</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
         <string>projecttoolbar</string>
        </property>
       </item>
