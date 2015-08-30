@@ -18,7 +18,7 @@ extern uint32_t BKE_hash(const wchar_t *str);
 ProjectWindow::ProjectWindow(QWidget *parent)
     :QTreeWidget(parent)
 {
-    setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectlist").toString()) ;
+    setStyleSheet("QTreeWidget{ border:0px; }");
     setHeaderHidden(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -32,13 +32,7 @@ ProjectWindow::ProjectWindow(QWidget *parent)
         connect(btns[i],SIGNAL(triggered()),this,SLOT(ActionAdmin())) ;
     }
 
-
-    searchroot.setIcon(0,QIcon(":/cedit/source/find.png"));
-    addTopLevelItem(&searchroot);
-    searchroot.setHidden(true);
-
 	workpro = NULL;
-    state = state_no ;
 }
 
 
@@ -67,7 +61,7 @@ void ProjectWindow::NewProject()
     //projectlist << pro ;
     addTopLevelItem(workpro->Root);
     BkeChangeCurrentProject();
-    BkeCreator::AddRecent(workpro->FileDir() + "/" + BKE_PROJECT_NAME,RECENT_PROJECT) ;
+	BkeCreator::AddRecentProject(workpro->FileDir() + "/" + BKE_PROJECT_NAME);
 }
 
 void ProjectWindow::OpenProject()
@@ -110,8 +104,7 @@ void ProjectWindow::OpenProject(const QString &file)
 //    QString text ;
 //    LOLI::AutoRead(text,pro->FileDir()+"/BkeProject.bmk") ;
 //    emit TextToMarks(text,pro->FileDir(),0);
-
-    BkeCreator::AddRecent(workpro->FileDir() + "/" + BKE_PROJECT_NAME,RECENT_PROJECT);
+	BkeCreator::AddRecentProject(workpro->FileDir() + "/" + BKE_PROJECT_NAME);
     //默认展开节点
     workpro->Root->setExpanded(true);
     workpro->Script->setExpanded(true);
@@ -136,22 +129,16 @@ void ProjectWindow::ItemDoubleClick(QTreeWidgetItem * item, int column)
 {
     if( !ReadItemInfo(item,info) ) return ;
 
-    if( state&state_search ){
-        info.FullName = item->toolTip(0) ;
-        //return ;
-    }
-
-    //BkeProject *p = FindPro(info.ProName);
-    //QString name = p->FileDir() + info.FullName;
-    QString name = workpro->FileDir() + info.FullName;
+    BkeProject *p = FindPro(info.ProName);
+	QString name = p->FileDir() + info.FullName;
 
     if( info.FullName == "/config.bkpsr" ){
-        ConfigProject(workpro->config);
+        ConfigProject(p->config);
         return ;
     }
 
     if( name.endsWith(".bkscr") || name.endsWith(".bkpsr")){
-        emit OpenThisFile(name, workpro->FileDir());
+        emit OpenThisFile(name, p->FileDir());
     }
 
 
@@ -164,12 +151,9 @@ void ProjectWindow::ShowRmenu( const QPoint & pos )
 
 	if (info.Layer == 1 && info.Name == "config.bkpsr")
 		return;
-
-    if( state&state_search ) return ;
 	
 	QPoint pt = QCursor::pos();
     QMenu mn ;
-
 
     if( info.Layer < 1){
         //mn.addAction(btns[btn_active]) ;
@@ -635,36 +619,4 @@ void ProjectWindow::ReleaseCurrentGame()
 	{
 		workpro->ReleaseGame();
 	}
-}
-
-void ProjectWindow::ShowFindItems(const QString &text)
-{
-    searchresult.clear();
-    searchresult = findItems(text,Qt::MatchRecursive|Qt::MatchWildcard|Qt::MatchFixedString) ;
-    if( searchresult.isEmpty() ) searchroot.setText(0,"没有匹配的文件");
-    else{
-        searchroot.setText(0,"搜索结果");
-        if( hasProject() ) workpro->Root->setHidden(true);
-        ItemInfo fff ;
-        for( int i = 0 ; i < searchresult.count() ; i++ ){
-            QTreeWidgetItem *lks = new QTreeWidgetItem() ;
-            lks->setText(0,searchresult.at(i)->text(0));
-            lks->setIcon(0,searchresult.at(i)->icon(0));
-            ReadItemInfo(searchresult.at(i),fff) ;
-            lks->setToolTip(0,fff.FullName);
-            searchroot.addChild(lks);
-        }
-    }
-
-    state = state|state_search ;
-    searchroot.setHidden(false);
-    searchroot.setExpanded(true);
-}
-
-void ProjectWindow::ClearFindItems()
-{
-    searchroot.takeChildren() ;
-    state = state&(~state_search) ;
-    searchroot.setHidden(true);
-    if( hasProject() ) workpro->Root->setHidden(false);
 }

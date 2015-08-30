@@ -206,8 +206,6 @@ void BkeScintilla::UiChange(int updated)
 		char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
 		char ch = SendScintilla(SCI_GETCHARAT, modfieddata.pos);
 		char chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + 1);
-		if ((style & 63 == SCE_BKE_STRING) || (style & 63 == SCE_BKE_STRING2))
-			return;
 		if (ChangeType & SC_MOD_INSERTTEXT)
 		{
 			char match[2];
@@ -215,23 +213,34 @@ void BkeScintilla::UiChange(int updated)
 			switch (ch)
 			{
 			case '(':
+                if ((style & 63 == SCE_BKE_STRING) || (style & 63 == SCE_BKE_STRING2))
+                    break;
 				match[0] = ')';
 				break;
 			case '[':
+                if ((style & 63 == SCE_BKE_STRING) || (style & 63 == SCE_BKE_STRING2))
+                    break;
 				match[0] = ']';
 				break;
 			case '{':
+                if ((style & 63 == SCE_BKE_STRING) || (style & 63 == SCE_BKE_STRING2))
+                    break;
 				match[0] = '}';
 				break;
 			case '\"':
-			case '\'':
-				match[0] = ch;
+				match[0] = '\"';
 				//判断是leading还是ending的"'
-				if (chPrev == ch && ch == chNext)
+				if (ch == chNext)
+					caret = true;
+				break;
+			case '\'':
+				match[0] = '\'';
+				//判断是leading还是ending的"'
+				if (ch == chNext)
 					caret = true;
 				break;
 			default:
-				if (ch==chNext && style3==style)
+                if (ch==chNext)
 					caret = true;	//光标前进一格，同时忽略本次输入
 				match[0] = 0;
 				break;

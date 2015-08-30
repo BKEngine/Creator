@@ -71,12 +71,7 @@
      <widget class="QComboBox" name="unitbox">
       <item>
        <property name="text">
-        <string>mainmenu</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>mainmenubar</string>
+        <string>codecombox</string>
        </property>
       </item>
       <item>
@@ -86,32 +81,27 @@
       </item>
       <item>
        <property name="text">
-        <string>codecombox</string>
+        <string>lineedit</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>codewindow</string>
+        <string>menu</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>searchbox</string>
+        <string>menubar</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>searchclear</string>
+        <string>processbar</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>projecttoolbar</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>projectcombox</string>
+        <string>projectbar</string>
        </property>
       </item>
       <item>
@@ -121,37 +111,27 @@
       </item>
       <item>
        <property name="text">
-        <string>projectlist</string>
+        <string>projectcombox</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>filelist</string>
+        <string>projectSUBmenu</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>bookmarklist</string>
+        <string>projectRightmenu</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>marklist</string>
+        <string>projectList</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>othertoolbar</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>otherwindow</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>otherbtn</string>
+        <string>filesList</string>
        </property>
       </item>
      </widget>

@@ -113,7 +113,7 @@ void MainWindow::CreateMenu()
     QFont tff = this->menuBar()->font() ;
     tff.setPointSize(11);
     this->menuBar()->setFont(tff);
-    this->menuBar()->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/mainmenubar",QString()).toString());
+    this->menuBar()->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menubar",QString()).toString());
 
 	btnnewprojectact = new QAction(QIcon(":/project/source/newproject.png"), "新建项目", this);
 	btnopenprojectact = new QAction(QIcon(":/project/source/open_file.png"), "打开项目", this);
@@ -121,7 +121,7 @@ void MainWindow::CreateMenu()
 	btnnewfileact = new QAction(QIcon(":/project/source/newfile.png"), "新建脚本", this);
 
     wmenu = this->menuBar()->addMenu("&文件");
-    wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/mainmenu").toString());
+    wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
 
     wmenu->addAction(btnopenprojectact) ;
     wmenu->addAction(btnnewprojectact) ;
@@ -138,7 +138,7 @@ void MainWindow::CreateMenu()
     connect(wmenu->addAction("退出"),SIGNAL(triggered()),this,SLOT(close())) ;
 
     wmenu = this->menuBar()->addMenu("&编辑");
-    wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/mainmenu").toString());
+    wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
     wmenu->addAction(codeedit->btnundoact) ;
     wmenu->addAction(codeedit->btnredoact) ;
     wmenu->addSeparator() ;
@@ -156,19 +156,19 @@ void MainWindow::CreateMenu()
     wmenu->addAction(codeedit->btncodeact) ;
 
     wmenu = this->menuBar()->addMenu("&构建");
-    wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/mainmenu").toString());
+    wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
     wmenu->addAction(codeedit->btncompileact ) ;
     wmenu->addAction(codeedit->btncompilerunact ) ;
     wmenu->addAction(codeedit->btnrunact ) ;
 
     wmenu = this->menuBar()->addMenu("&工具");
-    wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/mainmenu").toString());
+    wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
     connect(wmenu->addAction("选项..."),SIGNAL(triggered()),this,SLOT(Config())) ;
 	btnReleaseGame = wmenu->addAction("发布游戏");
 	btnReleaseGame->setEnabled(false);
 	connect(btnReleaseGame, SIGNAL(triggered()), this, SLOT(ReleaseGame()));
     wmenu = this->menuBar()->addMenu("&帮助");
-    wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/mainmenu").toString());
+    wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
     wmenu->addAction("帮助文件") ;
     connect(wmenu->addAction("检查更新"),SIGNAL(triggered()),this,SLOT(startUp())) ;
     connect(wmenu->addAction("(开启/关闭)自动更新"),SIGNAL(triggered()),this,SLOT(OCupdate())) ;
@@ -211,7 +211,7 @@ void MainWindow::CreateDownBar()
     //btnbar->setStyleSheet(BKE_QCSS_OBJECT.value("toolbar2").toString());
     btnbar->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/codetoolbar").toString());
 
-    editsearch = new QSearchLineEdit(this) ;
+    editsearch = new QSearchLineEdit("快速搜索",this) ;
     btnbar->addWidget(editsearch) ;
 }
 
@@ -293,8 +293,8 @@ void MainWindow::ClearMenu()
     if( p == 0 ) return ;
     QMenu *mn = dynamic_cast<QMenu*>( p->parentWidget()) ;
     if( mn == 0 ) return ;
-    else if( mn == rpmenu ) BkeCreator::AddRecent("##",RECENT_PROJECT) ;
-    else if( mn == rfmenu ) BkeCreator::AddRecent("##",RECENT_FILE) ;
+    else if( mn == rpmenu ) BkeCreator::AddRecentProject("##") ;
+    else if( mn == rfmenu ) BkeCreator::AddRecentFile("##") ;
 }
 
 void MainWindow::ReflashMenu()

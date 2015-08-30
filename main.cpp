@@ -84,38 +84,17 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_MAC
    BKE_CURRENT_DIR = QDir::homePath() + "/Documents/BKE_Creator";
    QDir dir(BKE_CURRENT_DIR);
-   do{
+   if(!dir.exists())
+   {
        QDir d(qApp->applicationDirPath());
        d.cdUp();
        d.cd("Resources");
-
-       QString dataPath = d.filePath("data.compress");
-       QString macvsPath = dir.filePath("macvs.txt");
-       if(dir.exists())
+       if(JlCompress::extractDir(d.filePath("data.compress"), dir.absolutePath()).count()==0)
        {
-           QFileInfo fi(dataPath);
-           QFileInfo vs(macvsPath);
-           if(vs.exists())
-           {
-               QString s;
-               if(LOLI::AutoRead(s, macvsPath))
-               {
-                   if(s == QString::number(fi.size()))
-                   {
-                       break;
-                   }
-               }
-           }
-       }
-
-       if(JlCompress::extractDir(dataPath, dir.absolutePath()).count()==0)
-       {
-           QMessageBox::information(0, "Error", "Cannot uncompress the resources. :( \nPlease unzip \"[.app path]/Resources/data.compress\" to \"~/Documents/BKE_Creator\" by yourself, and write the decimal size of \"data.compress\" into \"macvs.txt\", then restart the application.");
+           QMessageBox::information(0, "Error", "Cannot uncompress the resources. :( \nPlease unzip .app/Resources/data.compress to ~/Documents/BKE_Creator yourself and restart the application.");
            exit(0);
        }
-       LOLI::AutoWrite(macvsPath, QString::number(QFileInfo(dataPath).size()));
-   }while(0);
-
+   }
 #endif
     //SingleApplication a(argc, argv);
 
@@ -153,6 +132,13 @@ int main(int argc, char *argv[])
         QMessageBox::information(0,"初始化","读取API列表失败",QMessageBox::Ok) ;
     }
 
+    //读取最近使用列表
+    QString ks ;
+    LOLI::AutoRead(ks,BKE_CURRENT_DIR+"/projects.txt") ;
+    BKE_Recently_Project = ks.split("\r\n") ;
+    LOLI::AutoRead(ks,BKE_CURRENT_DIR+"/files.txt") ;
+    BKE_Recently_Files = ks.split("\r\n") ;
+
     //读取默认方法api列表
     BkeCreator::ReadApiList(&SYSlist,BKE_CURRENT_DIR+"/class.api",8) ;
     BkeCreator::ReadApiList(&KEYlist,BKE_CURRENT_DIR+"/parser.api",9) ;
@@ -162,9 +148,6 @@ int main(int argc, char *argv[])
     BKE_USER_SETTING = new QSettings(BKE_CURRENT_DIR+"/user.ini",QSettings::IniFormat) ;
     BKE_SKIN_SETTING = new QSettings(BKE_CURRENT_DIR+"/skin.ini",QSettings::IniFormat) ;
     BKE_SKIN_CURRENT = BKE_SKIN_SETTING->value("StyleName","默认").toString() ;	//颜色配置项
-    //读取最近使用列表
-    BKE_Recently_Project = BKE_CLOSE_SETTING->value("RecentProjects").toStringList() ;
-    BKE_Recently_Files   = BKE_CLOSE_SETTING->value("RecentFiles").toStringList() ;
 
     //<<<<<<<---------------
 

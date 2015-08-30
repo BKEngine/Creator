@@ -31,10 +31,9 @@ bool copyDirectoryFiles(const QString &fromDir, const QString &toDir, bool cover
 QString BkeFullnameToName(const QString &fullname,const QString &dir) ;
 QStringList ListDirsCopy(QStringList &list,const QString &dir,const QString &newdir) ;
 
-#define RECENT_FILE 1
-#define RECENT_PROJECT 2
 namespace BkeCreator {
-     void AddRecent(const QString &file,int type) ;
+     void AddRecentProject(const QString &file) ;
+     void AddRecentFile(const QString &file) ;
 	 void ReNameRecentFile(const QString &old, const QString &now);
 	 void ReadApiList(QStringList *ls, const QString &name, int type);
      QStringList CopyStencil(const QString &dir,const QStringList &ls) ;

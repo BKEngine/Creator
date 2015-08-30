@@ -45,18 +45,23 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Distribution Files">
+      <UniqueIdentifier>{B83CAF91-C7BF-462F-B76C-EA11631F866C}</UniqueIdentifier>
+      <Extensions>*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Distribution Files">
+      <UniqueIdentifier>{B83CAF91-C7BF-462F-B76C-EA11631F866C}</UniqueIdentifier>
+      <Extensions>*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
     <Filter Include="Generated Files\Debug">
-      <UniqueIdentifier>{01ed09c0-423c-4b3d-9606-f708c50312c3}</UniqueIdentifier>
+      <UniqueIdentifier>{e359d6e2-e264-423a-8fe8-ec43cddd8bf2}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
     <Filter Include="Generated Files\Release">
-      <UniqueIdentifier>{4cec6fec-01ed-4671-877d-a45fc2d5a189}</UniqueIdentifier>
-      <Extensions>cpp;moc</Extensions>
-      <SourceControlFiles>False</SourceControlFiles>
-    </Filter>
-    <Filter Include="Generated Files\Debug_Release">
-      <UniqueIdentifier>{e973ee70-09c1-4117-8e49-2213a6f9088c}</UniqueIdentifier>
+      <UniqueIdentifier>{88d17674-7770-4463-9495-d685a70c59d7}</UniqueIdentifier>
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
@@ -66,6 +71,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BKEscintilla\src\AutoComplete.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_hash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_number.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_string.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\BKE_variable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKS_info.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BKEscintilla\src\CallTip.cpp">
@@ -122,6 +145,9 @@
     <ClCompile Include="BKEscintilla\Qt4Qt5\ListBoxQt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParserHelper\ParserHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="BKEscintilla\src\PerLine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -152,6 +178,9 @@
     <ClCompile Include="BKEscintilla\src\Selection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dia\Setoptiondia.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="BKEscintilla\src\Style.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -162,6 +191,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BKEscintilla\src\ViewStyle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\WaitWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BKEscintilla\lexlib\WordList.cpp">
@@ -194,6 +226,9 @@
     <ClCompile Include="dia\cconfigdia.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dia\cdiroption.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="codewindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -203,7 +238,13 @@
     <ClCompile Include="paper\creator_parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dia\cskinoption.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="dia\ctextedit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\extend_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="function.cpp">
@@ -228,6 +269,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="otherwindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\parserextend_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="projectwindow.cpp">
@@ -281,52 +328,31 @@
     <ClCompile Include="topbarwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="paper\wordsupport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKS_info.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\BKE_hash.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\BKE_number.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\BKE_string.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\BKE_variable.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\extend_wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\parserextend_wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ParserHelper\parser\utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParserHelper\ParserHelper.cpp">
+    <ClCompile Include="dia\versioninfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="weh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dia\WaitWindow.cpp">
+    <ClCompile Include="paper\wordsupport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_SciClasses.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_SciClasses.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_Setoptiondia.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_Setoptiondia.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_WaitWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_WaitWindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_bkecompile.cpp">
@@ -365,22 +391,28 @@
     <ClCompile Include="Release\moc_cconfigdia.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_cdiroption.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_cdiroption.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
     <ClCompile Include="Debug\moc_codewindow.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_codewindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_WaitWindow.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_WaitWindow.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_creator_parser.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_creator_parser.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_cskinoption.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_cskinoption.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_ctextedit.cpp">
@@ -491,65 +523,14 @@
     <ClCompile Include="Release\moc_topbarwindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_source.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_Setoptiondia.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_Setoptiondia.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_cdiroption.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_cdiroption.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_cskinoption.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_cskinoption.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="dia\cskinoption.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dia\Setoptiondia.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dia\cdiroption.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="dia\versioninfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_versioninfo.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_versioninfo.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="dia\newversiondatawizard.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_newversiondatawizard.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_newversiondatawizard.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="dia\newversioninfowizardpage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_newversioninfowizardpage.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_newversioninfowizardpage.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="dia\newversioninfowizardpage2.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="GeneratedFiles\qrc_source.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -557,6 +538,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BKEscintilla\src\AutoComplete.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\BKE_array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\BKE_hash.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\BKE_number.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\BKE_string.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\BKE_variable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="bkeSci\BkeIndicatorBase.h">
@@ -628,6 +624,9 @@
     <ClInclude Include="BKEscintilla\lexlib\OptionSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParserHelper\ParserHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="BKEscintilla\src\Partitioning.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -664,6 +663,9 @@
     <ClInclude Include="BKEscintilla\src\Selection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <CustomBuild Include="dia\Setoptiondia.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <ClInclude Include="BKEscintilla\lexlib\SparseState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -685,6 +687,9 @@
     <ClInclude Include="BKEscintilla\src\ViewStyle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <CustomBuild Include="dia\WaitWindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <ClInclude Include="BKEscintilla\lexlib\WordList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -718,6 +723,9 @@
     <CustomBuild Include="dia\cconfigdia.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="dia\cdiroption.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="codewindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -727,9 +735,18 @@
     <CustomBuild Include="paper\creator_parser.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="dia\cskinoption.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <CustomBuild Include="dia\ctextedit.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <ClInclude Include="ParserHelper\parser\defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\extend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="function.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -742,6 +759,9 @@
     <CustomBuild Include="mainwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <ClInclude Include="ParserHelper\parser\memorypool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <CustomBuild Include="dia\newprodia.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -751,6 +771,9 @@
     <CustomBuild Include="otherwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <ClInclude Include="ParserHelper\parser\parser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <CustomBuild Include="projectwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -781,9 +804,6 @@
     <CustomBuild Include="BKEscintilla\Qt4Qt5\Qsci\qscimacro.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <ClInclude Include="BKEscintilla\Qt4Qt5\Qsci\qsciprinter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <CustomBuild Include="BKEscintilla\Qt4Qt5\Qsci\qsciscintilla.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -808,13 +828,22 @@
     <CustomBuild Include="topbarwindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <ClInclude Include="ParserHelper\parser\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\vcode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <CustomBuild Include="dia\versioninfo.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
     <ClInclude Include="weh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="paper\wordsupport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_ctextedit.h">
+    <ClInclude Include="GeneratedFiles\ui_Setoptiondia.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_WaitWindow.h">
@@ -826,13 +855,10 @@
     <ClInclude Include="GeneratedFiles\ui_cskinoption.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_Setoptiondia.h">
+    <ClInclude Include="GeneratedFiles\ui_ctextedit.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="dia\newversioninfowizardpage2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_newversiondatawizard.h">
+    <ClInclude Include="GeneratedFiles\ui_qbkewizard.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_versioninfo.h">
@@ -840,14 +866,11 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="dia\ctextedit.ui">
+    <CustomBuild Include="dia\Setoptiondia.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="dia\WaitWindow.ui">
       <Filter>Form Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dia\WaitWindow.h">
-      <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="dia\cdiroption.ui">
       <Filter>Form Files</Filter>
@@ -855,28 +878,10 @@
     <CustomBuild Include="dia\cskinoption.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="dia\Setoptiondia.ui">
+    <CustomBuild Include="dia\ctextedit.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="dia\Setoptiondia.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dia\cdiroption.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dia\cskinoption.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dia\newversioninfowizardpage.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dia\newversiondatawizard.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dia\versioninfo.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="dia\newversiondatawizard.ui">
+    <CustomBuild Include="dia\wizard\qbkewizard.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="dia\versioninfo.ui">
@@ -884,6 +889,9 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <None Include="source\728.GIF">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="source\Bookmark.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -923,6 +931,9 @@
     <None Include="source\btnnext.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="source\check_big.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="source\clear.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -960,6 +971,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="source\error.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\error_big.png">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="source\errorsmall.png">
@@ -1010,6 +1024,9 @@
     <None Include="source\pinsmall.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="source\product-design.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="source\redo.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -1034,6 +1051,12 @@
     <None Include="source\sourcedoc.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="source\terminal.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="source\textarea.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="source\undo.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -1042,17 +1065,11 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="ico.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="source\textarea.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="source\terminal.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="source\product-design.png">
-      <Filter>Resource Files</Filter>
-    </Image>
+    <None Include="bkeico.ico">
+      <Filter>Distribution Files</Filter>
+    </None>
+    <None Include="ico.rc">
+      <Filter>Distribution Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

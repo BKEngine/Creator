@@ -489,7 +489,7 @@ void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, c
 		else
 		{
 			//加到各种列表里去
-            BkeCreator::AddRecent(loli->FullName(),RECENT_FILE);
+			BkeCreator::AddRecentFile(loli->FullName());
 			//为了恢复当前文档的currentpos
 			QString curopenfile = ItemTextList.at(currentpos);
 			int pos = LOLI_SORT_INSERT(ItemTextList, loli->Name() + "*");
@@ -610,7 +610,7 @@ void CodeWindow::addFile(const QString &file,const QString &prodir)
         BkeProject *tpro = prowin->FindProjectFromDir(prodir) ;
         if( prodir != 0 ) loli->edit->setParser( tpro->lex );
 
-        BkeCreator::AddRecent(loli->FullName(),RECENT_FILE) ;
+        BkeCreator::AddRecentFile(loli->FullName()) ;
 
         //添加文件监视
 //        bool ks = filewatcher->addPath(loli->FullName()) ;
@@ -649,7 +649,6 @@ void CodeWindow::simpleNew(BkeDocBase *loli,const QString &t)
 	connect(loli->edit, SIGNAL(textChanged()), diasearch, SLOT(onDocChanged()));
 	connect(loli->edit, SIGNAL(selectionChanged()), diasearch, SLOT(onSelectionChanged()));
 
-    //loli->edit->setStyleSheet("background-image:url(file/image/test.jpg)");
     ignoreflag = false ;
 }
 

@@ -1,7 +1,7 @@
 ﻿D:/BKE-Demo/init.bkscr
 D:/BKE-Demo/extend.bkscr
-D:/BKE-Demo/macro.bkscr
 D:/BKE-Demo/main.bkscr
+D:/BKE-Demo/macro.bkscr
 G:/BKEProject/BKE demo_v4/main.bkscr
 G:/BKEProject/BKE demo_v4/extend.bkscr
 G:/BKEProject/BKE demo_v4/script/system_end.bkscr

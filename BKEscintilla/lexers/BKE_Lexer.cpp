@@ -562,20 +562,23 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			styler->Forward();
 			removeMask(BEGAL_MASK);
 			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
-			bool end = true;
-			while (!styler->atLineEnd)
+			bool error = false;
+			while (!styler->atLineEnd && styler->More())
 			{
 				if (isspace(styler->ch))
 					styler->Forward();
 				else
 				{
-					end = false;
-					styler->setPos(p);
-					break;
+					styler->SetState(SCE_BKE_ERROR | cur_mask);
+					styler->Forward();
+					error = true;
 				}
 			}
-			if (end)
-				break;
+			if (error)
+			{
+				styler->SetState(SCE_BKE_DEFAULT | cur_mask);
+			}
+			break;
 		}
 		last_state = styler->state & BASE_MASK;
 		switch (styler->ch)

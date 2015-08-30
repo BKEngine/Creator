@@ -1,7 +1,6 @@
 ﻿#include <weh.h>
 #include "bkeproject.h"
-//#include "dia/newversiondatawizard.h"
-//#include "dia/versioninfo.h"
+#include "dia/versioninfo.h"
 
 //读取一个item信息s
 void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
@@ -941,7 +940,8 @@ void BkeProject::CheckDir(BkeFilesHash *hash, const QString dirnow)
 
 int BkeProject::addVersionData(QWidget *parent)
 {
-    /*NewVersionDataWizard wizard(this, parent);
+    /*
+    NewVersionDataWizard wizard(this, parent);
     wizard.exec();
     if(wizard.isAccepted())
     {
@@ -964,6 +964,6 @@ QString BkeProject::AllNameToName(const QString &allname)
 
 void BkeProject::ReleaseGame()
 {
-    //ersionInfo info(this);
-    //info.exec();
+    VersionInfo info(this);
+    info.exec();
 }

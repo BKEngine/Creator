@@ -73,32 +73,13 @@ bool LOLI::AutoRead(QString &text,QFile *file)
     QTextStream strem ;
     //检测utf字节序列，默认使用本地8位码
     QTextCodec *codec = QTextCodec::codecForUtfText(file->read(16),QTextCodec::codecForLocale());
-    file->seek(0) ;//重置读写位置    
+    file->seek(0) ;//重置读写位置
 
     if( codec == QTextCodec::codecForLocale() ){
         text = isValidUTF8(file) ;  //是否为不带bom的utf8文件
         if( !text.isEmpty() ){
             file->close();
             return true ;
-        }
-        if(codec == QTextCodec::codecForName("UTF-8"))
-        {
-            QLocale::Language lang = QLocale::system().language();
-            switch (lang) {
-            case QLocale::C:
-                break;
-            case QLocale::Chinese:
-                codec = QTextCodec::codecForName("GBK");
-                break;
-            case QLocale::Japanese:
-                codec = QTextCodec::codecForName("Shift-JIS");
-                break;
-            case QLocale::Korean:
-                codec = QTextCodec::codecForName("EUC-KR");
-                break;
-            default:
-                break;
-            }
         }
         file->seek(0) ;
     }
@@ -167,7 +148,8 @@ bool LOLI::AutoRead(QByteArray &dest,const QString &name)
     if( !file.exists() ) return false ;
     if( !file.open(QFile::ReadWrite) ) return false ;
 
-    dest = file.readAll();
+    if( file.size() < 50000000 ) dest = file.readAll() ;
+    else dest = file.read( 50000000 ) ;
     file.close();
     return true ;
 }

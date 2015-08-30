@@ -464,6 +464,8 @@ void BkeParser::defDictionary(CompleteBase *le)
         }
         else if(wordadmin->cWord == "=" && wordadmin->nWord == ">"){
             le->AddChild(wordadmin->pWord,CompleteBase::BKE_TYPE_NORMAL) ;
+			wordadmin->NextWord();
+			wordadmin->NextWord();
         }
         else if( wordadmin->cWord == "]" ) return ;
         else if( wordadmin->cWord == ";" || wordadmin->cWord == "}" ){

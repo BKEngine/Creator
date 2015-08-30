@@ -4,8 +4,7 @@
 BkeLeftFileWidget::BkeLeftFileWidget(QWidget *parent) :
     QListWidget(parent)
 {
-    //setStyleSheet("QListWidget{border:0px}");
-    setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/filelist").toString());
+    setStyleSheet("QListWidget{border:0px}");
     btnCloseAll = new QAction("关闭所有",this);
     btnclose = new QAction("关闭文件",this) ;
     btncloseExp = new QAction("关闭其他所有文件",this)  ;

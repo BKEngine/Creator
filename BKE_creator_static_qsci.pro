@@ -120,7 +120,8 @@ SOURCES += ./main.cpp \
     dia/cdiroption.cpp \
     dia/cskinoption.cpp \
     dia/Setoptiondia.cpp \
-    dia/WaitWindow.cpp
+    dia/WaitWindow.cpp \
+    dia/versioninfo.cpp \
 
 HEADERS  += \
     topbarwindow.h \
@@ -225,7 +226,8 @@ HEADERS  += \
     dia/cdiroption.h \
     dia/cskinoption.h \
     dia/Setoptiondia.h \
-    dia/WaitWindow.h
+    dia/WaitWindow.h \
+    dia/versioninfo.h \
 
 RESOURCES += \
     source.qrc
@@ -238,7 +240,8 @@ FORMS += \
     dia/cskinoption.ui \
     dia/Setoptiondia.ui \
     dia/WaitWindow.ui \
-    dia/versioninfo.ui
+    dia/versioninfo.ui \
+    dia/wizard/qbkewizard.ui
 
 mac{
     LIBS += -L$$PWD/quazip -lquazip
