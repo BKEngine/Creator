@@ -135,10 +135,13 @@ void MainWindow::startUpdate()
         auto i = 0;
         while(i < keys.size())
         {
-            qDebug() << "here";
             if(isFileRemoved(keys.at(i)))
             {
+#if defined(Q_OS_WIN)
                 cmdString.append("del /Q \""+ keys.at(i) +"\"\r\n" ) ;
+#elif defined(Q_OS_LINUX)
+                cmdString.append("rm -f \""+ keys.at(i) +"\"\n" ) ;
+#endif
                 ofilejs.remove(keys.at(i));
             }
             i++;
@@ -165,9 +168,8 @@ void MainWindow::Nextfile()
 #if defined(Q_OS_WIN)
     fileName = "tool/bkengine_dev.exe";
 #elif defined(Q_OS_LINUX)
-    fileName = "tool/bkengine_dev";
+    fileName = "tool/BKEngine_Dev";
 #elif defined(Q_OS_MAC)
-    fileName = "tool/bkengine_dev.app/Contents/MacOS/BKEngine_Dev";
 #endif
 
 
@@ -210,7 +212,7 @@ void MainWindow::downFinish(QNetworkReply* netfile)
 #if defined(Q_OS_WIN)
         QFileInfo oinfo( CURRENT_DIR+"/"+currentfile+".new" ) ;
 #elif defined(Q_OS_LINUX)
-        QFileInfo oinfo( CURRENT_DIR+"/"+currentfile ) ;
+        QFileInfo oinfo( CURRENT_DIR+"/"+currentfile+".new" ) ;
 #elif defined(Q_OS_MAC)
         QFileInfo oinfo( CURRENT_DIR+"/"+currentfile ) ;
 #endif
@@ -220,8 +222,14 @@ void MainWindow::downFinish(QNetworkReply* netfile)
         }
         else{
             QString ename = currentfile ;
+#if defined(Q_OS_WIN)
             ename.replace(QRegExp("/"),"\\" ) ;
-            cmdString.append("copy /Y "+ ename+".new" +" "+ ename +"\r\n" ) ;
+            cmdString.append("copy /Y \""+ ename+".new\" \""+ ename +"\"\r\n" ) ;
+#elif defined(Q_OS_LINUX)
+            ename.replace(QRegExp("\\"),"/" ) ;
+            cmdString.append("cp -f \""+ ename+".new\" \""+ ename +"\"\r\n"  ) ;
+#endif
+
             ofilejs.insert(currentfile,dmd5) ;  //同时更新md5的值
             ui->textEdit->append("完成");
         }
@@ -323,7 +331,7 @@ void MainWindow::simpleOK()
         QDesktopServices::openUrl(QUrl::fromLocalFile( CURRENT_DIR+"/up.bat" )) ;
 #elif defined(Q_OS_LINUX)
 //        QDesktopServices::openUrl(QUrl::fromLocalFile( CURRENT_DIR+"/BKE_creator" )) ;
-        QMessageBox::information(this,"在线更新","更新成功！请重启BKECreator！");
+        QMessageBox::information(this,"在线更新","更新成功！请重启BKE_Creator！");
 #elif defined(Q_OS_MAC)
 #endif
         newJSON.insert("files",ofilejs) ; //替换新的文件列表为旧的，成功的文件md5被改变
@@ -344,9 +352,12 @@ void MainWindow::simpleOK()
 //文件md5码，是否相同
 bool MainWindow::isFileDiffrent(const QString &name)
 {
-    QString oldmd5 = ofilejs.value(name).toString() ;
+    QCryptographicHash hashmk(QCryptographicHash::Md5) ;
+    QFile f(CURRENT_DIR + "/" + name);
+    hashmk.addData(&f);
+
     QString newmd5 = nfilejs.value(name).toString() ;
-    return oldmd5 != newmd5 ;
+    return hashmk.result().toHex() != newmd5 ;
 }
 
 bool MainWindow::isFileRemoved(const QString &name)

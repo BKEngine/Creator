@@ -56,13 +56,13 @@ bool LOLI::AutoRead(QString &text,QFile *file)
         text.clear();
         return false ;
     }
-    else if( !file->isOpen() && !file->open(QFile::ReadWrite) ){ //文件不存在
+    else if( !file->isOpen() && !file->open(QFile::ReadOnly) ){ //文件不存在
         text.clear();
         return false ;
     }
     else if( !(file->openMode()&QFile::ReadOnly) ){//没有读属性时，增加读属性
         file->close();
-        file->open(QFile::ReadWrite) ;
+        file->open(QFile::ReadOnly) ;
     }
 
     file->seek(0) ;  //重置读写位置
@@ -142,7 +142,7 @@ bool LOLI::AutoRead(QByteArray &dest,const QString &name)
 {
     QFile file(name) ;
     if( !file.exists() ) return false ;
-    if( !file.open(QFile::ReadWrite) ) return false ;
+    if( !file.open(QFile::ReadOnly) ) return false ;
 
     if( file.size() < 50000000 ) dest = file.readAll() ;
     else dest = file.read( 50000000 ) ;

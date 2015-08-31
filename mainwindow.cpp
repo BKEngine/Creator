@@ -348,7 +348,7 @@ void MainWindow::CheckUpdate()
     platform = "win/";
 #endif
 #ifdef Q_OS_LINUX
-    platform = "";
+    platform = "linux/";
 #endif
 #ifdef Q_OS_MAC
     platform = "mac/";

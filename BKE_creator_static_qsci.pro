@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): {
 QT += widgets
 }
 
-TARGET = BKE_creator
+TARGET = BKE_Creator
 TEMPLATE = app
 
 CONFIG += warn_off qt
@@ -245,6 +245,11 @@ FORMS += \
 
 mac{
     LIBS += -L$$PWD/quazip -lquazip
+}
+
+linux{
+    QMAKE_RPATHDIR = :\'\$\$ORIGIN\'
+    #QMAKE_RPATH = .
 }
 
 DISTFILES += \

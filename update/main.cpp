@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     platform = "win/";
 #endif
 #ifdef Q_OS_LINUX
-    platform = "";
+    platform = "linux";
 #endif
 #ifdef Q_OS_Mac
     platform = "mac/";

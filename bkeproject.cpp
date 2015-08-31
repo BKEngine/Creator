@@ -9,7 +9,7 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 	info.IconKey = dest->icon(0).cacheKey();
 
 	QTreeWidgetItem *root = dest;
-	QStringList list;
+    QStringList list;
 	while (root->parent() != 0){
 		root = root->parent();
 		list.prepend(root->text(0)); //父节点总是在前面

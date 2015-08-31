@@ -56,7 +56,6 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-#ifndef QT_DEBUG
 #ifdef WIN32
     wchar_t tmp[MAX_PATH];
     GetModuleFileNameW(NULL, tmp, MAX_PATH);
@@ -67,7 +66,7 @@ int main(int argc, char *argv[])
 #ifndef Q_OS_MAC
     BKE_CURRENT_DIR = QFileInfo( exeDir ).path() ;
     //qt has a bug in 5.2.1(windows)? so I use setLibraryPaths
-    QApplication::addLibraryPath( BKE_CURRENT_DIR) ;
+    QApplication::addLibraryPath( BKE_CURRENT_DIR ) ;
 #else
     {
         QDir d = QFileInfo( exeDir ).dir();
@@ -76,7 +75,6 @@ int main(int argc, char *argv[])
         QApplication::setLibraryPaths(QStringList() << d.absolutePath());
         qDebug() << QApplication::libraryPaths();
     }
-#endif
 #endif
 
    QApplication a(argc, argv);
@@ -95,6 +93,10 @@ int main(int argc, char *argv[])
            exit(0);
        }
    }
+#endif
+
+#ifdef Q_OS_LINUX
+   QApplication::setWindowIcon(QIcon("icon.png"));
 #endif
     //SingleApplication a(argc, argv);
 
@@ -180,10 +182,10 @@ int main(int argc, char *argv[])
 //#endif
 
     //使用win32时，检查依赖库
-    #ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
     CheckOpenAL32();
     CheckFileAssociation();
-    #endif
+#endif
 
 	
     return a.exec();
@@ -192,19 +194,30 @@ int main(int argc, char *argv[])
 //检测是否安装了openal32，没有则安装
 void CheckOpenAL32()
 {
+#ifdef Q_OS_WIN
     QLibrary lib("OpenAL32.dll") ;
-    if( lib.load() ) return ;
+    if( lib.load() )
+    {
+        lib.unload();
+        return;
+    }
     QMessageBox::information(0,"安装支持库","你的计算机没有安装OpenAL32，Creator将为你安装，\n在接下来的窗口中选择 OK ") ;
     QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/tool/OpenAL.exe")) ;
-}
-
-void doFileAssociation()
-{
-    QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/FileAssociation.exe")) ;
+#else
+    QLibrary lib("openal");
+    if( lib.load() )
+    {
+        lib.unload();
+        return;
+    }
+    QMessageBox::information(0,"安装支持库","你的计算机没有安装libopenal1包，请先安装再运行本软件。") ;
+    exit(1);
+#endif
 }
 
 void CheckFileAssociation()
 {
+#ifdef Q_OS_WIN
     QSettings *ukenvFileReg = new QSettings("HKEY_CLASSES_ROOT\\.bkp", QSettings::NativeFormat);   //
 
     //判断UKEnv类型是否已在注册表中，并关联了正确的打开方式（程序打开方式），没有则写入
@@ -215,7 +228,29 @@ void CheckFileAssociation()
     {
         if(QMessageBox::question(0,"提示","检测到工程文件尚未关联。是否关联工程文件？")==QMessageBox::Yes)
         {
-            doFileAssociation();
+            QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/FileAssociation.exe")) ;
         }
     }
+#else
+    QProcess *cmd = new QProcess();
+    QObject::connect(cmd, &QProcess::readyReadStandardOutput, [cmd](){
+        if(QString::fromUtf8(cmd->readAllStandardOutput()).trimmed() != "bke_creator.desktop")
+        {
+            if(QMessageBox::question(0,"提示","检测到工程文件尚未关联。是否关联工程文件？")==QMessageBox::Yes)
+            {
+                class MyThread : public QThread
+                {
+                protected:
+                    void run()
+                    {
+                        system(("pkexec '"+BKE_CURRENT_DIR+"/add-menuitem.sh'").toLocal8Bit());
+                    }
+                };
+                MyThread *s = new MyThread;
+                s->start();
+            }
+        }
+    });
+    cmd->start("xdg-mime query default application/x-bke-project");
+#endif
 }
