@@ -3,3 +3,4 @@ GameName = "Bke_New_Project" ;
 
 ResolutionSize = [800,600] ;
 
+DefaultFontColor=#FFFFFF;

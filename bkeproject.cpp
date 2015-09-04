@@ -41,7 +41,7 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 
 //新建一个项目
 BkeProject::BkeProject(QObject *parent)
-    :QObject(parent)
+	:QObject(parent)
 {
 	isnull = true;
 	currentptr = 0;
@@ -218,7 +218,7 @@ void BkeProject::MakeImport()
 	OutFilelist.clear();
 	QString dirs = FileDir();
 
-	OutFilelist << "main.bkscr" << "macro.bkscr" << "config.bkpsr";
+	OutFilelist << "config.bkpsr" << "main.bkscr" << "macro.bkscr";
 
 	//从模版中复制文件，如果没有则创建
 	for (int i = 0; i < OutFilelist.size(); i++){
@@ -236,11 +236,18 @@ void BkeProject::MakeImport()
 	lex->ParserFile("macro.bkscr", dirs);
 	OutFilelist.append(lex->GetImportFiles()); //导入的脚本，将在脚本中属于例外
 
+	//config.bkpsr单独放
+	//main.bkscr放到脚本项目底下，其余放宏
 
-	for (int i = 0; i < OutFilelist.size(); i++){
+	{
+		FindItem(Script, OutFilelist[1], true);
+		OutFilelist[1] = LOLI_OS_QSTRING(FileDir() + "/" + OutFilelist[1]);
+	}
+
+	for (int i = 2; i < OutFilelist.size(); i++){
 		if (OutFilelist.at(i).trimmed().isEmpty()) continue;
 		FindItem(Import, OutFilelist.at(i), true);
-		OutFilelist[i] = LOLI_OS_QSTRING(FileDir() + "/" + OutFilelist.at(i));
+		OutFilelist[i] = LOLI_OS_QSTRING(FileDir() + "/" + OutFilelist[i]);
 	}
 
 	SortItem(Import);
@@ -362,7 +369,7 @@ bool BkeProject::SearchDir(BkeFilesHash &hash, const QString &dir, const QString
 		{
 			files.insert(LOLI_OS_QSTRING(d.relativeFilePath(fff.absoluteFilePath())), 1);
 		}
-			//ls->append(fff.fileName());
+		//ls->append(fff.fileName());
 	}
 	return infols.size() > 2;
 	//if (!ls->isEmpty()){
@@ -712,18 +719,18 @@ void BkeProject::ListFiles(QStringList &ls, QTreeWidgetItem *root, const QString
 	for (int i = 0; i < root->childCount(); i++)
 	{
 		auto r = root->child(i);
-        QString relatePath = parentdir.isEmpty()?r->text(0):parentdir + '/' + r->text(0);
+		QString relatePath = parentdir.isEmpty() ? r->text(0) : parentdir + '/' + r->text(0);
 		if (r->childCount() == 0)
-            ls.push_back(relatePath);
+			ls.push_back(relatePath);
 		else
-            ListFiles(ls, r, relatePath);
+			ListFiles(ls, r, relatePath);
 	}
 }
 
 QStringList BkeProject::AllScriptFiles()
 {
 	QStringList temp;
-    temp.push_back("config.bkpsr");
+	temp.push_back("config.bkpsr");
 	temp.append(ListFiles(1));
 	temp.append(ListFiles(2));
 	return temp;
@@ -731,9 +738,9 @@ QStringList BkeProject::AllScriptFiles()
 
 QStringList BkeProject::AllSourceFiles()
 {
-    QStringList temp;
-    temp.append(ListFiles(3));
-    return temp;
+	QStringList temp;
+	temp.append(ListFiles(3));
+	return temp;
 }
 
 void BkeProject::copyStencil(const QString &file)
@@ -790,7 +797,7 @@ bool BkeProject::WriteMarkFile(BkeMarkSupport *m)
 		akb.append(MarksToString(mks));
 	}
 
-    return LOLI::AutoWrite(FileDir() + "/BkeProject.bkpmk", akb);
+	return LOLI::AutoWrite(FileDir() + "/BkeProject.bkpmk", akb);
 }
 
 QString BkeProject::MarksToString(BkeMarkList *mk)
@@ -894,18 +901,18 @@ void BkeProject::AddDir(const QString &dir, const QString &relativeName, const I
 	la = Script;
 	h1 = &ScriptHash;
 	//项目上右键，扫描所有文件
-// 	if (f.Layer < 1)
-// 	{
-// 		if (!(f.Layer < 1)){
-// 		}
-// 		else{
-// 			la = f.Root;
-// 			h1 = typeHash(f.RootName);
-// 		}
-// 	}
+	// 	if (f.Layer < 1)
+	// 	{
+	// 		if (!(f.Layer < 1)){
+	// 		}
+	// 		else{
+	// 			la = f.Root;
+	// 			h1 = typeHash(f.RootName);
+	// 		}
+	// 	}
 
 	auto ff = f.getLayer1ItemInfo();
-	if (ff.Name == "脚本" || ff.Name=="宏")
+	if (ff.Name == "脚本" || ff.Name == "宏")
 	{
 		config->addScriptDir(relativeName);
 		config->writeFile();
@@ -936,20 +943,21 @@ void BkeProject::CheckDir(BkeFilesHash *hash, const QString dirnow)
 	}
 
 	hash->clear();
-    *hash = th;
+	*hash = th;
 }
 
 int BkeProject::addVersionData(QWidget *parent)
 {
-    /*NewVersionDataWizard wizard(this, parent);
-    wizard.exec();
-    if(wizard.isAccepted())
-    {
-        int index = _versionData.size();
-        _versionData.append(VersionData{wizard.name,wizard.time,wizard.info,wizard.data});
-        return index;
-    }*/
-    return -1;
+	/*
+	NewVersionDataWizard wizard(this, parent);
+	wizard.exec();
+	if(wizard.isAccepted())
+	{
+	int index = _versionData.size();
+	_versionData.append(VersionData{wizard.name,wizard.time,wizard.info,wizard.data});
+	return index;
+	}*/
+	return -1;
 }
 
 QString BkeProject::AllNameToName(const QString &allname)
