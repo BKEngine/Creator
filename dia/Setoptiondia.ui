@@ -109,6 +109,11 @@
          <normaloff>:/info/source/product-design.png</normaloff>:/info/source/product-design.png</iconset>
        </property>
       </item>
+      <item>
+       <property name="text">
+        <string>翻译设置</string>
+       </property>
+      </item>
      </widget>
     </item>
     <item row="2" column="2">
