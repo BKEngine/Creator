@@ -170,6 +170,7 @@ void MainWindow::Nextfile()
 #elif defined(Q_OS_LINUX)
     fileName = "tool/BKEngine_Dev";
 #elif defined(Q_OS_MAC)
+    fileName = "tool/bkengine_dev.app/Contents/MacOS/BKEngine_Dev";
 #endif
 
 

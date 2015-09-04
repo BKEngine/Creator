@@ -18,7 +18,7 @@ extern uint32_t BKE_hash(const wchar_t *str);
 ProjectWindow::ProjectWindow(QWidget *parent)
     :QTreeWidget(parent)
 {
-    setStyleSheet("QTreeWidget{ border:0px; }");
+    setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectlist").toString()) ;
     setHeaderHidden(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -460,7 +460,7 @@ BkeProject *ProjectWindow::FindProjectFromDir(const QString &dir)
 
 void ProjectWindow::ConfigProject(BkeProjectConfig *config)
 {
-    BkeConfigUiModel kag ;
+    QBkeConfigDialog kag;
     kag.StartConfig(config);
 }
 

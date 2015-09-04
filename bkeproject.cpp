@@ -1,6 +1,7 @@
 ﻿#include <weh.h>
 #include "bkeproject.h"
-#include "dia/versioninfo.h"
+//#include "dia/newversiondatawizard.h"
+//#include "dia/versioninfo.h"
 
 //读取一个item信息s
 void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
@@ -9,7 +10,7 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 	info.IconKey = dest->icon(0).cacheKey();
 
 	QTreeWidgetItem *root = dest;
-    QStringList list;
+	QStringList list;
 	while (root->parent() != 0){
 		root = root->parent();
 		list.prepend(root->text(0)); //父节点总是在前面
@@ -940,8 +941,7 @@ void BkeProject::CheckDir(BkeFilesHash *hash, const QString dirnow)
 
 int BkeProject::addVersionData(QWidget *parent)
 {
-    /*
-    NewVersionDataWizard wizard(this, parent);
+    /*NewVersionDataWizard wizard(this, parent);
     wizard.exec();
     if(wizard.isAccepted())
     {
@@ -964,6 +964,6 @@ QString BkeProject::AllNameToName(const QString &allname)
 
 void BkeProject::ReleaseGame()
 {
-    VersionInfo info(this);
-    info.exec();
+    //ersionInfo info(this);
+    //info.exec();
 }

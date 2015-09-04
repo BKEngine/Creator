@@ -81,6 +81,25 @@ bool LOLI::AutoRead(QString &text,QFile *file)
             file->close();
             return true ;
         }
+        if(codec == QTextCodec::codecForName("UTF-8"))
+        {
+            QLocale::Language lang = QLocale::system().language();
+            switch (lang) {
+            case QLocale::C:
+                break;
+            case QLocale::Chinese:
+                codec = QTextCodec::codecForName("GBK");
+                break;
+            case QLocale::Japanese:
+                codec = QTextCodec::codecForName("Shift-JIS");
+                break;
+            case QLocale::Korean:
+                codec = QTextCodec::codecForName("EUC-KR");
+                break;
+            default:
+                break;
+            }
+        }
         file->seek(0) ;
     }
 
@@ -148,8 +167,7 @@ bool LOLI::AutoRead(QByteArray &dest,const QString &name)
     if( !file.exists() ) return false ;
     if( !file.open(QFile::ReadWrite) ) return false ;
 
-    if( file.size() < 50000000 ) dest = file.readAll() ;
-    else dest = file.read( 50000000 ) ;
+    dest = file.readAll();
     file.close();
     return true ;
 }

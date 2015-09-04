@@ -4,11 +4,11 @@
 #include "ParserHelper/ParserHelper.h"
 #include <QtCore>
 
-class BkeConfigUiModel;
+class QBkeConfigDialog;
 class BkeProjectConfig : public QObject
 {
     Q_OBJECT
-    friend class BkeConfigUiModel;
+    friend class QBkeConfigDialog;
     QString filePath;
     QString projDir;
     QFileSystemWatcher watcher;

@@ -371,7 +371,11 @@ bool WordSupport::IsColor(const QString &t)
 
 bool WordSupport::IsFontColor(const QString &t)
 {
-	QString s = t.toLower();
+    QString s = t.toLower();
+    if(s.size()>=2 && s.left(1)==QChar('"') && s.right(1)==QChar('"'))
+        s = s.mid(1, s.size()-2);
+    if(s.isEmpty())
+        return true;
 	if (IsColor(s))
 		return true;
 

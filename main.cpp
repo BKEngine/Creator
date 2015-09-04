@@ -72,8 +72,7 @@ int main(int argc, char *argv[])
         QDir d = QFileInfo( exeDir ).dir();
         d.cdUp();
         d.cd("PlugIns");
-        QApplication::setLibraryPaths(QStringList() << d.absolutePath());
-        qDebug() << QApplication::libraryPaths();
+        QApplication::addLibraryPath(d.absolutePath());
     }
 #endif
 
@@ -82,17 +81,37 @@ int main(int argc, char *argv[])
 #ifdef Q_OS_MAC
    BKE_CURRENT_DIR = QDir::homePath() + "/Documents/BKE_Creator";
    QDir dir(BKE_CURRENT_DIR);
-   if(!dir.exists())
-   {
+   do{
        QDir d(qApp->applicationDirPath());
        d.cdUp();
        d.cd("Resources");
-       if(JlCompress::extractDir(d.filePath("data.compress"), dir.absolutePath()).count()==0)
+
+       QString dataPath = d.filePath("data.compress");
+       QString macvsPath = dir.filePath("macvs.txt");
+       if(dir.exists())
        {
-           QMessageBox::information(0, "Error", "Cannot uncompress the resources. :( \nPlease unzip .app/Resources/data.compress to ~/Documents/BKE_Creator yourself and restart the application.");
+           QFileInfo fi(dataPath);
+           QFileInfo vs(macvsPath);
+           if(vs.exists())
+           {
+               QString s;
+               if(LOLI::AutoRead(s, macvsPath))
+               {
+                   if(s == QString::number(fi.size()))
+                   {
+                       break;
+                   }
+               }
+           }
+       }
+
+       if(JlCompress::extractDir(dataPath, dir.absolutePath()).count()==0)
+       {
+           QMessageBox::information(0, "Error", "Cannot uncompress the resources. :( \nPlease unzip \"[.app path]/Resources/data.compress\" to \"~/Documents/BKE_Creator\" by yourself, and write the decimal size of \"data.compress\" into \"macvs.txt\", then restart the application.");
            exit(0);
        }
-   }
+       LOLI::AutoWrite(macvsPath, QString::number(QFileInfo(dataPath).size()));
+   }while(0);
 #endif
 
 #ifdef Q_OS_LINUX

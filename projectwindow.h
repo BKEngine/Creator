@@ -5,7 +5,7 @@
 #include "weh.h"
 #include "topbarwindow.h"
 #include "bkeproject.h"
-#include "dia/bkeconfiguimodel.h"
+#include "dia/bkeconfigdialog.h"
 
 //extern QList<BkeProject*> projectlist ;
 
