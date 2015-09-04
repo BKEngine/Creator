@@ -1,4 +1,4 @@
-#include "bkeconfigdialog.h"
+﻿#include "bkeconfigdialog.h"
 #include "ui_bkeconfigdialog.h"
 #include "function.h"
 #include "bkeprojectconfig.h"

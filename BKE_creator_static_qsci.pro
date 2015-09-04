@@ -50,7 +50,7 @@ SOURCES += ./main.cpp \
     paper/completebase.cpp \
     dia/searchbox.cpp \
     bkeSci/bkemarks.cpp \
-    dia/bkeconfiguimodel.cpp \
+    dia/bkeconfigdialog.cpp \
     loli/loli_island.cpp \
     otherbasicwin.cpp \
     dia/bkeleftfilewidget.cpp \
@@ -144,7 +144,7 @@ HEADERS  += \
     dia/searchbox.h \
     bkeSci/BkeIndicatorBase.h \
     bkeSci/bkemarks.h \
-    dia/bkeconfiguimodel.h \
+    dia/bkeconfigdialog.h \
     loli/loli_island.h \
     otherbasicwin.h \
     dia/bkeleftfilewidget.h \
@@ -241,7 +241,8 @@ FORMS += \
     dia/Setoptiondia.ui \
     dia/WaitWindow.ui \
     dia/versioninfo.ui \
-    dia/wizard/qbkewizard.ui
+    dia/wizard/qbkewizard.ui \
+    dia/bkeconfigdialog.ui
 
 mac{
     LIBS += -L$$PWD/quazip -lquazip
