@@ -2,6 +2,7 @@
 #define CTEXTEDIT_H
 
 #include "bkeSci/qscilexerbkescript.h"
+#include "CommonSettingDia.h"
 #include <QWidget>
 #include <QColorDialog>
 
@@ -9,13 +10,17 @@ namespace Ui {
 class CTextEdit;
 }
 
-class CTextEdit : public QWidget
+class CTextEdit : public QWidget, public CommonSettingDia
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    explicit CTextEdit(QWidget *parent = 0);
-    ~CTextEdit();
+	explicit CTextEdit(QWidget *parent = 0);
+	~CTextEdit();
+
+	virtual void save();
+	virtual void load();
+	virtual void reset();
 
 	int itemNo;
 
@@ -24,29 +29,29 @@ public slots:
 	void onBackcolorClicked();
 	void onOKClicked();
 	void onSave();
-    void onCopy() ;
-    void SetCurrentStyle(QString stylename) ;
+	void onCopy() ;
+	void SetCurrentStyle(QString stylename) ;
 
 signals:
 	void onOK();
 	void onRefreshLexer();
 
 private:
-    Ui::CTextEdit *ui;
-    QsciLexerBkeScript *lex ;
+	Ui::CTextEdit *ui;
+	QsciLexerBkeScript *lex ;
 	QColorDialog *cdia;
 	int curindex;
 
-    void upColour(int Row = -1) ;
-    bool CheckBtn() ;
+	void upColour(int Row = -1) ;
+	bool CheckBtn() ;
 
 private slots:
-    void configchange(int ci) ;
-    void itemchange(int index) ;
-    void upFont() ;
+	void configchange(int ci) ;
+	void itemchange(int index) ;
+	void upFont() ;
 
 private:
-    QColor setcolor;
+	QColor setcolor;
 };
 
 #endif // CTEXTEDIT_H

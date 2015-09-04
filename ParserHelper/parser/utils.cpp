@@ -3,14 +3,8 @@
 #include <errno.h>
 #include <limits.h>
 #include <iostream>
-
-#if _MSC_VER>1600
-#define HAVE_CODECVT
-#endif
-#ifdef HAVE_CODECVT
-#include <codecvt>
-#endif
-
+#include "bkutf8.h"
+#include <stdio.h>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -43,130 +37,130 @@ static inline wchar_t bkeToUpper(wchar_t character){
 
 bkplong bkpwcstoxl(const wchar_t *nptr, const wchar_t **endptr, int ibase, int flags)
 {
-    const wchar_t *p;
-    wchar_t c;
-    bkpulong number;
-    bkpulong digval;
-    bkpulong maxval;
+	const wchar_t *p;
+	wchar_t c;
+	bkpulong number;
+	bkpulong digval;
+	bkpulong maxval;
 
-    /* validation section */
-    if (endptr != NULL)
-    {
-        /* store beginning of string in endptr */
-        *endptr = nptr;
-    }
+	/* validation section */
+	if (endptr != NULL)
+	{
+		/* store beginning of string in endptr */
+		*endptr = nptr;
+	}
 
-    p = nptr;           /* p is our scanning pointer */
-    number = 0;         /* start with zero */
+	p = nptr;           /* p is our scanning pointer */
+	number = 0;         /* start with zero */
 
-    c = *p++;           /* read char */
+	c = *p++;           /* read char */
 
-    while ( iswspace(c) )
-        c = *p++;       /* skip whitespace */
+	while ( iswspace(c) )
+		c = *p++;       /* skip whitespace */
 
-    if (c == '-') {
-        flags |= FL_NEG;    /* remember minus sign */
-        c = *p++;
-    }
-    else if (c == '+')
-        c = *p++;       /* skip sign */
+	if (c == '-') {
+		flags |= FL_NEG;    /* remember minus sign */
+		c = *p++;
+	}
+	else if (c == '+')
+		c = *p++;       /* skip sign */
 
-    if (ibase == 0) {
-        /* determine base free-lance, based on first two chars of
-           string */
-        if (bkeWcharToDigit(c) != 0)
-            ibase = 10;
-        else if (*p == L'x' || *p == L'X')
-            ibase = 16;
-        else
-            ibase = 8;
-    }
+	if (ibase == 0) {
+		/* determine base free-lance, based on first two chars of
+		   string */
+		if (bkeWcharToDigit(c) != 0)
+			ibase = 10;
+		else if (*p == L'x' || *p == L'X')
+			ibase = 16;
+		else
+			ibase = 8;
+	}
 
-    if (ibase == 16) {
-        /* we might have 0x in front of number; remove if there */
-        if (bkeWcharToDigit(c) == 0 && (*p == L'x' || *p == L'X')) {
-            ++p;
-            c = *p++;   /* advance past prefix */
-        }
-    }
+	if (ibase == 16) {
+		/* we might have 0x in front of number; remove if there */
+		if (bkeWcharToDigit(c) == 0 && (*p == L'x' || *p == L'X')) {
+			++p;
+			c = *p++;   /* advance past prefix */
+		}
+	}
 
-    /* if our number exceeds this, we will overflow on multiply */
-    maxval = BKPULONG_MAX / ibase;
+	/* if our number exceeds this, we will overflow on multiply */
+	maxval = BKPULONG_MAX / ibase;
 
 
-    for (;;) {  /* exit in middle of loop */
+	for (;;) {  /* exit in middle of loop */
 
-        /* convert c to value */
-        if ( (digval = bkeWcharToDigit(c)) != -1 )
-            ;
-        else if ( bkeIsAlpha(c))
-            digval = bkeToUpper(c) - L'A' + 10;
-        else
-            break;
+		/* convert c to value */
+		if ( (digval = bkeWcharToDigit(c)) != -1 )
+			;
+		else if ( bkeIsAlpha(c))
+			digval = bkeToUpper(c) - L'A' + 10;
+		else
+			break;
 
-        if (digval >= (bkpulong)ibase)
-            break;      /* exit loop if bad digit found */
+		if (digval >= (bkpulong)ibase)
+			break;      /* exit loop if bad digit found */
 
-        /* record the fact we have read one digit */
-        flags |= FL_READDIGIT;
+		/* record the fact we have read one digit */
+		flags |= FL_READDIGIT;
 
-        /* we now need to compute number = number * base + digval,
-           but we need to know if overflow occured.  This requires
-           a tricky pre-check. */
+		/* we now need to compute number = number * base + digval,
+		   but we need to know if overflow occured.  This requires
+		   a tricky pre-check. */
 
-        if (number < maxval || (number == maxval &&
-        (bkpulong)digval <= BKPULONG_MAX % ibase)) {
-            /* we won't overflow, go ahead and multiply */
-            number = number * ibase + digval;
-        }
-        else {
-            /* we would have overflowed -- set the overflow flag */
-            flags |= FL_OVERFLOW;
-            if (endptr == NULL) {
-                /* no need to keep on parsing if we
-                   don't have to return the endptr. */
-                break;
-            }
-        }
+		if (number < maxval || (number == maxval &&
+		(bkpulong)digval <= BKPULONG_MAX % ibase)) {
+			/* we won't overflow, go ahead and multiply */
+			number = number * ibase + digval;
+		}
+		else {
+			/* we would have overflowed -- set the overflow flag */
+			flags |= FL_OVERFLOW;
+			if (endptr == NULL) {
+				/* no need to keep on parsing if we
+				   don't have to return the endptr. */
+				break;
+			}
+		}
 
-        c = *p++;       /* read next digit */
-    }
+		c = *p++;       /* read next digit */
+	}
 
-    --p;                /* point to place that stopped scan */
+	--p;                /* point to place that stopped scan */
 
-    if (!(flags & FL_READDIGIT)) {
-        /* no number there; return 0 and point to beginning of
-           string */
-        if (endptr)
-            /* store beginning of string in endptr later on */
-            p = nptr;
-        number = 0L;        /* return 0 */
-    }
-    else if ( (flags & FL_OVERFLOW) ||
-          ( !(flags & FL_UNSIGNED) &&
-            //( ( (flags & FL_NEG) && (number > -LONG_MIN) ) ||
-            //  ( !(flags & FL_NEG) && (number > LONG_MAX) ) ) ) )
+	if (!(flags & FL_READDIGIT)) {
+		/* no number there; return 0 and point to beginning of
+		   string */
+		if (endptr)
+			/* store beginning of string in endptr later on */
+			p = nptr;
+		number = 0L;        /* return 0 */
+	}
+	else if ( (flags & FL_OVERFLOW) ||
+		  ( !(flags & FL_UNSIGNED) &&
+			//( ( (flags & FL_NEG) && (number > -LONG_MIN) ) ||
+			//  ( !(flags & FL_NEG) && (number > LONG_MAX) ) ) ) )
 			(number > BKPLONG_MAX) ) )
-    {
-        /* overflow or signed overflow occurred */
-        errno = ERANGE;
-        if ( flags & FL_UNSIGNED )
-            number = BKPULONG_MAX;
-        else if ( flags & FL_NEG )
-            number = (bkpulong)BKPLONG_MAX+1;
-        else
-            number = LONG_MAX;
-    }
+	{
+		/* overflow or signed overflow occurred */
+		errno = ERANGE;
+		if ( flags & FL_UNSIGNED )
+			number = BKPULONG_MAX;
+		else if ( flags & FL_NEG )
+			number = (bkpulong)BKPLONG_MAX+1;
+		else
+			number = LONG_MAX;
+	}
 
-    if (endptr != NULL)
-        /* store pointer to char that stopped the scan */
-        *endptr = p;
+	if (endptr != NULL)
+		/* store pointer to char that stopped the scan */
+		*endptr = p;
 
-    if (flags & FL_NEG)
-        /* negate result if there was a neg sign */
-        number = (bkpulong)(-(bkplong)number);
+	if (flags & FL_NEG)
+		/* negate result if there was a neg sign */
+		number = (bkpulong)(-(bkplong)number);
 
-    return number;          /* done. */
+	return number;          /* done. */
 }
 
 bkplong bkpStr2Int(const wstring &src)
@@ -227,19 +221,33 @@ bkplong bkpColor2Int(const wstring &src)
 
 wstring bkpInt2Str(bkplong v)
 {
-	/*static*/ wstringstream strstream;
-	wstring str;
-	strstream<<v;
-	strstream>>str;
-	return std::move(str);
+	char buf[36];
+	itoa(v, buf, 10);
+	return UniFromUTF7(buf, strlen(buf));
 }
 wstring bkpInt2Str(double v)
 {
-	/*static*/ wstringstream strstream;
-	wstring str;
-	strstream<<v;
-	strstream>>str;
-	return std::move(str);
+	char buf[36];
+	sprintf(buf, "%lf", v);
+	return UniFromUTF7(buf, strlen(buf));
+}
+
+wstring bkpInt2HexStr(double v)
+{
+	char buf[36] = "0x";
+	sprintf(buf+2, "%x", (bkplong)v);
+	return UniFromUTF7(buf, strlen(buf));
+}
+
+wstring bkpStrToLower(const wstring &s)
+{
+	wstring c;
+	c.resize(s.size());
+	for (size_t i = 0; i < s.size(); i++)
+	{
+		c[i] = towlower(s[i]);
+	}
+	return c;
 }
 
 wstring space(bkplong count, wchar_t ch)
@@ -366,8 +374,7 @@ bool BKE_readFile(wstring &result, const wstring &filename)
 #ifdef _MSC_VER
 	ifstream fs(filename, ios_base::binary | ios_base::out);
 #else
-	char fname[FILENAME_MAX];
-	bkpwcstombs(fname, filename.c_str(), FILENAME_MAX);
+	string fname = UniToUTF8(filename);
 	ifstream fs(fname, ios_base::binary | ios_base::out);
 #endif
 	if (!fs.good())
@@ -376,54 +383,24 @@ bool BKE_readFile(wstring &result, const wstring &filename)
 	string::size_type s = (string::size_type)fs.tellg();
 	fs.seekg(0, ios_base::beg);
 	string res;
-	res.resize(s + 1);
+	res.resize(s);
 	fs.read(&res[0], s);
 	fs.close();
 	if (res.size() >= 2 && (unsigned char)res[0] == 0xFF && (unsigned char)res[1] == 0xFE)
 	{
 		//Unicode16-LE
-		result.clear();
-		result.resize(s+1);
-#ifdef HAVE_CODECVT
-		auto& f = use_facet<codecvt<wchar_t, char16_t, mbstate_t>>(locale());
-		mbstate_t mb=mbstate_t();
-		const char16_t* from_next;
-		wchar_t* to_next;
-		f.in(mb, (char16_t*)&res[2], (char16_t*)&res[s], from_next, &result[0], &result[s], to_next);
-#else
-		utf16toucs4((uint32_t *)&result[0], (uint16_t *)&res[2], s / 2 - 1);
-#endif
-		return true;
+		result = UniFromUTF16((const unsigned short *)(&res[2]), s / 2 - 1);
 	}
-#ifndef WIN32
-	mbstowcs(NULL, NULL, 0); // reset the conversion state
-#endif
-	if (res.size() >= 3 && (unsigned char)res[0] == 0xEF && (unsigned char)res[1] == 0xBB && (unsigned char)res[2] == 0xBF)
+	else if (res.size() >= 3 && (unsigned char)res[0] == 0xEF && (unsigned char)res[1] == 0xBB && (unsigned char)res[2] == 0xBF)
 	{
-		//UTF8-sig
-		result.clear();
-		result.resize(s + 1);
-#ifdef WIN32
-		//must use WINAPI on windows
-		MultiByteToWideChar(CP_UTF8, 0, (LPCCH)(&res[3]), s - 3, &result[0], s);
-#else
-		setlocale(LC_ALL, "en_US.UTF-8");
-		mbstowcs(&result[0], &res[3], s - 3);
-#endif
-		return true;
+		// UTF8-sig
+		result = UniFromUTF8((const char *)&res[3], s - 3);
 	}
 	else
 	{
-		//use UTF8-unsig in linux and GB2312 in win
-		result.resize(s + 1);
-#ifdef WIN32
-		setlocale(LC_ALL, "zh-CN.GB2312");
-#else
-		setlocale(LC_ALL, "en_US.UTF-8");
-#endif
-		mbstowcs(&result[0], &res[0], s);
-		return true;
+		result = UniFromUTF8((const char *)&res[0], s);
 	}
+	return true;
 }
 
 static bool writeFile(const wstring &res, ofstream &fs, bkplong pos)
@@ -432,25 +409,17 @@ static bool writeFile(const wstring &res, ofstream &fs, bkplong pos)
 	//write in Unicode16-LE
 	if (!fs.good())
 		return false;
-	if (pos >= 0)
+	if(pos == 0)
+		fs.seekp(0, ios_base::beg),fs.write((const char *)&magic, 2);
+	else if (pos > 0)
 		fs.seekp(pos, ios_base::beg);
 	else
 		fs.seekp(pos + 1, ios_base::end);
-	fs.write((const char *)&magic, 2);
-	u16string result;
-	bkplong s = res.size();
-	bkplong s2 = s * sizeof(wchar_t) / sizeof(char16_t);
-	result.resize(s2);
-#ifdef HAVE_CODECVT
-	auto& f = use_facet<codecvt<wchar_t, char16_t, mbstate_t>>(locale());
-	mbstate_t mb = mbstate_t();
-	char16_t* from_next;
-	const wchar_t* to_next;
-	f.out(mb, &res[0], &res[s], to_next, &result[0], &result[s2], from_next);
-#else
-	ucs4toutf16((uint16_t *)&result[0], (uint32_t *)&res[0], s);
-#endif
-	fs.write((const char *)result.c_str(), 2 * result.length());
+	bkplong s = UniToUTF16_Size(res);
+	unsigned short * ch = new unsigned short[s];
+	UniToUTF16(ch, res);
+	fs.write((const char *)ch, 2 * s);
+	delete[] ch;
 	return true;
 }
 
@@ -459,53 +428,10 @@ bool BKE_writeFile(const wstring &res, const wstring &filename, bkplong pos)
 #ifdef _MSC_VER
 	ofstream fs(filename, ios_base::binary | ios_base::out);
 #else
-	char fname[FILENAME_MAX];
-	bkpwcstombs(fname, filename.c_str(), FILENAME_MAX);
+	string fname = UniToUTF8(filename);
 	ofstream fs(fname, ios_base::binary | ios_base::out);
 #endif
 	return writeFile(res, fs, pos);
-}
-
-void utf16toucs4(uint32_t *ucs4, const uint16_t* utf16, int size)
-{
-	auto *in = utf16;
-	auto *out = ucs4;
-	while (*in && (size-- != 0))
-	{
-		if ((*in)<0xD800 || (*in)>0xDFFF)
-			*out++ = *in++;
-		else
-		{
-			auto a1 = *in++ - 0xD800;
-			auto a2 = *in++ - 0xDC00;
-			if (a1 >= 0 && a2 >= 0 && a1 < 0x400 && a2 < 0x400)
-			{
-				*out++ = (a1 << 10) + a2 + 0x10000;
-			}
-			//we meet illegal character
-			else
-				break;
-		}
-	}
-	*out = 0;
-}
-
-void ucs4toutf16(uint16_t* utf16, const uint32_t *ucs4, int size)
-{
-	auto *in = ucs4;
-	auto *out = utf16;
-	while (*in && (size-- != 0))
-	{
-		if ((*in) < 0x10000)
-			*out++ = (uint16_t)*in++;
-		else
-		{
-			auto a = *in++ - 0x10000;
-			*out++ = (uint16_t)(0xD800 + ((a & 0xFFC00) >> 10));
-			*out++ = 0xDC00 + (a & 0x3FF);
-		}
-	}
-	*out = 0;
 }
 
 double getutime()
@@ -518,115 +444,22 @@ double getutime()
 #else
 	struct timeval tv_begin;
 	gettimeofday(&tv_begin, NULL);
-	return tv_begin.tv_sec * 10000000 + tv_begin.tv_usec;
+	return tv_begin.tv_sec * 1000000 + tv_begin.tv_usec;
 #endif
 }
 
-void bkpwcstombs(char *d, const wchar_t *src, int srclen)
-{
-	unsigned char *dst = (unsigned char *)d;
-	for (int a = 0; (*src) && (srclen < 0 || a < srclen); a++)
-	{
-		wchar_t character = *src++;
-		if (character < 0x80)
-			*dst++ = (char)character;
-		else if (character < 0x800){
-			*dst++ = (character >> 6) | 0xC0;
-			*dst++ = (character & 0x3F) | 0x80;
-		}
-#if WCHAR_MAX == 0xFFFFFFFF
-		else if (character < 0x10000){
-			*dst++ = (character >> 12) | 0xE0;
-			*dst++ = ((character >> 6) & 0x3F) | 0x80;
-			*dst++ = (character & 0x3F) | 0x80;
-		}
-		else
-		{
-			*dst++ = (character >> 18) | 0xF0;
-			*dst++ = ((character >> 12) & 0x3F) | 0x80;
-			*dst++ = ((character >> 6) & 0x3F) | 0x80;
-			*dst++ = (character & 0x3F) | 0x80;
-		}
-#endif
-	}
-	*dst = 0;
-}
+#include <random>
 
-void bkpmbstowcs(wchar_t *dst, const char *s, int srclen)
-{
-	const unsigned char *src = (const unsigned char *)s;
-	int status = 0;
-	uint32_t wc = 0;
-	for (int a = 0; (*src) && (srclen < 0 || a < srclen); a++)
-	{
-		if (!status)
-		{
-			if (src[a] < 128)
-				*dst++ = (wchar_t)*src++;
-			else if ((src[a] & 0xe0) == 0xc0)
-			{
-				status = 1;
-				wc = src[a] & 0x1f;
-			}
-			else if ((src[a] & 0xf0) == 0xe0)
-			{
-				status = 2;
-				wc = src[a] & 0x0f;
-			}
-			else if ((src[a] & 0xf8) == 0xf0)
-			{
-				status = 3;
-				wc = src[a] & 0x07;
-			}
-			else if ((src[a] & 0xfc) == 0xf8)
-			{
-				status = 4;
-				wc = src[a] & 0x03;
-			}
-			else if ((src[a] & 0xfe) == 0xfc)
-			{
-				status = 5;
-				wc = src[a] & 0x01;
-			}
-		}
-		else
-		{
-			if ((src[a] & 0xc0) == 0x80)
-			{
-				status--;
-				wc <<= 6;
-				wc |= (src[a] & 0x3f);
-				if (!status)
-				{
-					*dst++ = (wchar_t)wc;
-				}
-			}
-			else
-				break;
-		}
-	}
-	*dst = 0;
-}
+std::mt19937 random_pool(std::time(NULL));
 
-static bkpulong s_seed = (bkpulong)(time(NULL) * 45568);
-
-void bkpRandomSeed(bkpulong seed)
-{
-	if (!seed) s_seed = time(NULL) * 45568;
-	else s_seed = seed;
-}
 bkplong bkpRandomInt()
 {
-//	if (!s_seed) s_seed = time(NULL) * 45568;
-	s_seed = 214013 * s_seed + 2531011;
-	return (s_seed ^ (s_seed >> 15));
+	return (bkplong)random_pool();
 }
 double bkpRandomDouble(double min, double max)
 {
-//	if (!s_seed) s_seed = time(NULL) * 45568;
-//	s_seed = 214013 * s_seed + 2531011;
-//	return min + (s_seed >> 16)*(1.0f / 65535.0f)*(max - min);
-	return min + ((bkpulong)bkpRandomInt()) / (double)BKPULONG_MAX * (max - min);
+	std::uniform_real_distribution<double> u(min, max);
+	return u(random_pool);
 }
 
 #include "BKE_string.h"
@@ -634,17 +467,18 @@ double bkpRandomDouble(double min, double max)
 
 GlobalStructures::GlobalStructures()
 {
-    init();
+	init();
 }
 
 void GlobalStructures::init()
 {
-    static GlobalStringMap m;
-    static GlobalMemoryPool p;
-    static BKE_VarClosure g;
-    this->globalStringMap = &m;
-    this->globalMemoryPool = &p;
-    this->globalClosure = &g;
+	static GlobalStringMap m;
+	static GlobalMemoryPool p;
+	static BKE_VarClosure g;
+	this->globalStringMap = &m;
+	this->globalMemoryPool = &p;
+	this->globalClosure = &g;
+	g.varmap.resizeTableSize(12);
 }
 
 GlobalStructures _globalStructures;

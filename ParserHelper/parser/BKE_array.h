@@ -356,6 +356,12 @@ public:
 		count--;
 		((__array_helper*)(&addrlist[count>>ARR_OFFSET][count & ARR_MASK]))->~__array_helper();
 		backaddr=count>0?&operator [] (count-1):NULL;
+		if ((count & ARR_MASK) == 0 && addrcount)
+		{
+			free(addrlist[addrcount]);
+			addrcount--;
+		}
+
 	}
 
 	inline void pop_back(T &res)
@@ -366,6 +372,11 @@ public:
 		res=addrlist[s][s2];
 		((__array_helper*)(&addrlist[s][s2]))->~__array_helper();
 		backaddr=&operator [] (count-1);
+		if ((count & ARR_MASK) == 0 && addrcount)
+		{
+			free(addrlist[addrcount]);
+			addrcount--;
+		}
 	}
 
 	void erase(bkplong index)
@@ -382,15 +393,18 @@ public:
 		if (s2 != ARR_MASK)
 		{
 			memcpy(&addrlist[s][s2], &addrlist[s][s2+1], sizeof(T) * (ARR_MASK-s2));
-			s++;
 		}
+		s++;
 		bkplong end=(--count)>>ARR_OFFSET;
-		if (!s)
-			s = 1;
-		for(bkplong i=s;i<=end;i++)
+		for (bkplong i = s; i <= end; i++)
 		{
-			memcpy(&addrlist[s - 1][ARR_MASK], &addrlist[s][0], sizeof(T));
-			memcpy(&addrlist[s][0], &addrlist[s][1], sizeof(T)* ARR_MASK);
+			memcpy(&addrlist[i - 1][ARR_MASK], &addrlist[i][0], sizeof(T));
+			memcpy(&addrlist[i][0], &addrlist[i][1], sizeof(T)* ARR_MASK);
+		}
+		if ((count & ARR_MASK) == 0 && addrcount)
+		{
+			free(addrlist[addrcount]);
+			addrcount--;
 		}
 	}
 

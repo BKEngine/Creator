@@ -90,7 +90,7 @@ private:
 		wstring s;
 #if PARSER_DEBUG
 		auto it = upper_bound(linestartpos.begin(), linestartpos.end(), pos);
-		s += L"第" + bkpInt2Str(it - linestartpos.begin()) + L"行，第" + bkpInt2Str((int)((it == linestartpos.end() ? pos : *it) - (*(it - 1)) + 1)) + L"处的";
+		s += L"第" + bkpInt2Str((bkplong)(it - linestartpos.begin())) + L"行，第" + bkpInt2Str((bkplong)((it == linestartpos.end() ? pos : *it) - (*(it - 1)) + 1)) + L"处的";
 #endif
 		return s;
 	};
@@ -120,7 +120,7 @@ private:
 	{
 		this->exp = e;
 		curpos = const_cast<wchar_t *>(e);
-		expsize = wcslen(e);
+		expsize = static_cast<bkpulong>(wcslen(e));
 		p = _this;
 		runpos = 0;
 		NextIsBareWord = false;
@@ -130,7 +130,7 @@ private:
 	{
 		this->exp = e.c_str();
 		curpos = const_cast<wchar_t *>(exp);
-		expsize = e.size();
+		expsize = static_cast<bkpulong>(e.size());
 		p = _this;
 		runpos = 0;
 		NextIsBareWord = false;
@@ -181,6 +181,7 @@ private:
 		else
 			throw Var_Except(L"此处不应当遇到结尾", token.pos);
 	}
+	void nud_enum(BKE_bytree **tree);
 
 	//void led_none(BKE_bytree **tree);
 	void led_one(BKE_bytree **tree);
@@ -236,6 +237,7 @@ private:
 	NUD_FUNCTION(const, "const");
 	NUD_FUNCTION(dot2, ".");
 	NUD_FUNCTION(with, "with");
+	NUD_FUNCTION(enum, "enum");
 
 	NUD_FUNCTION(unknown, "未实现"){ runpos = tree->Node.pos; throw Var_Except(L"该功能尚未实现"); };
 
@@ -271,7 +273,7 @@ private:
 	LED_FUNCTION(param, "(");	//used in function call
 	LED_FUNCTION(dot, ".");
 	LED_FUNCTION(ele, "[");
-	LED_FUNCTION(choose, "[");	//for ?: expression
+	LED_FUNCTION(choose, "?:");	//for ?: expression
 	LED_FUNCTION(instanceof, "instanceof");	//xx instanceof str
 	LED_FUNCTION(if, "if");	//后置if
 
@@ -281,7 +283,7 @@ private:
 	{
 		BKE_UNUSED_PARAM(tree);
 		{
-			throw Var_Except(wstring(L"语法错误，操作符") + OP_CODE[token.opcode % OP_COUNT] + L"不应出现在此处", curpos - exp);
+			throw Var_Except(wstring(L"语法错误，操作符") + OP_CODE[token.opcode % OP_COUNT] + L"不应出现在此处", static_cast<bkpulong>(curpos - exp));
 		};
 	};
 
@@ -303,14 +305,14 @@ public:
 
 	inline void addConst(const wstring &name, const BKE_Variable &var){ BKE_Variable &v = constmap[name]; v = var; v.makeConst(); };
 
-	BKE_Variable eval(const wchar_t *exp, BKE_VarClosure *_this= BKE_VarClosure::global());
-	inline BKE_Variable eval(const wstring &exp, BKE_VarClosure *_this= BKE_VarClosure::global()){return std::move(eval(exp.c_str(), _this));};
+	BKE_Variable eval(const wchar_t *exp, BKE_VarClosure *_this= BKE_VarClosure::global(), int line = 0);
+	inline BKE_Variable eval(const wstring &exp, BKE_VarClosure *_this = BKE_VarClosure::global(), int line = 0){ return std::move(eval(exp.c_str(), _this, line)); };
 	BKE_Variable run(BKE_bytree *tree, BKE_VarClosure *_this= BKE_VarClosure::global());
 	BKE_Variable run(BKE_VarFunction *func);
 	BKE_Variable& getVar(const wchar_t *exp, BKE_VarClosure *_this= BKE_VarClosure::global());
 	inline BKE_Variable& getVar(const wstring &exp, BKE_VarClosure *_this= BKE_VarClosure::global()){return getVar(exp.c_str(), _this);};
 
-	BKE_Variable evalMultiLineStr(const wstring &exp, BKE_VarClosure *_this = BKE_VarClosure::global());
+	BKE_Variable evalMultiLineStr(const wstring &exp, BKE_VarClosure *_this = BKE_VarClosure::global(), int startline = 0);
 
 	BKE_bytree *parse(const wstring &exp, bkplong startpos = 0, bkplong startline = 0);
 	void unParse(BKE_bytree *tree, wstring &res);

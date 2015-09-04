@@ -12,3 +12,18 @@ CDirOption::~CDirOption()
 {
     delete ui;
 }
+
+void CDirOption::save()
+{
+
+}
+
+void CDirOption::load()
+{
+
+}
+
+void CDirOption::reset()
+{
+
+}

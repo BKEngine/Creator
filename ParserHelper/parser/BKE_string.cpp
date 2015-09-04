@@ -33,13 +33,13 @@ StringType *GlobalStringMap::allocHashString(const wchar_t *str)
 	mu.lock();
 #endif
 	auto t = _getNode(str);
-	t->key.hashed = true;
-	t->key.hash = t->hashvalue;
-	t->key.ref++;
+	t->ct.first.hashed = true;
+	t->ct.first.hash = t->hashvalue;
+	t->ct.first.ref++;
 #if PARSER_MULTITHREAD
 	mu.unlock();
 #endif
-	return &t->key;
+	return const_cast<StringType*>(&t->ct.first);
 }
 
 StringType *GlobalStringMap::allocString(wstring &&str)
@@ -65,64 +65,14 @@ StringType *GlobalStringMap::allocHashString(wstring &&str)
 #if PARSER_MULTITHREAD
 	mu.lock();
 #endif
-	//rewrite hash to accept move param
-	bkplong ha = BKE_hash(str);
-	bkplong h = ha & (hashsize - 1);
-	if (buf[h] == NULL)
-	{
-		buf[h] = al.op_new();
-		buf[h]->key.hash = ha;
-		buf[h]->key.hashed = true;
-		buf[h]->key.str = std::move(str);
-		buf[h]->key.ref = 1;
-		buf[h]->index = h;
-		buf[h]->last = NULL;
-		buf[h]->next = NULL;
-		buf[h]->hashvalue = ha;
-		count++;
+	auto t = _getNode(StringType(std::move(str)));
+	t->ct.first.hashed = true;
+	t->ct.first.hash = t->hashvalue;
+	t->ct.first.ref++;
 #if PARSER_MULTITHREAD
-		mu.unlock();
+	mu.unlock();
 #endif
-		return &buf[h]->key;
-	}
-	else
-	{
-		BKE_HashNode *node = buf[h];
-		if (node->key.str == str)
-		{
-			node->key.ref++;
-#if PARSER_MULTITHREAD
-			mu.unlock();
-#endif
-			return &node->key;
-		}
-		while (node->next != NULL)
-		{
-			node = node->next;
-			if (node->key.str == str)
-			{
-				node->key.ref++;
-#if PARSER_MULTITHREAD
-				mu.unlock();
-#endif
-				return &node->key;
-			}
-		}
-		node->next = al.op_new();
-		node->next->key.hash = ha;
-		node->next->key.hashed = true;
-		node->next->key.str = std::move(str);
-		node->next->key.ref = 1;
-		node->next->index = h;
-		node->next->last = node;
-		node->next->next = NULL;
-		node->next->hashvalue = ha;
-		count++;
-#if PARSER_MULTITHREAD
-		mu.unlock();
-#endif
-		return &node->next->key;
-	}
+	return const_cast<StringType*>(&t->ct.first);
 }
 
 StringType *GlobalStringMap::hashString(StringType &&s)
@@ -132,63 +82,31 @@ StringType *GlobalStringMap::hashString(StringType &&s)
 		//nullString.ref++;
 		return &nullString;
 	}
+	if(s.hashed)
+		return &s;
 #if PARSER_MULTITHREAD
 	mu.lock();
 #endif
-	//rewrite hash to accept move param
-	bkplong ha = BKE_hash(s.str);
-	bkplong h = ha & (hashsize - 1);
-	if (buf[h] == NULL)
-	{
-		buf[h] = al.op_new();
-		buf[h]->key = std::move(s);
-		buf[h]->key.hash = ha;
-		buf[h]->index = h;
-		buf[h]->last = NULL;
-		buf[h]->next = NULL;
-		buf[h]->hashvalue = ha;
-		count++;
+	auto t = _getNode(std::move(s));
+	t->ct.first.hashed = true;
+	t->ct.first.hash = t->hashvalue;
+	t->ct.first.ref++;
 #if PARSER_MULTITHREAD
-		mu.unlock();
+	mu.unlock();
 #endif
-		return &buf[h]->key;
-	}
-	else
-	{
-		BKE_HashNode *node = buf[h];
-		if (node->key.str == s.str)
-		{
-			node->key.ref++;
-#if PARSER_MULTITHREAD
-			mu.unlock();
-#endif
-			return &node->key;
-		}
-		while (node->next != NULL)
-		{
-			node = node->next;
-			if (node->key.str == s.str)
-			{
-				node->key.ref++;
-#if PARSER_MULTITHREAD
-				mu.unlock();
-#endif
-				return &node->key;
-			}
-		}
-		node->next = al.op_new();
-		node->next->key = std::move(s);
-		node->next->key.hash = ha;
-		node->next->index = h;
-		node->next->last = node;
-		node->next->next = NULL;
-		node->next->hashvalue = ha;
-		count++;
-#if PARSER_MULTITHREAD
-		mu.unlock();
-#endif
-		return &node->next->key;
-	}
+	return const_cast<StringType*>(&t->ct.first);
+}
+
+bool GlobalStringMap::stripStr(const wstring &s)
+{
+	StringType st(s.c_str());
+	auto it = this->find(st);
+	if (it == this->end())
+		return true;
+	if (it->first.ref > 0)
+		return false;
+	this->erase(it);
+	return true;
 }
 
 void GlobalStringMap::forceGC()
@@ -196,25 +114,13 @@ void GlobalStringMap::forceGC()
 #if PARSER_MULTITHREAD
 	mu.lock();
 #endif
-	for (int i = 0; i<hashsize; i++)
+	auto it = begin();
+	while (it != end())
 	{
-		auto p = buf[i];
-		while (p != NULL)
-		{
-			BKE_HashNode *node = p;
-			p = node->next;
-			if (node->key.ref <= 0)
-			{
-				if (node->next)
-					node->next->last =node->last;
-				if (node->last)
-					node->last->next = node->next;
-				else
-					buf[node->index] = node->next;
-				al.op_delete(node);
-				count--;
-			}
-		}
+		if (it->first.ref <= 0)
+			it = erase(it);
+		else
+			++it;
 	}
 #if PARSER_MULTITHREAD
 	mu.unlock();
@@ -246,15 +152,26 @@ const wstring& BKE_String::printStr() const
 	c = *var;
 	var->printStrAvailable = true;
 	var->printStr = L"\'";
+#ifdef WIN32
 	wchar_t buf[10];
+#else
+	char buf[10];
+#endif
 	while (*c)
 	{
 		if (*c == L'\'')
 			var->printStr += L"\\\'";
 		else if (*c < 32)
 		{
+#ifdef WIN32
 			swprintf(buf, 10, L"\\x%02X", *c);
 			var->printStr += buf;
+#else
+			snprintf(buf, 10, "\\x%02X", *c);
+			char *ptr = buf;
+			while (*ptr)
+				var->printStr.push_back(*ptr++);
+#endif
 		}
 		else
 			var->printStr += *c;

@@ -4,6 +4,7 @@
 #include <math.h>
 #include <random>
 #include <functional>
+#include <bkutf8.h>
 
 #include "parser.h"
 
@@ -77,7 +78,7 @@ namespace Parser_Util
 		wcout<<res;
 		for(int i=1;i<paramarray->getCount();i++)
 		{
-			res=L"";
+			res.clear();
 			PARAM(i).save(res);
 			wcout<<L","<<res.c_str();
 		}
@@ -502,7 +503,7 @@ namespace Parser_Util
 			{
 				Regex *r = (Regex *)((BKE_VarClass *)PARAM(0).obj)->native;
 				const wstring &s = self->str.getConstStr();
-				for (int i = s.size() - 2; i >= 0; i--)
+				for (int i = (int)s.size() - 2; i >= 0; i--)
 				{
 					if (std::regex_match(s.substr(i), r->reg))
 						return true;
@@ -515,7 +516,7 @@ namespace Parser_Util
 		BKE_String str = PARAM(0).asBKEStr();
 		const wchar_t *src = self->str.getConstStr().c_str();
 		const wchar_t *dst = str.getConstStr().c_str();
-		bkplong off = (long)self->str.getConstStr().size() - (bkplong)str.getConstStr().size();
+		bkplong off = (bkplong)self->str.getConstStr().size() - (bkplong)str.getConstStr().size();
 		if (off < 0)
 			return false;
 		return wcscmp(src + off, dst)==0;
@@ -536,18 +537,18 @@ namespace Parser_Util
 		}
 #endif
 		wstring old=PARAM(0);
-		bkplong oldsize=old.size();
+		bkplong oldsize=static_cast<bkplong>(old.size());
 		wstring newvalue=PARAM(1);
-		bkplong newsize=newvalue.size();
+		//bkplong newsize=static_cast<bkplong>(newvalue.size());
 		const wstring &s=self->str.getConstStr();
-		bkplong ssize=s.size();
+		//bkplong ssize=static_cast<bkplong>(s.size());
 		wstring res;
 		bkplong i=0;
 		bkplong start;
 		do
 		{
 			start=i;
-			i=s.find(old, start);
+			i=static_cast<bkplong>(s.find(old, start));
 			if(i==s.npos)
 			{
 				res+=s.substr(start);
@@ -576,7 +577,7 @@ namespace Parser_Util
 			throw Var_Except(L"参数1必须是Regex的子类或字符串");
 		}
 #endif
-		bkplong s = self->str.getConstStr().find(PARAM(0).asString(), (bkplong)PARAM(1));
+		bkplong s = static_cast<bkplong>(self->str.getConstStr().find(PARAM(0).asString(), (bkplong)PARAM(1)));
 		if (s > (bkplong)self->str.getConstStr().size())
 			return -1;
 		return s;
@@ -593,7 +594,7 @@ namespace Parser_Util
 				Regex *r = (Regex *)((BKE_VarClass *)PARAM(0).obj)->native;
 				std::wsmatch m;
 				const wstring &s = self->str.getConstStr();
-				for (int i = s.size() - 2; i >= 0; i--)
+				for (int i = (int)s.size() - 2; i >= 0; i--)
 				{
 					std::regex_search((const wstring &)s.substr(i), m, r->reg);
 					if (!m.empty())
@@ -604,7 +605,7 @@ namespace Parser_Util
 			throw Var_Except(L"参数1必须是Regex的子类或字符串");
 		}
 #endif
-		bkplong s = self->str.getConstStr().rfind(PARAM(0).asString(), (bkplong)PARAM(1));
+		bkplong s = static_cast<bkplong>(self->str.getConstStr().rfind(PARAM(0).asString(), (bkplong)PARAM(1)));
 		if (s > (bkplong)self->str.getConstStr().size())
 			return -1;
 		return s;
@@ -664,42 +665,41 @@ namespace Parser_Util
 					} while (i < srcsize && !iswalpha(ch));
 					if (!PARAMEXIST(paramno))
 						throw Var_Except(L"参数数目不足");
-					wchar_t buf2[512];
 #ifdef _MSC_VER
+                    wchar_t buf2[512];
 					if (towupper(ch) == L'S')
-						swprintf(buf2, 511, mode.c_str(), ((wstring)PARAM(paramno++)).c_str());
+						swprintf(buf2, 512, mode.c_str(), ((wstring)PARAM(paramno++)).c_str());
 					else if (towupper(ch) == L'G')
-						swprintf(buf2, 511, mode.c_str(), PARAM(paramno++).asNumber());
+						swprintf(buf2, 512, mode.c_str(), PARAM(paramno++).asNumber());
 					else if (towupper(ch) == L'F')
-						swprintf(buf2, 511, mode.c_str(), (float)(PARAM(paramno++).asNumber()));
+						swprintf(buf2, 512, mode.c_str(), (float)(PARAM(paramno++).asNumber()));
 					else
-						swprintf(buf2, 511, mode.c_str(), PARAM(paramno++).asInteger());
+						swprintf(buf2, 512, mode.c_str(), PARAM(paramno++).asInteger());
+                    res.append(buf2);
 #else
-					char _mode[100];
 					char buf3[1024];
-					bkpwcstombs(_mode, mode.c_str(), 100);
+					string _mode = UniToUTF8(mode);
 					if (towupper(ch) == L'S')
 					{
-						char *__tmp=new char[4 * ((wstring)PARAM(paramno++)).size()];
-						bkpwcstombs(__tmp, ((wstring)PARAM(paramno++)).c_str(), 4 * ((wstring)PARAM(paramno++)).size());
-						snprintf(buf3, 1023, _mode, __tmp);
-						delete[] __tmp;
+                        wstring str = (wstring)PARAM(paramno++).asString();
+                        string __tmp = UniToUTF8(str);
+						snprintf(buf3, 1024, _mode.c_str(), __tmp.c_str());
 					}
 					else if (towupper(ch) == L'G')
 					{
-						snprintf(buf3, 1023, _mode, PARAM(paramno++).asNumber());
+						snprintf(buf3, 1024, _mode.c_str(), PARAM(paramno++).asNumber());
 					}
 					else if (towupper(ch) == L'F')
 					{
-						snprintf(buf3, 1023, _mode, (float)(PARAM(paramno++).asNumber()));
+						snprintf(buf3, 1024, _mode.c_str(), (float)(PARAM(paramno++).asNumber()));
 					}
 					else
 					{
-						snprintf(buf3, 1023, _mode, (int)PARAM(paramno++).asInteger());
+						snprintf(buf3, 1024, _mode.c_str(), (int)PARAM(paramno++).asInteger());
 					}
-					bkpmbstowcs(buf2, buf3, 511);
+                    res.append(UniFromUTF8(buf3, (bkpulong)strlen(buf3)));
 #endif
-					res.append(buf2);
+					
 					continue;
 				}
 			}
@@ -748,13 +748,13 @@ namespace Parser_Util
 #endif
 		const wstring &src = self->str.getConstStr();
 		wstring split=PARAM(0);
-		bkplong splitsize=split.size();
+		bkplong splitsize=static_cast<bkplong>(split.size());
 		BKE_VarArray *arr=new BKE_VarArray();
 		int start=0;
 		bkplong srcsize=(bkplong)src.size();
 		while(start<srcsize)
 		{
-			bkplong pos=src.find(split, start);
+			bkplong pos=static_cast<bkplong>(src.find(split, start));
 			if(pos==src.npos)
 				break;
 			if(pos>start || !PARAM(1))
@@ -852,7 +852,7 @@ namespace Parser_Util
 			}
 		case VAR_DIC:
 			{
-				auto it = ((BKE_VarDic *)self->obj)->varmap.find((wstring)var);
+				auto it = ((BKE_VarDic *)self->obj)->varmap.find(var.asBKEStr());
 				if (it == ((BKE_VarDic *)self->obj)->varmap.end())
 					RETURNDEFAULT;
 				return 1;
@@ -873,6 +873,14 @@ namespace Parser_Util
 		for (int i = 1; i < arr.size(); i++)
 			s += st + (wstring)arr[i];
 		return s;
+	}
+
+	NATIVE_FUNC(array_random)
+	{
+		auto &&v = ((BKE_VarArray *)self->obj)->vararray;
+		if (v.size() == 0)
+			RETURNDEFAULT;
+		return v[((bkpulong)bkpRandomInt()) % v.size()];
 	}
 
 //quicksort
@@ -956,7 +964,7 @@ namespace Parser_Util
 	NATIVE_FUNC(sort)
 	{
 		auto &&arr = ((BKE_VarArray *)self->obj)->vararray;
-		long s = arr.size();
+		bkplong s = (bkplong)arr.size();
 		BKE_Variable ss = L"+";
 		if (PARAMEXIST(0))
 			ss = PARAM(0);
@@ -1168,6 +1176,15 @@ namespace Parser_Util
 		REG_FUNC(getHour);
 		REG_FUNC(getMinute);
 		REG_FUNC(getSecond);
+
+		REG_FUNC(setYear);
+		REG_FUNC(setMonth);
+		REG_FUNC(setDay);
+		REG_FUNC(setHour);
+		REG_FUNC(setMinute);
+		REG_FUNC(setSecond);
+
+		REG_FUNC(format);
 	}
 
 	NATIVECLASS_FUNC(getYear)
@@ -1176,10 +1193,26 @@ namespace Parser_Util
 		return instance->_tm->tm_year + 1900;
 	}
 
+	NATIVECLASS_FUNC(setYear)
+	{
+		MINIMUMPARAMNUM(1);
+		GETINSTANCE();
+		instance->_tm->tm_year = PARAM(0).convertTo<int>() - 1970;
+		RETURNDEFAULT;
+	}
+
 	NATIVECLASS_FUNC(getMonth)
 	{
 		GETINSTANCE();
 		return instance->_tm->tm_mon + 1;
+	}
+
+	NATIVECLASS_FUNC(setMonth)
+	{
+		MINIMUMPARAMNUM(1);
+		GETINSTANCE();
+		instance->_tm->tm_mon = PARAM(0).convertTo<int>() - 1;
+		RETURNDEFAULT;
 	}
 
 	NATIVECLASS_FUNC(getDay)
@@ -1188,10 +1221,26 @@ namespace Parser_Util
 		return instance->_tm->tm_mday;
 	}
 
+	NATIVECLASS_FUNC(setDay)
+	{
+		MINIMUMPARAMNUM(1);
+		GETINSTANCE();
+		instance->_tm->tm_mday = PARAM(0).convertTo<int>();
+		RETURNDEFAULT;
+	}
+
 	NATIVECLASS_FUNC(getHour)
 	{
 		GETINSTANCE();
 		return instance->_tm->tm_hour;
+	}
+
+	NATIVECLASS_FUNC(setHour)
+	{
+		MINIMUMPARAMNUM(1);
+		GETINSTANCE();
+		instance->_tm->tm_hour = PARAM(0).convertTo<int>();
+		RETURNDEFAULT;
 	}
 
 	NATIVECLASS_FUNC(getMinute)
@@ -1200,10 +1249,98 @@ namespace Parser_Util
 		return instance->_tm->tm_min;
 	}
 
+	NATIVECLASS_FUNC(setMinute)
+	{
+		MINIMUMPARAMNUM(1);
+		GETINSTANCE();
+		instance->_tm->tm_min = PARAM(0).convertTo<int>();
+		RETURNDEFAULT;
+	}
+	
 	NATIVECLASS_FUNC(getSecond)
 	{
 		GETINSTANCE();
 		return instance->_tm->tm_sec;
+	}
+
+	NATIVECLASS_FUNC(setSecond)
+	{
+		MINIMUMPARAMNUM(1);
+		GETINSTANCE();
+		instance->_tm->tm_sec = PARAM(0).convertTo<int>();
+		RETURNDEFAULT;
+	}
+
+	NATIVECLASS_FUNC(format)
+	{
+		MINIMUMPARAMNUM(1);
+		GETINSTANCE();
+		wstring format = PARAM(0).asString();
+		wstring res;
+		bkpulong i = 0;
+		bkpulong s = (bkpulong)format.size();
+		bool shrink = false;	//正处于#的作用下
+		while (i < s)
+		{
+			wchar_t ch = format[i++];
+			if (ch != L'%' || shrink)
+				res.push_back(ch);
+			else
+			{
+				if (i >= s)
+					return res;
+				if (!shrink)
+					ch = format[i++];
+				wstring tmpstr(1, ch);
+				switch (ch)
+				{
+				case L'%':
+					break;
+				case L'#':
+					if (!shrink)
+					{
+						shrink = true;
+						continue;
+					}
+					break;
+				case L'Y':
+					tmpstr = bkpInt2Str(instance->_tm->tm_year + 1900);
+					if (tmpstr.size() < 4)
+						tmpstr = wstring(4 - tmpstr.size(), L'0');
+					if (shrink)
+						tmpstr = tmpstr.substr(tmpstr.size() - 2);
+					break;
+				case L'M':
+					tmpstr = bkpInt2Str(instance->_tm->tm_mon + 1);
+					if (!shrink && instance->_tm->tm_mon < 9)
+						tmpstr = L'0' + tmpstr;
+					break;
+				case L'D':
+					tmpstr = bkpInt2Str(instance->_tm->tm_mday);
+					if (!shrink && instance->_tm->tm_mday < 10)
+						tmpstr = L'0' + tmpstr;
+					break;
+				case L'h':
+					tmpstr = bkpInt2Str(instance->_tm->tm_hour);
+					if (!shrink && instance->_tm->tm_hour < 10)
+						tmpstr = L'0' + tmpstr;
+					break;
+				case L'm':
+					tmpstr = bkpInt2Str(instance->_tm->tm_min);
+					if (!shrink && instance->_tm->tm_min < 10)
+						tmpstr = L'0' + tmpstr;
+					break;
+				case L's':
+					tmpstr = bkpInt2Str(instance->_tm->tm_sec);
+					if (!shrink && instance->_tm->tm_sec < 10)
+						tmpstr = L'0' + tmpstr;
+					break;
+				}
+				shrink = false;
+				res += tmpstr;
+			}
+		}
+		return res;
 	}
 
 #ifdef CURRENTCLASS
@@ -1490,6 +1627,71 @@ namespace Parser_Util
 	}
 #endif
 
+#ifdef CURRENTCLASS
+#undef CURRENTCLASS
+#define CURRENTCLASS Flags
+#endif
+
+	NATIVECLASS_INIT()
+	{
+		PREPARECLASS();
+		DISABLECREATE();
+		REG_FUNC(contains);
+		REG_FUNC(split);
+		REG_FUNC(mask);
+		REG_FUNC(merge);
+	}
+
+	NATIVECLASS_CREATENEW()
+	{
+		return NULL;
+	}
+
+	NATIVECLASS_FUNC(contains)
+	{
+		MINIMUMPARAMNUM(2);
+		bkpulong container = PARAM(0);
+		bkpulong flag = PARAM(1);
+		return (bool)((container & flag) == flag);
+	}
+
+	NATIVECLASS_FUNC(split)
+	{
+		MINIMUMPARAMNUM(1);
+		bkpulong container = PARAM(0);
+		BKE_VarArray *arr = new BKE_VarArray();
+		bkpulong mask = 1;
+		while (mask != 0xF0000000)
+		{
+			if (container & mask)
+			{
+				arr->pushMember(mask);
+			}
+			mask <<= 1;
+		}
+		return arr;
+	}
+
+	NATIVECLASS_FUNC(mask)
+	{
+		MINIMUMPARAMNUM(2);
+		bkpulong container = PARAM(0);
+		bkpulong mask = PARAM(1);
+		return container & mask;
+	}
+
+	NATIVECLASS_FUNC(merge)
+	{
+		MINIMUMPARAMNUM(1);
+		bkpulong container = PARAM(0);
+		int count = PARAMCOUNT();
+		for (int i = 1; i < count; i++)
+		{
+			container |= (bkpulong)PARAM(i).asInteger();
+		}
+		return container;
+	}
+
 	void registerExtend(Parser *p)
 	{
 		//register inner classes and global functions
@@ -1547,7 +1749,7 @@ namespace Parser_Util
 		str_class->addNativeFunction(QUICKFUNC(endWith));
 		str_class->addNativeFunction(QUICKFUNC(clear));
 		str_class->addNativeFunction(QUICKFUNC(toLowerCase));
-		str_class->addNativeFunction(QUICKFUNC(toLowerCase));
+		str_class->addNativeFunction(QUICKFUNC(toUpperCase));
 		//str_class->innerCreateInstance=&Parser_Util::Native_string;
 
 		//arr_class->addNativePropGet(QUICKGETTER(type));
@@ -1566,6 +1768,7 @@ namespace Parser_Util
 		arr_class->addNativeFunction(QUICKFUNC(clone));
 		arr_class->addNativeFunction(QUICKFUNC(equals));
 		arr_class->addNativeFunction(QUICKFUNC(clear));
+		arr_class->addNativeFunction(L"random", &Parser_Util::nativeFunc_array_random);
 		arr_class->innerCreateInstance = &Parser_Util::nativeFunc_array;
 #ifdef ENABLE_FILE
 		arr_class->addNativeFunction(QUICKFUNC(save));
@@ -1618,6 +1821,7 @@ namespace Parser_Util
 #ifdef HAS_REGEX
 		p->registerClass(QUICKCLASS(Regex));
 #endif
+		p->registerClass(QUICKCLASS(Flags));
 	}
 }
 

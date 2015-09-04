@@ -1,10 +1,6 @@
 ﻿#ifndef BKE_VCODE
 #define BKE_VCODE
 
-#ifdef _DEBUG_MEM
-#include <debug_new.h>
-#endif
-
 #include <string>
 //#include <vector>
 #include "BKE_array.h"
@@ -100,6 +96,7 @@ enum BKE_opcode : bkplong
 	OP_WITH,
 	OP_INCONTEXTOF,
 	OP_STATIC,
+	OP_ENUM,
 
 	OP_INVALID,
 

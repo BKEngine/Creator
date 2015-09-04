@@ -23,6 +23,7 @@
 
 #include "defines.h"
 
+
 #ifndef _WIN32
 #include <sys/time.h>
 #endif
@@ -50,11 +51,11 @@ inline bool isInt(double k)
 {
 	if(k>0)
 	{
-		return fabs(k - (bkplong)(k + 0.5))<EPS;
+		return fabs(k - (bkplonglong)(k + 0.5))<EPS;
 	}
 	else
 	{
-		return fabs(k - (bkplong)(k - 0.5))<EPS;
+		return fabs(k - (bkplonglong)(k - 0.5))<EPS;
 	}
 };
 inline bkplonglong toInt(double k)
@@ -72,6 +73,8 @@ inline bkplonglong toInt(double k)
 bkplong bkpwcstoxl(const wchar_t *nptr, const wchar_t **endptr, int ibase, int flags = 0);
 
 wstring bkpInt2Str(double v);
+wstring bkpInt2HexStr(double v);
+wstring bkpStrToLower(const wstring &s);
 double str2num(const wstring &src);
 double bkpwcstonum(const wchar_t *nptr, const wchar_t **endptr);
 inline bool isZero(const double &c)
@@ -116,7 +119,12 @@ enum VarType
 #define WSTR2(x) WSTR(x)
 #define WSTR2NUM(x) WSTRNUM(x)
 #define W_FILE WSTR2(__FILE__)
+#if defined(WIN32) && 0
 #define W_FUNCTION WSTR2(__FUNCTION__)
+#else
+#include "bkutf8.h"
+#define W_FUNCTION UniFromUTF7(__FUNCTION__)
+#endif
 #define W_LINE WSTR2NUM(__LINE__)
 
 #if PARSER_DEBUG
@@ -143,8 +151,10 @@ public:
 #endif
 	Var_Except(const std::wstring &str) :msg(str), pos(-1), line(-1){};
 	Var_Except(const std::wstring &str, bkplong p) :msg(str), pos(p), line(-1){};
-    inline std::wstring getMsg()const{ return line == -1 ? (pos == -1 ? msg : L"在" + bkpInt2Str((int)pos) + L"处：" + msg) : L"在" + bkpInt2Str((int)line) + L"行" + bkpInt2Str((int)pos) + L"处：" + msg; };
-	inline std::wstring getMsgWithoutPos(){ return msg; };
+	Var_Except(std::wstring &&str) :msg(std::move(str)), pos(-1), line(-1){};
+	Var_Except(std::wstring &&str, bkplong p) :msg(std::move(str)), pos(p), line(-1){};
+	inline std::wstring getMsg() const { return line == -1 ? (pos == -1 ? msg : L"在" + bkpInt2Str((int)pos) + L"处：" + msg) : L"在" + bkpInt2Str((int)line) + L"行" + bkpInt2Str((int)pos) + L"处：" + msg; };
+	inline std::wstring getMsgWithoutPos() const { return msg; };
 	inline void setMsg(const std::wstring &str){ msg = str; };
 	inline void addPos(bkplong pos){ this->pos = pos; }
 	inline void removePos(){ this->pos = -1; }
@@ -156,14 +166,6 @@ public:
 };
 
 //some suppliments
-
-void utf16toucs4(uint32_t *ucs4, const uint16_t* utf16, int size = -1);
-
-void ucs4toutf16(uint16_t* utf16, const uint32_t *ucs4, int size = -1);
-
-void bkpwcstombs(char *dst, const wchar_t *src, int srclen = -1);
-
-void bkpmbstowcs(wchar_t *dst, const char *src, int srclen = -1);
 
 double getutime();
 
@@ -190,5 +192,10 @@ struct GlobalStructures
 extern GlobalStructures _globalStructures;
 
 #define GLOBALSTRUCTURES_INIT() static struct __GlobalLoader { __GlobalLoader(){_globalStructures.init();}} __globalLoader
+
+#ifdef _DEBUG_MEM
+#include <debug_new.h>
+#endif
+
 
 #endif

@@ -5,7 +5,7 @@
 #include "dia/ctextedit.h"
 #include "dia/cdiroption.h"
 #include "dia/cskinoption.h"
-#include "dia/LangOpt.h"
+#include "dia/CommonSettingDia.h"
 
 namespace Ui {
 class SetOptionDia;
@@ -21,6 +21,8 @@ public:
 
 public slots:
 	void downOK() ;
+	void resetCurrent();
+	void resetAll();
 //    void ItemChange(int i) ;
 
 private:
@@ -28,7 +30,8 @@ private:
 	CTextEdit *CEditOption ;
 	CDirOption *dirOption ;
 	CSkinOption *skinOption ;
-	CLangEdit *langOption;
+
+	QList<CommonSettingDia*> set;
 };
 
 #endif // SETOPTIONDIA_H

@@ -13,13 +13,15 @@
 #undef new
 
 //#if PARSER_DEBUG==2
-class GlobalMemoryPool : public BKE_hashmap<void *, bkplong, 12>
+class GlobalMemoryPool : public BKE_hashmap<void *, bkpulong>
 //#else
 //class GlobalMemoryPool : public BKE_hashmap<void *, _dummy_class, 12>
 //#endif
 {
 private:
+#if PARSER_MULTITHREAD
 	recursive_mutex mu;
+#endif
 
 public:
 #if PARSER_DEBUG==2
@@ -29,6 +31,7 @@ public:
 
 	GlobalMemoryPool()
 	{
+		resizeTableSize(16);
 		__init_memorypool();
 		clearflag = false;
 #if PARSER_DEBUG==2
@@ -36,8 +39,10 @@ public:
 #endif
 	};
 
+#if PARSER_MULTITHREAD
 	inline void lock(){ mu.lock(); }
 	inline void unlock(){ mu.unlock(); }
+#endif
 
 	void insertKey(void *p, bkplong size)
 	{
@@ -76,11 +81,12 @@ public:
 	bkplong ref;
 
 	
-	virtual void release(){ if (--ref <= 0 
-//#ifndef _DEBUG_MEM
-		//&& !MemoryPool().clearflag
-//#endif
-		) delete this; }
+	virtual void release()
+	{ 
+		if (--ref <= 0 ) 
+			delete this;
+	}
+
 	inline BKE_VarObject *addRef(){ ref++; return this; }
 
 	inline void forceDelete(){ delete this; }
@@ -100,7 +106,7 @@ public:
 			MemoryPool().insertKey(p);
 			MemoryPool().unlock();
 #else
-			MemoryPool().insertKey(p, size);
+			MemoryPool().insertKey(p, (bkpulong)size);
 #endif
 		}
 		return p;
@@ -120,6 +126,9 @@ public:
 			MemoryPool().lock();
 #endif
 			auto it = MemoryPool().find(p);
+			//先做兼容处理，找到bug再说
+			if (it == MemoryPool().end())
+				return;
 			if (it->second <= 4 * SMALL)
 				allocator_array()[(it->second + 3) / 4]->dynamic_deallocate(p);
 			else
@@ -162,6 +171,15 @@ T BKE_VarObjectSafeReferencer(T o)
 	return NULL;
 }
 
+template<class T>
+T BKE_VarObjectSafeReleaser(T o)
+{
+	static_assert(std::is_convertible<T, BKE_VarObject *>::value, "");
+	if (o)
+		o->release();
+	return o;
+}
+
 class BKE_VarClosure;
 class BKE_VarThis;
 class BKE_Variable;
@@ -180,6 +198,8 @@ enum
 class BKE_VariablePointer;
 class BKE_VarDic;
 class BKE_VarFunction;
+class BKE_VarProp;
+class BKE_VarClass;
 class BKE_Variable
 {
 private:
@@ -216,10 +236,11 @@ public:
 	inline BKE_Variable(bkpulong i) : vt(VAR_NUM), num(i), obj(NULL), is_var(VARIABLE_VAR){}
 	inline BKE_Variable(const BKE_Number &i) : vt(VAR_NUM), num(i), obj(NULL), is_var(VARIABLE_VAR){}
 
-	inline BKE_Variable(const wchar_t *s) : vt(VAR_STR), str(s), obj(NULL), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(const wchar_t *s) : vt(VAR_STR), str(s, false), obj(NULL), is_var(VARIABLE_VAR){}
 	inline BKE_Variable(const wchar_t &s) : vt(VAR_STR), str(wstring(1, s), false), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(const wstring &s) : vt(VAR_STR), str(s), obj(NULL), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(const wstring &s) : vt(VAR_STR), str(s, false), obj(NULL), is_var(VARIABLE_VAR){}
 	inline BKE_Variable(const BKE_String &s) : vt(VAR_STR), str(s), obj(NULL), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(BKE_String && s) : vt(VAR_STR), str(std::move(s)), obj(NULL), is_var(VARIABLE_VAR){}
 
 	inline BKE_Variable(BKE_VarObject *o){ obj = o;  if (!o)vt = VAR_NONE; else vt = o->vt; is_var = VARIABLE_VAR; }
 
@@ -228,6 +249,7 @@ public:
 	inline BKE_Variable(BKE_Variable &&v)
 	{
 		vt = v.vt;
+		v.vt = VAR_NONE;
 		num = std::move(v.num);
 		str = std::move(v.str);
 		obj = v.obj;
@@ -255,15 +277,19 @@ public:
 	template<class Head>
 	static BKE_Variable arrayWithObjects(BKE_VarArray *a, const Head &h);
 
-	//throw
-#define _throw(str)	{						\
-		wstring str2 = L"变量";				\
-		save(str2, false);					\
-		str2 += L"\t:";						\
-		str2+= str;							\
-		throw Var_Except(str2 VAR_EXCEPT_EXT);				\
-		}
+public:
+	static wstring _getThrowString(const wstring &str, const BKE_Variable *_this)
+	{
+		wstring str2 = L"变量";
+		_this->save(str2, false);
+		str2 += L"\t:";
+		str2 += str;
+		return std::move(str2);
+	}
+#define _throw(str) throw Var_Except(BKE_Variable::_getThrowString(str, this) VAR_EXCEPT_EXT);
+#define _throw2(str, var) throw Var_Except(BKE_Variable::_getThrowString(str, &(var)) VAR_EXCEPT_EXT);
 
+public:
 	//variable and const
 	inline void makeUnchangable(){ is_var = LOCK_TYPE; };
 	inline void makeConst(){ is_var = CONST_VAR; };
@@ -303,7 +329,6 @@ public:
 	}
 
 	//type-conversion
-	double asNumber() const;
 	BKE_Number asBKENum() const;
 	inline BKE_String asBKEStr() const
 	{
@@ -311,25 +336,85 @@ public:
 			return str;
 		return asString();
 	}
-	inline double toNumber() { if (vt == VAR_NUM) return num; double s = asNumber(); clear(); num = s; vt = VAR_NUM; return s; };
-	inline bool isInteger() const { return vt == VAR_NUM && num.isInteger(); };
-	bkplonglong asInteger() const;
-	bkplonglong roundAsInteger() const;
-	bool canBeNumber() const;
-	inline bkplonglong toInteger(){ bkplonglong i = asInteger(); clear(); num = i; vt = VAR_NUM; return i; };
-	inline bkplonglong roundToInteger(){ bkplonglong i = roundAsInteger(); clear(); num = i; vt = VAR_NUM; return i; }
 	bool asBoolean() const;
-	inline bool toBoolean(){ bool s = asBoolean(); clear(); num = s ? 1 : 0; vt = VAR_NUM; return s; };
+	bkplonglong asInteger() const;
+	double asNumber() const;
 	wstring asString() const;
-	inline const wstring& toString(){ if (vt == VAR_STR) return str.getConstStr(); wstring s = asString(); clear(); str = s; vt = VAR_STR; return str.getConstStr(); };
-	
-	//已addRef
-	BKE_VarThis *asThisClosure() const;
-	//未addRef
-	BKE_VarClosure *asClosure() const;
 	BKE_VarArray *asArray() const;
 	BKE_VarDic *asDic() const;
 	BKE_VarFunction *asFunc() const;
+	BKE_VarClass *asClass() const;
+	bool canBeNumber() const;
+	inline bool isInteger() const { return vt == VAR_NUM && num.isInteger(); };
+	bkplonglong roundAsInteger() const;
+	inline bkplonglong roundToInteger(){ bkplonglong i = roundAsInteger(); clear(); num = i; vt = VAR_NUM; return i; }
+	inline bool toBoolean(){ bool s = asBoolean(); clear(); num = s ? 1 : 0; vt = VAR_NUM; return s; };
+	inline bkplonglong toInteger(){ bkplonglong i = asInteger(); clear(); num = i; vt = VAR_NUM; return i; };
+	inline double toNumber() { if (vt == VAR_NUM) return num; double s = asNumber(); clear(); num = s; vt = VAR_NUM; return s; };
+	inline const wstring& toString(){ if (vt == VAR_STR) return str.getConstStr(); wstring s = asString(); clear(); str = std::move(s); vt = VAR_STR; return str.getConstStr(); };
+	
+	double forceAsNumber() const;
+	bkplonglong forceAsInteger() const;
+	BKE_Number forceAsBKENum() const;
+	bool forceAsBoolean() const;
+	const wstring& forceAsString() const;
+	const BKE_String &forceAsBKEStr() const;
+	BKE_VarArray *forceAsArray() const;
+	BKE_VarDic *forceAsDic() const;
+	BKE_VarFunction *forceAsFunc() const;
+	BKE_VarProp *forceAsProp() const;
+
+	//已addRef
+	BKE_VarThis *asThisClosure() const;
+	//未addRef
+	BKE_VarClosure *forceAsClosure() const;
+
+	//get restrict value whith no throw exception
+	BKE_Number getBKENum(BKE_Number defaultValue = 0) const;
+	BKE_String getBKEStr(BKE_String defaultValue = BKE_String()) const;
+	double getDouble(double defaultValue = 0) const;
+	bkplonglong getInteger(bkplonglong defaultValue = 0) const;
+	wstring getString(const wstring &defaultValue = wstring()) const;
+	bool getBoolean(bool defaultValue = false) const;
+	BKE_VarArray *getArray(BKE_VarArray *defaultValue = NULL) const;
+	BKE_VarDic *getDic(BKE_VarDic *BKE_VarDic = NULL) const;
+	BKE_VarFunction *getFunc(BKE_VarFunction *defaultValue = NULL) const;
+	BKE_VarClass *getClass(BKE_VarClass *defaultValue = NULL) const;
+	BKE_VarClosure *getClosure(BKE_VarClosure *defaultValue = NULL) const;
+	BKE_VarProp *getProp(BKE_VarProp *defaultValue = NULL) const;
+
+	template<class T, class... Args>
+	struct ConventerDelegate
+	{
+		static T convertTo(const BKE_Variable &_this, Args&&...args)
+		{
+			return _this.operator T();
+		}
+
+		static BKE_Variable convertFrom(const T& v)
+		{
+			return std::move(BKE_Variable(v));
+		}
+	};
+
+	template<class T>
+	T convertTo() const
+	{
+		return ConventerDelegate<T>::convertTo(*this);
+	}
+
+	template<class T, class... Args>
+	T convertTo(Args&&...args) const
+	{
+		return ConventerDelegate<T, Args...>::convertTo(*this, args...);
+	}
+
+	template<class T>
+	static BKE_Variable convertFrom(const T& v)
+	{
+		return ConventerDelegate<T>::convertFrom(v);
+	}
+
 	inline operator float() const{ return (float)asNumber(); };
 	inline operator double() const{ return asNumber(); };
 	inline operator bool() const{ return asBoolean(); };
@@ -346,6 +431,13 @@ public:
 			return str;
 		return asString();
 	}
+	//cause operator wstring invalid
+	//inline operator const wchar_t*() const
+	//{
+	//	if (vt == VAR_STR)
+	//		return str.getConstStr().c_str();
+	//	_throw(L"无法转化为字符串");
+	//}
 
 	inline int getType() const { return vt; };
 
@@ -363,8 +455,7 @@ public:
 
 	BKE_String getTypeBKEString() const
 	{
-		//fixme
-		static const wchar_t * t[] = { L"void", L"number", L"string", L"array", L"dictionary", L"function", L"property", L"closure", L"class", L"thisclosure" };
+		static const BKE_String t[] = { L"void", L"number", L"string", L"array", L"dictionary", L"function", L"property", L"closure", L"class", L"thisclosure" };
 		return t[vt];
 	}
 
@@ -449,6 +540,7 @@ public:
 	inline BKE_Variable& operator [] (const wchar_t *v){ wstring vv(v); return operator [] (BKE_String(vv)); };
 	BKE_Variable& operator [] (int v);
 	bool operator == (const BKE_Variable &v) const;
+	bool strictEqual(const BKE_Variable &v) const;
 	inline bool operator != (const BKE_Variable &v) const{ return !(*this == v); };
 	bool operator < (const BKE_Variable &v) const;
 	bool operator > (const BKE_Variable &v) const;
@@ -462,7 +554,7 @@ public:
 	}
 	BKE_Variable getMid(bkplong *start, bkplong *stop, bkplong step);
 	BKE_Variable& dot(const BKE_String &funcname);
-	BKE_Variable dotFunc(const BKE_String &funcname);
+	bool dotFunc(const BKE_String &funcname, BKE_Variable &out);
 	BKE_Variable operator + (double v) const;
 	BKE_Variable operator - (double v) const;
 	inline BKE_Variable operator * (double v) const{ return asBKENum() * BKE_Number(v); };
@@ -615,7 +707,7 @@ public:
 	BKE_array<BKE_Variable, T> vararray;
 
 	inline BKE_VarArrayTemplate() :BKE_VarObject(VAR_ARRAY){};
-	BKE_VarArrayTemplate(std::initializer_list<BKE_Variable> l) :BKE_VarObject(VAR_ARRAY){ vararray.resize(l.size()); for (auto it = l.begin(); it != l.end(); it++) vararray[(bkplong)(it - l.begin())] = *it; }
+	BKE_VarArrayTemplate(std::initializer_list<BKE_Variable> l) :BKE_VarObject(VAR_ARRAY){ vararray.resize((bkplong)l.size()); for (auto it = l.begin(); it != l.end(); it++) vararray[(bkplong)(it - l.begin())] = *it; }
 	inline bkplong getCount() const
 	{
 		return vararray.size();
@@ -696,7 +788,7 @@ public:
 			return;
 		vararray.erase(index);
 	};
-	inline void deleteMember(const BKE_Variable obj)
+	inline void deleteMember(const BKE_Variable &obj)
 	{
 		vararray.eraseValue(obj);
 	};
@@ -774,6 +866,19 @@ public:
 				return i;
 		}
 		return -1;
+	}
+	wstring join(const wstring &c)
+	{
+		wstring res;
+		if (vararray.empty())
+			return res;
+		int i;
+		for (i = 0; i < vararray.size() - 1; i++)
+		{
+			res += vararray[i].asString() + c;
+		}
+		res += vararray[i].asString();
+		return res;
 	}
 };
 
@@ -889,6 +994,10 @@ public:
 		for (auto it = v->varmap.begin(); it != v->varmap.end(); it++)
 			varmap.erase(it->first);
 	}
+	inline bool contains(const BKE_String &s)
+	{
+		return varmap.contains(s);
+	}
 	BKE_Variable toArray()
 	{
 		BKE_VarArray *arr = new BKE_VarArray();
@@ -931,6 +1040,20 @@ public:
 		}
 		return true;
 	}
+
+	//iterator
+
+	typedef BKE_hashmap<BKE_String, BKE_Variable>::iterator iterator;
+	typedef BKE_hashmap<BKE_String, BKE_Variable>::const_iterator const_iterator;
+	inline iterator begin(){ return varmap.begin(); }
+	inline const_iterator begin() const { return varmap.begin(); }
+	inline iterator end(){ return varmap.end(); }
+	inline const_iterator end() const{ return varmap.end(); }
+
+	iterator find(const BKE_String &key) const
+	{
+		return varmap.find(key);
+	}
 };
 
 class BKE_VarClass;
@@ -948,15 +1071,20 @@ protected:
 	}
 	virtual ~BKE_VarClosure()
 	{
-		if (!MemoryPool().clearflag && withvar)
-			withvar->release();
+		if (!MemoryPool().clearflag)
+		{
+			if (parent) 
+				parent->release();
+			if (withvar)
+				withvar->release();
+		}
 	};
 public:
 	int extraref;
 	BKE_hashmap<BKE_String, BKE_Variable> varmap;
 	BKE_VarClosure *parent;
 	BKE_VarObject *withvar;
-	virtual void release()
+	virtual void release() override
 	{
 		if (extraref > 0 && ref - 1 == extraref)
 			varmap.clear();
@@ -967,7 +1095,7 @@ public:
 			)
 			delete this;
 	};
-	inline BKE_VarClosure(const BKE_VarClosure *p = NULL):BKE_VarObject(VAR_CLO), extraref(0){ parent = const_cast<BKE_VarClosure *>(p); withvar = p ? BKE_VarObjectSafeReferencer(p->withvar) : NULL; };
+	inline BKE_VarClosure(BKE_VarClosure *p = NULL) :BKE_VarObject(VAR_CLO), extraref(0){ parent = BKE_VarObjectSafeReferencer(p); withvar = p ? BKE_VarObjectSafeReferencer(p->withvar) : NULL; };
 	inline void clear()
 	{
 		varmap.clear();
@@ -1016,6 +1144,7 @@ public:
 	inline void setConstMember(const BKE_String &key, const BKE_Variable &obj)
 	{
 		BKE_Variable &var = varmap[key];
+		if (!var.isVar() && !var.isTemp()) { throw Var_Except(L"操作数必须是变量" VAR_EXCEPT_EXT); }
 		var = obj;
 		var.makeConst();
 	};
@@ -1138,19 +1267,36 @@ public:
 	wstring rawexp;
 #endif
 	vector<BKE_String> paramnames;
-	BKE_hashmap<BKE_String, BKE_Variable, 4> initials;
+	BKE_hashmap<BKE_String, BKE_Variable> initials;
 
 	BKE_VarFunction() = delete;
 	inline BKE_VarFunction(BKE_NativeFunction fun, BKE_Variable *_self = NULL) :BKE_VarObject(VAR_FUNC){ func = new BKE_FunctionCode(fun); self = _self; closure = (BKE_VarClosure *)BKE_VarClosure::global()->addRef(); closure->extraref++; };
 	inline BKE_VarFunction(BKE_bytree *tree, BKE_Variable *_self = NULL) :BKE_VarObject(VAR_FUNC){ func = new BKE_FunctionCode(tree); self = _self; closure = (BKE_VarClosure *)BKE_VarClosure::global()->addRef(); closure->extraref++; };
-	inline BKE_VarFunction(const BKE_VarFunction &f, BKE_VarClosure *c = BKE_VarClosure::global(), BKE_Variable *_self = NULL) :BKE_VarObject(VAR_FUNC){ func = (BKE_FunctionCode*)f.func->addRef(); initials = f.initials; paramnames = f.paramnames; if (_self)self = _self; else self = f.self; closure = c; c->addRef(); closure->extraref++; };
+	BKE_VarFunction(const BKE_VarFunction &f, BKE_VarClosure *c = BKE_VarClosure::global(), BKE_Variable *_self = NULL) :BKE_VarObject(VAR_FUNC)
+	{ 
+		func = (BKE_FunctionCode*)f.func->addRef(); 
+		initials = f.initials; 
+		name = f.name;
+		paramnames = f.paramnames;
+		if (_self)
+			self = _self; 
+		else 
+			self = f.self; 
+		closure = c; 
+		c->addRef(); 
+		closure->extraref++; 
+#if PARSER_DEBUG
+		linestartpos = f.linestartpos;
+		rawexp = f.rawexp;
+#endif
+	};
 	inline BKE_Variable run(BKE_VarArray *params)
 	{
 		if (func->native)
 			return (func->native)(self, params, getClo());
 		BKE_VarClosure *clo = new BKE_VarClosure(getClo());
 		BKE_VarObjectAutoReleaser cc(clo);
-		for (auto i : initials)
+		for (auto &i : initials)
 		{
 			clo->setMember(i.first, i.second);
 		}
@@ -1236,7 +1382,7 @@ private:
 
 	inline BKE_VarClosure *getClo() const
 	{
-		return closure ? closure : (self ? self->asClosure() : NULL);
+		return closure ? closure : (self ? self->forceAsClosure() : NULL);
 	}
 public:
 	//BKE_VarProp(BKE_Variable *_self/* = NULL*/, BKE_NativeFunction get = NULL, BKE_NativeFunction set = NULL)
@@ -1274,6 +1420,7 @@ public:
 		else
 			self = p.self;
 		closure = c;
+		setparam = p.setparam;
 	}
 	inline void addPropGet(BKE_NativeFunction get){ if (funcget)funcget->release(); funcget = new BKE_FunctionCode(get); }
 	inline void addPropGet(BKE_bytree *get){ if (funcget)funcget->release(); funcget = new BKE_FunctionCode(get); }
@@ -1452,7 +1599,7 @@ public:
 		//_this->release();
 		//_this = new BKE_VarThis(this);
 		cannotcreate = false;
-		for (auto it : parent->varmap)
+		for (auto &it : parent->varmap)
 		{
 			if (it.second.getType() == VAR_FUNC)
 			{
@@ -1489,7 +1636,7 @@ public:
 			parent[i]->addRef();
 			for (auto &&it : parent[i]->classvar)
 				classvar[it.first] = it.second.clone();
-			for (auto it : parent[i]->varmap)
+			for (auto &it : parent[i]->varmap)
 			{
 				if (it.second.getType() == VAR_FUNC)
 				{
@@ -1527,7 +1674,7 @@ public:
 		//_this->release();
 		//_this = new BKE_VarThis(this);
 		cannotcreate = true;
-		for (auto it : parent->varmap)
+		for (auto &it : parent->varmap)
 		{
 			if (it.second.getType() == VAR_FUNC)
 			{
@@ -1613,7 +1760,7 @@ public:
 		}
 		if (!isdef)
 			return static_cast<BKE_VarClass*>(parent)->hasClassMember(key, var);
-		auto p = dynamic_cast<BKE_VarClass*>(parent);
+		//auto p = dynamic_cast<BKE_VarClass*>(parent);
 		for (int i = parents.size() - 1; i >= 0; i--)
 		{
 			if (parents[i]->hasClassMember(key, var))
@@ -1772,7 +1919,7 @@ inline BKE_VarClass *BKE_VarClosure::getThisClosure()
 	while (p && !dynamic_cast<BKE_VarClass*>(p))
 		p = p->parent;
 	if (p)
-		return dynamic_cast<BKE_VarClass*>(p);
+		return static_cast<BKE_VarClass*>(p);
 	else
 		return NULL;
 }

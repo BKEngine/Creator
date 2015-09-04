@@ -21,44 +21,22 @@ typedef std::wstring StringVal;
 struct StringType
 {
 	StringVal str;
-	int ref;
-	bkplong hash;
-	bool hashed;
-	wstring printStr;
-	bool printStrAvailable;
+	mutable int ref;
+	mutable bkplong hash;
+	mutable bool hashed;
+	mutable wstring printStr;
+	mutable bool printStrAvailable;
 
-	//do nothing
-	inline StringType(){};
-
+	inline StringType() = delete;
 	//because a Stringtype is unique
 	StringType(const StringType &s) = delete;
 	StringType& operator =(const StringType &) = delete;
 
 	//although copy is banned, move is enabled
 	//used to construct hashed string from unhash one
-	StringType(StringType &&s)
-	{
-		str = std::move(s.str);
-		//ref = s.ref;
-		//hash = s.hash;
-		//hashed = s.hashed;
-		ref = 1;
-		hashed = true;
-		printStr = std::move(s.printStr);
-		printStrAvailable = s.printStrAvailable;
-	}
-	StringType& operator =(StringType &&s)
-	{
-		str = std::move(s.str);
-		//ref = s.ref;
-		//hash = s.hash;
-		//hashed = s.hashed;
-		ref = 1;
-		hashed = true;
-		printStr = std::move(s.printStr);
-		printStrAvailable = s.printStrAvailable;
-		return *this;
-	};
+	inline StringType(StringType &&s);
+
+	//inline StringType& operator =(StringType &&s);
 
 	inline operator const wchar_t* () const
 	{
@@ -75,27 +53,72 @@ struct StringType
 		return str == s;
 	}
 
+	inline bool operator == (const wstring &s) const
+	{
+		return str == s;
+	}
+
 	inline StringType(const wchar_t *s) :str(s)
 	{
 		ref = 0;
 		printStrAvailable = false;
 	}
 
-	inline StringType(wstring &&s)
-	{
-		str = std::move(s);
-		ref = 0;
-		printStrAvailable = false;
-	}
-
+	inline StringType(wstring &&s);
 };
+
+//special hash function
+template<>
+inline int32_t BKE_hash(const StringType &str)
+{
+	return str.hashed ? str.hash : BKE_hash(str.str);
+}
+
+StringType::StringType(StringType &&s)
+	:str(std::move(s.str))
+{
+	//ref = s.ref;
+	//hashed = s.hashed;
+	//hash = s.hash;
+	ref = 0;
+	//hashed = true;
+	s.hashed = false;
+	//hash留给GlobalStringMap去做，那斌已经有hash过的值了
+	//hash = BKE_hash(s);
+	printStr = std::move(s.printStr);
+	printStrAvailable = s.printStrAvailable;
+}
+
+//StringType& StringType::operator = (StringType &&s)
+//{
+//	str = std::move(s.str);
+//	//ref = s.ref;
+//	//hash = s.hash;
+//	//hashed = s.hashed;
+//	ref = 0;
+//	hashed = true;
+//	hash = BKE_hash(s);
+//	s.hashed = false;
+//	printStr = std::move(s.printStr);
+//	printStrAvailable = s.printStrAvailable;
+//	return *this;
+//};
+
+inline StringType::StringType(wstring &&s)
+	:str(std::move(s))
+{
+	ref = 0;
+	//hash留给GlobalStringMap去做，那斌已经有hash过的值了
+	//hashed = h;
+	printStrAvailable = false;
+}
 
 class BKE_Number;
 
 class BKE_String
 {
 	friend int32_t _BKE_hash(const BKE_String &str);
-	StringType *var;
+	mutable StringType *var;
 public:
 
 	inline BKE_String();
@@ -206,7 +229,7 @@ public:
 
 	inline void setEmpty();
 
-	inline bkplong size() const{ return var->str.size(); };
+	inline bkplong size() const{ return (bkplong)var->str.size(); };
 
 	inline bool isVoid() const { return empty(); }
 
@@ -230,7 +253,7 @@ public:
 
 	inline const wstring& getConstStr() const { return var->str; }
 
-	inline wstring substr(bkplong start=0, bkpulong count = wstring::npos) const
+	inline wstring substr(bkplong start=0, bkpulong count = (bkpulong)-1) const
 	{
 		return getConstStr().substr(start, count);
 	}
@@ -249,14 +272,7 @@ public:
 	const wstring& printStr() const;
 };
 
-//special hash function
-template<>
-inline int32_t BKE_hash(const StringType &str)
-{
-	return str.hashed ? str.hash : BKE_hash(str.str);
-}
-
-class GlobalStringMap :protected BKE_hashset<StringType, 12>
+class GlobalStringMap :protected BKE_hashset<StringType>
 {
 private:
 	BKE_WrapperMutex mu;
@@ -264,6 +280,7 @@ private:
 
 public:
 	inline GlobalStringMap() :nullString(L""){ 
+		resizeTableSize(12);
 		nullString.hashed = true; nullString.hash = 0;
 	};
 
@@ -285,9 +302,11 @@ public:
 
 	void forceGC();
 
+	bool stripStr(const std::wstring &s);
+
 	inline void GC()
 	{
-		if (getCount() > 4096)
+		if (getCount() > hashsize)
 			forceGC();
 	}
 };
@@ -301,16 +320,15 @@ inline int32_t _BKE_hash(const BKE_String &str)
 {
 	if (!str.var->hashed)
 	{
-		BKE_String *_s = (BKE_String *)&str;
 		auto back = str.var;
 		if (back->ref <= 1)
 		{
-			_s->var = StringMap().hashString(std::move(*str.var));
+			str.var = StringMap().hashString(std::move(*str.var));
 			delete back;
 		}
 		else
 		{
-			_s->var = StringMap().allocHashString(*str.var);
+			str.var = StringMap().allocHashString(*str.var);
 			back->ref--;
 		}
 	}

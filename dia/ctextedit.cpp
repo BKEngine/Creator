@@ -24,13 +24,43 @@ CTextEdit::CTextEdit(QWidget *parent) :
 	connect(ui->comboBox_2,SIGNAL(currentTextChanged(QString)),this,SLOT(upFont())) ;
 
 	ui->listBox->setCurrentText( lex->ConfigName() );
-	upFont();
-	upColour();
+
+	load();
 }
 
 CTextEdit::~CTextEdit()
 {
 	delete ui;
+}
+
+void CTextEdit::save()
+{
+	QString stylename = ui->listBox->currentText();
+	if (stylename.isEmpty() || stylename == "默认") return;
+
+	QStringList c;
+	for (int i = 0; i < ui->listWidget->count(); i++)
+	{
+		c.push_back(QString("%1").arg(lex->hlb[i].fc));
+		c.push_back(QString("%1").arg(lex->hlb[i].bc));
+	}
+
+	BKE_USER_SETTING->setValue(stylename + "/colour", c);
+	BKE_USER_SETTING->setValue(stylename + "/font", ui->fontComboBox->currentText());
+	BKE_USER_SETTING->setValue(stylename + "/size", ui->comboBox_2->currentText());
+	BKE_USER_SETTING->setValue(stylename + "/valid", QVariant(true));
+}
+
+void CTextEdit::load()
+{
+	upFont();
+	upColour();
+}
+
+void CTextEdit::reset()
+{
+	lex->ReadConfig("默认");
+	load();
 }
 
 void CTextEdit::configchange(int ci)
@@ -103,20 +133,7 @@ void CTextEdit::onOKClicked()
 
 void CTextEdit::onSave()
 {
-	QString stylename = ui->listBox->currentText() ;
-	if( stylename.isEmpty() || stylename == "默认" ) return ;
-
-	QStringList c;
-	for (int i = 0; i < ui->listWidget->count(); i++)
-	{
-		c.push_back(QString("%1").arg(lex->hlb[i].fc));
-		c.push_back(QString("%1").arg(lex->hlb[i].bc));
-	}
-
-	BKE_USER_SETTING->setValue(stylename+"/colour", c);
-	BKE_USER_SETTING->setValue(stylename+"/font", ui->fontComboBox->currentText());
-	BKE_USER_SETTING->setValue(stylename+"/size", ui->comboBox_2->currentText());
-	BKE_USER_SETTING->setValue(stylename+"/valid", QVariant(true) );
+	save();
 }
 
 void CTextEdit::SetCurrentStyle(QString stylename)
