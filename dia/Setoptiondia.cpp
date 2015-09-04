@@ -2,37 +2,39 @@
 #include "ui_Setoptiondia.h"
 
 SetOptionDia::SetOptionDia(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::SetOptionDia)
+QDialog(parent),
+ui(new Ui::SetOptionDia)
 {
-    ui->setupUi(this);
-    this->setLayout(ui->gridLayout);
-    resize(600,400);
+	ui->setupUi(this);
+	this->setLayout(ui->gridLayout);
+	resize(600, 400);
 
-    CEditOption = new CTextEdit(this) ;
-    dirOption = new CDirOption(this) ;
-    skinOption = new CSkinOption(this) ;
+	CEditOption = new CTextEdit(this);
+	dirOption = new CDirOption(this);
+	skinOption = new CSkinOption(this);
+	langOption = new CLangEdit(this);
 
-    ui->stackedWidget->addWidget(CEditOption) ;
-    ui->stackedWidget->addWidget(dirOption) ;
-    ui->stackedWidget->addWidget(skinOption) ;
+	ui->stackedWidget->addWidget(CEditOption);
+	ui->stackedWidget->addWidget(dirOption);
+	ui->stackedWidget->addWidget(skinOption);
+	ui->stackedWidget->addWidget(langOption);
 
-    connect(ui->listWidget,SIGNAL(currentRowChanged(int)),ui->stackedWidget,SLOT(setCurrentIndex(int))) ;
-    connect(ui->btnok,SIGNAL(clicked()),this,SLOT(downOK())) ;
-    ui->listWidget->setCurrentRow(0);
+	connect(ui->listWidget, SIGNAL(currentRowChanged(int)), ui->stackedWidget, SLOT(setCurrentIndex(int)));
+	connect(ui->btnok, SIGNAL(clicked()), this, SLOT(downOK()));
+	ui->listWidget->setCurrentRow(0);
 }
 
 SetOptionDia::~SetOptionDia()
 {
-    delete ui;
+	delete ui;
 }
 
 void SetOptionDia::downOK()
 {
-    CEditOption->onSave();
-    CEditOption->SetCurrentStyle("");
+	CEditOption->onSave();
+	CEditOption->SetCurrentStyle("");
 
-    BKE_SKIN_SETTING->setValue("StyleName",BKE_SKIN_CURRENT);
+	BKE_SKIN_SETTING->setValue("StyleName", BKE_SKIN_CURRENT);
 
-    this->close() ;
+	this->close();
 }

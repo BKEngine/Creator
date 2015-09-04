@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
+ <class>CLangEdit</class>
  <widget class="QWidget" name="CLangEdit">
   <property name="geometry">
    <rect>
@@ -97,9 +97,18 @@
          <height>191</height>
         </rect>
        </property>
+       <property name="lineWidth">
+        <number>1</number>
+       </property>
        <property name="showGrid">
         <bool>true</bool>
        </property>
+       <property name="cornerButtonEnabled">
+        <bool>false</bool>
+       </property>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>true</bool>
+       </attribute>
        <column>
         <property name="text">
          <string>命令</string>

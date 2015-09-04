@@ -532,6 +532,15 @@
     <ClCompile Include="GeneratedFiles\qrc_source.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="dia\LangOpt.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_LangOpt.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_LangOpt.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -867,6 +876,9 @@
     <ClInclude Include="GeneratedFiles\ui_versioninfo.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_LangOpt.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\Setoptiondia.ui">
@@ -891,6 +903,12 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="dia\versioninfo.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\LangOpt.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\LangOpt.ui">
       <Filter>Form Files</Filter>
     </CustomBuild>
   </ItemGroup>
