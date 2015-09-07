@@ -41,6 +41,9 @@ CodeWindow::CodeWindow(QWidget *parent)
 	connect(btnsaveasact, SIGNAL(triggered()), this, SLOT(SaveAs()));
 	//编译
 	connect(btncompileact, SIGNAL(triggered()), this, SLOT(CompileAll()));
+	connect(btncompilelang, SIGNAL(triggered()), this, SLOT(CompileLang()));
+	//编译并运行
+	connect(btncompilerunact, SIGNAL(triggered()), this, SLOT(CompileAndRun()));
 	connect(btnbookmarkact, SIGNAL(triggered()), this, SLOT(AddBookMark()));
 	//查找
 	connect(btnfindact, SIGNAL(triggered()), diasearch, SLOT(SearchModel()));
@@ -58,8 +61,6 @@ CodeWindow::CodeWindow(QWidget *parent)
 	connect(btnselectall, SIGNAL(triggered()), this, SLOT(SelectAll()));
 	//转到行
 	connect(btnfly, SIGNAL(triggered()), this, SLOT(GotoLine()));
-	//编译并运行
-	connect(btncompilerunact, SIGNAL(triggered()), this, SLOT(CompileAndRun()));
 	//点击标签
 	connect(slablelist, SIGNAL(currentIndexChanged(int)), this, SLOT(GotoLable(int)));
 	//重做
@@ -422,6 +423,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 		int linestart = loli->edit->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line);
 		int linelen = loli->edit->SendScintilla(QsciScintilla::SCI_LINELENGTH, line);
 		char *buf = new char[linelen + 1];
+		loli->edit->SendScintilla(QsciScintilla::SCI_GETLINE, line, buf);
 		buf[linelen] = 0;
 		linelen--;
 		while (buf[linelen] == '\r' || buf[linelen] == '\n')
@@ -547,7 +549,7 @@ void CodeWindow::searchAllFile(const QString &searchstr, bool iscase, bool isreg
 	QStringList ls;
 	ls.append(currentproject->ListFiles(1));
 	ls.append(currentproject->ListFiles(2));
-	QString base = currentproject->FileDir();
+	QString base = currentproject->FileDir() + '/';
 	if (ls.empty())
 		return;
 	//WaitWindow *w = new WaitWindow();
@@ -842,6 +844,44 @@ void CodeWindow::Compile()
 	}
 }
 
+void CodeWindow::CompileLang(bool release /*= false*/)
+{
+	LOLI_CLEAR_TEMP(BKE_CURRENT_DIR + "/temp");
+	//当前编辑项不是项目的话，什么也不会发生
+	if (currentproject == 0) return;
+
+	//设置按钮
+	btncompileact->setEnabled(false);
+	btncompilerunact->setEnabled(false);
+	btnrunact->setEnabled(false);
+	////清理上次编译的项目
+	//deleteCompileFile(ComList, cosdir);
+
+	////拷贝文件
+	//if( !WriteOpenFile(currentproject->FileDir()) ){
+	//    btncompileact->setEnabled(true);
+	//    btncompilerunact->setEnabled(true);
+	//    btnrunact->setEnabled(true);
+	//    return ;
+	//}
+	//QStringList ls = ListDirsCopy(ComList,cosdir,BKE_CURRENT_DIR+"/temp") ;
+
+	//if( ls.size() > 0){
+	//    QMessageBox msg ;
+	//    msg.setText("以下文件复制失败：\r\n" + ls.join("\r\n") );
+	//    msg.addButton(QMessageBox::Ok);
+	//    msg.exec() ;
+	//    return ;
+	//}
+	QStringList ls = currentproject->AllScriptFiles();
+	kag->setMaximum(ls.size());
+	kag->setValue(0);
+	kag->show();
+	//开始编译
+	//comtool.Compile(BKE_CURRENT_DIR+"/temp");
+	SaveALL();
+	comtool.CompileLang(currentproject->FileDir(), release);
+}
 
 void CodeWindow::CompileAll(bool release /*= false*/)
 {

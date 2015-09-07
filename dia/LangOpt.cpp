@@ -20,7 +20,9 @@ CLangEdit::~CLangEdit()
 
 void CLangEdit::save()
 {
-
+	if (ui->lineEdit->text().isEmpty())
+		QMessageBox::warning(NULL, "警告", "语言编号不能为空");
+	ui->lineEdit->setText("chn");
 }
 
 void CLangEdit::reset()
@@ -32,7 +34,9 @@ void CLangEdit::reset()
 
 void CLangEdit::load()
 {
-	ui->lineEdit->setText(QString::fromStdWString(global_bke_info.projsetting.getString(L"chn")));
+	ui->lineEdit->setText(QString::fromStdWString(global_bke_info.projsetting[L"lang"].getString(L"chn")));
+
+	auto opt = global_bke_info.projsetting[L"langopt"];
 
 
 }

@@ -1,5 +1,6 @@
 ﻿#include <weh.h>
 #include "bkecompile.h"
+#include "../BKS_info.h"
 
 BkeCompile::BkeCompile(QObject *parent) :
 QObject(parent)
@@ -7,9 +8,42 @@ QObject(parent)
 #ifdef Q_OS_WIN
 	codec = QTextCodec::codecForName("GBK");
 #else
-    codec = QTextCodec::codecForName("UTF-8");
+	codec = QTextCodec::codecForName("UTF-8");
 #endif
-    cmd = NULL;
+	cmd = NULL;
+}
+
+void BkeCompile::CompileLang(const QString &dir, bool release/* = false*/)
+{
+	result.clear();
+	if (cmd)
+		delete cmd;
+	cmd = new QProcess(this);
+	connect(cmd, SIGNAL(readyReadStandardOutput()), this, SLOT(StandardOutput()));
+	connect(cmd, SIGNAL(finished(int)), this, SLOT(finished(int)));
+	connect(cmd, SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
+	cmd->setWorkingDirectory(BKE_CURRENT_DIR);
+	list.clear();
+	QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
+	QString lang = QString::fromStdWString(global_bke_info.projsetting[L"lang"].getString(L"chn"));
+	QString langopt = BKE_CURRENT_DIR + "/" + BKE_PROJECT_NAME + ".user|langopt";
+#ifdef Q_OS_WIN
+	cmd->start(BKE_CURRENT_DIR + "/tool/" + exeName + ".exe", QStringList() << dir << "-nopause" << "-lang" << lang << "-langopt" << langopt);
+#elif defined(Q_OS_MAC)
+	/*QString str = "./BKCompiler_Dev '" + dir + "'-nopause";
+	QFile file(BKE_CURRENT_DIR + "/run_bkc.sh");
+	if(!file.open(QFile::WriteOnly))
+	{
+	QMessageBox::information(0, "Error", "Cannot write run_bkc.sh.");
+	return;
+	}
+	file.write(str.toUtf8());
+	file.close();
+	cmd->start("open", QStringList() << "-a" << "Terminal.app sh" << BKE_CURRENT_DIR + "/run_bkc.sh");*/
+	cmd->start(BKE_CURRENT_DIR + "/" + exeName, QStringList() << dir << "-nopause" << "-lang" << lang << "-langopt" << langopt);
+#else
+	cmd->start(BKE_CURRENT_DIR + "/tool/" + exeName, QStringList() << dir << "-nopause" << "-lang" << lang << "-langopt" << langopt);
+#endif
 }
 
 void BkeCompile::Compile(const QString &dir, bool release/* = false*/)
@@ -21,24 +55,25 @@ void BkeCompile::Compile(const QString &dir, bool release/* = false*/)
 	connect(cmd, SIGNAL(readyReadStandardOutput()), this, SLOT(StandardOutput()));
 	connect(cmd, SIGNAL(finished(int)), this, SLOT(finished(int)));
 	connect(cmd, SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
+	cmd->setWorkingDirectory(BKE_CURRENT_DIR);
 	list.clear();
-    QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
+	QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
 #ifdef Q_OS_WIN
-    cmd->start(BKE_CURRENT_DIR + "/tool/"+exeName+".exe", QStringList() << dir << "-nopause");
+	cmd->start(BKE_CURRENT_DIR + "/tool/"+exeName+".exe", QStringList() << dir << "-nopause");
 #elif defined(Q_OS_MAC)
-    /*QString str = "./BKCompiler_Dev '" + dir + "'-nopause";
-    QFile file(BKE_CURRENT_DIR + "/run_bkc.sh");
-    if(!file.open(QFile::WriteOnly))
-    {
-        QMessageBox::information(0, "Error", "Cannot write run_bkc.sh.");
-        return;
-    }
-    file.write(str.toUtf8());
-    file.close();
-    cmd->start("open", QStringList() << "-a" << "Terminal.app sh" << BKE_CURRENT_DIR + "/run_bkc.sh");*/
-    cmd->start(BKE_CURRENT_DIR + "/"+exeName, QStringList() << dir << "-nopause");
+	/*QString str = "./BKCompiler_Dev '" + dir + "'-nopause";
+	QFile file(BKE_CURRENT_DIR + "/run_bkc.sh");
+	if(!file.open(QFile::WriteOnly))
+	{
+		QMessageBox::information(0, "Error", "Cannot write run_bkc.sh.");
+		return;
+	}
+	file.write(str.toUtf8());
+	file.close();
+	cmd->start("open", QStringList() << "-a" << "Terminal.app sh" << BKE_CURRENT_DIR + "/run_bkc.sh");*/
+	cmd->start(BKE_CURRENT_DIR + "/"+exeName, QStringList() << dir << "-nopause");
 #else
-    cmd->start(BKE_CURRENT_DIR + "/tool/"+exeName, QStringList() << dir << "-nopause");
+	cmd->start(BKE_CURRENT_DIR + "/tool/"+exeName, QStringList() << dir << "-nopause");
 #endif
 }
 

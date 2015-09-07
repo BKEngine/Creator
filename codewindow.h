@@ -158,6 +158,7 @@ signals:
 	void FileWillBeDel(const QString &file);
 	void Compile();
 	void CompileAll(bool release = false);
+	void CompileLang(bool release = false);
 	void CompileFinish();
 	void CompileError(QString s);
 	void CompileAndRun();
