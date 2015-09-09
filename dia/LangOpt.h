@@ -25,6 +25,10 @@ public:
 private:
 	Ui::CLangEdit *ui;
 
+public slots:
+	void onAddClick();
+	void onRemoveClick();
+	void onEditClick();
 };
 
 #endif // CLangEdit_H

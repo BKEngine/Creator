@@ -8,7 +8,10 @@ QWidget(parent),
 ui(new Ui::CLangEdit)
 {
 	ui->setupUi(this);
-	
+
+	connect(ui->addButton, SIGNAL(clicked()), this, SLOT(onAddClick()));
+	connect(ui->removeButton, SIGNAL(clicked()), this, SLOT(onRemoveClick()));
+
 	load();
 }
 
@@ -38,5 +41,20 @@ void CLangEdit::load()
 
 	auto opt = global_bke_info.projsetting[L"langopt"];
 
+
+}
+
+void CLangEdit::onAddClick()
+{
+
+}
+
+void CLangEdit::onRemoveClick()
+{
+
+}
+
+void CLangEdit::onEditClick()
+{
 
 }
