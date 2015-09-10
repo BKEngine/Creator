@@ -28,6 +28,8 @@ struct ParamInfo
 	QStringList options;
 };
 
+class BkeProject;
+
 class BKE_Info
 {
 public:
@@ -44,28 +46,15 @@ public:
 
 	BKE_Variable projsetting;
 
+	BkeProject *pro;
+
 	~BKE_Info()
 	{
 	}
 
-	void setProj()
-	{
-		wstring w;
-		bool res = BKE_readFile(w, (BKE_CURRENT_DIR + "/" + BKE_PROJECT_NAME + ".user").toStdWString());
-		if (res)
-		{
-			try
-			{
-				projsetting = Parser::getInstance()->evalMultiLineStr(w);
-			}
-			catch (Var_Except &){}
-		}
-	}
+	void setProj(BkeProject *p);
 
-	void save()
-	{
-		BKE_writeFile(projsetting.saveString(false), (BKE_CURRENT_DIR + "/" + BKE_PROJECT_NAME + ".user").toStdWString());
-	}
+	void save();
 };
 
 extern BKE_Info global_bke_info;

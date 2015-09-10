@@ -64,7 +64,6 @@ void ProjectWindow::NewProject()
 	addTopLevelItem(workpro->Root);
 	BkeChangeCurrentProject();
 	BkeCreator::AddRecentProject(workpro->FileDir() + "/" + BKE_PROJECT_NAME);
-	global_bke_info.setProj();
 }
 
 void ProjectWindow::OpenProject()
@@ -117,6 +116,7 @@ void ProjectWindow::OpenProject(const QString &file)
 
 	MainWindow::getInstance()->setWindowTitle(t);
 	//SetProp(GetActiveWindow(), L"title", (HANDLE)BKE_hash(t.toStdWString().c_str()));
+	emit onProjectOpen(workpro);
 }
 
 //读取项目，并发送
@@ -561,6 +561,8 @@ void ProjectWindow::CloseProject()
 	//workpro->deleteLater();
 	takeTopLevelItem(indexOfTopLevelItem(workpro->Root));
 	delete workpro;
+	workpro = NULL;
+	emit onProjectClose();
 }
 
 void ProjectWindow::CloseProject(const ItemInfo &f)

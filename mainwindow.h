@@ -35,8 +35,8 @@ public:
 
 signals:
 
-	public slots :
-		void HiddenLeft();
+public slots :
+	void HiddenLeft();
 	void AboutBkeCreator();
 	void ClearMenu();
 	void ReflashMenu();
@@ -52,6 +52,9 @@ signals:
 	void OCupdate();
 	void Config();
 	void GameConfig();
+	void ProjectOpen(BkeProject *p);
+	void ProjectClose();
+
 
 	//发布游戏
 	void ReleaseGame();
@@ -78,6 +81,8 @@ private:
 	QAction *btnnewfileact;
 	QAction *btnReleaseGame;
 	QToolBar *btnbar;
+
+	QAction *option_prop;
 
 	QSearchLineEdit *editsearch;
 	QNetworkAccessManager *netAdimin;

@@ -1,5 +1,6 @@
 ﻿#include <weh.h>
 #include "mainwindow.h"
+#include "BKS_info.h"
 
 QSplitter *ras[3] ;
 CodeWindow *codeedit ;
@@ -165,10 +166,10 @@ void MainWindow::CreateMenu()
 	wmenu = this->menuBar()->addMenu("&工具");
 	wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
 	connect(wmenu->addAction("选项..."),SIGNAL(triggered()),this,SLOT(Config())) ;
-	connect(wmenu->addAction("工程属性"), SIGNAL(triggered()), this, SLOT(GameConfig()));
-	btnReleaseGame = wmenu->addAction("发布游戏");
+	connect(option_prop = wmenu->addAction("工程属性"), SIGNAL(triggered()), this, SLOT(GameConfig()));
+	option_prop->setEnabled(false);
+	connect(btnReleaseGame = wmenu->addAction("发布游戏"), SIGNAL(triggered()), this, SLOT(ReleaseGame()));
 	btnReleaseGame->setEnabled(false);
-	connect(btnReleaseGame, SIGNAL(triggered()), this, SLOT(ReleaseGame()));
 	wmenu = this->menuBar()->addMenu("&帮助");
 	wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
 	wmenu->addAction("帮助文件") ;
@@ -182,6 +183,8 @@ void MainWindow::CreateMenu()
 	connect(btnopenfileact,SIGNAL(triggered()),projectedit ,SLOT(OpenFile())) ;
 	connect(btnnewfileact,SIGNAL(triggered()),codeedit,SLOT(NewEmptyFile())) ;
 
+	connect(projectedit, SIGNAL(onProjectOpen(BkeProject *)), this, SLOT(ProjectOpen(BkeProject *)));
+	connect(projectedit, SIGNAL(onProjectClose()), this, SLOT(ProjectClose()));
 }
 
 //创建下边栏
@@ -456,6 +459,19 @@ void MainWindow::OCupdate()
 	}
 
 	QMessageBox::information(this,"",temp,QMessageBox::Ok) ;
+}
+
+void MainWindow::ProjectOpen(BkeProject *p)
+{
+	global_bke_info.setProj(p);
+	option_prop->setEnabled(true);
+	btnReleaseGame->setEnabled(true);
+}
+
+void MainWindow::ProjectClose()
+{
+	option_prop->setEnabled(false);
+	btnReleaseGame->setEnabled(false);
 }
 
 //配置项目

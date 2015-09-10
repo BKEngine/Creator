@@ -22,11 +22,11 @@ void BkeCompile::CompileLang(const QString &dir, bool release/* = false*/)
 	connect(cmd, SIGNAL(readyReadStandardOutput()), this, SLOT(StandardOutput()));
 	connect(cmd, SIGNAL(finished(int)), this, SLOT(finished(int)));
 	connect(cmd, SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
-	cmd->setWorkingDirectory(BKE_CURRENT_DIR);
+	cmd->setWorkingDirectory(dir);
 	list.clear();
 	QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
 	QString lang = QString::fromStdWString(global_bke_info.projsetting[L"lang"].getString(L"chn"));
-	QString langopt = BKE_CURRENT_DIR + "/" + BKE_PROJECT_NAME + ".user|langopt";
+	QString langopt = dir + "/" + BKE_PROJECT_NAME + ".user|langopt";
 #ifdef Q_OS_WIN
 	cmd->start(BKE_CURRENT_DIR + "/tool/" + exeName + ".exe", QStringList() << dir << "-nopause" << "-lang" << lang << "-langopt" << langopt);
 #elif defined(Q_OS_MAC)
@@ -55,7 +55,7 @@ void BkeCompile::Compile(const QString &dir, bool release/* = false*/)
 	connect(cmd, SIGNAL(readyReadStandardOutput()), this, SLOT(StandardOutput()));
 	connect(cmd, SIGNAL(finished(int)), this, SLOT(finished(int)));
 	connect(cmd, SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
-	cmd->setWorkingDirectory(BKE_CURRENT_DIR);
+	cmd->setWorkingDirectory(dir);
 	list.clear();
 	QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
 #ifdef Q_OS_WIN

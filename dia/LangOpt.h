@@ -5,6 +5,7 @@
 #include "CommonSettingDia.h"
 #include <QWidget>
 #include <QColorDialog>
+#include <QTableWidgetItem>
 
 namespace Ui {
 	class CLangEdit;
@@ -25,10 +26,15 @@ public:
 private:
 	Ui::CLangEdit *ui;
 
+	void removeRow(const QString &tag);
+	int findRow(const QString &tag);
+	void sortLast();
+
 public slots:
 	void onAddClick();
 	void onRemoveClick();
-	void onEditClick();
+
+	void onDoubleClick(QTableWidgetItem*);
 };
 
 #endif // CLangEdit_H

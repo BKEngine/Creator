@@ -1,6 +1,8 @@
 ﻿#include <weh.h>
 #include "BKS_info.h"
 #include "ParserHelper/parser/parserextend.h"
+#include "bkeproject.h"
+#include "dia/LangOpt.h"
 
 GLOBALSTRUCTURES_INIT();
 
@@ -30,4 +32,30 @@ BKE_Info::BKE_Info()
 	glo->setConstMember(L"message_layer", -2);
 	glo->setConstMember(L"bgm", -1);
 	glo->setConstMember(L"voice", -2);
+}
+
+void BKE_Info::setProj(BkeProject *p)
+{
+	pro = p;
+	wstring w;
+	bool res = BKE_readFile(w, (p->ProjectFile() + ".user").toStdWString());
+	if (res && !w.empty())
+	{
+		try
+		{
+			projsetting = Parser::getInstance()->evalMultiLineStr(w);
+		}
+		catch (Var_Except &){}
+	}
+	else
+	{
+		CLangEdit edit;
+		edit.reset();
+		edit.save();
+	}
+}
+
+void BKE_Info::save()
+{
+	BKE_writeFile(projsetting.saveString(false), (pro->ProjectFile() + ".user").toStdWString());
 }

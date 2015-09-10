@@ -70,6 +70,7 @@ public:
 	BkeProject(QObject *parent = 0);
 	~BkeProject() ;
 	QString ProjectFile() const;
+	QString ProjectLangFile() const;
 	QString FileDir() const;
 	QString ProjectName() const ;
 	QString IconKey(qint64 key) ;
@@ -136,6 +137,7 @@ public:
 private:
 	QString pdir ;
 	QString pname ;
+	QString pfile;
 	QString ErrorInfo ;
 	QString Time ;
 	QStringList OutFilelist ;

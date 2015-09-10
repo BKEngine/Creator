@@ -1,4 +1,5 @@
-﻿D:/BKE-Demo/BkeProject.bkp
+﻿G:/BKEProject/BKE-Demo/BkeProject.bkp
+D:/BKE-Demo/BkeProject.bkp
 G:/BKEProject/BKE demo_v4/BkeProject.bkp
 F:/BKEProject/BKE demo/BkeProject.bkp
 F:/BKEProject/Mazu/BkeProject.bkp
@@ -7,4 +8,3 @@ C:/Users/taiga/Desktop/青春/BkeProject.bkp
 C:/Users/taiga/Desktop/test_/BkeProject.bkp
 C:/Users/taiga/Desktop/template/BkeProject.bkp
 F:/work/qt/build-BKE_creator-Desktop_Qt_5_3_0_MinGW_32bit-Debug/BkeProject.bkp
-D:/nvl_for_bke/project/template/BkeProject.bkp

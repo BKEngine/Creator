@@ -26,4 +26,5 @@ void DoubleInput::waitResult(QString &r1, QString &r2)
 	this->exec();
 	r1 = ui->lineEdit->text();
 	r2 = ui->lineEdit_2->text();
+	this->close();
 }

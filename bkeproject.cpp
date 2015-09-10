@@ -160,6 +160,7 @@ bool BkeProject::OpenProject(const QString &name)
 
 	QFileInfo fi(name);
 	pdir = fi.path();
+	pfile = fi.fileName();
 	pname = bkpAdmin->value("name").toString();
 	//if( bkpAdmin->value("version").toString().isEmpty() ) pdir = pdir + "/" + pname ;
 
@@ -339,7 +340,12 @@ QString BkeProject::ProjectName() const
 
 QString BkeProject::ProjectFile() const
 {
-	return pdir + "/" + pname;
+	return pdir + "/" + pfile;
+}
+
+QString BkeProject::ProjectLangFile() const
+{
+	return pdir + "/" + pfile + ".user";
 }
 
 //寻找指定的文件，并把文件加入到hash中
@@ -972,6 +978,6 @@ QString BkeProject::AllNameToName(const QString &allname)
 
 void BkeProject::ReleaseGame()
 {
-    //ersionInfo info(this);
-    //info.exec();
+	//ersionInfo info(this);
+	//info.exec();
 }

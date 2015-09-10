@@ -44,7 +44,7 @@
     <rect>
      <x>20</x>
      <y>20</y>
-     <width>91</width>
+     <width>341</width>
      <height>21</height>
     </rect>
    </property>
@@ -57,9 +57,15 @@
     <rect>
      <x>20</x>
      <y>120</y>
-     <width>61</width>
+     <width>341</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <property name="text">
     <string>TextLabel</string>

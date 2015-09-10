@@ -32,12 +32,12 @@ QString BkeFullnameToName(const QString &fullname,const QString &dir) ;
 QStringList ListDirsCopy(QStringList &list,const QString &dir,const QString &newdir) ;
 
 namespace BkeCreator {
-     void AddRecentProject(const QString &file) ;
-     void AddRecentFile(const QString &file) ;
+	 void AddRecentProject(const QString &file) ;
+	 void AddRecentFile(const QString &file) ;
 	 void ReNameRecentFile(const QString &old, const QString &now);
 	 void ReadApiList(QStringList *ls, const QString &name, int type);
-     QStringList CopyStencil(const QString &dir,const QStringList &ls) ;
-     QString IntToRgbString(unsigned int rgb) ;
+	 QStringList CopyStencil(const QString &dir,const QStringList &ls) ;
+	 QString IntToRgbString(unsigned int rgb) ;
 }
 
 inline QString chopFileExt(const QString &filename)
