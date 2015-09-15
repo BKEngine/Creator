@@ -5,8 +5,6 @@ VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BKE_creator_static_qsci", "BKE_creator_static_qsci.vcxproj", "{5E15C268-65A9-3AD8-887F-7E1741CE0F29}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BKEApiGenerator", "BKEApiGenerator\BKEApiGenerator.vcxproj", "{372C5E63-8207-322A-8786-806AA187AE52}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserWrapper", "..\ParserWrapper\ParserWrapper.csproj", "{1BF0FFC4-F2B3-485E-B29B-85711A2268D3}"
 EndProject
 Global
@@ -40,21 +38,6 @@ Global
 		{5E15C268-65A9-3AD8-887F-7E1741CE0F29}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{5E15C268-65A9-3AD8-887F-7E1741CE0F29}.Release|Win32.ActiveCfg = Release|Win32
 		{5E15C268-65A9-3AD8-887F-7E1741CE0F29}.Release|Win32.Build.0 = Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug_Release|Any CPU.ActiveCfg = Debug_Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug_Release|Mixed Platforms.ActiveCfg = Debug_Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug_Release|Mixed Platforms.Build.0 = Debug_Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug_Release|Win32.ActiveCfg = Debug_Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug_Release|Win32.Build.0 = Debug_Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug|Win32.ActiveCfg = Debug|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Debug|Win32.Build.0 = Debug|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Release|Any CPU.ActiveCfg = Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Release|Win32.ActiveCfg = Release|Win32
-		{372C5E63-8207-322A-8786-806AA187AE52}.Release|Win32.Build.0 = Release|Win32
 		{1BF0FFC4-F2B3-485E-B29B-85711A2268D3}.Debug_Release|Any CPU.ActiveCfg = Debug_Release|Any CPU
 		{1BF0FFC4-F2B3-485E-B29B-85711A2268D3}.Debug_Release|Mixed Platforms.ActiveCfg = Debug_Release|Any CPU
 		{1BF0FFC4-F2B3-485E-B29B-85711A2268D3}.Debug_Release|Mixed Platforms.Build.0 = Debug_Release|Any CPU

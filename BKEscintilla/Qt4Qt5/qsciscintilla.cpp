@@ -1,4 +1,4 @@
-// This module implements the "official" high-level API of the Qt port of
+﻿// This module implements the "official" high-level API of the Qt port of
 // Scintilla.  It is modelled on QTextEdit - a method of the same name should
 // behave in the same way.
 //
