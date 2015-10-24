@@ -2,6 +2,7 @@
 #include "bkescintilla.h"
 #include "../BKS_info.h"
 #include "../codewindow.h"
+#include "../cmdlist_wrapper.h"
 
 QImage BKE_AUTOIMAGE_KEY(":/auto/source/auto_key.png");
 QImage BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_funcotin.png");
@@ -18,6 +19,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	this->setContextMenuPolicy(Qt::CustomContextMenu); //使用用户右键菜单
 	this->setAttribute(Qt::WA_InputMethodEnabled, true);
 	findstr_length = 0;
+	analysis = NULL;
 
 	setUtf8(true);
 	setMarginWidth(0, "012345678");
@@ -28,6 +30,16 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	markerDefine(QImage(":/info/source/pinsmall.png"), 4);
 	markerDefine(QsciScintilla::LeftRectangle, 5);
 	SendScintilla(SCI_MARKERSETBACK, 5, QColor(0, 159, 60));
+
+	//error
+	SendScintilla(SCI_INDICSETSTYLE, 2, INDIC_SQUIGGLEPIXMAP);
+	SendScintilla(SCI_INDICSETFORE, 2, 0x0000FF);//BGR
+	SendScintilla(SCI_INDICSETOUTLINEALPHA, 2, 255);
+	//warning
+	SendScintilla(SCI_INDICSETSTYLE, 3, INDIC_SQUIGGLEPIXMAP);
+	SendScintilla(SCI_INDICSETFORE, 3, 0xFF0000);//BGR
+	SendScintilla(SCI_INDICSETOUTLINEALPHA, 3, 255);
+
 
 	DefineIndicators(BKE_INDICATOR_FIND, INDIC_STRAIGHTBOX);  //标记搜索的风格指示器
 	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_FIND, QColor(0, 0xff, 0));
@@ -54,8 +66,10 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	ChangeStateFlag = 0;
 	IsNewLine = false;
 	IsWorkingUndo = false;
+	isMacroFile = false;
 
 	deflex = new QsciLexerBkeScript;
+	//pdata = new ParseData(this);
 	setLexer(deflex);
 	Selfparser = defparser = new BkeParser;     //新的词法分析器
 
@@ -71,13 +85,53 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	//输入单个字符
 	connect(this, SIGNAL(SCN_CHARADDED(int)), this, SLOT(CharHandle(int)));
 
+	tm.setTimerType(Qt::TimerType::CoarseTimer);
+	connect(&tm, SIGNAL(timeout()), this, SLOT(onTimer()));
+	tm.start(500);
 }
 
 BkeScintilla::~BkeScintilla()
 {
+	tm.stop();
 	delete Selfparser;
 }
 
+void BkeScintilla::onTimer()
+{
+	if (!analysis)
+		return;
+	auto p = analysis->lockFile(FileName);
+	if (!p || !p->refresh)
+	{
+		analysis->unlockFile();
+		return;
+	}
+	p->refresh = false;
+	set<QString> l;
+	p->getLabels(l);
+	emit refreshLabel(l);
+	//clear indicator
+	int len = length();
+	SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, 2);
+	SendScintilla(BkeScintilla::SCI_INDICATORCLEARRANGE, 0, len);
+	SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, 3);
+	SendScintilla(BkeScintilla::SCI_INDICATORCLEARRANGE, 0, len);
+	for (auto &it : p->infos)
+	{
+		SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, it.type);
+		SendScintilla(BkeScintilla::SCI_SETINDICATORVALUE, it.value);
+		SendScintilla(BkeScintilla::SCI_INDICATORFILLRANGE, it.from, it.len);
+	}
+	p->infos2_mutex.lock();
+	for (auto &it : p->infos2)
+	{
+		SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, it.type);
+		SendScintilla(BkeScintilla::SCI_SETINDICATORVALUE, it.value);
+		SendScintilla(BkeScintilla::SCI_INDICATORFILLRANGE, it.from, it.len);
+	}
+	p->infos2_mutex.unlock();
+	analysis->unlockFile();
+}
 
 void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 	int len, int added, int line, int foldNow, int foldPrev, int token,
@@ -87,6 +141,11 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 
 	int xline, xindex;
 	lineIndexFromPosition(pos, &xline, &xindex);
+	Pos st, off;
+	st.line = xline;
+	st.pos = xindex;
+	lineIndexFromPosition(pos + len, &off.line, &off.pos);
+	off -= st;
 	if (ChangeType & SC_PERFORMED_USER)
 	{
 		BkeStartUndoAction();
@@ -101,6 +160,16 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 		modfieddata.lineadd = added;
 		modfieddata.text = QString(text);
 
+
+		if (!FileName.isEmpty())
+		{
+			int buflen = length() + 1;
+			char *buf = new char[buflen];
+			SendScintilla(SCI_GETTEXT, buflen, buf);
+			analysis->pushFile(FileName, buf);
+			delete[] buf;
+		}
+		//pdata->insertChars(st, off);
 	}
 	else if (mtype & SC_MOD_DELETETEXT)
 	{
@@ -112,6 +181,16 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 		modfieddata.index = xindex;
 		modfieddata.lineadd = added;
 		//modfieddata.text = QString(text);
+
+		if (!FileName.isEmpty())
+		{
+			int buflen = length() + 1;
+			char *buf = new char[buflen];
+			SendScintilla(SCI_GETTEXT, buflen, buf);
+			analysis->pushFile(FileName, buf);
+			delete[] buf;
+		}
+		//pdata->deleteChars(st, off);
 	}
 	else if (mtype & SC_MOD_BEFOREDELETE)
 	{
@@ -122,14 +201,9 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 		modfieddata.index = xindex;
 		modfieddata.lineadd = added;
 		int l = 0;
-		QString q;
-		while (l < len)
-		{
-			char ch = SendScintilla(SCI_GETCHARAT, pos + l);
-			q.push_back(ch);
-			l++;
-		}
-		modfieddata.text = q;
+		char *buf = new char[len + 1];
+		SendScintilla(SCI_GETTEXTRANGE, pos, pos + len, buf);
+		modfieddata.text = buf;
 
 		ChangeType = mtype;
 	}
@@ -651,7 +725,9 @@ bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr, bool cs
 		//from = SendScintilla(SCI_GETTARGETEND) + 1;
 		SendScintilla(SCI_SETANCHOR, SendScintilla(SCI_GETTARGETSTART) + 1);
 		SendScintilla(SCI_GOTOPOS, SendScintilla(SCI_GETTARGETSTART));
-	}while(0);
+		SendScintilla(SCI_SETSELECTIONSTART, SendScintilla(SCI_GETTARGETSTART));
+		SendScintilla(SCI_SETSELECTIONEND, SendScintilla(SCI_GETTARGETEND));
+	} while (0);
 
 	ChangeStateFlag &= (~BKE_CHANGE_REPLACE);
 	return true;
@@ -943,6 +1019,7 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 	SendScintilla(SCI_SETFOLDFLAGS, 16 | 4); //如果折叠就在折叠行的上下各画一条横线
 
 	SendScintilla(SCI_PRIVATELEXERCALL, 0, &global_bke_info);
+	//SendScintilla(SCI_PRIVATELEXERCALL, 1, pdata);
 	//SendScintilla(SCI_SETMARGINSENSITIVEN, SC_MARKNUM_FOLDER, true);
 }
 
@@ -959,7 +1036,7 @@ int BkeScintilla::GetActualIndentCharLength(int lineID)
 bool BkeScintilla::event(QEvent *e)
 {
 	if (e->type() == QEvent::ToolTip){
-		ShowInfomation();
+		ShowInfomation(((QHelpEvent*)e)->pos());
 		return true;
 	}
 	return QsciScintilla::event(e);
@@ -967,16 +1044,95 @@ bool BkeScintilla::event(QEvent *e)
 
 
 //显示鼠标悬浮位置的信息
-void BkeScintilla::ShowInfomation()
+void BkeScintilla::ShowInfomation(QPoint pos)
 {
-	QPoint pt1 = QCursor::pos();
-	QPoint pt = mapFromGlobal(pt1);
+	int n_pos = SendScintilla(BkeScintilla::SCI_POSITIONFROMPOINT, pos.x(), pos.y());
+
+	auto node = analysis->findNode(FileName, n_pos);
+	//test indicator
+	int v2 = SendScintilla(SCI_INDICATORVALUEAT, 2, n_pos);
+	int v3 = SendScintilla(SCI_INDICATORVALUEAT, 3, n_pos);
+
+	int v = v2 ? v2 - 1 : v3 - 1;
+
+	if (v >= 0)
+	{
+		QString arg1;
+		if (node)
+			arg1 = node->name;
+		QString arg2;
+		BaseNode* node2 = NULL;
+		if (node)
+			node2 = node->findChild(n_pos - node->startPos);
+		if (node2)
+			arg2 = node2->name;
+		QString inform(InidicatorMSG[v]);
+		inform = inform.arg(arg1, arg2);
+		QToolTip::showText(QCursor::pos(), inform);
+		return;
+	}
 
 	//获取鼠标所在位置的位置（相当于文档）
+	if (node && node->isCommand())
+	{
+		QString name = node->name;
+		//test cmd first
+		{
+			auto it = CmdList.find(name);
+			if (it != CmdList.end())
+			{
+				QString info = "命令:" + it->name + "\t参数:" + it->argNames.join(' ') + '\n' + it->detail;
+				QToolTip::showText(QCursor::pos(), info);
+				return;
+			}
+		}
+		//test specialcmd
+		{
+			auto it = SpecialCmdList.find(name);
+			if (it != SpecialCmdList.end())
+			{
+				auto mode = node->findIndex("mode", 0);
+				if (mode && !mode->name.isEmpty())
+				{
+					BKECmdInfo *info = NULL;
+					QString modename = mode->name;
+					bool f;
+					int idx = mode->name.toInt(&f, 0);
+					if (f)
+					{
+						for (auto &it3 : it->modes)
+						{
+							if (it3.second.first == idx)
+							{
+								info = &it3.second.second;
+								modename = it3.first;
+							}
+						}
+					}
+					else
+					{
+						auto it3 = it->modes.find(mode->name);
+						if (it3 != it->modes.end())
+							info = &it3->second.second;
+					}
+
+					if (info)
+					{
+						QString t = "命令:" + node->name + "模式:" + modename + "\t参数:" + info->argNames.join(' ') + '\n' + info->detail;
+						QToolTip::showText(QCursor::pos(), t);
+						return;
+					}
+				}
+				return;
+			}
+		}
+		//test macro
+	}
+
 	//long close_pos = SendScintilla(SCI_POSITIONFROMPOINTCLOSE, pt.x(),pt.y() );
 	//int xl,xi ;
 	//lineIndexFromPosition(close_pos,&xl,&xi);
-	int line = lineAt(pt);
+	int line = lineAt(pos);
 	if (line == -1)
 	{
 		QToolTip::hideText();
@@ -990,5 +1146,5 @@ void BkeScintilla::ShowInfomation()
 		QToolTip::hideText();
 		return;
 	}
-	QToolTip::showText(pt1, t);
+	QToolTip::showText(QCursor::pos(), t);
 }

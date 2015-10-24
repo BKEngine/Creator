@@ -34,6 +34,7 @@
 #include <QProcess>
 #include <QtCore>
 #include <QRegExp>
+#include <QHelpEvent>
 #include "function.h"
 
 #include "ParserHelper/ParserHelper.h"
@@ -56,5 +57,7 @@ extern CodeWindow *codeedit;
 extern OtherWindow *otheredit;
 extern ProjectWindow *projectedit;
 extern BkeLeftFileWidget *fileListWidget;
+
+typedef unsigned char u8;
 
 #endif // WEH_H

@@ -7,6 +7,7 @@
 #include "paper/creator_parser.h"
 #include "bkeSci/bkemarks.h"
 #include "bkeprojectconfig.h"
+#include "BG_Analysis.h"
 
 class ItemInfo;
 
@@ -120,6 +121,7 @@ public:
 	QTreeWidgetItem *Root ;
 	BkeParser *lex ;
 	BkeProjectConfig *config;
+	BG_Analysis *analysis;
 
 	QMap<QString, long> files;
 

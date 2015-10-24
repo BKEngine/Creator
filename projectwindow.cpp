@@ -165,7 +165,7 @@ void ProjectWindow::ShowRmenu(const QPoint & pos)
 	}
 	else if (info.Layer > 1){
 		mn.addAction(btns[btn_insertdir]);
-		mn.addAction(btns[btn_preview]);
+		//mn.addAction(btns[btn_preview]);
 	}
 
 	mn.addSeparator();
@@ -369,7 +369,7 @@ void ProjectWindow::Addfiles(const ItemInfo &f)
 		QMessageBox::warning(this, "警告", "以下文件由于工程里有同名文件故无法添加：\n" + errors2.join('\n'));
 		res = QMessageBox::warning(this, "警告", "是否自动加上文件夹作为前缀？", QMessageBox::Yes, QMessageBox::No);
 	}
-	p->Addfiles(ls, f, res == 16384);
+	p->Addfiles(ls, f, res == QMessageBox::Yes);
 }
 
 //

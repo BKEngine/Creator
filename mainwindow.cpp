@@ -472,6 +472,7 @@ void MainWindow::ProjectClose()
 {
 	option_prop->setEnabled(false);
 	btnReleaseGame->setEnabled(false);
+	codeedit->CloseAll();
 }
 
 //配置项目

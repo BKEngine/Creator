@@ -1,5 +1,6 @@
-﻿G:/tttest/BkeProject.bkp
+﻿G:/once/Dev/BkeProject.bkp
 G:/BKEProject/BKE-Demo/BkeProject.bkp
+G:/tttest/BkeProject.bkp
 D:/BKE-Demo/BkeProject.bkp
 G:/BKEProject/BKE demo_v4/BkeProject.bkp
 F:/BKEProject/BKE demo/BkeProject.bkp
@@ -7,4 +8,3 @@ F:/BKEProject/Mazu/BkeProject.bkp
 F:/work/QT/BKE_Creator/file/test/BkeProject.bkp
 C:/Users/taiga/Desktop/青春/BkeProject.bkp
 C:/Users/taiga/Desktop/test_/BkeProject.bkp
-C:/Users/taiga/Desktop/template/BkeProject.bkp

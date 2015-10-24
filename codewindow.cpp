@@ -9,9 +9,10 @@ CodeWindow::CodeWindow(QWidget *parent)
 	diasearch = new SearchBox(this);
 	addDockWidget(Qt::BottomDockWidgetArea, diasearch);
 	currentedit = 0;
+	labelbanned = false;
 
 	QSize fff = parent->size();
-	hint.setWidth(fff.width()*0.8);
+	hint.setWidth(fff.width() * 0.8);
 	hint.setHeight(fff.height() - 50);
 
 	ks1.setColor(QColor(0x80, 0, 0));
@@ -20,8 +21,9 @@ CodeWindow::CodeWindow(QWidget *parent)
 	ks2.setPaper(QColor(0xff, 0xf0, 0xff));
 	CreateBtn();
 
-	//    filewatcher = new QFileSystemWatcher(this) ;
-	//    watcherflag = 1 ;
+	filewatcher = new QFileSystemWatcher(this);
+	connect(filewatcher, SIGNAL(fileChanged(const QString &)), this, SLOT(QfileChange(const QString &)));
+	watcherflag = 1 ;
 
 	currentpos = -1;
 	currentbase = NULL;
@@ -62,7 +64,7 @@ CodeWindow::CodeWindow(QWidget *parent)
 	//转到行
 	connect(btnfly, SIGNAL(triggered()), this, SLOT(GotoLine()));
 	//点击标签
-	connect(slablelist, SIGNAL(currentIndexChanged(int)), this, SLOT(GotoLable(int)));
+	connect(slablelist, SIGNAL(currentIndexChanged(int)), this, SLOT(GotoLabel(int)));
 	//重做
 	connect(btnredoact, SIGNAL(triggered()), this, SLOT(ActRedo()));
 	//撤销
@@ -312,7 +314,8 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 	emit CurrentFileChange(currentbase->Name(), currentbase->ProjectDir());
 
 	AddMarksToEdit();
-	BackstageSearchLable(currentedit);
+	refreshLabel(currentedit);
+	//BackstageSearchLable(currentedit);
 }
 
 //断开、连接当前文档信号
@@ -330,6 +333,8 @@ void CodeWindow::CurrentConnect(bool c)
 		//        connect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
 		//项目被改变，需要从下层传递信号
 		connect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
+		connect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
+		connect(currentedit, SIGNAL(refreshLabel(set<QString> &)), this, SLOT(refreshLabel(set<QString> &)));
 	}
 	else{
 		disconnect(currentedit, SIGNAL(copyAvailable(bool)), btncopyact, SLOT(setEnabled(bool)));
@@ -341,7 +346,9 @@ void CodeWindow::CurrentConnect(bool c)
 		//        disconnect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
 		//        disconnect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
 		//        disconnect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
-		connect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
+		disconnect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
+		disconnect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
+		disconnect(currentedit, SIGNAL(refreshLabel(set<QString> &)), this, SLOT(refreshLabel(set<QString> &)));
 	}
 }
 
@@ -616,15 +623,16 @@ void CodeWindow::addFile(const QString &file, const QString &prodir)
 		BkeCreator::AddRecentFile(loli->FullName());
 
 		//添加文件监视
+		filewatcher->addPath(loli->FullName());
 		//        bool ks = filewatcher->addPath(loli->FullName()) ;
 		//        ks = false ;
 	}
 
 	//从当前文档的附近路径中寻找项目，失败返回0
-	ChangeProject(prowin->FindProjectFromDir(loli->ProjectDir()));
+	//ChangeProject(prowin->FindProjectFromDir(loli->ProjectDir()));
 	//改变当前显示项
 	SetCurrentEdit(loli->edit);
-	QfileChange("");
+	//QfileChange("");
 }
 
 void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
@@ -632,6 +640,7 @@ void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 	ignoreflag = true; //忽略改变，在所有准备工作完成以后才改变
 
 	loli->edit = new BkeScintilla(this);
+	loli->edit->analysis = currentproject->analysis;
 	loli->edit->basedoc = loli;
 	int pos = LOLI_SORT_INSERT(ItemTextList, loli->Name());
 	filewidget->insertItem(pos, loli->Name());
@@ -705,6 +714,7 @@ void CodeWindow::SaveFile()
 
 void CodeWindow::simpleSave(BkeDocBase *loli)
 {
+	filewatcher->removePath(loli->FullName());
 	if (loli->FullName() == "New"){
 		QString temp = QFileDialog::getSaveFileName(this, "保存文件");
 		if (temp.isEmpty()) return;
@@ -720,7 +730,7 @@ void CodeWindow::simpleSave(BkeDocBase *loli)
 	loli->edit->setModified(false);
 	//更新文件被改写的时间
 	loli->upFileTime();
-
+	filewatcher->addPath(loli->FullName());
 }
 
 //另存为
@@ -1135,6 +1145,11 @@ void CodeWindow::ToLocation(BkeMarkerBase *p, const QString &prodir)
 void CodeWindow::ShowRmenu(const QPoint & pos)
 {
 	QMenu menu(this);
+	//在文件内容上右键菜单
+	int n_pos = currentedit->SendScintilla(BkeScintilla::SCI_POSITIONFROMPOINT, pos.x(), pos.y());
+	Pos p;
+	currentedit->lineIndexFromPosition(n_pos, &p.line, &p.pos);
+
 	menu.addAction(btncopyact);
 	menu.addAction(btncutact);
 	menu.addAction(btnpasteact);
@@ -1289,7 +1304,7 @@ void CodeWindow::ChangeCodec()
 	msg.addButton(QMessageBox::Yes);
 	if (msg.exec() == QMessageBox::Yes){
 		QFile *f = currentbase->File();
-		if (!f->isOpen() && !f->open(QFile::ReadWrite)) return;
+		if (!f->isOpen() && !f->open(QFile::ReadOnly)) return;
 		f->seek(0);
 		QByteArray temp = f->readAll();
 		QTextCodec *codec = QTextCodec::codecForName(akb.currentText().toLatin1());
@@ -1297,7 +1312,23 @@ void CodeWindow::ChangeCodec()
 	}
 }
 
+void CodeWindow::refreshLabel(BkeScintilla *sci)
+{
+	set<QString> l;
+	sci->analysis->getLabels(sci->FileName, l);
+	refreshLabel(l);
+}
 
+void CodeWindow::refreshLabel(set<QString> &l)
+{
+	slablelist->clear();
+	labelbanned = true;
+	for (auto &it : l)
+	{
+		slablelist->addItem("*" + it);
+	}
+	labelbanned = false;
+}
 
 void CodeWindow::FileReadyToCompile(int i)
 {
@@ -1362,7 +1393,7 @@ void CodeWindow::QfileChange(const QString &path)
 	QMessageBox msg(this);
 
 	if (!tempbase->File()->exists()){
-		msg.setText("文件：\r\n" + tempbase->Name() + "\r\n已经被从外部删除，是否另存为？");
+		msg.setText("文件：\r\n" + tempbase->Name() + "\r\n已经被从外部删除，是否重新保存？");
 		msg.addButton(QMessageBox::Save);
 		msg.addButton(QMessageBox::Close);
 		msg.addButton(QMessageBox::Cancel);
@@ -1372,7 +1403,8 @@ void CodeWindow::QfileChange(const QString &path)
 			if (pro != 0) pro->RemoveItem(tempbase->FullName());
 			simpleClose(tempbase);
 		}
-		else if (i == QMessageBox::Save) SaveAs();
+		else if (i == QMessageBox::Save)
+			simpleSave(tempbase);
 		return;
 	}
 
@@ -1407,7 +1439,7 @@ void CodeWindow::simpleClose(BkeDocBase *loli)
 	docStrHash.remove(LOLI_OS_QSTRING(loli->FullName()));
 	docWidgetHash.remove(loli->edit);
 	//移除文件监视
-	//filewatcher->removePath(currentbase->FullName()) ;
+	filewatcher->removePath(currentbase->FullName()) ;
 
 	loli->edit->close();
 	loli->edit->deleteLater();
@@ -1419,7 +1451,7 @@ void CodeWindow::simpleClose(BkeDocBase *loli)
 	if (stackwidget->count() < 1){
 		btnDisable();
 		currentedit = NULL;
-		//filewatcher->removePaths(filewatcher->files()) ;
+		filewatcher->removePaths(filewatcher->files()) ;
 		DrawLine(false);
 	}
 	else{
@@ -1482,10 +1514,20 @@ void CodeWindow::BackstageSearchLable(BkeScintilla *edit)
 	edit->setFirstVisibleLine(fline);
 }
 
-void CodeWindow::GotoLable(int i)
+void CodeWindow::GotoLabel(int i)
 {
-	currentedit->setFirstVisibleLine(slablelist->itemData(i).toInt());
-
+	if (i < 0 || labelbanned)
+		return;
+	//currentedit->setFirstVisibleLine(slablelist->itemData(i).toInt());
+	QString l = slablelist->itemText(i);
+	l = l.right(l.length() - 1);
+	int pos = currentedit->analysis->findLabel(currentedit->FileName, l);
+	int line, index;
+	currentedit->lineIndexFromPositionByte(pos, &line, &index);
+	if (line < 0)
+		return;
+	currentedit->setFirstVisibleLine(line);
+	//currentedit->SendScintilla(QsciScintilla::SCI_GOTOLINE, line);
 }
 
 void CodeWindow::DrawLine(bool isClear)

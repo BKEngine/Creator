@@ -5,20 +5,20 @@
 //SCE_BKE_LABEL, SCE_BKE_COMMENT, SCE_BKE_OPERATORS, SCE_BKE_ERROR, SCE_BKE_PARSER_KEYWORD, (1 << 6) };
 
 QsciLexerBkeScript::QsciLexerBkeScript(QObject *parent)
-    :QsciLexer(parent)
+	:QsciLexer(parent)
 {
-    ReadConfig(ConfigName());
+	ReadConfig(ConfigName());
 }
 
 const char *QsciLexerBkeScript::language() const { return "Bke" ; }
 const char * QsciLexerBkeScript::lexer () const
 {
-    return "bke" ;
+	return "bke" ;
 }
 
 QString QsciLexerBkeScript::description(int style) const
 {
-    switch (style & 63) {
+	switch (style & 63) {
 	case SCE_BKE_DEFAULT:
 	case SCE_BKE_PARSER:
 	case SCE_BKE_PARSER_DEFAULT: return QString("Default");
@@ -40,12 +40,12 @@ QString QsciLexerBkeScript::description(int style) const
 	case SCE_BKE_TRANS:  return QString("TRANS");
 	}
 
-    return QString() ;
+	return QString() ;
 }
 
 QColor QsciLexerBkeScript::defaultColor (int style) const
 {
-    switch (style & 63)
+	switch (style & 63)
 	{
 	case SCE_BKE_PARSER:
 	case SCE_BKE_PARSER_DEFAULT:
@@ -67,7 +67,7 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
 	case SCE_BKE_PARSER_VAR:    return QColor(47, 79, 79);
 	case SCE_BKE_ERROR:    return QColor(0xff, 0x00, 0x00);
 	}
-    return QColor( 0x00,0x00,0x00) ;
+	return QColor( 0x00,0x00,0x00) ;
 }
 
 QColor QsciLexerBkeScript::color(int style) const
@@ -135,23 +135,23 @@ QColor QsciLexerBkeScript::paper(int style) const
 
 QFont QsciLexerBkeScript::font (int style) const
 {
-    return Lfont ;
+	return Lfont ;
 }
 
 QFont QsciLexerBkeScript::defaultFont (int style) const
 {
-    return Lfont ;
+	return Lfont ;
 }
 
 QStringList QsciLexerBkeScript::autoCompletionWordSeparators() const
 {
-    QStringList ls ;
-    return ls ;
+	QStringList ls ;
+	return ls ;
 }
 
 const char * QsciLexerBkeScript::blockStart (int *style ) const
 {
-    return "{ @if if while @for for foreach" ;
+	return "{ @if if while @for for foreach" ;
 }
 
 const char *QsciLexerBkeScript::keywords(int set) const
@@ -167,34 +167,34 @@ const char *QsciLexerBkeScript::keywords(int set) const
 //返回配置项的名字
 QString QsciLexerBkeScript::ConfigName()
 {
-    QString temp = BKE_USER_SETTING->value("SyleCurrent",QString("默认")).toString() ;
-    if( ConfigVoid(temp) ) return temp ;
-    else return "默认" ;
+	QString temp = BKE_USER_SETTING->value("SyleCurrent",QString("默认")).toString() ;
+	if( ConfigVoid(temp) ) return temp ;
+	else return "默认" ;
 }
 
 //返回配置列表
 QStringList QsciLexerBkeScript::ConfigList()
 {
-    QStringList res,temp = BKE_USER_SETTING->childGroups() ;
-    for( int i = 0 ;i < temp.size();i++){
-        if( ConfigVoid( temp.at(i)) ){
-            res.append( temp.at(i) );
-        }
-    }
-    res.prepend("默认");
-    return res ;
+	QStringList res,temp = BKE_USER_SETTING->childGroups() ;
+	for( int i = 0 ;i < temp.size();i++){
+		if( ConfigVoid( temp.at(i)) ){
+			res.append( temp.at(i) );
+		}
+	}
+	res.prepend("默认");
+	return res ;
 }
 
 bool QsciLexerBkeScript::ConfigVoid(QString stylename)
 {
-    return BKE_USER_SETTING->value(stylename+"/valid",false).toBool() ;
+	return BKE_USER_SETTING->value(stylename+"/valid",false).toBool() ;
 }
 
 
 //从文件中读取配置
 void QsciLexerBkeScript::ReadConfig(QString hname)
 {
-    QStringList v = BKE_USER_SETTING->value(hname+"/colour", QStringList()).toStringList();
+	QStringList v = BKE_USER_SETTING->value(hname+"/colour", QStringList()).toStringList();
 	if (v.empty())
 	{
 		for (int i = 0; i < sizeof(list_colors) / sizeof(int); i++)
@@ -210,7 +210,7 @@ void QsciLexerBkeScript::ReadConfig(QString hname)
 			c.push_back(QString("%1").arg(hlb[i].fc));
 			c.push_back(QString("%1").arg(hlb[i].bc));
 		}
-        BKE_USER_SETTING->setValue(hname+"/colour", c);
+		BKE_USER_SETTING->setValue(hname+"/colour", c);
 		return;
 	}
 
@@ -221,6 +221,6 @@ void QsciLexerBkeScript::ReadConfig(QString hname)
 		hlb[i].bc = v[2 * i + 1].toUInt();
 	}
 
-    Lfont.setFamily(BKE_USER_SETTING->value(hname+"/font", "微软雅黑").toString());
-    Lfont.setPointSize(BKE_USER_SETTING->value(hname+"/size", "13").toInt());
+	Lfont.setFamily(BKE_USER_SETTING->value(hname+"/font", "微软雅黑").toString());
+	Lfont.setPointSize(BKE_USER_SETTING->value(hname+"/size", "13").toInt());
 }

@@ -140,7 +140,7 @@ signals:
 signals:
 	void searchOne(const QString &file, const QString &fullfile, int line, int start, int end);
 
-	public slots:
+public slots:
 	bool CloseAll();
 	void ChangeCurrentEdit(int pos);
 	void SetCurrentEdit(int pos);
@@ -178,7 +178,7 @@ signals:
 	void SelectAll();
 	void QfileChange(const QString &path);
 	void GotoLine();
-	void GotoLable(int i);
+	void GotoLabel(int i);
 	void ActUndo();
 	void ActRedo();
 	void ActCurrentChange();
@@ -191,6 +191,8 @@ signals:
 	void replaceOneFile(const QString &file, const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen);
 	void replaceAllFile(const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen);
 	void resetLexer();
+	void refreshLabel(BkeScintilla *sci);
+	void refreshLabel(set<QString> &l);
 
 private:
 	OtherWindow *othwin;
@@ -207,7 +209,7 @@ private:
 
 	QHash<QString, BkeDocBase*> docStrHash;
 	QHash<QWidget*, BkeDocBase*> docWidgetHash;
-	//    QFileSystemWatcher *filewatcher ;
+	QFileSystemWatcher *filewatcher ;
 
 
 	QToolBar *toolbar2;
@@ -226,8 +228,9 @@ private:
 	bool ignoreflag;
 	bool isRun;
 	bool isSearLable;
-	//int watcherflag ;
+	int watcherflag ;
 	int isCompileNotice;
+	bool labelbanned;
 
 	QSize hint;
 	QsciStyle ks1;

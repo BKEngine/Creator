@@ -11,6 +11,8 @@
 QString title = "BKE Creator - ";
 uint32_t titlehash = 0;
 
+extern void initCmd();
+
 uint32_t BKE_hash(const wchar_t *str)
 {
 	if (!*str)
@@ -206,7 +208,7 @@ int main(int argc, char *argv[])
 	CheckOpenAL32();
 	CheckFileAssociation();
 #endif
-
+	initCmd();
 	
 	return a.exec();
 }

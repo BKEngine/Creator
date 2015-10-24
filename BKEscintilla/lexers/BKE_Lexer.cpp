@@ -29,6 +29,8 @@
 
 #include "../paper/creator_parser.h"
 
+#include "../ParseData.h"
+
 #define BASE_MASK 63
 #define BEGAL_MASK (1<<6)
 //in @ or [ command
@@ -43,7 +45,12 @@ private:
 
 	StyleContext/*BKE_Accessor*/ *styler;
 
-    BKE_Info *info;
+	BKE_Info *info;
+
+	ParseData *pdata;
+	BaseNode *curnode;
+
+	list<BaseNode*>::iterator cur_it;
 
 	unsigned char cur_mask;
 
@@ -51,6 +58,8 @@ private:
 
 	int start, end;
 	unsigned char startStyle;
+
+	IDocument *myDoc;
 
 	class BracketsStack
 	{
@@ -117,6 +126,8 @@ public:
 		info = NULL;
 		firstLex = false;	//反正第一次是一下高亮完的
 		cur_mask = 0;
+		pdata = NULL;
+		curnode = NULL;
 	}
 
 	virtual int SCI_METHOD Version() const
@@ -168,6 +179,10 @@ public:
 		{
 		case 0:
 			info = (BKE_Info*)pointer;
+			break;
+		case 1:
+			pdata = (ParseData*)pointer;
+			//cur_it = pdata->fileNodes.begin();
 			break;
 		}
 		return NULL;
@@ -688,6 +703,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			}
 		}
 	}
+	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 }
 
 void BKE_Lexer::DoCommand()
@@ -835,6 +851,8 @@ void BKE_Lexer::ContinueLabel()
 {
 	setMask(CMD_MASK);
 	styler->SetState(SCE_BKE_LABEL | cur_mask);
+	//QByteArray ba;
+	bool sp = false;
 	while (styler->More() && !styler->atLineEnd)
 	{
 		if (atLineComment())
@@ -847,10 +865,16 @@ void BKE_Lexer::ContinueLabel()
 			styler->Forward();
 			ContinueBlockComment();
 		}
+		//if (!sp)
+		//	ba.append(styler->ch);
 		styler->Forward();
+		//sp = isspace(styler->ch);
 	}
 	removeMask(CMD_MASK);
 	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
+	//curnode->name.clear();
+	//curnode->name.prepend(ba);
+	//curnode->cached = true;
 	return;
 }
 
@@ -882,42 +906,89 @@ void BKE_Lexer::ContinueLineComment()
 
 void BKE_Lexer::JudgeStyle()
 {
+	//if (curnode)
+	//{
+	//	curnode->endPos.line = myDoc->LineFromPosition(styler->currentPos - 1);
+	//	curnode->endPos.pos = styler->currentPos - 1 - myDoc->LineStart(curnode->endPos.line);
+	//	auto iit = pdata->fileNodes.insert(cur_it, curnode);
+	//	if (curnode->isLabel())
+	//	{
+	//		pdata->labels.push_front(iit);
+	//		curnode->reflect = pdata->labels.begin();
+	//	}
+	//	pdata->checkCmd(curnode);
+	//	curnode = NULL;
+	//}
 	if (styler->ch == '@')
 	{
+		//curnode = new BaseNode(NULL);
+		//curnode->type = BaseNode::Node_AtCommand;
+		//curnode->startPos.line = myDoc->LineFromPosition(styler->currentPos);
+		//curnode->startPos.pos = styler->currentPos - myDoc->LineStart(curnode->startPos.line);
 		styler->SetState(SCE_BKE_COMMAND | cur_mask);
 	}
 	else if (styler->ch == '[')
 	{
+		//curnode = new BaseNode(NULL);
+		//curnode->type = BaseNode::Node_Command;
+		//curnode->startPos.line = myDoc->LineFromPosition(styler->currentPos);
+		//curnode->startPos.pos = styler->currentPos - myDoc->LineStart(curnode->startPos.line);
 		styler->SetState(SCE_BKE_COMMAND2 | cur_mask);
 	}
 	else if (styler->ch == '/' && styler->chNext == '/')
 	{
+		//curnode = new BaseNode(NULL);
+		//curnode->type = BaseNode::Node_LineComment;
+		//curnode->startPos.line = myDoc->LineFromPosition(styler->currentPos);
+		//curnode->startPos.pos = styler->currentPos - myDoc->LineStart(curnode->startPos.line);
 		styler->SetState(SCE_BKE_ANNOTATE | cur_mask);
 		styler->Forward();
 	}
 	else if (styler->ch == ';' && styler->atLineStart)
+	{
+		//curnode = new BaseNode(NULL);
+		//curnode->type = BaseNode::Node_LineComment;
+		//curnode->startPos.line = myDoc->LineFromPosition(styler->currentPos);
+		//curnode->startPos.pos = styler->currentPos - myDoc->LineStart(curnode->startPos.line);
 		styler->SetState(SCE_BKE_ANNOTATE | cur_mask);
+	}
 	else if (styler->ch == '/' && styler->chNext == '*')
 	{
 		//styler->setMaskState(COMMENT_MASK);
+		//curnode = new BaseNode(NULL);
+		//curnode->type = BaseNode::Node_Comment;
+		//curnode->startPos.line = myDoc->LineFromPosition(styler->currentPos);
+		//curnode->startPos.pos = styler->currentPos - myDoc->LineStart(curnode->startPos.line);
 		last_state = styler->state;
 		styler->SetState(SCE_BKE_COMMENT | cur_mask);
 		styler->Forward();
 	}
 	else if (styler->ch == '*' && styler->atLineStart)
 	{
+		//curnode = new BaseNode(NULL);
+		//curnode->type = BaseNode::Node_Label;
+		//curnode->startPos.line = myDoc->LineFromPosition(styler->currentPos);
+		//curnode->startPos.pos = styler->currentPos - myDoc->LineStart(curnode->startPos.line);
 		styler->SetState(SCE_BKE_LABEL | cur_mask);
 	}
 	else if (styler->ch == '#')
 	{
 		if (styler->chNext == '#')
 		{
+			//curnode = new BaseNode(NULL);
+			//curnode->type = BaseNode::Node_Parser;
+			//curnode->startPos.line = myDoc->LineFromPosition(styler->currentPos);
+			//curnode->startPos.pos = styler->currentPos - myDoc->LineStart(curnode->startPos.line);
 			setMask(BEGAL_MASK);
 			styler->SetState(SCE_BKE_PARSER_DEFAULT | cur_mask);
 			styler->Forward();
 		}
 		else
 		{
+			//curnode = new BaseNode(NULL);
+			//curnode->type = BaseNode::Node_LineParser;
+			//curnode->startPos.line = myDoc->LineFromPosition(styler->currentPos);
+			//curnode->startPos.pos = styler->currentPos - myDoc->LineStart(curnode->startPos.line);
 			setMask(BEGAL_MASK);
 			styler->SetState(SCE_BKE_PARSER | cur_mask);
 		}
@@ -941,6 +1012,10 @@ void BKE_Lexer::JudgeStyle()
 	}
 	else
 	{
+		//curnode = new BaseNode(NULL);
+		//curnode->type = BaseNode::Node_Text;
+		//curnode->startPos.line = myDoc->LineFromPosition(styler->currentPos);
+		//curnode->startPos.pos = styler->currentPos - myDoc->LineStart(curnode->startPos.line);
 		styler->SetState(SCE_BKE_TEXT | cur_mask);
 	}
 	bool stillstart = false;
@@ -969,15 +1044,20 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 {
 	LexAccessor accessor(pAccess);
 
+	myDoc = pAccess;
+
 	StyleContext sc(startPos, lengthDoc, initStyle, accessor, 0xFF);
 	styler = &sc;
 	if (firstLex)
 	{
 		firstLex = false;
+		//pdata->reMake(startPos, lengthDoc, startPos, lengthDoc, cur_it);
 
 		unsigned char laststyle = (unsigned char)pAccess->StyleAt(startPos - 1);
 		unsigned char curstyle = (unsigned char)pAccess->StyleAt(startPos);
 		cur_mask = initStyle & ~BASE_MASK;
+		//Lex(startPos, lengthDoc, laststyle, pAccess);
+		//return;
 
 		if (initStyle & CMD_MASK)
 		{
@@ -1012,6 +1092,7 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 		}
 	}
 	//styler->setRange(startPos, startPos + lengthDoc, initStyle);
+	//curnode = NULL;
 
 	while (styler->More())
 	{
@@ -1046,18 +1127,31 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 			ParseBegal(false, true, true);
 			break;
 		default:
-#ifdef Q_WS_WIN
-            __asm int 3;
-#endif
 			styler->Forward();
 		}
 	}
+
+	//if (curnode)
+	//{
+	//	curnode->endPos.line = myDoc->LineFromPosition(styler->currentPos - 1);
+	//	curnode->endPos.pos = styler->currentPos - 1 - myDoc->LineStart(curnode->endPos.line);
+	//	auto iit = pdata->fileNodes.insert(cur_it, curnode);
+	//	if (curnode->isLabel())
+	//	{
+	//		pdata->labels.push_front(iit);
+	//		curnode->reflect = pdata->labels.begin();
+	//	}
+	//	curnode = NULL;
+	//}
+
 	//styler->continueStateToPos(startPos + lengthDoc);
 	styler->Complete();
 	firstLex = true;
 	start = startPos;
 	end = startPos + lengthDoc;
 	startStyle = pAccess->StyleAt(startPos);
+
+	//pdata->refreshLabel();
 }
 
 void SCI_METHOD BKE_Lexer::Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess)

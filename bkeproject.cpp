@@ -45,6 +45,7 @@ BkeProject::BkeProject(QObject *parent)
 {
 	isnull = true;
 	currentptr = 0;
+	analysis = 0;
 	lex = new BkeParser(this);
 	fileico = new QIcon(":/project/source/file.png");
 	dirsico = new QIcon(":/project/source/doc.png");
@@ -62,6 +63,7 @@ BkeProject::BkeProject(QObject *parent)
 BkeProject::~BkeProject()
 {
 	delete lex;
+	delete analysis;
 	//lex->deleteLater();
 }
 
@@ -107,6 +109,9 @@ bool BkeProject::NewProject(const QString &dir, const QString &name)
 		ForceAddScript(it.key(), Script);
 	}
 
+
+	delete analysis;
+	analysis = new BG_Analysis(FileDir() + '/');
 	return WriteBkpFile();
 }
 
@@ -191,6 +196,12 @@ bool BkeProject::OpenProject(const QString &name)
 		Import->removeChild(it);
 	}
 
+	delete analysis;
+	auto ls = AllScriptFiles();
+	ls.pop_front();
+
+	analysis = new BG_Analysis(FileDir() + '/');
+	analysis->addFiles(ls);
 	//检查路径是否已经改变
 	/*
 	QFileInfo llm(name) ;
