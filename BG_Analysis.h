@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <weh.h>
 #include "qthread.h"
 #include "ParseData.h"

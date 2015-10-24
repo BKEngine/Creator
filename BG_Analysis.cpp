@@ -1,4 +1,4 @@
-#include <weh.h>
+﻿#include <weh.h>
 #include "BG_Analysis.h"
 #include "bkeSci\bkescintilla.h"
 #include "loli\loli_island.h"

@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 #include <weh.h>
 #include <unordered_map>
@@ -122,10 +122,10 @@ enum bkCmdParamType
 struct BKECmdInfo
 {
 	QString name;
-	QString detail;//ÃèÊöĞÅÏ¢
+	QString detail;//æè¿°ä¿¡æ¯
 	QStringList argNames;
 	vector<bkpulong> argFlags;
-	//almostOneÖ®ÀàµÄÒÔºóÔÙËµ¡­¡­
+	//almostOneä¹‹ç±»çš„ä»¥åå†è¯´â€¦â€¦
 };
 
 struct BKESpecialCmdInfo
