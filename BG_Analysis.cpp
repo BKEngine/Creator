@@ -141,6 +141,7 @@ void BG_Analysis::run()
 										auto &m = backup_macrodata[mname];
 										m.name = mname;
 										m.definefile = thisfile;
+										m.comment = (*node)->comment;
 										m.pos = (*node)->startPos;
 										for (int i = 0; i < (*node)->cmdParam.size(); i++)
 										{

@@ -617,7 +617,13 @@ bool ParseData::Parse()
 		{
 		case ';':
 			if (isLineStart)
+			{
+				int rawidx = idx;
 				skipLineComment();
+				lastComment = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
+				delete node;
+				continue;
+			}
 			else
 			{
 				node->type = BaseNode::Node_Text;
@@ -780,6 +786,8 @@ bool ParseData::Parse()
 			fileNodes.insert(node->startPos, node);
 			break;
 		}
+		node->comment = lastComment;
+		lastComment.clear();
 	}
 	return true;
 }

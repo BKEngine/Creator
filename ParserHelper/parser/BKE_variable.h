@@ -95,9 +95,9 @@ public:
 	void* operator new (size_t size)
 	{
 		void *p;
-		if (size <= 4 * SMALL)
-			p = allocator_array()[(size + 3) / 4]->dynamic_allocate();
-		else
+		//if (size <= 4 * SMALL)
+		//	p = allocator_array()[(size + 3) / 4]->dynamic_allocate();
+		//else
 			p = malloc(size);
 		if (p)
 		{
@@ -129,9 +129,9 @@ public:
 			//先做兼容处理，找到bug再说
 			if (it == MemoryPool().end())
 				return;
-			if (it->second <= 4 * SMALL)
-				allocator_array()[(it->second + 3) / 4]->dynamic_deallocate(p);
-			else
+			//if (it->second <= 4 * SMALL)
+			//	allocator_array()[(it->second + 3) / 4]->dynamic_deallocate(p);
+			//else
 				free(p);
 			MemoryPool().erase(it);
 #if PARSER_MULTITHREAD

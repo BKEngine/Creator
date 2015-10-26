@@ -1328,6 +1328,8 @@ void BkeScintilla::ShowInfomation(QPoint pos)
 					p.remove(0, 1);
 				if (!p.isEmpty())
 					info += "\t参数:" + p;
+				if (!m_info.comment.isEmpty())
+					info += "\n" + m_info.comment;
 				QToolTip::showText(QCursor::pos(), info);
 				return;
 			}

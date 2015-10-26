@@ -146,6 +146,7 @@ struct BaseNode
 	//list<list<BaseNode*>::iterator>::iterator reflect;
 
 	QString name;
+	QString comment;
 
 	//Pos startPos, endPos;
 	int startPos, endPos;
@@ -231,6 +232,9 @@ public:
 	bool checkLabel(BaseNode *node);
 	bool checkCommand(BaseNode *node, bool startwithat);
 	bool checkCmd(BaseNode *node);
+
+	QString lastComment;
+
 	char fetchNextOne()
 	{
 		char ch = textbuf[idx];
@@ -239,12 +243,16 @@ public:
 		char ch2 = textbuf[idx + 1];
 		if (ch == '/' && ch2 == '/')
 		{
+			int rawidx = idx + 2;
 			skipLineComment();
+			lastComment = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
 			return textbuf[idx];
 		}
 		else if (ch == '/' && ch2 == '*')
 		{
+			int rawidx = idx + 2;
 			skipBlockComment();
+			lastComment = QString::fromStdString(string(textbuf + rawidx, idx - 2 - rawidx));
 			return textbuf[idx];
 		}
 		return ch;

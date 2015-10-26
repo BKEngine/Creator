@@ -17,6 +17,7 @@ struct BKEMacros
 {
 	QString name;
 	QString definefile;
+	QString comment;
 	bkplong pos;
 	vector<pair<QString, QString>> paramqueue;
 };
