@@ -20,6 +20,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	this->setAttribute(Qt::WA_InputMethodEnabled, true);
 	findstr_length = 0;
 	analysis = NULL;
+	completeType = SHOW_NULL;
 
 	setUtf8(true);
 	setMarginWidth(0, "012345678");
@@ -55,6 +56,8 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	setMarginsForegroundColor(QColor(100, 100, 100));
 	setMarginsBackgroundColor(QColor(240, 240, 240));
 	//setAutoIndent(true);
+	
+	SendScintilla(SCI_AUTOCSTOPS, "", ",./!@#$%^&*()_+-=\\;'\"[]{}");
 
 	//setIndentationGuides(true) ;
 	Separate = QString(" ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\\n\r");
@@ -213,6 +216,187 @@ void BkeScintilla::CharHandle(int cc)
 {
 }
 
+QString BkeScintilla::getAttrs(const QString &name, const QString &alltext)
+{
+	std::set<QString> params;
+	QString res;
+	{
+		auto it = CmdList.find(name);
+		if (it != CmdList.end())
+		{
+			if (it->argNames.empty())
+				return res;
+			for (auto &it2 : it->argNames)
+				params.insert(it2);
+			auto it2 = params.begin();
+			res += *it2;
+			for (it2++; it2 != params.end(); it2++)
+			{
+				res += ' ';
+				res += *it2;
+			}
+			return res;
+		}
+	}
+	//test specialcmd
+	{
+		auto it = SpecialCmdList.find(name);
+		if (it != SpecialCmdList.end())
+		{
+			QRegExp reg("name=\"(\\w+)\"");
+			QRegExp reg2("name=(\\d+)");
+			auto modeidx = alltext.indexOf(reg);
+			auto modeidx2 = alltext.indexOf(reg2);
+			if (modeidx >= 0 || modeidx2 >= 0)
+			{
+				bool f = modeidx < 0;
+				BKECmdInfo *info = NULL;
+				QString modename = reg.cap(1);
+				int idx = -1;
+				if (f)
+					idx = reg2.cap(1).toInt(&f, 0);
+				if (f)
+				{
+					for (auto &it3 : it->modes)
+					{
+						if (it3.second.first == idx)
+						{
+							info = &it3.second.second;
+							modename = it3.first;
+						}
+					}
+				}
+				else
+				{
+					auto it3 = it->modes.find(modename);
+					if (it3 != it->modes.end())
+						info = &it3->second.second;
+				}
+
+				if (info)
+				{
+					for (auto &it2 : info->argNames)
+						params.insert(it2);
+					auto it2 = params.begin();
+					res += *it2;
+					for (it2++; it2 != params.end(); it2++)
+					{
+						res += ' ';
+						res += *it2;
+					}
+					return res;
+				}
+			}
+			else
+				return "mode";
+			return res;
+		}
+	}
+	//test macro
+	{
+		BKEMacros macro;
+		bool r = analysis->findMacro(name, &macro);
+		if (r)
+		{
+			for (auto &it2 : macro.paramqueue)
+				params.insert(it2.first);
+			auto it2 = params.begin();
+			res += *it2;
+			for (it2++; it2 != params.end(); it2++)
+			{
+				res += ' ';
+				res += *it2;
+			}
+			return res;
+		}
+	}
+	return res;
+}
+
+void BkeScintilla::showComplete()
+{
+	int pos = modfieddata.pos + modfieddata.text.length() - 1;
+	unsigned char style = SendScintilla(SCI_GETSTYLEAT, pos);
+	unsigned char ch = SendScintilla(SCI_GETCHARAT, pos);
+	unsigned char curstyle = style;
+	QString context;
+	QString cmdname;
+	QString lastContext;
+	int beginPos = pos;
+	unsigned int lastStyle = 0;
+	completeType = SHOW_NULL;
+	if (style & 64 /*BEGAL_MASK*/)
+	{
+
+	}
+	else if (style & 128 /*CMD_MASK*/)
+	{
+		beginPos--;
+		style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+		while (beginPos > 0 && (style & 128))
+		{
+			beginPos--;
+			style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+		}
+		//now we find the beginning the @ or [ command
+		char *buf = new char[pos + 2 - beginPos];
+		SendScintilla(SCI_GETTEXTRANGE, beginPos, pos + 1, buf);
+		context = buf;
+		delete[] buf;
+		int p = context.indexOf(' ');
+		cmdname = context;
+		if (p >= 0)
+			cmdname.truncate(p);
+		int p2 = context.lastIndexOf(' ');
+		lastContext = context.right(context.length() - p2 - 1);
+		if (p < 0 && (cmdname[0] == '@' || cmdname[0] == '['))
+		{
+			completeType = SHOW_AUTOCOMMANDLIST;
+		}
+		else if (isspace(ch) || isVarName(lastContext))
+		{
+			completeType = SHOW_ATTR;
+		}
+		else
+		{
+			completeType = SHOW_AUTOVALLIST;
+		}
+		cmdname.remove(0, 1);
+	}
+	else
+	{
+		if (ch == '@' || ch == '[')
+		{
+			//begin of cmd
+			context = ch;
+			completeType = SHOW_AUTOCOMMANDLIST;
+		}
+		else
+			completeType = SHOW_NULL;
+	}
+
+	bool l = SendScintilla(SCI_AUTOCACTIVE);
+	if (l != 0)
+		return;
+
+	switch (completeType)
+	{
+	case SHOW_AUTOCOMMANDLIST:
+		completeList = analysis->getCmdList();
+		SendScintilla(SCI_AUTOCSHOW, cmdname.length(), completeList.toUtf8().data());
+		break;
+	case SHOW_ATTR:
+		completeList = getAttrs(cmdname, context);
+		SendScintilla(SCI_AUTOCSHOW, lastContext.length(), completeList.toUtf8().data());
+		break;
+	case SHOW_AUTOVALLIST:
+
+		break;
+	default:
+		break;
+	}
+}
+
 //文字或样式被改变后
 void BkeScintilla::UiChange(int updated)
 {
@@ -226,8 +410,9 @@ void BkeScintilla::UiChange(int updated)
 
 	if (ChangeType & SC_MOD_INSERTTEXT){
 		//自动补全
-		defparser->TextBeChange(&modfieddata, this);
-		CompliteFromApi();
+		showComplete();
+		//defparser->TextBeChange(&modfieddata, this);
+		//CompliteFromApi();
 	}
 
 	if (IsWorkingUndo && !ChangeIgnore) BkeEndUndoAction();
@@ -363,7 +548,7 @@ void BkeScintilla::CompliteFromApi(int type)
 	if (defparser->showtype == BkeParser::SHOW_AUTOVALLIST && context.length() < 3) return;
 	else if (defparser->showtype == BkeParser::SHOW_LABEL && context.length() < 2) return;
 
-	SendScintilla(SCI_AUTOCSETIGNORECASE, true);
+	SendScintilla(SCI_AUTOCSETIGNORECASE, false);
 
 	comss = defparser->GetList(context);
 
@@ -458,6 +643,7 @@ void BkeScintilla::UseListChoose(const char* text, int id)
 		ChooseComplete(text, positionFromLineIndex(line, index));
 	BkeEndUndoAction();
 	ChangeIgnore--;
+	completeList.clear();
 }
 
 //自动完成列表被选择
@@ -469,6 +655,7 @@ void BkeScintilla::AutoListChoose(const char* text, int pos)
 	ChooseComplete(text, pos);
 	BkeEndUndoAction();
 	ChangeIgnore--;
+	completeList.clear();
 }
 
 
@@ -1111,6 +1298,7 @@ void BkeScintilla::ShowInfomation(QPoint pos)
 					}
 					else
 					{
+						mode->name = mode->name.mid(1, mode->name.length() - 2);
 						auto it3 = it->modes.find(mode->name);
 						if (it3 != it->modes.end())
 							info = &it3->second.second;
@@ -1127,6 +1315,23 @@ void BkeScintilla::ShowInfomation(QPoint pos)
 			}
 		}
 		//test macro
+		{
+			BKEMacros m_info;
+			bool f = analysis->findMacro(name, &m_info);
+			if (f)
+			{
+				QString info = "命令:" + m_info.name;
+				QString p;
+				for (int i = 0; i < m_info.paramqueue.size(); i++)
+					p += " " + m_info.paramqueue[i].first;
+				if (!p.isEmpty())
+					p.remove(0, 1);
+				if (!p.isEmpty())
+					info += "\t参数:" + p;
+				QToolTip::showText(QCursor::pos(), info);
+				return;
+			}
+		}
 	}
 
 	//long close_pos = SendScintilla(SCI_POSITIONFROMPOINTCLOSE, pt.x(),pt.y() );

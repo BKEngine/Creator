@@ -22,8 +22,9 @@ class Parser
 {
 	friend class BKE_FunctionCode;
 	friend class BKE_VarFunction;
+	friend class PAModule;
 
-private:
+protected:
 	BKE_hashmap<wstring, BKE_Variable> constmap;
 	BKE_hashmap<wstring, BKE_opcode> opmap;
 	//vector<BKE_Variable> tempvars;
@@ -195,7 +196,7 @@ private:
 	void led_param(BKE_bytree **tree);
 	void led_choose(BKE_bytree **tree);		//for ?: expression
 
- 	NUD_FUNCTION(preadd, "+");
+	NUD_FUNCTION(preadd, "+");
 	NUD_FUNCTION(presub, "-");
 	NUD_FUNCTION(not, "!");
 	//NUD_FUNCTION(bracket, "(");
@@ -279,7 +280,7 @@ private:
 
 	LED_FUNCTION(unknown, "未实现"){ runpos = tree->Node.pos; throw Var_Except(L"该功能尚未实现"); };
 
-    inline void reportError(BKE_bytree** tree)
+	inline void reportError(BKE_bytree** tree)
 	{
 		BKE_UNUSED_PARAM(tree);
 		{
@@ -296,7 +297,7 @@ private:
 		return (this->*runner[tree->Node.opcode])(tree, _this, tmpvars);
 	}
 
-	Parser();
+	Parser(bool init = true);
 
 	double costTime;
 

@@ -166,6 +166,23 @@ private:
 protected:
 	bool event(QEvent *e) ;
 
+	//补全相关
+	enum{
+		SHOW_NULL,
+		SHOW_USECOMMANDLIST,
+		SHOW_AUTOCOMMANDLIST,
+		SHOW_AUTOVALLIST,
+		SHOW_USEVALLIST,
+		SHOW_LABEL,
+		SHOW_ATTR,
+		SHOW_SYS
+	}completeType;
+
+	QString completeList;
+
+	void showComplete();
+	QString getAttrs(const QString &name, const QString &alltext = "");
+
 };
 
 #endif // BKESCINTILLA_H

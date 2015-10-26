@@ -523,7 +523,10 @@ void BkeParser::TextBeChange(BkeModifiedBase *modbase,QsciScintilla *sciedit)
 
     //如果有自动完成列表，则不显示
 
-    if( !(modbase->type&QsciScintilla::SC_MOD_INSERTTEXT) ) return ; //不是插入文本不分析
+	//已被过滤
+  //  if( !(modbase->type & QsciScintilla::SC_MOD_INSERTTEXT) )
+		//return ; //不是插入文本不分析
+
     if( modbase->lineadd > 0){
         QString t ;
         //有多行被改变时，自动检查前几行

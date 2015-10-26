@@ -21,6 +21,8 @@ const char *InidicatorMSG[]=
 	"import命令缺少必需的属性file",
 	"import的文件%2不在工程内或文件不存在",
 	"macro命令缺少必需的属性name",
+	"macro不能与系统命令重名",
+	"macro名称必须为常量字符串表达式",
 	NULL
 };
 
@@ -695,7 +697,7 @@ bool ParseData::Parse()
 				{
 					node2->endPos = idx;
 					node->cmdParam.push_back(node2);
-					auto node2 = new BaseNode(node);
+					node2 = new BaseNode(node);
 					idx++;
 				}
 				node2->type = BaseNode::Node_CmdPropValue;
@@ -746,6 +748,9 @@ bool ParseData::Parse()
 			}
 			else
 			{
+				idx++;
+				skipSpace();
+				skipLineEnd();
 				rawidx = idx;
 				ch = textbuf[idx];
 				while (ch)
@@ -777,4 +782,444 @@ bool ParseData::Parse()
 		}
 	}
 	return true;
+}
+
+PAModule::PAModule(const QString &str) : expstr(str.toStdWString())
+{
+	p = Parser::getInstance();
+	curpos = exp = expstr.c_str();
+	expsize = expstr.size();
+	NextIsBareWord = false;
+	forcequit = false;
+
+	restree = new BKE_bytree();
+	restree->Node.opcode = OP_RESERVE + OP_COUNT;
+	next.opcode = OP_STOP;
+	do
+	{
+		try
+		{
+			while (next.opcode == OP_STOP)
+				readToken();
+			restree->addChild();
+			expression(&restree->childs.back());
+		}
+		catch (Var_Except &)
+		{
+			skipToNextSentence();
+		}
+		if (restree->childs.back() == NULL)
+			restree->childs.pop_back();
+	} while (next.opcode != OP_END);
+
+	if (restree->childs.empty())
+	{
+		constvar = false;
+		restree->release();
+		restree = NULL;
+	}
+	else
+	{
+		BKE_bytree *tr = restree->childs.back();
+		assert(tr);
+		constvar = tr->Node.opcode == OP_CONSTVAR + OP_COUNT;
+		if (constvar)
+			res = tr->Node.var;
+	}
+}
+
+void PAModule::skipToNextSentence()
+{
+	while (1)
+	{
+		try
+		{
+			readToken();
+			if (next.opcode == OP_STOP)
+				break;
+		}
+		catch (Var_Except &)
+		{
+
+		}
+	}
+}
+
+#define MATCH(a, b) if(MatchFunc(L##a, &curpos)){ node.opcode = b; return;}
+#define QRET(c)	curpos++;node.opcode = c;return;
+
+bool PAModule::MatchFunc(const wchar_t *a, const wchar_t **c)
+{
+	const wchar_t *b;
+	b = *c;
+	while ((*a) && (*b))
+	{
+		if ((*a) != (*b))
+			return false;
+		b++;
+		a++;
+	}
+	*c = b;
+	return true;
+}
+
+void PAModule::readToken()
+{
+	BKE_Node &node = next;
+	while ((*curpos) && bkpIsWSpace(*curpos))curpos++;
+	node.pos = static_cast<bkpulong>(curpos - exp);
+	if (!(*curpos))
+	{
+		node.opcode = OP_END;
+		return;
+	}
+	wchar_t ch = *curpos;
+	//read operators
+	switch (ch)
+	{
+	case L'+':
+		MATCH("+=", OP_SETADD);
+		MATCH("++", OP_SELFADD);
+		QRET(OP_ADD);
+	case L'-':
+		MATCH("-=", OP_SETSUB);
+		MATCH("--", OP_SELFDEC);
+		QRET(OP_SUB);
+	case L'*':
+		MATCH("*=", OP_SETMUL);
+		QRET(OP_MUL);
+	case L'/':
+		if (MatchFunc(L"//", &curpos))
+		{
+			//skip a line
+			while (*curpos != L'\0' && *curpos != L'\r' && *curpos != L'\n')
+				curpos++;
+			//bufnodes.pop_back();
+			readToken();
+			return;
+		}
+		if (MatchFunc(L"/*", &curpos))
+		{
+			while (*curpos && !(*curpos == L'*' && *(curpos + 1) == L'/'))
+				curpos++;
+			//bufnodes.pop_back();
+			curpos += 2;
+			readToken();
+			return;
+		}
+		MATCH("/=", OP_SETDIV);
+		QRET(OP_DIV);
+	case L'%':
+		MATCH("%[", OP_DIC);
+		MATCH("%=", OP_SETMOD);
+		QRET(OP_MOD);
+	case L'^':
+		MATCH("^=", OP_SETPOW);
+		QRET(OP_POW);
+	case L'!':
+		MATCH("!==", OP_NNEQUAL);
+		MATCH("!=", OP_NEQUAL);
+		QRET(OP_NOT);
+	case L'=':
+		MATCH("===", OP_EEQUAL);
+		MATCH("=>", OP_VALUE);
+		MATCH("==", OP_EQUAL);
+		QRET(OP_SET);
+	case L'>':
+		MATCH(">=", OP_LE);
+		QRET(OP_LARGER);
+	case L'<':
+		MATCH("<=", OP_SE);
+		QRET(OP_SMALLER);
+	case L'|':
+		MATCH("|=", OP_SETSET);
+		MATCH("||", OP_OR);
+		QRET(OP_FASTOR);
+	case L'&':
+		MATCH("&&", OP_AND);
+		QRET(OP_FASTAND);
+	case L'(':
+		QRET(OP_BRACKET);
+	case L'[':
+		QRET(OP_ARRAY);
+	case L'{':
+		QRET(OP_BLOCK);
+	case L'.':
+		NextIsBareWord = true;
+		QRET(OP_DOT);
+	case L'?':
+		QRET(OP_CHOOSE);
+	case L':':
+		QRET(OP_MAOHAO);
+	case L';':
+		QRET(OP_STOP);
+	case L')':
+		QRET(OP_BRACKET2);
+	case L']':
+		QRET(OP_ARR2);
+	case L'}':
+		QRET(OP_BLOCK2);
+	case L',':
+		QRET(OP_COMMA);
+	case L'\"':
+		{
+			//read const string
+			wstring tmp = L"";
+			while (*(++curpos))
+			{
+				ch = *curpos;
+				if (ch == '\"')
+				{
+					curpos++;
+					if (*curpos != '\"')
+						break;
+					else
+					{
+						tmp.push_back(ch);
+					}
+				}
+				else if (ch == L'\n' || ch == L'\r' || ch == L'\0')
+				{
+					throw Var_Except(L"读字符串时遇到意料之外的结尾", static_cast<bkpulong>(curpos - exp));
+				}
+				else
+					tmp.push_back(ch);
+			}
+			//字符串常量不hash了
+			BKE_String _hashtmp(tmp, false);
+			node.opcode = OP_CONSTVAR;
+			//node.varindex = getVarIndex(_hashtmp);
+			node.var = _hashtmp;
+			return;
+		}
+		break;
+	case L'0':
+	case L'1':
+	case L'2':
+	case L'3':
+	case L'4':
+	case L'5':
+	case L'6':
+	case L'7':
+	case L'8':
+	case L'9':
+		//read int
+		//node.varindex = getVarIndex(str2num(curpos, &curpos));
+		node.var = str2num(curpos, const_cast<wchar_t**>(&curpos));
+		node.opcode = OP_CONSTVAR;
+		return;
+	case L'#':
+	{
+		//color number
+		//RGBA
+		unsigned char n[8];
+		int nn = 0;
+		bkpulong color = 0;
+		ch = *(++curpos);
+		while (nn<8)
+		{
+			if (L'0' <= ch && ch <= L'9')
+				n[nn++] = ch - L'0';
+			else if (L'a' <= ch && ch <= L'f')
+				n[nn++] = ch - L'a' + 10;
+			else if (L'A' <= ch && ch <= L'F')
+				n[nn++] = ch - L'A' + 10;
+			else
+				break;
+			ch = *(++curpos);
+		}
+		switch (nn)
+		{
+		case 3:
+			n[3] = 15;
+		case 4:
+			color = 0x11000000 * n[3];
+			color |= 0x110000 * n[0];
+			color |= 0x1100 * n[1];
+			color |= 0x11 * n[2];
+			break;
+		case 6:
+			n[6] = 0x0F;
+			n[7] = 0x0F;
+		case 8:
+			color |= (0x10000000 * n[6]) | (0x01000000 * n[7]);
+			color |= (0x100000 * n[0]) | (0x010000 * n[1]);
+			color |= (0x1000 * n[2]) | (0x0100 * n[3]);
+			color |= (0x10 * n[4]) | (0x01 * n[5]);
+			break;
+		default:
+			throw Var_Except(L"#后面只能接3,4,6,或8个十六进制数字表示颜色值", static_cast<bkpulong>(curpos - exp));
+		}
+		//node.varindex = getVarIndex(color);
+		node.var = color;
+		node.opcode = OP_CONSTVAR;
+		return;
+	}
+	}
+	if (ch == L'\'')
+	{
+		wchar_t startch = ch;
+		//read const string
+		wstring tmp = L"";
+		while (*(++curpos))
+		{
+			ch = *curpos;
+			if (ch == '\\')
+			{
+				bkplong s;
+				if (!*(++curpos))
+				{
+					throw Var_Except(L"读字符串时遇到意料之外的结尾", static_cast<bkpulong>(curpos - exp));
+				};
+				switch (ch = *curpos)
+				{
+				case L'n':
+					tmp.push_back(L'\n');
+					break;
+				case L'r':
+					tmp.push_back(L'\r');
+					break;
+				case L't':
+					tmp.push_back(L'\t');
+					break;
+				case L'a':
+					tmp.push_back(L'\a');
+					break;
+				case L'b':
+					tmp.push_back(L'\b');
+					break;
+				case L'f':
+					tmp.push_back(L'\f');
+					break;
+				case L'v':
+					tmp.push_back(L'\v');
+					break;
+				case L'o':
+					ch = *(++curpos);
+					s = 0;
+					if (ch<L'0' || ch>L'9')
+					{
+						tmp.push_back((wchar_t)s);
+						curpos--;
+						break;
+					}
+					s += 64 * (ch - L'0');
+					ch = *(++curpos);
+					if (ch<L'0' || ch>L'9')
+					{
+						tmp.push_back((wchar_t)s);
+						curpos--;
+						break;
+					}
+					s += 8 * (ch - L'0');
+					ch = *(++curpos);
+					if (ch<L'0' || ch>L'9')
+					{
+						tmp.push_back((wchar_t)s);
+						curpos--;
+						break;
+					}
+					s += (ch - L'0');
+					tmp.push_back((wchar_t)s);
+					break;
+				case L'x':
+					ch = *(++curpos);
+					s = 0;
+					if (ch<L'0' || (ch>L'9' && towupper(ch)<L'A') || towupper(ch)>L'F')
+					{
+						tmp.push_back((wchar_t)s);
+						curpos--;
+						break;
+					}
+					s += 16 * (ch>L'9' ? towupper(ch) - L'A' + 10 : ch - L'0');
+					ch = *(++curpos);
+					if (ch<L'0' || (ch>L'9' && towupper(ch)<L'A') || towupper(ch)>L'F')
+					{
+						tmp.push_back((wchar_t)s);
+						curpos--;
+						break;
+					}
+					s += ch>L'9' ? towupper(ch) - L'A' + 10 : ch - L'0';
+					tmp.push_back((wchar_t)s);
+					break;
+				case L'\n':
+				case L'\r':
+					throw Var_Except(L"读字符串时遇到意料之外的结尾", static_cast<bkpulong>(curpos - exp));
+				default:
+					tmp.push_back(ch);
+				}
+			}
+			else if (ch == L'\n' || ch == L'\r' || ch == L'\0')
+			{
+				throw Var_Except(L"读字符串时遇到意料之外的结尾", static_cast<bkpulong>(curpos - exp));
+			}
+			else if (ch == startch)
+			{
+				curpos++;
+				break;
+			}
+			else
+				tmp.push_back(ch);
+		}
+		BKE_String _hashtmp(tmp, false);
+		node.opcode = OP_CONSTVAR;
+		//node.varindex = getVarIndex(_hashtmp);
+		node.var = _hashtmp;
+		return;
+	}
+	if (ch >= 0x80 || isalpha(ch) || ch == L'_' /*|| ch==L'$' || ch==L'#'*/)
+	{
+		//read variable name
+		wstring tmp;
+		tmp.push_back(ch);
+		while ((ch = *(++curpos)))
+		{
+			if (ch >= 0x80 || iswalnum(ch) || ch == '_')
+				tmp.push_back(ch);
+			else
+				break;
+		}
+		if (!NextIsBareWord)
+		{
+			if (p->constmap.find(tmp) != p->constmap.end())
+			{
+				//node.varindex = getVarIndex(constmap[tmp]);
+				node.var = p->constmap[tmp];
+				node.opcode = OP_CONSTVAR;
+				return;
+			}
+			auto it = p->opmap.find(tmp);
+			if (it != p->opmap.end())
+			{
+				node.opcode = it->second;
+				return;
+			}
+		}
+		NextIsBareWord = false;
+		BKE_String _hashtmp(tmp);
+		node.opcode = OP_LITERAL;
+		//node.varindex = getVarIndex(_hashtmp);
+		node.var = _hashtmp;
+		return;
+	}
+	throw Var_Except(wstring(L"读取时遇到非法字符<") + ch + L'>', static_cast<bkpulong>(curpos - exp));
+}
+
+void PAModule::expression(BKE_bytree** tree, int rbp)
+{
+	if (rbp>20 && p->head[next.opcode])
+	{
+		throw Var_Except(L"该符号必须放在句首。", next.pos);
+	}
+	token = next;
+	readToken();
+	token.opcode += OP_COUNT;
+	(this->*p->funclist[token.opcode])(tree);
+	while (!forcequit && rbp < p->lbp[next.opcode])
+	{
+		token = next;
+		readToken();
+		(this->*p->funclist[token.opcode])(tree);
+	}
+	forcequit = false;
 }

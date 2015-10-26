@@ -1,10 +1,10 @@
-﻿G:/once/Dev/system/textwindow.bkscr
+﻿G:/once/Dev/scenario/CH01.bkscr
+G:/once/Dev/system/once_macro.bkscr
+G:/once/Dev/scenario/CH00.bkscr
+G:/once/Dev/system/textwindow.bkscr
 G:/once/Dev/configure.bkscr
 G:/BKEProject/BKE-Demo/script/story.bkscr
 G:/once/Dev/system/once_interface.bkscr
-G:/once/Dev/system/once_macro.bkscr
-G:/once/Dev/scenario/CH00.bkscr
-G:/once/Dev/scenario/CH01.bkscr
 G:/once/Dev/system/splash.bkscr
 G:/once/Dev/system/extra.bkscr
 G:/once/Dev/macro.bkscr

@@ -787,6 +787,7 @@ void BKE_Lexer::DoCommand()
 void BKE_Lexer::DoAtCommand()
 {
 	setMask(CMD_MASK);
+	styler->SetState(styler->state | cur_mask);
 	//check cmd name
 	if (!styler->atLineEnd && !isspace(styler->ch))
 	{

@@ -2,6 +2,7 @@
 #include "BG_Analysis.h"
 #include "bkeSci\bkescintilla.h"
 #include "loli\loli_island.h"
+#include "BKS_info.h"
 
 BG_Analysis::BG_Analysis(const QString &p)
 {
@@ -9,6 +10,8 @@ BG_Analysis::BG_Analysis(const QString &p)
 	cancel = false;
 	newmacrofile = false;
 	pdir = p;
+	backup_topclo = new BKE_VarClosure(global_bke_info.glo);
+	topclo = NULL;
 	this->start();
 }
 
@@ -18,6 +21,10 @@ BG_Analysis::~BG_Analysis()
 	stop = true;
 	cancel = true;
 	wait();
+	if (topclo)
+		topclo->release();
+	if (backup_topclo)
+		backup_topclo->release();
 }
 
 void BG_Analysis::run()
@@ -116,16 +123,39 @@ void BG_Analysis::run()
 							}
 							else
 							{
-								auto &m = backup_macrodata[n->name];
-								m.name = n->name;
-								m.definefile = thisfile;
-								m.pos = (*node)->startPos;
-								for (int i = 0; i < (*node)->cmdParam.size(); i++)
+								PAModule pa(n->name);
+								bool suc;
+								QString mname = pa.getStringValue(&suc);
+								if (suc)
 								{
-									if (!(*node)->cmdParam[i] || (*node)->cmdParam[i]->name.isEmpty())
-										m.paramqueue.emplace_back((*node)->cmdValue[i]->name, QString(""));
+									if (CmdList.find(mname) != CmdList.end() || SpecialCmdList.find(mname) != SpecialCmdList.end())
+									{
+										p->infos2_mutex.lock();
+										p->infos2.emplace_back(2, 18, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+										p->infos2_mutex.unlock();
+									}
 									else
-										m.paramqueue.emplace_back((*node)->cmdParam[i]->name, (*node)->cmdValue[i]->name);
+									{
+										auto &m = backup_macrodata[mname];
+										m.name = mname;
+										m.definefile = thisfile;
+										m.pos = (*node)->startPos;
+										for (int i = 0; i < (*node)->cmdParam.size(); i++)
+										{
+											if ((*node)->cmdParam[i] && (*node)->cmdParam[i]->name == "name")
+												continue;
+											if (!(*node)->cmdParam[i] || (*node)->cmdParam[i]->name.isEmpty())
+												m.paramqueue.emplace_back((*node)->cmdValue[i]->name, QString(""));
+											else
+												m.paramqueue.emplace_back((*node)->cmdParam[i]->name, (*node)->cmdValue[i]->name);
+										}
+									}
+								}
+								else
+								{
+									p->infos2_mutex.lock();
+									p->infos2.emplace_back(2, 19, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+									p->infos2_mutex.unlock();
 								}
 							}
 						}

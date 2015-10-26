@@ -317,9 +317,10 @@ BKE_FunctionCode::~BKE_FunctionCode()
 		code->release();
 }
 
-Parser::Parser() : opmap(8)
+Parser::Parser(bool init) : opmap(8)
 {
-	init();
+	if (init)
+		this->init();
 }
 
 void Parser::init()

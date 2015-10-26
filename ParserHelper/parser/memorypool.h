@@ -517,6 +517,7 @@ inline int __get_memorypool_memory()
 	return s;
 }
 
+//use standard function for multi-thread
 template <class T>
 class BKE_allocator
 {
@@ -536,27 +537,29 @@ public:
 
 	T* allocate()
 	{
-		return (T*)(al->allocate());
+		//return (T*)(al->allocate());
+		return (T*)malloc(sizeof(T));
 	}
 
 	T* allocate(size_t count)
 	{
-		if (count > 1)
+		//if (count > 1)
 			return (T*)malloc(sizeof(T) * count);
-		return (T*)(al->allocate());
+		//return (T*)(al->allocate());
 	}
 
 	void deallocate(T* p)
 	{
-		al->deallocate(p);
+		free(p);
+		//al->deallocate(p);
 	}
 
 	void deallocate(T* p, size_t count)
 	{
-		if (count > 1)
+		//if (count > 1)
 			free(p);
-		else
-			al->deallocate(p);
+		//else
+		//	al->deallocate(p);
 	}
 
 	T* op_new()

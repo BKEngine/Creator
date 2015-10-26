@@ -3,6 +3,7 @@
 #include <list>
 #include <vector>
 #include <set>
+#include "ParserHelper\parser\parser.h"
 
 using namespace std;
 
@@ -577,3 +578,73 @@ public:
 	bool Parse();
 };
 
+/// <summary>
+/// Parser Analysis Module
+/// </summary>
+class PAModule : private Parser
+{
+private:
+	std::wstring expstr;
+	Parser *p;
+	BKE_bytree *restree;
+	BKE_Variable res;
+	bool constvar;
+
+	const wchar_t* curpos;
+
+	//for ineer lexer
+	bool MatchFunc(const wchar_t *a, const wchar_t **c);
+	void readToken();
+	void expression(BKE_bytree** tree, int rbp = 0);
+	void skipToNextSentence();
+
+public:
+	PAModule(const QString &str);
+
+	BKE_bytree *getTree()
+	{
+		return restree;
+	}
+
+	BKE_Variable getValue(bool *success)
+	{
+		if (success)
+			*success = constvar;
+		return res;
+	}
+
+	QString getStringValue(bool *success)
+	{
+		if (success)
+			*success = constvar && res.getType() == VAR_STR;
+		return QString::fromStdWString(res.forceAsString());
+	}
+
+	int getIntValue(bool *success)
+	{
+		if (success)
+			*success = constvar && res.getType() == VAR_STR;
+		return res.forceAsInteger();
+	}
+
+
+};
+
+inline bool isVarName(const QString &s)
+{
+	bool r = true;
+	QByteArray ba = s.toUtf8();
+	for (int i = 0; i < ba.length(); i++)
+	{
+		unsigned char c = ba[i];
+		if (i == 0 && isalpha(c))
+			continue;
+		if (i > 0 && isalnum(c))
+			continue;
+		if (c == '_' || c >= 0x80)
+			continue;
+		r = false;
+		break;
+	}
+	return r;
+}

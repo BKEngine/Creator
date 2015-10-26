@@ -7,6 +7,7 @@
 #include <list>
 #include <algorithm>
 #include "cmdlist_wrapper.h"
+#include "ParserHelper\parser\parser.h"
 
 using std::atomic_bool;
 
@@ -36,6 +37,10 @@ public:
 	virtual void run() override;
 
 private:
+
+	BKE_VarClosure *backup_topclo;
+
+	BKE_VarClosure *topclo;
 
 	/// <summary>
 	/// Global macro data.
@@ -259,6 +264,51 @@ public:
 	void unlockFile()
 	{
 		msgmutex.unlock();
+	}
+
+	/// <summary>
+	/// Gets all the commands and macros.
+	/// </summary>
+	/// <returns></returns>
+	QString getCmdList()
+	{
+		std::set<QString> auto_list;
+		for (auto &it : CmdList)
+		{
+			auto_list.insert(it.name);
+		}
+		for (auto it = SpecialCmdList.begin(); it != SpecialCmdList.end(); it++)
+		{
+			auto_list.insert(it.key());
+		}
+		msgmutex.lock();
+		for (auto it = macrodata.begin(); it != macrodata.end(); it++)
+		{
+			auto_list.insert(it.key());
+		}
+		msgmutex.unlock();
+		QString cmd;
+		auto it = auto_list.begin();
+		cmd = *it;
+		for (; it != auto_list.end(); it++)
+		{
+			cmd += " " + *it;
+		}
+		return cmd;
+	}
+
+	bool findMacro(const QString &name, BKEMacros *m)
+	{
+		msgmutex.lock();
+		auto it = macrodata.find(name);
+		if (it == macrodata.end())
+		{
+			msgmutex.unlock();
+			return false;
+		}
+		*m = it.value();
+		msgmutex.unlock();
+		return true;
 	}
 };
 
