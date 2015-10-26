@@ -37,6 +37,12 @@ public:
 	virtual void run() override;
 
 private:
+	volatile enum
+	{
+		STATE_IDLE,
+		STATE_PARSEFILE,
+		STATE_PARSEMACRO,
+	}cur_state;
 
 	BKE_VarClosure *backup_topclo;
 
@@ -56,6 +62,11 @@ private:
 	/// The macrofiles.
 	/// </summary>
 	list<QString> macrofiles;
+
+	/// <summary>
+	/// The backup_macrofiles.
+	/// </summary>
+	list<QString> backup_macrofiles;
 
 	/// <summary>
 	/// Whether macro has changed.
@@ -154,7 +165,11 @@ public:
 			filebuf[file] = buffer;
 		}
 		if (std::find(macrofiles.begin(), macrofiles.end(), file) != macrofiles.end())
+		{
 			newmacrofile = true;
+			if (cur_state == STATE_PARSEMACRO)
+				cancel = true;
+		}
 		msgmutex.unlock();
 	}
 

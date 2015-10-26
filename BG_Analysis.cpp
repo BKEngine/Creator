@@ -31,6 +31,7 @@ void BG_Analysis::run()
 {
 	while (!this->stop)
 	{
+		cancel = false;
 		QString cur;
 		msgmutex.lock();
 		cur = curfile;
@@ -50,22 +51,23 @@ void BG_Analysis::run()
 			//no file to analysis, test macro
 			while (newmacrofile)
 			{
+				cur_state = STATE_PARSEMACRO;
 				//analysis macros
 				backup_macrodata.clear();
 
 				msgmutex.lock();
-				macrofiles.clear();
-				macrofiles.push_back("macro.bkscr");
-				auto m_it = macrofiles.begin();
+				backup_macrofiles.clear();
+				backup_macrofiles.push_back("macro.bkscr");
+				auto m_it = backup_macrofiles.begin();
 				msgmutex.unlock();
 
-				while (!cancel && m_it != macrofiles.end())
+				while (!cancel && m_it != backup_macrofiles.end())
 				{
 					//analysis one by one
 					msgmutex.lock();
 					QString thisfile = *m_it;
 					auto p = data[thisfile];
-					//macrofiles.pop_front();
+					//backup_macrofiles.pop_front();
 					msgmutex.unlock();
 
 					if (p->fileNodes.empty())
@@ -106,9 +108,9 @@ void BG_Analysis::run()
 									p->infos2.emplace_back(2, 16, n->startPos, n->endPos + 1 - n->startPos);
 									p->infos2_mutex.unlock();
 								}
-								else if (std::find(macrofiles.begin(), macrofiles.end(), f) == macrofiles.end())
+								else if (std::find(backup_macrofiles.begin(), backup_macrofiles.end(), f) == backup_macrofiles.end())
 								{
-									macrofiles.push_back(f);
+									backup_macrofiles.push_back(f);
 								}
 							}
 						}
@@ -166,11 +168,13 @@ void BG_Analysis::run()
 
 				msgmutex.lock();
 				macrodata = backup_macrodata;
+				macrofiles = backup_macrofiles;
 				msgmutex.unlock();
 
 				newmacrofile = false;
 				break;
 			}
+			cur_state = STATE_IDLE;
 			msleep(50);
 			continue;
 		}
@@ -196,6 +200,7 @@ void BG_Analysis::run()
 
 		while (!stop && !cancel)
 		{
+			cur_state = STATE_PARSEFILE;
 			bool res = p->Parse();
 			if (!res)
 			{
@@ -210,6 +215,5 @@ void BG_Analysis::run()
 			}
 		}
 
-		cancel = false;
 	}
 }
