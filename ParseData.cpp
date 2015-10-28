@@ -55,13 +55,15 @@ void erase(Pos p, Pos &org, Pos off)
 	}
 }
 
-ParseData::ParseData(QByteArray &file)
+ParseData::ParseData(QByteArray &file, BKE_VarClosure *clo)
 {
 	//int len = file.length();
 	//textbuf = new char[len + 1];
 	textbuf = file.data();
 	isLineStart = true;
 	refresh = true;
+	fileclo = new BKE_VarClosure();
+	fileclo->cloneFrom(clo);
 }
 
 void ParseData::getLabels(set<QString> &l)
@@ -735,6 +737,7 @@ bool ParseData::Parse()
 			if (ch == '#')
 			{
 				rawidx = idx;
+				idx++;
 				skipSpace();
 				if (isLineEnd())
 				{
@@ -754,9 +757,6 @@ bool ParseData::Parse()
 			}
 			else
 			{
-				idx++;
-				skipSpace();
-				skipLineEnd();
 				rawidx = idx;
 				ch = textbuf[idx];
 				while (ch)
@@ -775,6 +775,8 @@ bool ParseData::Parse()
 				{
 					infos.emplace_back(2, 13, idx - 1, 1);
 				}
+				else
+					idx += 2;
 				fileNodes.insert(node->startPos, node);
 			}
 			break;
@@ -816,7 +818,7 @@ PAModule::PAModule(const QString &str) : expstr(str.toStdWString())
 		{
 			skipToNextSentence();
 		}
-		if (restree->childs.back() == NULL)
+		if (!restree->childs.empty() && restree->childs.back() == NULL)
 			restree->childs.pop_back();
 	} while (next.opcode != OP_END);
 
@@ -843,13 +845,104 @@ void PAModule::skipToNextSentence()
 		try
 		{
 			readToken();
-			if (next.opcode == OP_STOP)
+			if (next.opcode == OP_STOP || next.opcode == OP_END)
 				break;
 		}
 		catch (Var_Except &)
 		{
-
+			curpos++;
 		}
+	}
+}
+
+void PAModule::analysisToClosure(BKE_VarClosure *clo)
+{
+	if (!restree || !clo)
+		return;
+	top = clo;
+	for (int i = 0; i < restree->childs.size(); i++)
+	{
+		_analysisToClosure(restree->childs[i], clo, NULL);
+	}
+}
+
+void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Variable *var)
+{
+	if (!tr)
+		return;
+	switch (tr->Node.opcode)
+	{
+	case OP_IF + OP_COUNT:
+	case OP_FOR + OP_COUNT:
+	case OP_WHILE + OP_COUNT:
+	case OP_DO + OP_COUNT:
+	case OP_QUICKFOR + OP_COUNT:
+	case OP_FOREACH + OP_COUNT:
+	case OP_BLOCK + OP_COUNT:
+		{
+			auto c = new BKE_VarClosure(clo);
+			for (int i = 0; i < tr->childs.size(); i++)
+				_analysisToClosure(tr->childs[i], c, var);
+			c->release();
+		}
+		break;
+	case OP_VAR + OP_COUNT:
+		for (int i = 0; i < tr->childs.size(); i+=2)
+		{
+			auto str = tr->childs[i]->Node.var.asBKEStr();
+			BKE_Variable *v = &clo->getMember(str);
+			_analysisToClosure(tr->childs[i + 1], clo, v);
+		}
+		break;
+	case OP_CONSTVAR + OP_COUNT:
+		if (var)
+			*var = tr->Node.var;
+		break;
+	case OP_LITERAL + OP_COUNT:
+		tmpvar = &clo->getMember(tr->Node.var.asBKEStr());
+		break;
+	case OP_DOT + OP_COUNT:
+		{
+			auto str = tr->childs[0]->Node.var.asBKEStr();
+			if (!clo->withvar)
+			{
+				tmpvar = &top->getMember(str);
+			}
+			else
+			{
+				if (clo->withvar->vt == VAR_CLASS)
+					tmpvar = &((BKE_VarClass*)clo->withvar)->getMember(str);
+				else if (clo->withvar->vt == VAR_DIC)
+					tmpvar = &((BKE_VarDic*)clo->withvar)->getMember(str);
+			}
+		}
+		break;
+	case OP_DOT:
+		tmpvar = NULL;
+		_analysisToClosure(tr->childs[0], clo, NULL);
+		if (tmpvar && tmpvar->getType() == VAR_DIC)
+		{
+			tmpvar = &((BKE_VarDic*)tmpvar->obj)->getMember(tr->childs[1]->Node.var.asBKEStr());
+		}
+		else
+			tmpvar = NULL;	//识别终止
+		break;
+	case OP_SET:
+	case OP_SETADD:
+	case OP_SETDIV:
+	case OP_SETSUB:
+	case OP_SETMUL:
+	case OP_SETMOD:
+	case OP_SETPOW:
+	case OP_SETSET:
+		tmpvar = NULL;
+		_analysisToClosure(tr->childs[0], clo, NULL);
+		_analysisToClosure(tr->childs[1], clo, tmpvar);
+		break;
+	default:
+		for (int i = 0; i < tr->childs.size(); i++)
+			_analysisToClosure(tr->childs[i], clo, var);
+		break;
 	}
 }
 

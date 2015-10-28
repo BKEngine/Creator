@@ -103,7 +103,7 @@ public:
 		{
 #if PARSER_MULTITHREAD
 			MemoryPool().lock();
-			MemoryPool().insertKey(p);
+			MemoryPool().insertKey(p, (bkpulong)size);
 			MemoryPool().unlock();
 #else
 			MemoryPool().insertKey(p, (bkpulong)size);
@@ -127,13 +127,14 @@ public:
 #endif
 			auto it = MemoryPool().find(p);
 			//先做兼容处理，找到bug再说
-			if (it == MemoryPool().end())
-				return;
-			//if (it->second <= 4 * SMALL)
-			//	allocator_array()[(it->second + 3) / 4]->dynamic_deallocate(p);
-			//else
-				free(p);
-			MemoryPool().erase(it);
+			if (it != MemoryPool().end())
+			{
+				//if (it->second <= 4 * SMALL)
+				//	allocator_array()[(it->second + 3) / 4]->dynamic_deallocate(p);
+				//else
+					free(p);
+				MemoryPool().erase(it);
+			}
 #if PARSER_MULTITHREAD
 		MemoryPool().unlock();
 #endif
@@ -1173,6 +1174,18 @@ public:
 				num++;
 		return num;
 	};
+	inline BKE_VarClosure *cloneFrom(const BKE_VarClosure *v)
+	{
+		if (v)
+		{
+			clear();
+			for (auto it = v->varmap.begin(); it != v->varmap.end(); it++)
+			{
+				varmap[it->first] = it->second.clone();
+			}
+		}
+		return this;
+	}
 	inline static BKE_VarClosure* global()
 	{
 		return _globalStructures.globalClosure;

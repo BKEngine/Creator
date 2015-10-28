@@ -5,9 +5,10 @@
 //#define REG_CMD(a) do{ auto &_v = CmdList[#a]; _v.name=#a; _v.detail = "说明暂缺";
 #define REG_CMD_VERSION(a, v, b) REG_CMD(a, b);
 #define REG_END() }while(0)
-#define ADD_PARAM(b, c, ...) _v.argNames.push_back(#b);_v.argFlags.push_back(c);
+#define ADD_PARAM(b, c, ...) _v.argNames.push_back(#b);_v.argFlags.push_back(c);_v.argAutoList.push_back("");
+#define ADD_LIST(a) _v.argAutoList.back()=a;
 #define PROPERTY(a, b, c) 
-#define REG_SPE_CMD(a, b, c, d) { auto &_p = SpecialCmdList[#a].modes[#b]; _p.first = c; auto &_v = _p.second; _v.name=#b;_v.detail = d; _v.argNames.push_back("mode"); _v.argFlags.push_back(ptString);
+#define REG_SPE_CMD(a, b, c, d) { auto &_p = SpecialCmdList[#a].modes[#b]; _p.first = c; auto &_v = _p.second; _v.name=#b;_v.detail = d; /*_v.argNames.push_back("mode"); _v.argFlags.push_back(ptString);*/
 //#define REG_SPE_CMD(a, b, c) { auto &_p = SpecialCmdList[#a].modes[#b]; _p.first = c; auto &_v = _p.second; _v.name=#b; _v.argNames.push_back("mode"); _v.argFlags.push_back(ptString);
 
 #define AVALIABLE_AFTER(a) DynamicVersionInfo::availableAfter(a)
@@ -547,6 +548,7 @@ void initCmd()
 	REG_CMD(anchor, "调整一个精灵的锚点。set和get参数至多存在一个。\nset如果是字符串的话，其预设字符串有：center、topleft、topright、topcenter、leftcenter、rightcenter、bottomleft、bottomcenter、bottomright");
 	ADD_PARAM(index, ptInteger);
 	ADD_PARAM(set, ptString | ptPos | ptOptional);
+	ADD_LIST("\"center\" \"topleft\" \"topright\" \"topcenter\" \"leftcenter\" \"rightcenter\" \"bottomleft\" \"bottomcenter\" \"bottomright\"");
 	ADD_PARAM(get, ptVariable | ptOptional);
 	ADD_PARAM(keep, ptBool | ptOptional);
 	PROPERTY(set, get, onlyOne);
@@ -952,6 +954,7 @@ void initCmd()
 	ADD_PARAM(index, ptInteger | ptOptional);
 	ADD_PARAM(from, ptString | ptOptional);
 	ADD_PARAM(stay, ptString | ptOptional);
+	ADD_LIST("\"nostay\" \"stayfore\" \"stayback\"");
 	REG_END();
 	REG_SPE_CMD(trans, shutter, TRANS_SHUTTER, "百叶窗渐变，横向时num默认值为16，纵向时num默认值为12");
 	ADD_PARAM(time, ptTime);

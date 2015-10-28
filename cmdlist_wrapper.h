@@ -123,7 +123,8 @@ struct BKECmdInfo
 {
 	QString name;
 	QString detail;//描述信息
-	QStringList argNames;
+	QStringList argAutoList;	//对于有限字符串取值的参数，其自动完成列表
+	QStringList argNames;	//参数名称
 	vector<bkpulong> argFlags;
 	//almostOne之类的以后再说……
 };

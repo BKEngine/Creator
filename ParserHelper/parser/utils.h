@@ -5,7 +5,7 @@
 //#define ENABLE_FILE
 #define HAS_REGEX
 
-#define PARSER_MULTITHREAD 0
+#define PARSER_MULTITHREAD 1
 
 #include <string>
 #include <sstream>

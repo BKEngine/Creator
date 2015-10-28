@@ -142,6 +142,8 @@ private:
 		return QString();
 	}
 
+	void parseMacro(const QString &file);
+
 public:
 	/// <summary>
 	/// Adds the file to analysis immediately.

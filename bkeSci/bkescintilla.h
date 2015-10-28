@@ -18,6 +18,7 @@ extern QImage BKE_AUTOIMAGE_NORMAL ;
 extern QImage BKE_AUTOIMAGE_MATH ;
 
 class BkeDocBase;
+class BkeProject;
 
 class BkeScintilla : public QsciScintilla
 {
@@ -39,12 +40,17 @@ public:
 		P_AUTO_START
 	} ;
 	enum{
-		BKE_INDICATOR_FIND = 1
+		BKE_INDICATOR_FIND = 1,
+		BKE_INDICATOR_ERROR,
+		BKE_INDICATOR_WARNING,
 	};
 	enum{
 		BKE_CHANGE_REPLACE = 0x1
 	};
+	//所有搜索结果的indicator
 	QList<BkeIndicatorBase> testlist ;
+	//为了显示选择效果而隐藏的indicator
+	BkeIndicatorBase findlast;
 	QString FileName;
 
 	QString apiContext2(int pos , int &word_start , int &word_end) ;
@@ -73,9 +79,9 @@ public:
 	void setSelection(BkeIndicatorBase &p);
 
 	int findcount ;
-	BkeIndicatorBase findlast;
 
 	BkeDocBase *basedoc;
+	BkeProject *workpro;
 	QsciLexerBkeScript *deflex;
 	//ParseData *pdata;
 	BG_Analysis *analysis;
@@ -172,6 +178,7 @@ protected:
 		SHOW_USECOMMANDLIST,
 		SHOW_AUTOCOMMANDLIST,
 		SHOW_AUTOVALLIST,
+		SHOW_ENUMLIST,
 		SHOW_USEVALLIST,
 		SHOW_LABEL,
 		SHOW_ATTR,
@@ -182,7 +189,8 @@ protected:
 
 	void showComplete();
 	QString getAttrs(const QString &name, const QString &alltext = "");
-
+	QString getEnums(const QString &name, const QString &attr, const QString &alltext = "");
+	QString getValList(const QStringList &ls, const QString &alltext = "");
 };
 
 #endif // BKESCINTILLA_H

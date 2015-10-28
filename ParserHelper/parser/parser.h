@@ -138,8 +138,8 @@ protected:
 		setupDebugInfo();
 	}
 
-	void expression(BKE_bytree** tree, int rbp=0);
-	void readToken();
+	virtual void expression(BKE_bytree** tree, int rbp = 0);
+	virtual void readToken();
   
 	void nud_this(BKE_bytree **tree);
 	void nud_var(BKE_bytree **tree);

@@ -33,13 +33,13 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	SendScintilla(SCI_MARKERSETBACK, 5, QColor(0, 159, 60));
 
 	//error
-	SendScintilla(SCI_INDICSETSTYLE, 2, INDIC_SQUIGGLEPIXMAP);
-	SendScintilla(SCI_INDICSETFORE, 2, 0x0000FF);//BGR
-	SendScintilla(SCI_INDICSETOUTLINEALPHA, 2, 255);
+	SendScintilla(SCI_INDICSETSTYLE, BKE_INDICATOR_ERROR, INDIC_SQUIGGLEPIXMAP);
+	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_ERROR, 0x0000FF);//BGR
+	SendScintilla(SCI_INDICSETOUTLINEALPHA, BKE_INDICATOR_ERROR, 255);
 	//warning
-	SendScintilla(SCI_INDICSETSTYLE, 3, INDIC_SQUIGGLEPIXMAP);
-	SendScintilla(SCI_INDICSETFORE, 3, 0xFF0000);//BGR
-	SendScintilla(SCI_INDICSETOUTLINEALPHA, 3, 255);
+	SendScintilla(SCI_INDICSETSTYLE, BKE_INDICATOR_WARNING, INDIC_SQUIGGLEPIXMAP);
+	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_WARNING, 0xFF0000);//BGR
+	SendScintilla(SCI_INDICSETOUTLINEALPHA, BKE_INDICATOR_WARNING, 255);
 
 
 	DefineIndicators(BKE_INDICATOR_FIND, INDIC_STRAIGHTBOX);  //标记搜索的风格指示器
@@ -243,8 +243,8 @@ QString BkeScintilla::getAttrs(const QString &name, const QString &alltext)
 		auto it = SpecialCmdList.find(name);
 		if (it != SpecialCmdList.end())
 		{
-			QRegExp reg("name=\"(\\w+)\"");
-			QRegExp reg2("name=(\\d+)");
+			QRegExp reg("mode=\"(\\w+)\"");
+			QRegExp reg2("mode=(\\d+)");
 			auto modeidx = alltext.indexOf(reg);
 			auto modeidx2 = alltext.indexOf(reg2);
 			if (modeidx >= 0 || modeidx2 >= 0)
@@ -313,6 +313,177 @@ QString BkeScintilla::getAttrs(const QString &name, const QString &alltext)
 	return res;
 }
 
+QString BkeScintilla::getEnums(const QString &name, const QString &attr, const QString &alltext)
+{
+	std::set<QString> params;
+	QString res;
+	{
+		auto it = CmdList.find(name);
+		if (it != CmdList.end())
+		{
+			auto it2 = it->argNames.indexOf(attr);
+			if (it2 >= 0)
+			{
+				if (!it->argAutoList[it2].isEmpty())
+					return it->argAutoList[it2];
+				else if (it->argFlags[it2] & ptBool)
+					return "false true";
+				else if (it->argFlags[it2] & ptScript)
+				{
+					auto ls = workpro->AllScriptFiles();
+					ls.pop_front();
+					for (auto &ff : ls)
+						ff = '\"' + ff + '\"';
+					return ls.join(' ');
+				}
+			}
+			return res;
+		}
+	}
+	{
+		auto it = SpecialCmdList.find(name);
+		if (it != SpecialCmdList.end())
+		{
+			if (attr == "mode")
+			{
+				for (auto &it3 : it->modes)
+				{
+					params.insert(it3.first);
+				}
+				for (auto &it3 : params)
+				{
+					res += " \"" + it3 + "\"";
+				}
+				res.remove(0, 1);
+				return res;
+			}
+			QRegExp reg("\smode=([^ ]*)");
+			auto modeidx = alltext.indexOf(reg);
+			if (modeidx >= 0)
+			{
+				QString modename = reg.cap(1);
+				PAModule pa(modename);
+				bool f;
+				BKECmdInfo *info = NULL;
+				int idx = pa.getIntValue(&f);
+				if (f)
+				{
+					for (auto &it3 : it->modes)
+					{
+						if (it3.second.first == idx)
+						{
+							info = &it3.second.second;
+							modename = it3.first;
+						}
+					}
+				}
+				else
+				{
+					modename = pa.getStringValue(&f);
+					if (f)
+					{
+						auto it3 = it->modes.find(modename);
+						if (it3 != it->modes.end())
+							info = &it3->second.second;
+					}
+				}
+
+				if (info)
+				{
+					auto it2 = info->argNames.indexOf(attr);
+					if (it2 >= 0)
+					{
+						if (!info->argAutoList[it2].isEmpty())
+							return info->argAutoList[it2];
+						else if (info->argFlags[it2] & ptBool)
+							return "false true";
+						else if (info->argFlags[it2] & ptScript)
+						{
+							auto ls = workpro->AllScriptFiles();
+							ls.pop_front();
+							for (auto &ff : ls)
+								ff = '\"' + ff + '\"';
+							return ls.join(' ');
+						}
+					}
+					return res;
+				}
+			}
+			return res;
+		}
+	}
+}
+
+QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
+{
+	QString res;
+	auto p = analysis->lockFile(FileName);
+	BKE_Variable v;
+	auto idx = 0;
+	while (idx != ls.size() - 1)
+	{
+		if (!idx)
+		{
+			v = p->fileclo->getMember(ls[idx].toStdWString());
+		}
+		else if (v.getType() == VAR_DIC || v.getType() == VAR_CLASS)
+		{
+			v = v.dot(ls[idx].toStdWString());
+		}
+		else
+		{
+			analysis->unlockFile();
+			return res;
+		}
+		idx++;
+	}
+	std::set<QString> params;
+	switch (v.getType())
+	{
+	case VAR_DIC:
+		for (auto &it : ((BKE_VarDic*)v.obj)->varmap)
+		{
+			params.insert(QString::fromStdWString(it.first));
+		}
+		analysis->unlockFile();
+		for (auto &it2 : params)
+		{
+			res += ' ';
+			res += it2;
+		}
+		res.remove(0, 1);
+		return res;
+	case VAR_CLASS:
+		getAllMembers((BKE_VarClass*)v.obj, params);
+		analysis->unlockFile();
+		for (auto &it2 : params)
+		{
+			res += ' ';
+			res += it2;
+		}
+		res.remove(0, 1);
+		return res;
+	default:
+		{
+			BKE_Variable &vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
+			if (vv.getType() != VAR_CLASS)
+			{
+				analysis->unlockFile();
+				return res;
+			}
+			getAllMembers((BKE_VarClass*)vv.obj, params);
+			analysis->unlockFile();
+			for (auto &it2 : params)
+			{
+				res += ' ';
+				res += it2;
+			}
+			res.remove(0, 1);
+			return res;
+		}
+	}
+}
+
 void BkeScintilla::showComplete()
 {
 	int pos = modfieddata.pos + modfieddata.text.length() - 1;
@@ -321,13 +492,50 @@ void BkeScintilla::showComplete()
 	unsigned char curstyle = style;
 	QString context;
 	QString cmdname;
+	QString attrContext;
 	QString lastContext;
 	int beginPos = pos;
 	unsigned int lastStyle = 0;
 	completeType = SHOW_NULL;
+
+	unsigned char st = style & 63;
+
+	if (st == SCE_BKE_STRING || st == SCE_BKE_STRING2 || st == SCE_BKE_TRANS || st == SCE_BKE_ANNOTATE || st == SCE_BKE_COMMENT || st == SCE_BKE_LABEL || st == SCE_BKE_TEXT)
+		return;
+
+	bool l = SendScintilla(SCI_AUTOCACTIVE);
+	if (l != 0)
+		return;
+
 	if (style & 64 /*BEGAL_MASK*/)
 	{
-
+		beginPos--;
+		style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+		while (beginPos > 0 && (style & 128))
+		{
+			beginPos--;
+			style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+		}
+		//now we find the beginning the @ or [ command
+		char *buf = new char[pos + 2 - beginPos];
+		SendScintilla(SCI_GETTEXTRANGE, beginPos, pos + 1, buf);
+		context = buf;
+		delete[] buf;
+		while (isalnum(ch) || ch == '.' || ch == '_')
+		{
+			attrContext.push_front(ch);
+			ch = SendScintilla(SCI_GETCHARAT, --pos);
+		}
+		while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
+			attrContext.remove(0, 1);
+		if (attrContext.isEmpty())
+			return;
+		QStringList ls = attrContext.split('.');
+		if (ls.size() == 1 && ls[0].length() <= 2)
+			return;
+		lastContext = ls.back();
+		completeList = getValList(ls, context);
+		completeType = SHOW_AUTOVALLIST;
 	}
 	else if (style & 128 /*CMD_MASK*/)
 	{
@@ -348,17 +556,25 @@ void BkeScintilla::showComplete()
 		if (p >= 0)
 			cmdname.truncate(p);
 		int p2 = context.lastIndexOf(' ');
-		lastContext = context.right(context.length() - p2 - 1);
+		attrContext = context.right(context.length() - p2 - 1);
+		int p3 = attrContext.indexOf('=');
+		if (p3 >= 0)
+			attrContext.truncate(p3);
 		if (p < 0 && (cmdname[0] == '@' || cmdname[0] == '['))
 		{
 			completeType = SHOW_AUTOCOMMANDLIST;
 		}
-		else if (isspace(ch) || isVarName(lastContext))
+		else if (ch == '=' && isVarName(attrContext))
+		{
+			completeType = SHOW_ENUMLIST;
+		}
+		else if (isspace(ch) || isVarName(attrContext))
 		{
 			completeType = SHOW_ATTR;
 		}
 		else
 		{
+			
 			completeType = SHOW_AUTOVALLIST;
 		}
 		cmdname.remove(0, 1);
@@ -375,8 +591,7 @@ void BkeScintilla::showComplete()
 			completeType = SHOW_NULL;
 	}
 
-	bool l = SendScintilla(SCI_AUTOCACTIVE);
-	if (l != 0)
+	if (completeList.isEmpty())
 		return;
 
 	switch (completeType)
@@ -387,10 +602,15 @@ void BkeScintilla::showComplete()
 		break;
 	case SHOW_ATTR:
 		completeList = getAttrs(cmdname, context);
-		SendScintilla(SCI_AUTOCSHOW, lastContext.length(), completeList.toUtf8().data());
+		SendScintilla(SCI_AUTOCSHOW, attrContext.length(), completeList.toUtf8().data());
+		break;
+	case SHOW_ENUMLIST:
+		completeList = getEnums(cmdname, attrContext, context);
+		SendScintilla(SCI_AUTOCSHOW, 0UL, completeList.toUtf8().data());
 		break;
 	case SHOW_AUTOVALLIST:
-
+		//completeList is set before
+		SendScintilla(SCI_AUTOCSHOW, lastContext.length(), completeList.toUtf8().data());
 		break;
 	default:
 		break;
@@ -808,18 +1028,24 @@ bool BkeScintilla::FindForward(int pos)
 	}
 
 	BkeIndicatorBase abc;
+	abc = findIndicator(BKE_INDICATOR_FIND, pos);
+	abc = simpleFind(fstrdata.constData(), findflag, abc.Start(), abc.End());
+	if (abc.IsNull()) return false;
+
+	if (!findlast.IsNull())
+	{
+		SetIndicator(BKE_INDICATOR_FIND, findlast);
+		findlast.Clear();
+	}
 	//if( !findlast.IsNull() ){ //上一个节点有效，则再寻找一次
 	//    abc = simpleFind(fstrdata.constData(),findflag,findlast.Start(),findlast.End()) ;
 	//    SetIndicator(BKE_INDICATOR_FIND,abc);
 	//}
-	abc = findIndicator(BKE_INDICATOR_FIND, pos);
-	abc = simpleFind(fstrdata.constData(), findflag, abc.Start(), abc.End());
-	if (abc.IsNull()) return false;
-	setSelection(abc);
-	findlast = abc;
 	//abc.SetEnd(abc.Start() + findstr_length);
 	ClearIndicator(abc);
 	SendScintilla(SCI_GOTOPOS, abc.Start());
+	setSelection(abc);
+	findlast = abc;
 	return true;
 }
 
@@ -836,16 +1062,22 @@ bool BkeScintilla::FindBack(int pos)
 		return false;
 	}
 
-	if (!findlast.IsNull()){
-		SetIndicator(BKE_INDICATOR_FIND, findlast);
-		clearSelection();
-	}
 	BkeIndicatorBase abc2 = findIndicatorLast(BKE_INDICATOR_FIND, pos);
 	if (abc2.IsNull() || abc2.End() == 0)
 	{
 		QMessageBox::information(this, "查找", "再往前没有了！", QMessageBox::Ok);
 		return false;
 	}
+
+	if (!findlast.IsNull())
+	{
+		SetIndicator(BKE_INDICATOR_FIND, findlast);
+		findlast.Clear();
+	}
+	//if (!findlast.IsNull()){
+	//	SetIndicator(BKE_INDICATOR_FIND, findlast);
+	//	clearSelection();
+	//}
 	BkeIndicatorBase abc;
 	abc.SetEnd(abc2.Start());
 	do
@@ -853,9 +1085,9 @@ bool BkeScintilla::FindBack(int pos)
 		abc = simpleFind(fstrdata.constData(), findflag, abc.End(), abc2.End());
 	} while (abc.End() < abc2.End());
 	ClearIndicator(abc);
+	SendScintilla(SCI_GOTOPOS, abc.Start());
 	setSelection(abc);
 	findlast = abc;
-	SendScintilla(SCI_GOTOPOS, abc.Start());
 	return true;
 }
 
@@ -1073,6 +1305,7 @@ bool BkeScintilla::IsIndicator(int id, int pos)
 void BkeScintilla::ClearIndicator(BkeIndicatorBase &p)
 {
 	if (p.IsNull()) return;
+	SendScintilla(SCI_SETINDICATORCURRENT, BKE_INDICATOR_FIND);
 	SendScintilla(SCI_INDICATORCLEARRANGE, p.Start(), p.Len());
 }
 
@@ -1283,8 +1516,9 @@ void BkeScintilla::ShowInfomation(QPoint pos)
 				{
 					BKECmdInfo *info = NULL;
 					QString modename = mode->name;
+					PAModule pa(modename);
 					bool f;
-					int idx = mode->name.toInt(&f, 0);
+					int idx = pa.getIntValue(&f);
 					if (f)
 					{
 						for (auto &it3 : it->modes)
@@ -1298,10 +1532,13 @@ void BkeScintilla::ShowInfomation(QPoint pos)
 					}
 					else
 					{
-						mode->name = mode->name.mid(1, mode->name.length() - 2);
-						auto it3 = it->modes.find(mode->name);
-						if (it3 != it->modes.end())
-							info = &it3->second.second;
+						modename = pa.getStringValue(&f);
+						if (f)
+						{
+							auto it3 = it->modes.find(modename);
+							if (it3 != it->modes.end())
+								info = &it3->second.second;
+						}
 					}
 
 					if (info)
@@ -1320,7 +1557,7 @@ void BkeScintilla::ShowInfomation(QPoint pos)
 			bool f = analysis->findMacro(name, &m_info);
 			if (f)
 			{
-				QString info = "命令:" + m_info.name;
+				QString info = "宏:" + m_info.name;
 				QString p;
 				for (int i = 0; i < m_info.paramqueue.size(); i++)
 					p += " " + m_info.paramqueue[i].first;

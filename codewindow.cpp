@@ -641,6 +641,7 @@ void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 
 	loli->edit = new BkeScintilla(this);
 	loli->edit->analysis = currentproject->analysis;
+	loli->edit->workpro = currentproject;
 	loli->edit->basedoc = loli;
 	int pos = LOLI_SORT_INSERT(ItemTextList, loli->Name());
 	filewidget->insertItem(pos, loli->Name());

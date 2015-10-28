@@ -171,6 +171,11 @@ struct BaseNode
 		return type == Node_Command || type == Node_AtCommand;
 	}
 
+	bool isExp() const
+	{
+		return type == Node_Parser || type == Node_LineParser;
+	}
+
 	BaseNode* findIndex(const QString &name, int defaultpos = -1)
 	{
 		for (int i = 0; i < cmdParam.size(); i++)
@@ -203,10 +208,11 @@ struct BaseNode
 class ParseData
 {
 public:
-	ParseData(QByteArray &file);
+	ParseData(QByteArray &file, BKE_VarClosure *clo);
 
 	~ParseData()
 	{
+		fileclo->release();
 	}
 
 	//BkeScintilla *scifile;
@@ -299,9 +305,12 @@ public:
 	}
 	void skipText()
 	{
-		char ch = getNextOne();
+		char ch = fetchNextOne();
 		while (ch && ch != '\n' && ch != '\r' && ch != '[')
-			ch = getNextOne();
+		{
+			idx++;
+			ch = fetchNextOne();
+		}
 	}
 	bool skipLineEnd()
 	{
@@ -552,6 +561,8 @@ public:
 		return res;
 	}
 
+	BKE_VarClosure *fileclo;
+
 	struct Info
 	{
 		int type;//2(error) or 3(warning)
@@ -602,9 +613,13 @@ private:
 
 	//for ineer lexer
 	bool MatchFunc(const wchar_t *a, const wchar_t **c);
-	void readToken();
-	void expression(BKE_bytree** tree, int rbp = 0);
+	virtual void readToken();
+	virtual void expression(BKE_bytree** tree, int rbp = 0);
 	void skipToNextSentence();
+
+	BKE_Variable *tmpvar;
+	BKE_VarClosure *top;
+	void _analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Variable *var);
 
 public:
 	PAModule(const QString &str);
@@ -635,11 +650,13 @@ public:
 		return res.forceAsInteger();
 	}
 
-
+	void analysisToClosure(BKE_VarClosure *clo);
 };
 
 inline bool isVarName(const QString &s)
 {
+	if (s.isEmpty())
+		return false;
 	bool r = true;
 	QByteArray ba = s.toUtf8();
 	for (int i = 0; i < ba.length(); i++)
@@ -655,4 +672,12 @@ inline bool isVarName(const QString &s)
 		break;
 	}
 	return r;
+}
+
+inline void getAllMembers(BKE_VarClass *cla, set<QString> &params)
+{
+	for (int i = 0; i < cla->parents.size(); i++)
+		getAllMembers(cla->parents[i], params);
+	for (auto &it : cla->varmap)
+		params.insert(QString::fromStdWString(it.first));
 }
