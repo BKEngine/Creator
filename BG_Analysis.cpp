@@ -345,12 +345,14 @@ void BG_Analysis::run()
 					auto it = p->fileNodes.begin();
 					while (!stop && !cancel && it != p->fileNodes.end())
 					{
-						if ((*it)->isExp())
+						while (it != p->fileNodes.end() && !(*it)->isExp())
+							++it;
+						if (it != p->fileNodes.end())
 						{
 							PAModule pa((*it)->name);
 							pa.analysisToClosure(p->fileclo);
+							++it;
 						}
-						++it;
 					}
 				}
 				msgmutex.lock();

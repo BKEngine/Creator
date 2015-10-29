@@ -679,5 +679,10 @@ inline void getAllMembers(BKE_VarClass *cla, set<QString> &params)
 	for (int i = 0; i < cla->parents.size(); i++)
 		getAllMembers(cla->parents[i], params);
 	for (auto &it : cla->varmap)
-		params.insert(QString::fromStdWString(it.first));
+	{
+		if (it.second.getType() == VAR_FUNC)
+			params.insert(QString::fromStdWString(it.first.getConstStr() + L"()"));
+		else
+			params.insert(QString::fromStdWString(it.first));
+	}
 }

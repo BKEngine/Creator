@@ -1,7 +1,7 @@
-﻿G:/World's End/World's end/battle.bkscr
-G:/World's End/World's end/macro.bkscr
-G:/once/Dev/scenario/CH01.bkscr
+﻿G:/once/Dev/scenario/CH01.bkscr
 G:/once/Dev/scenario/CH00.bkscr
+G:/World's End/World's end/battle.bkscr
+G:/World's End/World's end/macro.bkscr
 G:/World's End/World's end/main.bkscr
 G:/once/Dev/main.bkscr
 G:/once/Dev/system/once_interface.bkscr

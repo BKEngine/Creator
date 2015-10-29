@@ -560,9 +560,10 @@ void ProjectWindow::CloseProject()
 		return;
 	//workpro->deleteLater();
 	takeTopLevelItem(indexOfTopLevelItem(workpro->Root));
+	//先closeALl脚本窗口
+	emit onProjectClose();
 	delete workpro;
 	workpro = NULL;
-	emit onProjectClose();
 }
 
 void ProjectWindow::CloseProject(const ItemInfo &f)

@@ -308,7 +308,7 @@ public:
 		QString cmd;
 		auto it = auto_list.begin();
 		cmd = *it;
-		for (; it != auto_list.end(); it++)
+		for (++it; it != auto_list.end(); it++)
 		{
 			cmd += " " + *it;
 		}

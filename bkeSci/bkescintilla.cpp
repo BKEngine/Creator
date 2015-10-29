@@ -412,6 +412,7 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 			return res;
 		}
 	}
+	return res;
 }
 
 QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
@@ -438,9 +439,17 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		idx++;
 	}
 	std::set<QString> params;
+	BKE_Variable vv;
 	switch (v.getType())
 	{
 	case VAR_DIC:
+		vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
+		if (vv.getType() != VAR_CLASS)
+		{
+			analysis->unlockFile();
+			return res;
+		}
+		getAllMembers((BKE_VarClass*)vv.obj, params);
 		for (auto &it : ((BKE_VarDic*)v.obj)->varmap)
 		{
 			params.insert(QString::fromStdWString(it.first));
@@ -464,23 +473,21 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		res.remove(0, 1);
 		return res;
 	default:
+		vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
+		if (vv.getType() != VAR_CLASS)
 		{
-			BKE_Variable &vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
-			if (vv.getType() != VAR_CLASS)
-			{
-				analysis->unlockFile();
-				return res;
-			}
-			getAllMembers((BKE_VarClass*)vv.obj, params);
 			analysis->unlockFile();
-			for (auto &it2 : params)
-			{
-				res += ' ';
-				res += it2;
-			}
-			res.remove(0, 1);
 			return res;
 		}
+		getAllMembers((BKE_VarClass*)vv.obj, params);
+		analysis->unlockFile();
+		for (auto &it2 : params)
+		{
+			res += ' ';
+			res += it2;
+		}
+		res.remove(0, 1);
+		return res;
 	}
 }
 
@@ -568,13 +575,27 @@ void BkeScintilla::showComplete()
 		{
 			completeType = SHOW_ENUMLIST;
 		}
-		else if (isspace(ch) || isVarName(attrContext))
+		else if (isspace(ch) || (isVarName(attrContext) && p3 < 0))
 		{
 			completeType = SHOW_ATTR;
 		}
 		else
 		{
-			
+			attrContext.clear();
+			while (isalnum(ch) || ch == '.' || ch == '_')
+			{
+				attrContext.push_front(ch);
+				ch = SendScintilla(SCI_GETCHARAT, --pos);
+			}
+			while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
+				attrContext.remove(0, 1);
+			if (attrContext.isEmpty())
+				return;
+			QStringList ls = attrContext.split('.');
+			if (ls.size() == 1 && ls[0].length() <= 2)
+				return;
+			lastContext = ls.back();
+			completeList = getValList(ls, context);
 			completeType = SHOW_AUTOVALLIST;
 		}
 		cmdname.remove(0, 1);
@@ -591,26 +612,27 @@ void BkeScintilla::showComplete()
 			completeType = SHOW_NULL;
 	}
 
-	if (completeList.isEmpty())
-		return;
-
 	switch (completeType)
 	{
 	case SHOW_AUTOCOMMANDLIST:
 		completeList = analysis->getCmdList();
-		SendScintilla(SCI_AUTOCSHOW, cmdname.length(), completeList.toUtf8().data());
+		if (!completeList.isEmpty())
+			SendScintilla(SCI_AUTOCSHOW, cmdname.length(), completeList.toUtf8().data());
 		break;
 	case SHOW_ATTR:
 		completeList = getAttrs(cmdname, context);
-		SendScintilla(SCI_AUTOCSHOW, attrContext.length(), completeList.toUtf8().data());
+		if (!completeList.isEmpty())
+			SendScintilla(SCI_AUTOCSHOW, attrContext.length(), completeList.toUtf8().data());
 		break;
 	case SHOW_ENUMLIST:
 		completeList = getEnums(cmdname, attrContext, context);
-		SendScintilla(SCI_AUTOCSHOW, 0UL, completeList.toUtf8().data());
+		if (!completeList.isEmpty())
+			SendScintilla(SCI_AUTOCSHOW, 0UL, completeList.toUtf8().data());
 		break;
 	case SHOW_AUTOVALLIST:
 		//completeList is set before
-		SendScintilla(SCI_AUTOCSHOW, lastContext.length(), completeList.toUtf8().data());
+		if (!completeList.isEmpty())
+			SendScintilla(SCI_AUTOCSHOW, lastContext.length(), completeList.toUtf8().data());
 		break;
 	default:
 		break;
@@ -887,8 +909,10 @@ void BkeScintilla::ChooseComplete(const char *text, int pos)
 		pos = SendScintilla(SCI_GETCURRENTPOS);
 	bool iscommand = (GetByte(pos - 1) == ';');
 
-	if (!temp.endsWith("\"") && iscommand && !defparser->HasTheChileOf(temp))
-		temp.append("=");
+	//if (!temp.endsWith("\"") && iscommand && !defparser->HasTheChileOf(temp))
+	//	temp.append("=");
+	//if (completeType == SHOW_ATTR)
+	//	temp.append("=");
 
 	if (iscommand)
 	{
@@ -903,6 +927,19 @@ void BkeScintilla::ChooseComplete(const char *text, int pos)
 	SendScintilla(SCI_SETSELECTIONEND, SendScintilla(SCI_GETCURRENTPOS));
 	removeSelectedText();
 	InsertAndMove(temp);
+
+	//if (completeType == SHOW_ATTR)
+	//{
+	//	modfieddata.pos = SendScintilla(SCI_GETCURRENTPOS);
+	//	modfieddata.text = '=';
+	//	showComplete();
+	//}
+
+	//如果最后是(),光标回移一格
+	if (temp.endsWith("()"))
+	{
+		SendScintilla(SCI_SETEMPTYSELECTION, SendScintilla(SCI_GETCURRENTPOS) - 1);
+	}
 }
 
 

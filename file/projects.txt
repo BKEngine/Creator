@@ -1,5 +1,5 @@
-﻿G:/World's End/World's end/BkeProject.bkp
-G:/once/Dev/BkeProject.bkp
+﻿G:/once/Dev/BkeProject.bkp
+G:/World's End/World's end/BkeProject.bkp
 G:/BKEProject/BKE-Demo/BkeProject.bkp
 G:/tttest/BkeProject.bkp
 D:/BKE-Demo/BkeProject.bkp
