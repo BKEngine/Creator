@@ -137,6 +137,7 @@ public:
 	virtual void SCI_METHOD Release()
 	{
 		//deconstruct
+		delete this;
 	}
 	virtual const char * SCI_METHOD PropertyNames()
 	{
@@ -710,7 +711,7 @@ void BKE_Lexer::DoCommand()
 {
 	//check cmd name
 	setMask(CMD_MASK);
-	bool error = false;
+	//bool error = false;
 	if (!styler->atLineEnd && !isspace(styler->ch) && styler->ch != ']')
 	{
 		while (styler->More())
@@ -721,11 +722,12 @@ void BKE_Lexer::DoCommand()
 				styler->Forward();
 		}
 	}
-	else
-	{
-		error = true;
-		styler->ChangeState(SCE_BKE_ERROR | cur_mask);
-	}
+	//else
+	//{
+	//	error = true;
+	//	有了indicator后不用在Lexer里画Error了
+	//	styler->ChangeState(SCE_BKE_ERROR | cur_mask);
+	//}
 	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 	//prop-value
 	while (styler->More() && !styler->atLineEnd && styler->ch != ']')
@@ -770,9 +772,9 @@ void BKE_Lexer::DoCommand()
 	}
 	if (styler->ch == ']')
 	{
-		if (error)
-			styler->SetState(SCE_BKE_ERROR | cur_mask);
-		else
+		//if (error)
+		//	styler->SetState(SCE_BKE_ERROR | cur_mask);
+		//else
 			styler->SetState(SCE_BKE_COMMAND | cur_mask);
 		styler->Forward();
 		removeMask(CMD_MASK);
@@ -799,10 +801,11 @@ void BKE_Lexer::DoAtCommand()
 				styler->Forward();
 		}
 	}
-	else
-	{
-		styler->ChangeState(SCE_BKE_ERROR | cur_mask);
-	}
+	//有了indicator后不用在Lexer里画Error了
+	//else
+	//{
+	//	styler->ChangeState(SCE_BKE_ERROR | cur_mask);
+	//}
 	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 	//prop-value
 	while (styler->More() && !styler->atLineEnd)

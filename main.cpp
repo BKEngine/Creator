@@ -210,7 +210,13 @@ int main(int argc, char *argv[])
 #endif
 	initCmd();
 	
-	return a.exec();
+	auto res = a.exec();
+
+	delete BKE_CLOSE_SETTING;
+	delete BKE_USER_SETTING;
+	delete BKE_SKIN_SETTING;
+
+	return res;
 }
 
 //检测是否安装了openal32，没有则安装
@@ -245,14 +251,14 @@ void CheckFileAssociation()
 	//判断UKEnv类型是否已在注册表中，并关联了正确的打开方式（程序打开方式），没有则写入
 	QString currentValue = ukenvFileReg->value("Default").toString();
 
-	if (currentValue.isEmpty() ||
-	  currentValue != "BKE_Creator")
+	if (currentValue.isEmpty() || currentValue != "BKE_Creator")
 	{
 		if(QMessageBox::question(0,"提示","检测到工程文件尚未关联。是否关联工程文件？")==QMessageBox::Yes)
 		{
 			QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/FileAssociation.exe")) ;
 		}
 	}
+	delete ukenvFileReg;
 #else
 	QProcess *cmd = new QProcess();
 	QObject::connect(cmd, &QProcess::readyReadStandardOutput, [cmd](){

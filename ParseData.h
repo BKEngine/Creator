@@ -213,6 +213,8 @@ public:
 	~ParseData()
 	{
 		fileclo->release();
+		for (auto &it : fileNodes)
+			delete it;
 	}
 
 	//BkeScintilla *scifile;

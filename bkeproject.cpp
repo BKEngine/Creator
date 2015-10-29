@@ -46,7 +46,9 @@ BkeProject::BkeProject(QObject *parent)
 	isnull = true;
 	currentptr = 0;
 	analysis = 0;
-	lex = new BkeParser(this);
+	//lex = new BkeParser(this);
+	lex = NULL;
+
 	fileico = new QIcon(":/project/source/file.png");
 	dirsico = new QIcon(":/project/source/doc.png");
 	baseico = new QIcon(":/project/source/database.png");
@@ -62,8 +64,20 @@ BkeProject::BkeProject(QObject *parent)
 
 BkeProject::~BkeProject()
 {
-	delete lex;
+	//delete lex;
 	delete analysis;
+	delete config;
+
+	delete fileico;
+	delete dirsico;
+	delete baseico;
+	delete importico;
+	delete bksdocico;
+	delete sourcedocico;
+	delete bksfileico;
+	delete imgfileico;
+	delete volfileico;
+	delete movfileico;
 	//lex->deleteLater();
 }
 
@@ -159,7 +173,11 @@ bool BkeProject::OpenProject(const QString &name)
 	if (kk.isNull() || !kk.isObject()) return false;
 
 	bkpAdmin = new QJsonObject(kk.object());
-	if (bkpAdmin->isEmpty()) return false;
+	if (bkpAdmin->isEmpty())
+	{
+		delete bkpAdmin;
+		return false;
+	}
 
 	int version = int(bkpAdmin->value("version").toString().toDouble() * 10 + 0.5);
 
@@ -221,6 +239,7 @@ bool BkeProject::OpenProject(const QString &name)
 	if (version < SAVE_VERSION)
 		WriteBkpFile();
 
+	delete bkpAdmin;
 	return true;
 }
 

@@ -32,6 +32,7 @@ public:
     QListWidget *marklist ;
 
     OtherWindow(QWidget *parent = 0);
+	~OtherWindow();
 
     int ErrorCount(){ return errorcount ; }
     void ShowProblem(BkeMarkList *list,const QString &dir) ;

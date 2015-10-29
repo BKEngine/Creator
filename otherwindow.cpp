@@ -50,6 +50,13 @@ OtherWindow::OtherWindow(QWidget *parent)
 	emap[btnmark] = marklist;
 }
 
+OtherWindow::~OtherWindow()
+{
+	delete icoerror;
+	delete icowarning;
+	delete icobookmark;
+}
+
 void OtherWindow::WINproblem() { IfShow(btnproblem); }
 void OtherWindow::WINsearch() { IfShow(btnsearch); }
 void OtherWindow::WINcomile() { IfShow(btncompiletext); }

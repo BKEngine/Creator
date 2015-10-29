@@ -89,6 +89,10 @@ CodeWindow::CodeWindow(QWidget *parent)
 
 }
 
+CodeWindow::~CodeWindow()
+{
+}
+
 void CodeWindow::CreateBtn()
 {
 	toolbar = new QToolBar;
@@ -617,8 +621,8 @@ void CodeWindow::addFile(const QString &file, const QString &prodir)
 			loli->edit->FileName = file;
 		else
 			loli->edit->FileName = shortname;
-		BkeProject *tpro = prowin->FindProjectFromDir(prodir);
-		if (prodir != 0) loli->edit->setParser(tpro->lex);
+		//BkeProject *tpro = prowin->FindProjectFromDir(prodir);
+		//if (prodir != 0) loli->edit->setParser(tpro->lex);
 
 		BkeCreator::AddRecentFile(loli->FullName());
 
@@ -640,7 +644,8 @@ void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 	ignoreflag = true; //忽略改变，在所有准备工作完成以后才改变
 
 	loli->edit = new BkeScintilla(this);
-	loli->edit->analysis = currentproject->analysis;
+	if (currentproject)
+		loli->edit->analysis = currentproject->analysis;
 	loli->edit->workpro = currentproject;
 	loli->edit->basedoc = loli;
 	int pos = LOLI_SORT_INSERT(ItemTextList, loli->Name());
@@ -1120,7 +1125,7 @@ void CodeWindow::FileNameChange(const QString &oldname, const QString &newname, 
 void CodeWindow::ToLocation(BkeMarkerBase *p, const QString &prodir)
 {
 	if (prodir.isEmpty())
-		addFile(p->FullName, "");
+		addFile(p->FullName, currentproject->FileDir());
 	else
 		addFile(p->FullName, prodir);
 	//    BKEproject *pro = prowin->FindFileProject(p->FullName) ;

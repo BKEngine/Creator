@@ -33,7 +33,7 @@ public:
 		BTN_COUNT
 	};
 
-
+	~ProjectWindow();
 	ProjectWindow(QWidget *parent = 0);
 	BkeProject *FindPro(const QString &proname);
 	BkeProject *FindFileProject(const QString &file);

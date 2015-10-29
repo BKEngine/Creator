@@ -58,6 +58,8 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	//setAutoIndent(true);
 	
 	SendScintilla(SCI_AUTOCSTOPS, "", ",./!@#$%^&*()_+-=\\;'\"[]{}");
+	SendScintilla(SCI_SETUSETABS, true);
+	SendScintilla(SCI_SETINDENT, 0);
 
 	//setIndentationGuides(true) ;
 	Separate = QString(" ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\\n\r");
@@ -71,10 +73,11 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	IsWorkingUndo = false;
 	isMacroFile = false;
 
-	deflex = new QsciLexerBkeScript;
+	deflex = new QsciLexerBkeScript(this);
 	//pdata = new ParseData(this);
 	setLexer(deflex);
-	Selfparser = defparser = new BkeParser;     //新的词法分析器
+	//Selfparser = defparser = new BkeParser;     //新的词法分析器
+	Selfparser = defparser = NULL;
 
 	connect(this, SIGNAL(SCN_MODIFIED(int, int, const char *, int, int, int, int, int, int, int)),
 		SLOT(EditModified(int, int, const char *, int, int, int, int, int, int, int)));
@@ -96,7 +99,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 BkeScintilla::~BkeScintilla()
 {
 	tm.stop();
-	delete Selfparser;
+	//delete Selfparser;
 }
 
 void BkeScintilla::onTimer()
@@ -518,7 +521,7 @@ void BkeScintilla::showComplete()
 	{
 		beginPos--;
 		style = SendScintilla(SCI_GETSTYLEAT, beginPos);
-		while (beginPos > 0 && (style & 128))
+		while (beginPos > 0 && (style & 64))
 		{
 			beginPos--;
 			style = SendScintilla(SCI_GETSTYLEAT, beginPos);
@@ -644,6 +647,8 @@ void BkeScintilla::UiChange(int updated)
 {
 	if (ChangeIgnore) return;
 
+	int tabWidth = SendScintilla(SCI_GETTABWIDTH);
+
 	ChangeIgnore++;
 	if (ChangeType & SC_PERFORMED_USER)
 	{
@@ -664,45 +669,133 @@ void BkeScintilla::UiChange(int updated)
 	{
 		char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
 		char chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + modfieddata.text.count());
+		int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
+		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
 
 		if ((chPrev == '{' && chNext == '}') ||
 			(chPrev == '[' && chNext == ']') ||
 			(chPrev == '(' && chNext == ')')
 			)
 		{
-			int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
 			SendScintilla(SCI_INSERTTEXT, modfieddata.pos, modfieddata.text.toLatin1().data());
-			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + SendScintilla(SCI_GETTABWIDTH));
+			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
 			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 2, count);
-			SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
+		}
+		else if (style & 64)	//parser
+		{
+			int len = lineLength(modfieddata.line);
+			char *buf = new char[len + 1];
+			SendScintilla(SCI_GETLINE, modfieddata.line, buf);
+			while (buf[len] == '\n' || buf[len] == '\r')
+				len--;
+			buf[len] = 0;
+			if (!len || buf[len - 1] == ';')
+			{
+				//沿用上一行的缩进
+				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+			}
+			else
+			{
+				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
+			}
+			delete[] buf;
+			//int ly = defparser->GetIndentLayer(this, modfieddata.line);
+			//if (ly < 0)
+			//{
+			//	count += SendScintilla(SCI_GETTABWIDTH) * ly;
+			//	SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count);
+			//	modfieddata.pos--; //我也不知道为啥会这样，总之偏移了一个字节
+			//}
+			//else if (ly > 0)
+			//{
+			//	count += SendScintilla(SCI_GETTABWIDTH);
+			//}
+			//SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+			//SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
 		}
 		else
 		{
-			int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
-			int ly = defparser->GetIndentLayer(this, modfieddata.line);
-			if (ly < 0)
+			//认为是command域
+			int len = lineLength(modfieddata.line);
+			char *buf = new char[len + 1];
+			SendScintilla(SCI_GETLINE, modfieddata.line, buf);
+			--len;
+			while (buf[len] == '\n' || buf[len] == '\r')
+				len--;
+			buf[len + 1] = 0;
+			int Pos = positionFromLineIndexByte(modfieddata.line, len - 1);
+			unsigned char style = SendScintilla(SCI_GETSTYLEAT, Pos);
+
+			if (!(style & 128))
 			{
-				count += SendScintilla(SCI_GETTABWIDTH) * ly;
-				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count);
-				modfieddata.pos--; //我也不知道为啥会这样，总之偏移了一个字节
+				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
 			}
-			else if (ly > 0)
+			else
 			{
-				count += SendScintilla(SCI_GETTABWIDTH);
+				while (style & 128)
+				{
+					style = SendScintilla(SCI_GETSTYLEAT, --Pos);
+				}
+				unsigned char ch = SendScintilla(SCI_GETCHARAT, Pos);
+				if (ch != '@' && ch != '[')
+				{
+					SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+				}
+				else
+				{
+					//find command name
+					QString cmd;
+					++Pos;
+					ch = SendScintilla(SCI_GETCHARAT, Pos);
+					if (ch == '_' || isalpha(ch) || ch >= 0x80)
+					{
+						do
+						{
+							cmd.push_back(ch);
+							++Pos;
+							ch = SendScintilla(SCI_GETCHARAT, Pos);
+						} while (ch == '_' || isalnum(ch) || ch >= 0x80);
+					}
+					if (cmd == "if" || cmd == "for")
+					{
+						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
+					}
+					else if (cmd == "else" || cmd == "elseif")
+					{
+						if (count < tabWidth)
+							count = tabWidth;
+						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
+						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+					}
+					else if (cmd == "endif" || cmd == "next")
+					{
+						if (count < tabWidth)
+							count = tabWidth;
+						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
+						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count - tabWidth);
+					}
+					else
+					{
+						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+					}
+				}
 			}
-			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
-			SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
 		}
+		SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
 	}
 
 	//括号，引号补全
 	if (modfieddata.text.length() == 1 && (modfieddata.text == "(" || modfieddata.text == "[" || modfieddata.text == "{" || modfieddata.text == "\"" || modfieddata.text == "'" || modfieddata.text == ")" || modfieddata.text == "]" || modfieddata.text == "}"))
 	{
-		QString lefts = "([{\"\'";
-		QString rights = ")]}\"\'";
 		unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos - 1);
 		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
 		unsigned char style2 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
+		//首先不要在字符串内，否则忽略
+		if ((style & 63) == SCE_BKE_STRING || (style & 63) == SCE_BKE_STRING2 || (style & 63) == SCE_BKE_TRANS)
+			goto out;
+
+		QString lefts = "([{\"\'";
+		QString rights = ")]}\"\'";
 		//unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
 		char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
 		char ch = SendScintilla(SCI_GETCHARAT, modfieddata.pos);
@@ -768,13 +861,15 @@ void BkeScintilla::UiChange(int updated)
 		}
 	}
 
+out:
+
 	if (ChangeType & SC_PERFORMED_USER)
 	{
 		BkeEndUndoAction();
 	}
 	ChangeIgnore--;
 
-	defparser->showtype = BkeParser::SHOW_NULL;
+	//defparser->showtype = BkeParser::SHOW_NULL;
 	ChangeType = 0;
 	modfieddata.clear();
 }
@@ -785,41 +880,41 @@ void BkeScintilla::UiChange(int updated)
 //自动补全
 void BkeScintilla::CompliteFromApi(int type)
 {
-	int word_end;
-	QString context = apiContext2(SendScintilla(SCI_GETCURRENTPOS), StartWordPos, word_end);
-	if (defparser->showtype == BkeParser::SHOW_AUTOVALLIST && context.length() < 3) return;
-	else if (defparser->showtype == BkeParser::SHOW_LABEL && context.length() < 2) return;
+	//int word_end;
+	//QString context = apiContext2(SendScintilla(SCI_GETCURRENTPOS), StartWordPos, word_end);
+	//if (defparser->showtype == BkeParser::SHOW_AUTOVALLIST && context.length() < 3) return;
+	//else if (defparser->showtype == BkeParser::SHOW_LABEL && context.length() < 2) return;
 
-	SendScintilla(SCI_AUTOCSETIGNORECASE, false);
+	//SendScintilla(SCI_AUTOCSETIGNORECASE, false);
 
-	comss = defparser->GetList(context);
+	//comss = defparser->GetList(context);
 
-	if (comss == 0) return;
+	//if (comss == 0) return;
 
-	if (context.isEmpty()){
-		SendScintilla(SCI_USERLISTSHOW, 1, comss);
-	}
-	else{
-		SendScintilla(SCI_AUTOCSHOW, context.length(), comss);
-	}
+	//if (context.isEmpty()){
+	//	SendScintilla(SCI_USERLISTSHOW, 1, comss);
+	//}
+	//else{
+	//	SendScintilla(SCI_AUTOCSHOW, context.length(), comss);
+	//}
 }
 
 void BkeScintilla::CompliteFromApi2(int lest)
 {
-	int word_end, nowpos = SendScintilla(SCI_GETCURRENTPOS);
-	QString context = apiContext2(nowpos, StartWordPos, word_end);
-	if (context.length() < lest) return;
+	//int word_end, nowpos = SendScintilla(SCI_GETCURRENTPOS);
+	//QString context = apiContext2(nowpos, StartWordPos, word_end);
+	//if (context.length() < lest) return;
 
-	const char *ks = defparser->GetValList(context);
-	SendScintilla(SCI_AUTOCSETIGNORECASE, true);
+	//const char *ks = defparser->GetValList(context);
+	//SendScintilla(SCI_AUTOCSETIGNORECASE, true);
 
-	if (ks == 0) return;
-	else if (context.isEmpty()){
-		SendScintilla(SCI_USERLISTSHOW, 1, ks);
-	}
-	else{
-		SendScintilla(SCI_AUTOCSHOW, context.length(), ks);
-	}
+	//if (ks == 0) return;
+	//else if (context.isEmpty()){
+	//	SendScintilla(SCI_USERLISTSHOW, 1, ks);
+	//}
+	//else{
+	//	SendScintilla(SCI_AUTOCSHOW, context.length(), ks);
+	//}
 }
 
 
@@ -911,8 +1006,8 @@ void BkeScintilla::ChooseComplete(const char *text, int pos)
 
 	//if (!temp.endsWith("\"") && iscommand && !defparser->HasTheChileOf(temp))
 	//	temp.append("=");
-	//if (completeType == SHOW_ATTR)
-	//	temp.append("=");
+	if (completeType == SHOW_ATTR)
+		temp.append("=");
 
 	if (iscommand)
 	{
@@ -922,23 +1017,23 @@ void BkeScintilla::ChooseComplete(const char *text, int pos)
 	else 
 		SendScintilla(SCI_SETSELECTIONSTART, pos);
 
-	defparser->showtype = BkeParser::SHOW_NULL;
+	//defparser->showtype = BkeParser::SHOW_NULL;
 	modfieddata.clear();
 	SendScintilla(SCI_SETSELECTIONEND, SendScintilla(SCI_GETCURRENTPOS));
 	removeSelectedText();
 	InsertAndMove(temp);
 
-	//if (completeType == SHOW_ATTR)
-	//{
-	//	modfieddata.pos = SendScintilla(SCI_GETCURRENTPOS);
-	//	modfieddata.text = '=';
-	//	showComplete();
-	//}
+	if (completeType == SHOW_ATTR)
+	{
+		modfieddata.pos = SendScintilla(SCI_GETCURRENTPOS);
+		modfieddata.text = '=';
+		showComplete();
+	}
 
 	//如果最后是(),光标回移一格
 	if (temp.endsWith("()"))
 	{
-		SendScintilla(SCI_SETEMPTYSELECTION, SendScintilla(SCI_GETCURRENTPOS) - 1);
+		SendScintilla(SCI_GOTOPOS, SendScintilla(SCI_GETCURRENTPOS) - 1);
 	}
 }
 
@@ -957,29 +1052,29 @@ void BkeScintilla::InsertAndMove(const QString &text)
 void BkeScintilla::CurChange(int line, int index)
 {
 	//改变忽略，行没有改变，文本被选择不会触发语法检查
-	if (ChangeIgnore || line == LastLine || hasSelectedText()){
-		IsNewLine = false;
-		return;
-	}
+	//if (ChangeIgnore || line == LastLine || hasSelectedText()){
+	//	IsNewLine = false;
+	//	return;
+	//}
 
-	LastKeywordEnd = 2; //关键位置重置为2
-	if (!hasSelectedText()){
-		QString temp = this->text(LastLine);
-		defparser->ParserText(temp);  //非选择状态，词法分析上一行
-		//        //CheckLine( line ); //检查行状态
-		//        AutoState = AUTO_NULL ;
-		//        LastKeywordEnd = 99 ;
-		//        ComPleteLeast = 3 ;
-		//         //获得缩进
-		//        IndentCount = defparser->GetIndentLayer()*8 ;
+	//LastKeywordEnd = 2; //关键位置重置为2
+	//if (!hasSelectedText()){
+	//	QString temp = this->text(LastLine);
+	//	//defparser->ParserText(temp);  //非选择状态，词法分析上一行
+	//	//        //CheckLine( line ); //检查行状态
+	//	//        AutoState = AUTO_NULL ;
+	//	//        LastKeywordEnd = 99 ;
+	//	//        ComPleteLeast = 3 ;
+	//	//         //获得缩进
+	//	//        IndentCount = defparser->GetIndentLayer()*8 ;
 
-	}
-	markerDelete(LastLine, 5);
-	markerDelete(LastLine + 1, 5);
-	LastLine = line;
-	markerAdd(line, 5);
-	//光标移动是不会触发填充模式的
-	vautostate = P_AUTO_NULL;
+	//}
+	//markerDelete(LastLine, 5);
+	//markerDelete(LastLine + 1, 5);
+	//LastLine = line;
+	//markerAdd(line, 5);
+	////光标移动是不会触发填充模式的
+	//vautostate = P_AUTO_NULL;
 }
 
 
@@ -1621,11 +1716,11 @@ void BkeScintilla::ShowInfomation(QPoint pos)
 	}
 
 
-	QString t = defparser->GetInfo(this->text(line).trimmed());;
-	if (t.isEmpty())
-	{
-		QToolTip::hideText();
-		return;
-	}
-	QToolTip::showText(QCursor::pos(), t);
+	//QString t = defparser->GetInfo(this->text(line).trimmed());;
+	//if (t.isEmpty())
+	//{
+	//	QToolTip::hideText();
+	//	return;
+	//}
+	//QToolTip::showText(QCursor::pos(), t);
 }

@@ -794,13 +794,18 @@ bool ParseData::Parse()
 	return true;
 }
 
-PAModule::PAModule(const QString &str) : expstr(str.toStdWString())
+PAModule::PAModule(const QString &str) : Parser(false), expstr(str.toStdWString())
 {
 	p = Parser::getInstance();
 	curpos = exp = expstr.c_str();
 	expsize = expstr.size();
 	NextIsBareWord = false;
 	forcequit = false;
+
+	//copy lbp, pre, runner
+	memcpy(lbp, p->lbp, sizeof(lbp));
+	pre = lbp + OP_COUNT;
+	memcpy(runner, p->runner, sizeof(runner));
 
 	restree = new BKE_bytree();
 	restree->Node.opcode = OP_RESERVE + OP_COUNT;

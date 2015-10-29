@@ -36,6 +36,10 @@ ProjectWindow::ProjectWindow(QWidget *parent)
 	workpro = NULL;
 }
 
+ProjectWindow::~ProjectWindow()
+{
+	delete workpro;
+}
 
 void ProjectWindow::NewProject()
 {

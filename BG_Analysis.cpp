@@ -27,6 +27,9 @@ BG_Analysis::~BG_Analysis()
 		topclo->release();
 	if (backup_topclo)
 		backup_topclo->release();
+
+	for (auto &it : data)
+		delete it;
 }
 
 void BG_Analysis::parseMacro(const QString &file)
@@ -340,7 +343,7 @@ void BG_Analysis::run()
 			bool res = p->Parse();
 			if (!res)
 			{
-				if (std::find(macrofiles.begin(), macrofiles.end(), cur) == macrofiles.end())
+				//if (std::find(macrofiles.begin(), macrofiles.end(), cur) == macrofiles.end())
 				{
 					auto it = p->fileNodes.begin();
 					while (!stop && !cancel && it != p->fileNodes.end())
@@ -366,5 +369,9 @@ void BG_Analysis::run()
 			}
 		}
 
+		msgmutex.lock();
+		if (data[cur] != p)
+			delete p;
+		msgmutex.unlock();
 	}
 }

@@ -127,6 +127,6 @@ void BkeCompile::error(QProcess::ProcessError e)
 		break;
 	}
 	emit CompliteError(s);
-	delete cmd;
-	cmd = 0;
+	//delete cmd;
+	//cmd = 0;
 }

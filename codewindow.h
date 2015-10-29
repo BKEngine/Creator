@@ -21,6 +21,7 @@ public:
 
 	BkeDocBase(){ edit = 0; }
 	~BkeDocBase(){
+		//delete edit;
 		if (fileIO.isOpen()) fileIO.close();
 	}
 
@@ -89,6 +90,7 @@ public:
 
 	friend class SearchThread;
 
+	~CodeWindow();
 	CodeWindow(QWidget *parent = 0);
 	QSize sizeHint() const;
 	void OtherWinStartX(ProjectWindow *p, OtherWindow *win, BkeLeftFileWidget *flist);

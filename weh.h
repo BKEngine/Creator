@@ -1,6 +1,8 @@
 ﻿#ifndef WEH_H
 #define WEH_H
 
+//#include <vld.h>
+
 #include <QWidget>
 #include <QLabel>
 #include <Qsci/qsciscintilla.h>
