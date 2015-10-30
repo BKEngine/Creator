@@ -694,7 +694,7 @@ bool ParseData::Parse()
 				node2->type = BaseNode::Node_CmdProp;
 				node2->startPos = idx - node->startPos;
 				rawidx = idx;
-				node2->name = readCmdName(startwithat);
+				node2->name = readName();
 				ch = fetchNextOne();
 				if (node2->name.isEmpty() || ch != '=')
 				{

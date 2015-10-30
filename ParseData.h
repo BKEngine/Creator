@@ -360,6 +360,23 @@ public:
 		tmp.prepend(ba);
 		return tmp;
 	}
+	QString readName()
+	{
+		QByteArray ba;
+		char ch = fetchNextOne();
+		if (isalpha(ch) || ch == '_' || ch >= 0x80)
+		{
+			do
+			{
+				ba.push_back(ch);
+				idx++;
+				ch = fetchNextOne();
+			} while (isalnum(ch) || ch == '_' || ch >= 0x80);
+		}
+		QString tmp;
+		tmp.prepend(ba);
+		return tmp;
+	}
 	QString readValue(bool startwithat)
 	{
 		enum BracketType
