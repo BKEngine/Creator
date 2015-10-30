@@ -293,16 +293,16 @@ public:
 		std::set<QString> auto_list;
 		for (auto &it : CmdList)
 		{
-			auto_list.insert(it.name);
+			auto_list.insert(it.name + "?0");
 		}
 		for (auto it = SpecialCmdList.begin(); it != SpecialCmdList.end(); it++)
 		{
-			auto_list.insert(it.key());
+			auto_list.insert(it.key() + "?0");
 		}
 		msgmutex.lock();
 		for (auto it = macrodata.begin(); it != macrodata.end(); it++)
 		{
-			auto_list.insert(it.key());
+			auto_list.insert(it.key() + "?3");
 		}
 		msgmutex.unlock();
 		QString cmd;

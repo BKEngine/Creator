@@ -455,7 +455,7 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		getAllMembers((BKE_VarClass*)vv.obj, params);
 		for (auto &it : ((BKE_VarDic*)v.obj)->varmap)
 		{
-			params.insert(QString::fromStdWString(it.first));
+			params.insert(QString::fromStdWString(it.first.getConstStr() + L"?0"));
 		}
 		analysis->unlockFile();
 		for (auto &it2 : params)
@@ -492,6 +492,22 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		res.remove(0, 1);
 		return res;
 	}
+}
+
+QString BkeScintilla::getGlobalList(const QString &ls, const QString &alltext)
+{
+	QString res;
+	auto p = analysis->lockFile(FileName);
+	std::set<QString> params;
+	getAllMembers(p->fileclo, params);
+	analysis->unlockFile();
+	for (auto &it2 : params)
+	{
+		res += ' ';
+		res += it2;
+	}
+	res.remove(0, 1);
+	return res;
 }
 
 void BkeScintilla::showComplete()
@@ -543,8 +559,15 @@ void BkeScintilla::showComplete()
 		QStringList ls = attrContext.split('.');
 		if (ls.size() == 1 && ls[0].length() <= 2)
 			return;
+		else if (ls.size() == 1)
+		{
+			completeList = getGlobalList(ls[0], context);
+		}
+		else
+		{
+			completeList = getValList(ls, context);
+		}
 		lastContext = ls.back();
-		completeList = getValList(ls, context);
 		completeType = SHOW_AUTOVALLIST;
 	}
 	else if (style & 128 /*CMD_MASK*/)
@@ -764,6 +787,8 @@ void BkeScintilla::UiChange(int updated)
 					{
 						if (count < tabWidth)
 							count = tabWidth;
+						else
+							modfieddata.pos--;
 						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
 						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
 					}
@@ -771,6 +796,8 @@ void BkeScintilla::UiChange(int updated)
 					{
 						if (count < tabWidth)
 							count = tabWidth;
+						else
+							modfieddata.pos--;
 						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
 						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count - tabWidth);
 					}

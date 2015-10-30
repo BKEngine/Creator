@@ -1558,7 +1558,7 @@ void Parser::nud_array(BKE_bytree** tree)
 		if (next.opcode != OP_COMMA)
 			break;
 		readToken();
-	} while (next.opcode != OP_ARR2);
+	} while (next.opcode != OP_ARR2 && next.opcode != OP_END);
 	if (next.opcode != OP_ARR2)
 	{
 		THROW(getPos(p) + L"[需要]结尾。", next.pos);
@@ -1634,7 +1634,7 @@ void Parser::nud_dic(BKE_bytree** tree)
 		if (next.opcode != OP_COMMA)
 			break;
 		readToken();
-	} while (next.opcode != OP_ARR2);
+	} while (next.opcode != OP_ARR2 && next.opcode != OP_END);
 	if (next.opcode != OP_ARR2)
 	{
 		THROW(getPos(p) + L"%[需要]结尾。", next.pos);

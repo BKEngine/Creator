@@ -683,8 +683,21 @@ inline void getAllMembers(BKE_VarClass *cla, set<QString> &params)
 	for (auto &it : cla->varmap)
 	{
 		if (it.second.getType() == VAR_FUNC)
-			params.insert(QString::fromStdWString(it.first.getConstStr() + L"()"));
+			params.insert(QString::fromStdWString(it.first.getConstStr() + L"()?3"));
 		else
-			params.insert(QString::fromStdWString(it.first));
+			params.insert(QString::fromStdWString(it.first.getConstStr() + L"?0"));
+	}
+}
+
+inline void getAllMembers(BKE_VarClosure *clo, set<QString> &params)
+{
+	if (clo->parent)
+		getAllMembers(clo->parent, params);
+	for (auto &it : clo->varmap)
+	{
+		if (it.second.getType() == VAR_FUNC)
+			params.insert(QString::fromStdWString(it.first.getConstStr() + L"()?3"));
+		else
+			params.insert(QString::fromStdWString(it.first.getConstStr() + L"?0"));
 	}
 }

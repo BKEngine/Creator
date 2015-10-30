@@ -1,9 +1,9 @@
-﻿G:/once/Dev/scenario/CH04.bkscr
+﻿G:/once/Dev/main.bkscr
 G:/once/Dev/scenario/CH01.bkscr
+G:/once/Dev/scenario/CH04.bkscr
 G:/once/Dev/scenario/CH03.bkscr
 G:/once/Dev/system/bgmmode.bkscr
 G:/once/Dev/scenario/start.bkscr
-G:/once/Dev/main.bkscr
 G:/once/Dev/scenario/CH00.bkscr
 G:/once/Dev/scenario/CH02.bkscr
 G:/once/Dev/system/once_interface.bkscr

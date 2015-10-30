@@ -191,6 +191,7 @@ protected:
 	QString getAttrs(const QString &name, const QString &alltext = "");
 	QString getEnums(const QString &name, const QString &attr, const QString &alltext = "");
 	QString getValList(const QStringList &ls, const QString &alltext = "");
+	QString getGlobalList(const QString &ls, const QString &alltext = "");
 };
 
 #endif // BKESCINTILLA_H

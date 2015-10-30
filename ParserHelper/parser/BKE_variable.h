@@ -1254,6 +1254,7 @@ class BKE_VarFunction :public BKE_VarObject
 	friend class Parser;
 	friend class BKE_Variable;
 	friend class BKE_VarClass;
+	friend class PAModule;
 private:
 	BKE_FunctionCode *func;
 	BKE_Variable* self;
