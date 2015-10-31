@@ -696,6 +696,37 @@ void BkeScintilla::UiChange(int updated)
 	//if (IsWorkingUndo && !ChangeIgnore) BkeEndUndoAction();
 
 	//缩进
+	//额外处理]和}
+	if ((ChangeType & SC_MOD_INSERTTEXT) && (modfieddata.text == "]" || modfieddata.text == "}"))
+	{
+		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
+		if (style & 64)
+		{
+			int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
+			int len = lineLength(modfieddata.line);
+			char *buf = new char[len + 1];
+			SendScintilla(SCI_GETLINE, modfieddata.line, buf);
+			buf[len] = 0;
+			len--;
+			while (len >= 0 && buf[len] == '\n' || buf[len] == '\r')
+				len--;
+			buf[++len] = 0;
+			//如果本行只有}或]
+			int start = 0;
+			while (isspace((unsigned char)buf[start]))
+				start++;
+			if (start == len - 1)
+			{
+				//那么往回缩
+				if (count < tabWidth)
+					count = tabWidth;
+				else
+					modfieddata.pos--;
+				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
+				SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
+			}
+		}
+	}
 	if (modfieddata.lineadd == 1 && (modfieddata.text == "\n" || modfieddata.text == "\r\n"))
 	{
 		char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
@@ -704,8 +735,9 @@ void BkeScintilla::UiChange(int updated)
 		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
 
 		if ((chPrev == '{' && chNext == '}') ||
-			(chPrev == '[' && chNext == ']') ||
-			(chPrev == '(' && chNext == ')')
+			(chPrev == '[' && chNext == ']')// ||
+			//小括号还是算了
+			//(chPrev == '(' && chNext == ')')
 			)
 		{
 			SendScintilla(SCI_INSERTTEXT, modfieddata.pos, modfieddata.text.toLatin1().data());
@@ -717,10 +749,12 @@ void BkeScintilla::UiChange(int updated)
 			int len = lineLength(modfieddata.line);
 			char *buf = new char[len + 1];
 			SendScintilla(SCI_GETLINE, modfieddata.line, buf);
-			while (buf[len] == '\n' || buf[len] == '\r')
-				len--;
 			buf[len] = 0;
-			if (!len || buf[len - 1] == ';')
+			len--;
+			while (len >= 0 && buf[len] == '\n' || buf[len] == '\r')
+				len--;
+			buf[++len] = 0;
+			if (!len || buf[len - 1] == ';' || buf[len - 1] == '}')
 			{
 				//沿用上一行的缩进
 				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
@@ -750,10 +784,11 @@ void BkeScintilla::UiChange(int updated)
 			int len = lineLength(modfieddata.line);
 			char *buf = new char[len + 1];
 			SendScintilla(SCI_GETLINE, modfieddata.line, buf);
-			--len;
-			while (buf[len] == '\n' || buf[len] == '\r')
+			buf[len] = 0;
+			len--;
+			while (len >= 0 && buf[len] == '\n' || buf[len] == '\r')
 				len--;
-			buf[len + 1] = 0;
+			buf[++len] = 0;
 			int Pos = positionFromLineIndexByte(modfieddata.line, len - 1);
 			unsigned char style = SendScintilla(SCI_GETSTYLEAT, Pos);
 
