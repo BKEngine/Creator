@@ -459,12 +459,13 @@ bool BKE_Lexer::ParseString2()
 			}
 			return true;
 		}
-		if (!intrans && styler->ch == '\\')
+		if (!intrans && ch == '\\')
 		{
 			intrans = true;
 			trans_info.push_back(Trans());
-			trans_info.back().begin = realpos;
-			styler->Forward();
+			trans_info.back().begin = realpos - 1;
+			ch = styler->GetRelative(realpos - pos);
+			realpos++;
 			continue;
 		}
 		if (intrans)
@@ -472,7 +473,7 @@ bool BKE_Lexer::ParseString2()
 			trans_info.back().len = 2;
 			trans_info.back().correct = true;
 			intrans = false;
-			switch (styler->ch)
+			switch (ch)
 			{
 			case L'n':
 			case L'r':
@@ -483,7 +484,8 @@ bool BKE_Lexer::ParseString2()
 			case L'v':
 			case '\"':
 			case '\'':
-				styler->Forward();
+				ch = styler->GetRelative(realpos - pos);
+				realpos++;
 				break;
 			case 'o':
 				//need two more num
@@ -728,6 +730,7 @@ void BKE_Lexer::DoCommand()
 {
 	//check cmd name
 	setMask(CMD_MASK);
+	styler->SetState(styler->state | cur_mask);
 	//bool error = false;
 	if (!styler->atLineEnd && !isspace(styler->ch) && styler->ch != ']')
 	{

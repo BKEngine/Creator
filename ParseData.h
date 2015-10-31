@@ -665,7 +665,7 @@ public:
 	int getIntValue(bool *success)
 	{
 		if (success)
-			*success = constvar && res.getType() == VAR_STR;
+			*success = constvar && res.getType() == VAR_NUM;
 		return res.forceAsInteger();
 	}
 

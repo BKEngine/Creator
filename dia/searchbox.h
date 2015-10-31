@@ -32,6 +32,9 @@ public slots :
 	void onFindConditionChange();
 	void onSearcAllConditionChange();
 
+	void onReturn1();
+	void onReturn2();
+
 public slots:
     void FindNext() ;
     void FindLast() ;

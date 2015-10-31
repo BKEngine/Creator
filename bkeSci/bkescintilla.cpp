@@ -57,7 +57,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	setMarginsBackgroundColor(QColor(240, 240, 240));
 	//setAutoIndent(true);
 	
-	SendScintilla(SCI_AUTOCSTOPS, "", ",./!@#$%^&*()_+-=\\;'\"[]{}");
+	SendScintilla(SCI_AUTOCSTOPS, "", ",./!@#$%^&*()+-=\\;'\"[]{}");
 	SendScintilla(SCI_SETUSETABS, true);
 	SendScintilla(SCI_SETINDENT, 0);
 	SendScintilla(SCI_AUTOCSETORDER, SC_ORDER_PERFORMSORT);
@@ -250,18 +250,15 @@ QString BkeScintilla::getAttrs(const QString &name, const QString &alltext)
 		auto it = SpecialCmdList.find(name);
 		if (it != SpecialCmdList.end())
 		{
-			QRegExp reg("mode=\"(\\w+)\"");
-			QRegExp reg2("mode=(\\d+)");
+			QRegExp reg("\\smode=([^ ]*)");
 			auto modeidx = alltext.indexOf(reg);
-			auto modeidx2 = alltext.indexOf(reg2);
-			if (modeidx >= 0 || modeidx2 >= 0)
+			if (modeidx >= 0)
 			{
-				bool f = modeidx < 0;
-				BKECmdInfo *info = NULL;
 				QString modename = reg.cap(1);
-				int idx = -1;
-				if (f)
-					idx = reg2.cap(1).toInt(&f, 0);
+				PAModule pa(modename);
+				bool f;
+				BKECmdInfo *info = NULL;
+				int idx = pa.getIntValue(&f);
 				if (f)
 				{
 					for (auto &it3 : it->modes)
@@ -275,13 +272,19 @@ QString BkeScintilla::getAttrs(const QString &name, const QString &alltext)
 				}
 				else
 				{
-					auto it3 = it->modes.find(modename);
-					if (it3 != it->modes.end())
-						info = &it3->second.second;
+					modename = pa.getStringValue(&f);
+					if (f)
+					{
+						auto it3 = it->modes.find(modename);
+						if (it3 != it->modes.end())
+							info = &it3->second.second;
+					}
 				}
 
 				if (info)
 				{
+					if (info->argNames.isEmpty())
+						return res;
 					for (auto &it2 : info->argNames)
 						params.insert(it2);
 					auto it2 = params.begin();
@@ -364,7 +367,7 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 				res.remove(0, 1);
 				return res;
 			}
-			QRegExp reg("\smode=([^ ]*)");
+			QRegExp reg("\\smode=([^ ]*)");
 			auto modeidx = alltext.indexOf(reg);
 			if (modeidx >= 0)
 			{
@@ -518,7 +521,9 @@ void BkeScintilla::showComplete()
 {
 	int pos = modfieddata.pos + modfieddata.text.length() - 1;
 	if (ChangeType & SC_MOD_DELETETEXT)
-		pos--;
+		pos = modfieddata.pos - 1;
+	if (pos < 0)
+		return;
 	unsigned char style = SendScintilla(SCI_GETSTYLEAT, pos);
 	unsigned char ch = SendScintilla(SCI_GETCHARAT, pos);
 	unsigned char curstyle = style;
@@ -684,8 +689,8 @@ void BkeScintilla::UiChange(int updated)
 		BkeStartUndoAction();
 	}
 
-	if (ChangeType & SC_PERFORMED_USER)
-	//if (ChangeType & SC_MOD_INSERTTEXT)
+	//if (ChangeType & SC_PERFORMED_USER)
+	if (ChangeType & SC_MOD_INSERTTEXT)
 	{
 		//自动补全
 		showComplete();
@@ -1181,6 +1186,8 @@ int BkeScintilla::findFirst1(const QString fstr, bool cs, bool exp, bool word, b
 	findcount = 0;
 	fstrdata = fstr.toUtf8();
 	const char *ss = fstrdata.constData();
+	if (ss[0] == 0)
+		return 0;
 	testlist.clear();
 	findstr_length = fstrdata.length();
 	findflag = (cs ? SCFIND_MATCHCASE : 0) |

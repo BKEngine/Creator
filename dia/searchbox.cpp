@@ -28,6 +28,9 @@ QDockWidget(parent)
 	sciedit = 0;
 	firstshow = true;
 
+	connect(edit, SIGNAL(returnPressed()), this, SLOT(onReturn1()));
+	connect(edit1, SIGNAL(returnPressed()), this, SLOT(onReturn2()));
+
 	connect(findallpro, SIGNAL(stateChanged(int)), this, SLOT(onSearcAllConditionChange()));
 	connect(iscase, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
 	connect(isregular, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
@@ -287,4 +290,18 @@ void SearchBox::Show_()
 
 	this->show();
 	activateWindow();
+	edit->setFocus();
+}
+
+void SearchBox::onReturn1()
+{
+	if (edit1->isEnabled())
+		edit1->setFocus();
+	else
+		FindNext();
+}
+
+void SearchBox::onReturn2()
+{
+	ReplaceText();
 }
