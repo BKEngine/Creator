@@ -1,25 +1,20 @@
-﻿// This module implements the "official" high-level API of the Qt port of
+// This module implements the "official" high-level API of the Qt port of
 // Scintilla.  It is modelled on QTextEdit - a method of the same name should
 // behave in the same way.
 //
-// Copyright (c) 2012 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2015 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
-// This file may be used under the terms of the GNU General Public
-// License versions 2.0 or 3.0 as published by the Free Software
-// Foundation and appearing in the files LICENSE.GPL2 and LICENSE.GPL3
-// included in the packaging of this file.  Alternatively you may (at
-// your option) use any later version of the GNU General Public
-// License if such license has been publicly approved by Riverbank
-// Computing Limited (or its successors, if any) and the KDE Free Qt
-// Foundation. In addition, as a special exception, Riverbank gives you
-// certain additional rights. These rights are described in the Riverbank
-// GPL Exception version 1.1, which can be found in the file
-// GPL_EXCEPTION.txt in this package.
+// This file may be used under the terms of the GNU General Public License
+// version 3.0 as published by the Free Software Foundation and appearing in
+// the file LICENSE included in the packaging of this file.  Please review the
+// following information to ensure the GNU General Public License version 3.0
+// requirements will be met: http://www.gnu.org/copyleft/gpl.html.
 // 
-// If you are unsure which license is appropriate for your use, please
-// contact the sales department at sales@riverbankcomputing.com.
+// If you do not wish to use this file under the terms of the GPL version 3.0
+// then you may purchase a commercial license.  For more information contact
+// info@riverbankcomputing.com.
 // 
 // This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 // WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,16 +23,17 @@
 #include "Qsci/qsciscintilla.h"
 
 #include <string.h>
-#include <qaction.h>
-#include <qapplication.h>
-#include <qcolor.h>
-#include <qevent.h>
-#include <qimage.h>
-#include <qiodevice.h>
-#include <qkeysequence.h>
-#include <qpoint.h>
 
-#include <qmenu.h>
+#include <QAction>
+#include <QApplication>
+#include <QColor>
+#include <QEvent>
+#include <QImage>
+#include <QIODevice>
+#include <QKeyEvent>
+#include <QKeySequence>
+#include <QMenu>
+#include <QPoint>
 
 #include "Qsci/qsciabstractapis.h"
 #include "Qsci/qscicommandset.h"
@@ -45,13 +41,11 @@
 #include "Qsci/qscistyle.h"
 #include "Qsci/qscistyledtext.h"
 
+
 // Make sure these match the values in Scintilla.h.  We don't #include that
 // file because it just causes more clashes.
 #define KEYWORDSET_MAX  8
 #define MARKER_MAX      31
-
-#define ScintillaStringData(s)      (s).constData()
-#define ScintillaStringLength(s)    (s).size()
 
 // The list separators for auto-completion and user lists.
 const char acSeparator = '\x03';
@@ -251,13 +245,10 @@ void QsciScintilla::handleCharAdded(int ch)
     // start character.  If it is then create a new list which will be a subset
     // of the current one.  The case where it isn't a start character seems to
     // be handled correctly elsewhere.
-    if (isListActive())
+    if (isListActive() && isStartChar(ch))
     {
-        if (isStartChar(ch))
-        {
-            cancelList();
-            startAutoCompletion(acSource, false, use_single == AcusAlways);
-        }
+        cancelList();
+        startAutoCompletion(acSource, false, use_single == AcusAlways);
 
         return;
     }
@@ -673,9 +664,9 @@ void QsciScintilla::startAutoCompletion(AutoCompletionSource acs,
         return;
 
     // Get the last word's raw data and length.
-    ScintillaString s = convertTextQ2S(context.last());
-    const char *last_data = ScintillaStringData(s);
-    int last_len = ScintillaStringLength(s);
+    ScintillaBytes s = textAsBytes(context.last());
+    const char *last_data = ScintillaBytesConstData(s);
+    int last_len = s.length();
 
     if (checkThresh && last_len < acThresh)
         return;
@@ -774,8 +765,8 @@ void QsciScintilla::startAutoCompletion(AutoCompletionSource acs,
     SendScintilla(SCI_AUTOCSETCHOOSESINGLE, choose_single);
     SendScintilla(SCI_AUTOCSETSEPARATOR, acSeparator);
 
-    ScintillaString wlist_s = convertTextQ2S(wlist.join(QChar(acSeparator)));
-    SendScintilla(SCI_AUTOCSHOW, last_len, ScintillaStringData(wlist_s));
+    ScintillaBytes wlist_s = textAsBytes(wlist.join(QChar(acSeparator)));
+    SendScintilla(SCI_AUTOCSHOW, last_len, ScintillaBytesConstData(wlist_s));
 }
 
 
@@ -831,7 +822,15 @@ void QsciScintilla::autoIndentation(char ch, long pos)
             autoIndentLine(pos, curr_line, blockIndent(curr_line - 1) - ind_width);
     }
     else if (ch == '\r' || ch == '\n')
-        autoIndentLine(pos, curr_line, blockIndent(curr_line - 1));
+    {
+        // Don't auto-indent the line (ie. preserve its existing indentation)
+        // if we have inserted a new line above by pressing return at the start
+        // of this line - in other words, if the previous line is empty.
+        long prev_line_length = SendScintilla(SCI_GETLINEENDPOSITION, curr_line - 1) - SendScintilla(SCI_POSITIONFROMLINE, curr_line - 1);
+
+        if (prev_line_length != 0)
+            autoIndentLine(pos, curr_line, blockIndent(curr_line - 1));
+    }
 }
 
 
@@ -1049,7 +1048,6 @@ bool QsciScintilla::isUtf8() const
 // Set the code page.
 void QsciScintilla::setUtf8(bool cp)
 {
-    setAttribute(Qt::WA_InputMethodEnabled, cp);
     SendScintilla(SCI_SETCODEPAGE, (cp ? SC_CP_UTF8 : 0));
 }
 
@@ -1818,10 +1816,10 @@ int QsciScintilla::simpleFind()
     SendScintilla(SCI_SETTARGETSTART, findState.startpos);
     SendScintilla(SCI_SETTARGETEND, findState.endpos);
 
-    ScintillaString s = convertTextQ2S(findState.expr);
+    ScintillaBytes s = textAsBytes(findState.expr);
 
-    return SendScintilla(SCI_SEARCHINTARGET, ScintillaStringLength(s),
-            ScintillaStringData(s));
+    return SendScintilla(SCI_SEARCHINTARGET, s.length(),
+            ScintillaBytesConstData(s));
 }
 
 
@@ -1838,8 +1836,8 @@ void QsciScintilla::replace(const QString &replaceStr)
 
     int cmd = (findState.flags & SCFIND_REGEXP) ? SCI_REPLACETARGETRE : SCI_REPLACETARGET;
 
-    ScintillaString s = convertTextQ2S(replaceStr);
-    long len = SendScintilla(cmd, -1, ScintillaStringData(s));
+    ScintillaBytes s = textAsBytes(replaceStr);
+    long len = SendScintilla(cmd, -1, ScintillaBytesConstData(s));
 
     // Reset the selection.
     SendScintilla(SCI_SETSELECTIONSTART, start);
@@ -1960,7 +1958,7 @@ void QsciScintilla::setSelection(int lineFrom, int indexFrom, int lineTo,
 void QsciScintilla::setSelectionBackgroundColor(const QColor &col)
 {
     int alpha = col.alpha();
-    
+
     if (alpha == 255)
         alpha = SC_ALPHA_NOALPHA;
 
@@ -2039,6 +2037,48 @@ void QsciScintilla::setCaretLineVisible(bool enable)
 }
 
 
+// Set the background colour of a hotspot area.
+void QsciScintilla::setHotspotBackgroundColor(const QColor &col)
+{
+    SendScintilla(SCI_SETSELBACK, 1, col);
+}
+
+
+// Set the foreground colour of a hotspot area.
+void QsciScintilla::setHotspotForegroundColor(const QColor &col)
+{
+    SendScintilla(SCI_SETHOTSPOTACTIVEFORE, 1, col);
+}
+
+
+// Reset the background colour of a hotspot area to the default.
+void QsciScintilla::resetHotspotBackgroundColor()
+{
+    SendScintilla(SCI_SETSELBACK, 0UL);
+}
+
+
+// Reset the foreground colour of a hotspot area to the default.
+void QsciScintilla::resetHotspotForegroundColor()
+{
+    SendScintilla(SCI_SETHOTSPOTACTIVEFORE, 0UL);
+}
+
+
+// Set the underline of a hotspot area.
+void QsciScintilla::setHotspotUnderline(bool enable)
+{
+    SendScintilla(SCI_SETHOTSPOTACTIVEUNDERLINE, enable);
+}
+
+
+// Set the wrapping of a hotspot area.
+void QsciScintilla::setHotspotWrap(bool enable)
+{
+    SendScintilla(SCI_SETHOTSPOTSINGLELINE, !enable);
+}
+
+
 // Query the read-only state.
 bool QsciScintilla::isReadOnly() const
 {
@@ -2049,6 +2089,7 @@ bool QsciScintilla::isReadOnly() const
 // Set the read-only state.
 void QsciScintilla::setReadOnly(bool ro)
 {
+    setAttribute(Qt::WA_InputMethodEnabled, !ro);
     SendScintilla(SCI_SETREADONLY, ro);
 }
 
@@ -2058,9 +2099,8 @@ void QsciScintilla::append(const QString &text)
 {
     bool ro = ensureRW();
 
-    ScintillaString s = convertTextQ2S(text);
-    SendScintilla(SCI_APPENDTEXT, ScintillaStringLength(s),
-            ScintillaStringData(s));
+    ScintillaBytes s = textAsBytes(text);
+    SendScintilla(SCI_APPENDTEXT, s.length(), ScintillaBytesConstData(s));
 
     SendScintilla(SCI_EMPTYUNDOBUFFER);
 
@@ -2089,7 +2129,7 @@ void QsciScintilla::insertAtPos(const QString &text, int pos)
 
     SendScintilla(SCI_BEGINUNDOACTION);
     SendScintilla(SCI_INSERTTEXT, pos,
-            ScintillaStringData(convertTextQ2S(text)));
+            ScintillaBytesConstData(textAsBytes(text)));
     SendScintilla(SCI_ENDUNDOACTION);
 
     setReadOnly(ro);
@@ -2184,7 +2224,7 @@ void QsciScintilla::removeSelectedText()
 // Replace any selected text.
 void QsciScintilla::replaceSelectedText(const QString &text)
 {
-    SendScintilla(SCI_REPLACESEL, ScintillaStringData(convertTextQ2S(text)));
+    SendScintilla(SCI_REPLACESEL, ScintillaBytesConstData(textAsBytes(text)));
 }
 
 
@@ -2198,7 +2238,7 @@ QString QsciScintilla::selectedText() const
 
     SendScintilla(SCI_GETSELTEXT, buf);
 
-    QString qs = convertTextS2Q(buf);
+    QString qs = bytesAsText(buf);
     delete[] buf;
 
     return qs;
@@ -2213,7 +2253,7 @@ QString QsciScintilla::text() const
 
     SendScintilla(SCI_GETTEXT, buflen, buf);
 
-    QString qs = convertTextS2Q(buf);
+    QString qs = bytesAsText(buf);
     delete[] buf;
 
     return qs;
@@ -2233,7 +2273,7 @@ QString QsciScintilla::text(int line) const
     SendScintilla(SCI_GETLINE, line, buf);
     buf[line_len] = '\0';
 
-    QString qs = convertTextS2Q(buf);
+    QString qs = bytesAsText(buf);
     delete[] buf;
 
     return qs;
@@ -2245,7 +2285,7 @@ void QsciScintilla::setText(const QString &text)
 {
     bool ro = ensureRW();
 
-    SendScintilla(SCI_SETTEXT, ScintillaStringData(convertTextQ2S(text)));
+    SendScintilla(SCI_SETTEXT, ScintillaBytesConstData(textAsBytes(text)));
     SendScintilla(SCI_EMPTYUNDOBUFFER);
 
     setReadOnly(ro);
@@ -2518,9 +2558,9 @@ void QsciScintilla::setMarginType(int margin, QsciScintilla::MarginType type)
 void QsciScintilla::clearMarginText(int line)
 {
     if (line < 0)
-        SendScintilla(SCI_MARGINSETTEXT, line, (const char *)0);
-    else
         SendScintilla(SCI_MARGINTEXTCLEARALL);
+    else
+        SendScintilla(SCI_MARGINSETTEXT, line, (const char *)0);
 }
 
 
@@ -2530,7 +2570,7 @@ void QsciScintilla::setMarginText(int line, const QString &text, int style)
     int style_offset = SendScintilla(SCI_MARGINGETSTYLEOFFSET);
 
     SendScintilla(SCI_MARGINSETTEXT, line,
-            ScintillaStringData(convertTextQ2S(text)));
+            ScintillaBytesConstData(textAsBytes(text)));
 
     SendScintilla(SCI_MARGINSETSTYLE, line, style - style_offset);
 }
@@ -2558,10 +2598,11 @@ void QsciScintilla::setMarginText(int line, const QsciStyledText &text)
 void QsciScintilla::setMarginText(int line, const QList<QsciStyledText> &text)
 {
     char *styles;
-    ScintillaString styled_text = styleText(text, &styles,
+    ScintillaBytes styled_text = styleText(text, &styles,
             SendScintilla(SCI_MARGINGETSTYLEOFFSET));
 
-    SendScintilla(SCI_MARGINSETTEXT, line, ScintillaStringData(styled_text));
+    SendScintilla(SCI_MARGINSETTEXT, line,
+            ScintillaBytesConstData(styled_text));
     SendScintilla(SCI_MARGINSETSTYLES, line, styles);
 
     delete[] styles;
@@ -2629,7 +2670,7 @@ void QsciScintilla::setMarginWidth(int margin, int width)
 void QsciScintilla::setMarginWidth(int margin, const QString &s)
 {
     int width = SendScintilla(SCI_TEXTWIDTH, STYLE_LINENUMBER,
-            ScintillaStringData(convertTextQ2S(s)));
+            ScintillaBytesConstData(textAsBytes(s)));
 
     setMarginWidth(margin, width);
 }
@@ -2662,7 +2703,8 @@ int QsciScintilla::indicatorDefine(IndicatorStyle style, int indicatorNumber)
     checkIndicator(indicatorNumber);
 
     if (indicatorNumber >= 0)
-        SendScintilla(SCI_INDICSETSTYLE, indicatorNumber, static_cast<long>(style));
+        SendScintilla(SCI_INDICSETSTYLE, indicatorNumber,
+                static_cast<long>(style));
 
     return indicatorNumber;
 }
@@ -2671,7 +2713,7 @@ int QsciScintilla::indicatorDefine(IndicatorStyle style, int indicatorNumber)
 // Return the state of an indicator being drawn under the text.
 bool QsciScintilla::indicatorDrawUnder(int indicatorNumber) const
 {
-    if (indicatorNumber < 0 || indicatorNumber >= INDIC_MAX)
+    if (indicatorNumber < 0 || indicatorNumber >= INDIC_IME)
         return false;
 
     return SendScintilla(SCI_INDICGETUNDER, indicatorNumber);
@@ -2681,13 +2723,13 @@ bool QsciScintilla::indicatorDrawUnder(int indicatorNumber) const
 // Set the state of indicators being drawn under the text.
 void QsciScintilla::setIndicatorDrawUnder(bool under, int indicatorNumber)
 {
-    if (indicatorNumber <= INDIC_MAX)
+    if (indicatorNumber < INDIC_IME)
     {
         // We ignore allocatedIndicators to allow any indicators defined
         // elsewhere (e.g. in lexers) to be set.
         if (indicatorNumber < 0)
         {
-            for (int i = 0; i <= INDIC_MAX; ++i)
+            for (int i = 0; i < INDIC_IME; ++i)
                 SendScintilla(SCI_INDICSETUNDER, i, under);
         }
         else
@@ -2699,9 +2741,10 @@ void QsciScintilla::setIndicatorDrawUnder(bool under, int indicatorNumber)
 
 
 // Set the indicator foreground colour.
-void QsciScintilla::setIndicatorForegroundColor(const QColor &col, int indicatorNumber)
+void QsciScintilla::setIndicatorForegroundColor(const QColor &col,
+        int indicatorNumber)
 {
-    if (indicatorNumber <= INDIC_MAX)
+    if (indicatorNumber < INDIC_IME)
     {
         int alpha = col.alpha();
 
@@ -2709,7 +2752,7 @@ void QsciScintilla::setIndicatorForegroundColor(const QColor &col, int indicator
         // elsewhere (e.g. in lexers) to be set.
         if (indicatorNumber < 0)
         {
-            for (int i = 0; i <= INDIC_MAX; ++i)
+            for (int i = 0; i < INDIC_IME; ++i)
             {
                 SendScintilla(SCI_INDICSETFORE, i, col);
                 SendScintilla(SCI_INDICSETALPHA, i, alpha);
@@ -2724,10 +2767,54 @@ void QsciScintilla::setIndicatorForegroundColor(const QColor &col, int indicator
 }
 
 
+// Set the indicator hover foreground colour.
+void QsciScintilla::setIndicatorHoverForegroundColor(const QColor &col,
+        int indicatorNumber)
+{
+    if (indicatorNumber < INDIC_IME)
+    {
+        // We ignore allocatedIndicators to allow any indicators defined
+        // elsewhere (e.g. in lexers) to be set.
+        if (indicatorNumber < 0)
+        {
+            for (int i = 0; i < INDIC_IME; ++i)
+                SendScintilla(SCI_INDICSETHOVERFORE, i, col);
+        }
+        else
+        {
+            SendScintilla(SCI_INDICSETHOVERFORE, indicatorNumber, col);
+        }
+    }
+}
+
+
+// Set the indicator hover style.
+void QsciScintilla::setIndicatorHoverStyle(IndicatorStyle style,
+        int indicatorNumber)
+{
+    if (indicatorNumber < INDIC_IME)
+    {
+        // We ignore allocatedIndicators to allow any indicators defined
+        // elsewhere (e.g. in lexers) to be set.
+        if (indicatorNumber < 0)
+        {
+            for (int i = 0; i < INDIC_IME; ++i)
+                SendScintilla(SCI_INDICSETHOVERSTYLE, i,
+                        static_cast<long>(style));
+        }
+        else
+        {
+            SendScintilla(SCI_INDICSETHOVERSTYLE, indicatorNumber,
+                    static_cast<long>(style));
+        }
+    }
+}
+
+
 // Set the indicator outline colour.
 void QsciScintilla::setIndicatorOutlineColor(const QColor &col, int indicatorNumber)
 {
-    if (indicatorNumber <= INDIC_MAX)
+    if (indicatorNumber < INDIC_IME)
     {
         int alpha = col.alpha();
 
@@ -2735,7 +2822,7 @@ void QsciScintilla::setIndicatorOutlineColor(const QColor &col, int indicatorNum
         // elsewhere (e.g. in lexers) to be set.
         if (indicatorNumber < 0)
         {
-            for (int i = 0; i <= INDIC_MAX; ++i)
+            for (int i = 0; i < INDIC_IME; ++i)
                 SendScintilla(SCI_INDICSETOUTLINEALPHA, i, alpha);
         }
         else
@@ -2750,7 +2837,7 @@ void QsciScintilla::setIndicatorOutlineColor(const QColor &col, int indicatorNum
 void QsciScintilla::fillIndicatorRange(int lineFrom, int indexFrom,
         int lineTo, int indexTo, int indicatorNumber)
 {
-    if (indicatorNumber <= INDIC_MAX)
+    if (indicatorNumber < INDIC_IME)
     {
         int start = positionFromLineIndex(lineFrom, indexFrom);
         int finish = positionFromLineIndex(lineTo, indexTo);
@@ -2759,7 +2846,7 @@ void QsciScintilla::fillIndicatorRange(int lineFrom, int indexFrom,
         // elsewhere (e.g. in lexers) to be set.
         if (indicatorNumber < 0)
         {
-            for (int i = 0; i <= INDIC_MAX; ++i)
+            for (int i = 0; i < INDIC_IME; ++i)
             {
                 SendScintilla(SCI_SETINDICATORCURRENT, i);
                 SendScintilla(SCI_INDICATORFILLRANGE, start, finish - start);
@@ -2778,7 +2865,7 @@ void QsciScintilla::fillIndicatorRange(int lineFrom, int indexFrom,
 void QsciScintilla::clearIndicatorRange(int lineFrom, int indexFrom,
         int lineTo, int indexTo, int indicatorNumber)
 {
-    if (indicatorNumber <= INDIC_MAX)
+    if (indicatorNumber < INDIC_IME)
     {
         int start = positionFromLineIndex(lineFrom, indexFrom);
         int finish = positionFromLineIndex(lineTo, indexTo);
@@ -2787,7 +2874,7 @@ void QsciScintilla::clearIndicatorRange(int lineFrom, int indexFrom,
         // elsewhere (e.g. in lexers) to be set.
         if (indicatorNumber < 0)
         {
-            for (int i = 0; i <= INDIC_MAX; ++i)
+            for (int i = 0; i < INDIC_IME; ++i)
             {
                 SendScintilla(SCI_SETINDICATORCURRENT, i);
                 SendScintilla(SCI_INDICATORCLEARRANGE, start, finish - start);
@@ -3007,7 +3094,7 @@ void QsciScintilla::checkMarker(int &markerNumber)
 void QsciScintilla::checkIndicator(int &indicatorNumber)
 {
     allocateId(indicatorNumber, allocatedIndicators, INDIC_CONTAINER,
-            INDIC_MAX);
+            INDIC_IME - 1);
 }
 
 
@@ -3143,7 +3230,6 @@ void QsciScintilla::detachLexer()
 
         SendScintilla(SCI_STYLERESETDEFAULT);
         SendScintilla(SCI_STYLECLEARALL);
-        SendScintilla(SCI_CLEARDOCUMENTSTYLE);
     }
 }
 
@@ -3159,6 +3245,8 @@ void QsciScintilla::setLexer(QsciLexer *lexer)
 
     if (lex)
     {
+        SendScintilla(SCI_CLEARDOCUMENTSTYLE);
+
         if (lex->lexer())
             SendScintilla(SCI_SETLEXERLANGUAGE, lex->lexer());
         else
@@ -3201,7 +3289,7 @@ void QsciScintilla::setLexer(QsciLexer *lexer)
         int nrStyles = 1 << SendScintilla(SCI_GETSTYLEBITS);
 
         for (int s = 0; s < nrStyles; ++s)
-            if (!lex->description(s).isNull())
+            if (!lex->description(s).isEmpty())
                 setLexerStyle(s);
 
         // Initialise the properties.
@@ -3282,8 +3370,9 @@ void QsciScintilla::handleStyleFontChange(const QFont &f, int style)
 // Set the font for a style.
 void QsciScintilla::setStylesFont(const QFont &f, int style)
 {
-    SendScintilla(SCI_STYLESETFONT, style, f.family().toUtf8().constData());
-    SendScintilla(SCI_STYLESETSIZE, style, f.pointSize());
+    SendScintilla(SCI_STYLESETFONT, style, f.family().toLatin1().data());
+    SendScintilla(SCI_STYLESETSIZEFRACTIONAL, style,
+            long(f.pointSizeF() * SC_FONT_SIZE_MULTIPLIER));
 
     // Pass the Qt weight via the back door.
     SendScintilla(SCI_STYLESETWEIGHT, style, -f.weight());
@@ -3552,26 +3641,6 @@ void QsciScintilla::lineIndexFromPosition(int position, int *line, int *index) c
 
     *line = lin;
     *index = indx;
-}
-
-
-// Convert a Scintilla string to a Qt Unicode string.
-QString QsciScintilla::convertTextS2Q(const char *s) const
-{
-    if (isUtf8())
-        return QString::fromUtf8(s);
-
-    return QString::fromLatin1(s);
-}
-
-
-// Convert a Qt Unicode string to a Scintilla string.
-QsciScintilla::ScintillaString QsciScintilla::convertTextQ2S(const QString &q) const
-{
-    if (isUtf8())
-        return q.toUtf8();
-
-    return q.toLatin1();
 }
 
 
@@ -3854,8 +3923,8 @@ void QsciScintilla::showUserList(int id, const QStringList &list)
 
     SendScintilla(SCI_AUTOCSETSEPARATOR, userSeparator);
 
-    ScintillaString s = convertTextQ2S(list.join(QChar(userSeparator)));
-    SendScintilla(SCI_USERLISTSHOW, id, ScintillaStringData(s));
+    ScintillaBytes s = textAsBytes(list.join(QChar(userSeparator)));
+    SendScintilla(SCI_USERLISTSHOW, id, ScintillaBytesConstData(s));
 }
 
 
@@ -3863,6 +3932,9 @@ void QsciScintilla::showUserList(int id, const QStringList &list)
 void QsciScintilla::handleUserListSelection(const char *text, int id)
 {
     emit userListActivated(id, QString(text));
+
+    // Make sure the editor hasn't been deactivated as a side effect.
+    activateWindow();
 }
 
 
@@ -3910,7 +3982,6 @@ bool QsciScintilla::read(QIODevice *io)
         }
 
         part = io->read(buf + data_len, buf_size - data_len - 1);
-
         data_len += part;
     }
     while (part > 0);
@@ -3990,7 +4061,7 @@ QString QsciScintilla::wordAtPosition(int position) const
 
     char *buf = new char[word_len + 1];
     SendScintilla(SCI_GETTEXTRANGE, start_pos, end_pos, buf);
-    QString word = convertTextS2Q(buf);
+    QString word = bytesAsText(buf);
     delete[] buf;
 
     return word;
@@ -4029,9 +4100,9 @@ void QsciScintilla::annotate(int line, const QString &text, int style)
 {
     int style_offset = SendScintilla(SCI_ANNOTATIONGETSTYLEOFFSET);
 
-    ScintillaString s = convertTextQ2S(text);
+    ScintillaBytes s = textAsBytes(text);
 
-    SendScintilla(SCI_ANNOTATIONSETTEXT, line, ScintillaStringData(s));
+    SendScintilla(SCI_ANNOTATIONSETTEXT, line, ScintillaBytesConstData(s));
     SendScintilla(SCI_ANNOTATIONSETSTYLE, line, style - style_offset);
 
     setScrollBars();
@@ -4060,11 +4131,11 @@ void QsciScintilla::annotate(int line, const QsciStyledText &text)
 void QsciScintilla::annotate(int line, const QList<QsciStyledText> &text)
 {
     char *styles;
-    ScintillaString styled_text = styleText(text, &styles,
+    ScintillaBytes styled_text = styleText(text, &styles,
             SendScintilla(SCI_ANNOTATIONGETSTYLEOFFSET));
 
     SendScintilla(SCI_ANNOTATIONSETTEXT, line,
-            ScintillaStringData(styled_text));
+            ScintillaBytesConstData(styled_text));
     SendScintilla(SCI_ANNOTATIONSETSTYLES, line, styles);
 
     delete[] styles;
@@ -4078,7 +4149,7 @@ QString QsciScintilla::annotation(int line) const
 
     buf[SendScintilla(SCI_ANNOTATIONGETTEXT, line, buf)] = '\0';
 
-    QString qs = convertTextS2Q(buf);
+    QString qs = bytesAsText(buf);
     delete[] buf;
 
     return qs;
@@ -4086,7 +4157,7 @@ QString QsciScintilla::annotation(int line) const
 
 
 // Convert a list of styled text to the low-level arrays.
-QsciScintilla::ScintillaString QsciScintilla::styleText(const QList<QsciStyledText> &styled_text, char **styles, int style_offset)
+QsciScintillaBase::ScintillaBytes QsciScintilla::styleText(const QList<QsciStyledText> &styled_text, char **styles, int style_offset)
 {
     QString text;
     int i;
@@ -4101,16 +4172,16 @@ QsciScintilla::ScintillaString QsciScintilla::styleText(const QList<QsciStyledTe
         text.append(st.text());
     }
 
-    ScintillaString s = convertTextQ2S(text);
+    ScintillaBytes s = textAsBytes(text);
 
     // There is a style byte for every byte.
-    char *sp = *styles = new char[ScintillaStringLength(s)];
+    char *sp = *styles = new char[s.length()];
 
     for (i = 0; i < styled_text.count(); ++i)
     {
         const QsciStyledText &st = styled_text[i];
-        ScintillaString part = convertTextQ2S(st.text());
-        int part_length = ScintillaStringLength(part);
+        ScintillaBytes part = textAsBytes(st.text());
+        int part_length = part.length();
 
         for (int c = 0; c < part_length; ++c)
             *sp++ = (char)(st.style() - style_offset);
@@ -4141,8 +4212,6 @@ int QsciScintilla::mapModifiers(int modifiers)
 }
 
 
-// We no longer add features to the Qt3 version if it is a hassle.
-
 // Re-implemented to handle shortcut overrides.
 bool QsciScintilla::event(QEvent *e)
 {
@@ -4160,7 +4229,7 @@ bool QsciScintilla::event(QEvent *e)
             }
 
             // We want any key that is bound.
-            QsciCommand *cmd = stdCmds->boundTo(ke->key() | ke->modifiers());
+            QsciCommand *cmd = stdCmds->boundTo(ke->key() | (ke->modifiers() & ~Qt::KeypadModifier));
 
             if (cmd)
             {
@@ -4171,6 +4240,65 @@ bool QsciScintilla::event(QEvent *e)
     }
 
     return QsciScintillaBase::event(e);
+}
+
+
+// Re-implemented to handle chenges to the enabled state.
+void QsciScintilla::changeEvent(QEvent *e)
+{
+    QsciScintillaBase::changeEvent(e);
+
+    if (e->type() != QEvent::EnabledChange)
+        return;
+
+    if (isEnabled())
+        SendScintilla(SCI_SETCARETSTYLE, CARETSTYLE_LINE);
+    else
+        SendScintilla(SCI_SETCARETSTYLE, CARETSTYLE_INVISIBLE);
+
+    QColor fore = palette().color(QPalette::Disabled, QPalette::Text);
+    QColor back = palette().color(QPalette::Disabled, QPalette::Base);
+
+    if (lex.isNull())
+    {
+        if (isEnabled())
+        {
+            fore = nl_text_colour;
+            back = nl_paper_colour;
+        }
+
+        SendScintilla(SCI_STYLESETFORE, 0, fore);
+
+        // Assume style 0 applies to everything so that we don't need to use
+        // SCI_STYLECLEARALL which clears everything.  We still have to set the
+        // default style as well for the background without any text.
+        SendScintilla(SCI_STYLESETBACK, 0, back);
+        SendScintilla(SCI_STYLESETBACK, STYLE_DEFAULT, back);
+    }
+    else
+    {
+        setEnabledColors(STYLE_DEFAULT, fore, back);
+
+        int nrStyles = 1 << SendScintilla(SCI_GETSTYLEBITS);
+
+        for (int s = 0; s < nrStyles; ++s)
+            if (!lex->description(s).isNull())
+                setEnabledColors(s, fore, back);
+    }
+}
+
+
+// Set the foreground and background colours for a style.
+void QsciScintilla::setEnabledColors(int style, QColor &fore, QColor &back)
+{
+    if (isEnabled())
+    {
+        fore = lex->color(style);
+        back = lex->paper(style);
+    }
+
+    handleStyleColorChange(fore, style);
+    handleStylePaperChange(back, style);
 }
 
 
@@ -4252,4 +4380,3 @@ void QsciScintilla::delete_selection()
 {
     SendScintilla(SCI_CLEAR);
 }
-

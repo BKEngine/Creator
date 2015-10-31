@@ -152,10 +152,13 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 	st.pos = xindex;
 	lineIndexFromPosition(pos + len, &off.line, &off.pos);
 	off -= st;
-	if (ChangeType & SC_PERFORMED_USER)
-	{
-		BkeStartUndoAction();
-	}
+
+	//QSci新版的输入法处理会导致内部Undo计数和我们这记的不一样
+	//注释掉后Undo，Redo似乎工作正常，于是注释掉吧
+	//if (ChangeType & SC_PERFORMED_USER)
+	//{
+	//	BkeStartUndoAction();
+	//}
 	if (mtype & SC_MOD_INSERTTEXT)
 	{  //文字被插入
 		ChangeType = mtype;
@@ -678,14 +681,16 @@ void BkeScintilla::UiChange(int updated)
 		BkeStartUndoAction();
 	}
 
-	if (ChangeType & SC_MOD_INSERTTEXT){
+	if (ChangeType & SC_PERFORMED_USER)
+	//if (ChangeType & SC_MOD_INSERTTEXT)
+	{
 		//自动补全
 		showComplete();
 		//defparser->TextBeChange(&modfieddata, this);
 		//CompliteFromApi();
 	}
 
-	if (IsWorkingUndo && !ChangeIgnore) BkeEndUndoAction();
+	//if (IsWorkingUndo && !ChangeIgnore) BkeEndUndoAction();
 
 	//缩进
 	if (modfieddata.lineadd == 1 && (modfieddata.text == "\n" || modfieddata.text == "\r\n"))
@@ -1033,8 +1038,8 @@ void BkeScintilla::ChooseComplete(const char *text, int pos)
 
 	//if (!temp.endsWith("\"") && iscommand && !defparser->HasTheChileOf(temp))
 	//	temp.append("=");
-	if (completeType == SHOW_ATTR)
-		temp.append("=");
+	//if (completeType == SHOW_ATTR)
+	//	temp.append("=");
 
 	if (iscommand)
 	{
@@ -1050,12 +1055,14 @@ void BkeScintilla::ChooseComplete(const char *text, int pos)
 	removeSelectedText();
 	InsertAndMove(temp);
 
-	if (completeType == SHOW_ATTR)
-	{
-		modfieddata.pos = SendScintilla(SCI_GETCURRENTPOS);
-		modfieddata.text = '=';
-		showComplete();
-	}
+	//if (completeType == SHOW_ATTR)
+	//{
+	//	modfieddata.pos = SendScintilla(SCI_GETCURRENTPOS) - 1;
+	//	SendScintilla(SCI_COLOURISE, modfieddata.pos - 1 - strlen(text), modfieddata.pos + 1);
+	//	modfieddata.text = '=';
+	//	//showComplete();
+	//	SendScintilla(SCI_AUTOCSHOW, 0UL, "\"crossfade\" \"turn\"");
+	//}
 
 	//如果最后是(),光标回移一格
 	if (temp.endsWith("()"))
@@ -1534,6 +1541,8 @@ void BkeScintilla::BkeStartUndoAction(bool newUndo/* = true*/)
 
 void BkeScintilla::BkeEndUndoAction()
 {
+	if (!IsWorkingUndo)
+		return;
 	IsWorkingUndo = false;
 	QsciScintilla::endUndoAction();
 	emit Undoready(isUndoAvailable());

@@ -577,6 +577,33 @@
     <ClCompile Include="cmdlist_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BKEscintilla\src\CaseConvert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\CaseFolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\EditModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\EditView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\MarginView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\InputMethod.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\MacPasteboardMime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\CharacterCategory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_ScintillaQt.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -700,9 +727,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BKEscintilla\src\ScintillaBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BKEscintilla\Qt4Qt5\ScintillaQt.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BKEscintilla\src\Selection.h">
@@ -933,6 +957,42 @@
     <ClInclude Include="cmdlist_wrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BKEscintilla\lexlib\StringCopy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\include\ILexer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\include\Platform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\include\SciLexer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\include\Scintilla.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\include\ScintillaWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\CaseConvert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\CaseFolder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\EditModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\EditView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\MarginView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BKEscintilla\src\UnicodeFromUTF8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\Setoptiondia.ui">
@@ -978,6 +1038,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="BG_Analysis.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="BKEscintilla\Qt4Qt5\ScintillaQt.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

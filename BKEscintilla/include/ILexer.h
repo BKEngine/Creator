@@ -18,7 +18,7 @@ namespace Scintilla {
 	#define SCI_METHOD
 #endif
 
-enum { dvOriginal=0 };
+enum { dvOriginal=0, dvLineEnd=1 };
 
 class IDocument {
 public:
@@ -36,6 +36,8 @@ public:
 	virtual void SCI_METHOD StartStyling(int position, char mask) = 0;
 	virtual bool SCI_METHOD SetStyleFor(int length, char style) = 0;
 	virtual bool SCI_METHOD SetStyles(int length, const char *styles) = 0;
+	//user-defined
+	virtual bool SCI_METHOD SetSingleStyles(int start, int length, unsigned char styles) { return true; };
 	virtual void SCI_METHOD DecorationSetCurrentIndicator(int indicator) = 0;
 	virtual void SCI_METHOD DecorationFillRange(int position, int value, int fillLength) = 0;
 	virtual void SCI_METHOD ChangeLexerState(int start, int end) = 0;
@@ -45,7 +47,14 @@ public:
 	virtual int SCI_METHOD GetLineIndentation(int line) = 0;
 };
 
-enum { lvOriginal=0 };
+class IDocumentWithLineEnd : public IDocument {
+public:
+	virtual int SCI_METHOD LineEnd(int line) const = 0;
+	virtual int SCI_METHOD GetRelativePosition(int positionStart, int characterOffset) const = 0;
+	virtual int SCI_METHOD GetCharacterAndWidth(int position, int *pWidth) const = 0;
+};
+
+enum { lvOriginal=0, lvSubStyles=1 };
 
 class ILexer {
 public:
@@ -60,6 +69,20 @@ public:
 	virtual void SCI_METHOD Lex(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess) = 0;
 	virtual void SCI_METHOD Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess) = 0;
 	virtual void * SCI_METHOD PrivateCall(int operation, void *pointer) = 0;
+};
+
+class ILexerWithSubStyles : public ILexer {
+public:
+	virtual int SCI_METHOD LineEndTypesSupported() = 0;
+	virtual int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) = 0;
+	virtual int SCI_METHOD SubStylesStart(int styleBase) = 0;
+	virtual int SCI_METHOD SubStylesLength(int styleBase) = 0;
+	virtual int SCI_METHOD StyleFromSubStyle(int subStyle) = 0;
+	virtual int SCI_METHOD PrimaryStyleFromStyle(int style) = 0;
+	virtual void SCI_METHOD FreeSubStyles() = 0;
+	virtual void SCI_METHOD SetIdentifiers(int style, const char *identifiers) = 0;
+	virtual int SCI_METHOD DistanceToSecondaryStyles() = 0;
+	virtual const char * SCI_METHOD GetSubStyleBases() = 0;
 };
 
 class ILoader {

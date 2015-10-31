@@ -18,9 +18,9 @@ extern "C" {
 #if defined(_WIN32)
 /* Return false on failure: */
 int Scintilla_RegisterClasses(void *hInstance);
-int Scintilla_ReleaseResources();
+int Scintilla_ReleaseResources(void);
 #endif
-int Scintilla_LinkLexers();
+int Scintilla_LinkLexers(void);
 
 #ifdef __cplusplus
 }
@@ -50,6 +50,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_ADDTEXT 2001
 #define SCI_ADDSTYLEDTEXT 2002
 #define SCI_INSERTTEXT 2003
+#define SCI_CHANGEINSERTION 2672
 #define SCI_CLEARALL 2004
 #define SCI_DELETERANGE 2645
 #define SCI_CLEARDOCUMENTSTYLE 2005
@@ -91,8 +92,15 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETBUFFEREDDRAW 2035
 #define SCI_SETTABWIDTH 2036
 #define SCI_GETTABWIDTH 2121
+#define SCI_CLEARTABSTOPS 2675
+#define SCI_ADDTABSTOP 2676
+#define SCI_GETNEXTTABSTOP 2677
 #define SC_CP_UTF8 65001
 #define SCI_SETCODEPAGE 2037
+#define SC_IME_WINDOWED 0
+#define SC_IME_INLINE 1
+#define SCI_GETIMEINTERACTION 2678
+#define SCI_SETIMEINTERACTION 2679
 #define MARKER_MAX 31
 #define SC_MARK_CIRCLE 0
 #define SC_MARK_ROUNDRECT 1
@@ -125,6 +133,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_MARK_AVAILABLE 28
 #define SC_MARK_UNDERLINE 29
 #define SC_MARK_RGBAIMAGE 30
+#define SC_MARK_BOOKMARK 31
 #define SC_MARK_CHARACTER 10000
 #define SC_MARKNUM_FOLDEREND 25
 #define SC_MARKNUM_FOLDEROPENMID 26
@@ -148,6 +157,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_MARKERDEFINEPIXMAP 2049
 #define SCI_MARKERADDSET 2466
 #define SCI_MARKERSETALPHA 2476
+#define SC_MAX_MARGIN 4
 #define SC_MARGIN_SYMBOL 0
 #define SC_MARGIN_NUMBER 1
 #define SC_MARGIN_BACK 2
@@ -263,7 +273,13 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define INDIC_SQUIGGLELOW 11
 #define INDIC_DOTBOX 12
 #define INDIC_SQUIGGLEPIXMAP 13
-#define INDIC_MAX 31
+#define INDIC_COMPOSITIONTHICK 14
+#define INDIC_COMPOSITIONTHIN 15
+#define INDIC_FULLBOX 16
+#define INDIC_TEXTFORE 17
+#define INDIC_IME 32
+#define INDIC_IME_MAX 35
+#define INDIC_MAX 35
 #define INDIC_CONTAINER 8
 #define INDIC0_MASK 0x20
 #define INDIC1_MASK 0x40
@@ -275,6 +291,15 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_INDICGETFORE 2083
 #define SCI_INDICSETUNDER 2510
 #define SCI_INDICGETUNDER 2511
+#define SCI_INDICSETHOVERSTYLE 2680
+#define SCI_INDICGETHOVERSTYLE 2681
+#define SCI_INDICSETHOVERFORE 2682
+#define SCI_INDICGETHOVERFORE 2683
+#define SC_INDICVALUEBIT 0x1000000
+#define SC_INDICVALUEMASK 0xFFFFFF
+#define SC_INDICFLAG_VALUEFORE 1
+#define SCI_INDICSETFLAGS 2684
+#define SCI_INDICGETFLAGS 2685
 #define SCI_SETWHITESPACEFORE 2084
 #define SCI_SETWHITESPACEBACK 2085
 #define SCI_SETWHITESPACESIZE 2086
@@ -356,11 +381,12 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_PRINT_COLOURONWHITEDEFAULTBG 4
 #define SCI_SETPRINTCOLOURMODE 2148
 #define SCI_GETPRINTCOLOURMODE 2149
-#define SCFIND_WHOLEWORD 2
-#define SCFIND_MATCHCASE 4
+#define SCFIND_WHOLEWORD 0x2
+#define SCFIND_MATCHCASE 0x4
 #define SCFIND_WORDSTART 0x00100000
 #define SCFIND_REGEXP 0x00200000
 #define SCFIND_POSIX 0x00400000
+#define SCFIND_CXX11REGEX 0x00800000
 #define SCI_FINDTEXT 2150
 #define SCI_FORMATRANGE 2151
 #define SCI_GETFIRSTVISIBLELINE 2152
@@ -381,6 +407,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_POSITIONFROMLINE 2167
 #define SCI_LINESCROLL 2168
 #define SCI_SCROLLCARET 2169
+#define SCI_SCROLLRANGE 2569
 #define SCI_REPLACESEL 2170
 #define SCI_SETREADONLY 2171
 #define SCI_NULL 2172
@@ -405,6 +432,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_GETTARGETSTART 2191
 #define SCI_SETTARGETEND 2192
 #define SCI_GETTARGETEND 2193
+#define SCI_SETTARGETRANGE 2686
+#define SCI_GETTARGETTEXT 2687
 #define SCI_REPLACETARGET 2194
 #define SCI_REPLACETARGETRE 2195
 #define SCI_SEARCHINTARGET 2197
@@ -414,6 +443,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_CALLTIPCANCEL 2201
 #define SCI_CALLTIPACTIVE 2202
 #define SCI_CALLTIPPOSSTART 2203
+#define SCI_CALLTIPSETPOSSTART 2214
 #define SCI_CALLTIPSETHLT 2204
 #define SCI_CALLTIPSETBACK 2205
 #define SCI_CALLTIPSETFORE 2206
@@ -438,12 +468,25 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SETFOLDEXPANDED 2229
 #define SCI_GETFOLDEXPANDED 2230
 #define SCI_TOGGLEFOLD 2231
+#define SC_FOLDACTION_CONTRACT 0
+#define SC_FOLDACTION_EXPAND 1
+#define SC_FOLDACTION_TOGGLE 2
+#define SCI_FOLDLINE 2237
+#define SCI_FOLDCHILDREN 2238
+#define SCI_EXPANDCHILDREN 2239
+#define SCI_FOLDALL 2662
 #define SCI_ENSUREVISIBLE 2232
+#define SC_AUTOMATICFOLD_SHOW 0x0001
+#define SC_AUTOMATICFOLD_CLICK 0x0002
+#define SC_AUTOMATICFOLD_CHANGE 0x0004
+#define SCI_SETAUTOMATICFOLD 2663
+#define SCI_GETAUTOMATICFOLD 2664
 #define SC_FOLDFLAG_LINEBEFORE_EXPANDED 0x0002
 #define SC_FOLDFLAG_LINEBEFORE_CONTRACTED 0x0004
 #define SC_FOLDFLAG_LINEAFTER_EXPANDED 0x0008
 #define SC_FOLDFLAG_LINEAFTER_CONTRACTED 0x0010
 #define SC_FOLDFLAG_LEVELNUMBERS 0x0040
+#define SC_FOLDFLAG_LINESTATE 0x0080
 #define SCI_SETFOLDFLAGS 2233
 #define SCI_ENSUREVISIBLEENFORCEPOLICY 2234
 #define SCI_SETTABINDENTS 2260
@@ -458,6 +501,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_WRAP_NONE 0
 #define SC_WRAP_WORD 1
 #define SC_WRAP_CHAR 2
+#define SC_WRAP_WHITESPACE 3
 #define SCI_SETWRAPMODE 2268
 #define SCI_GETWRAPMODE 2269
 #define SC_WRAPVISUALFLAG_NONE 0x0000
@@ -497,6 +541,11 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_APPENDTEXT 2282
 #define SCI_GETTWOPHASEDRAW 2283
 #define SCI_SETTWOPHASEDRAW 2284
+#define SC_PHASES_ONE 0
+#define SC_PHASES_TWO 1
+#define SC_PHASES_MULTIPLE 2
+#define SCI_GETPHASESDRAW 2673
+#define SCI_SETPHASESDRAW 2674
 #define SC_EFF_QUALITY_MASK 0xF
 #define SC_EFF_QUALITY_DEFAULT 0
 #define SC_EFF_QUALITY_NON_ANTIALIASED 1
@@ -611,6 +660,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_STATUS_OK 0
 #define SC_STATUS_FAILURE 1
 #define SC_STATUS_BADALLOC 2
+#define SC_STATUS_WARN_START 1000
+#define SC_STATUS_WARN_REGEX 1001
 #define SCI_SETSTATUS 2382
 #define SCI_GETSTATUS 2383
 #define SCI_SETMOUSEDOWNCAPTURES 2384
@@ -658,6 +709,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_PARAUPEXTEND 2416
 #define SCI_POSITIONBEFORE 2417
 #define SCI_POSITIONAFTER 2418
+#define SCI_POSITIONRELATIVE 2670
 #define SCI_COPYRANGE 2419
 #define SCI_COPYTEXT 2420
 #define SC_SEL_STREAM 0
@@ -696,6 +748,15 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_CASEINSENSITIVEBEHAVIOUR_IGNORECASE 1
 #define SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR 2634
 #define SCI_AUTOCGETCASEINSENSITIVEBEHAVIOUR 2635
+#define SC_MULTIAUTOC_ONCE 0
+#define SC_MULTIAUTOC_EACH 1
+#define SCI_AUTOCSETMULTI 2636
+#define SCI_AUTOCGETMULTI 2637
+#define SC_ORDER_PRESORTED 0
+#define SC_ORDER_PERFORMSORT 1
+#define SC_ORDER_CUSTOM 2
+#define SCI_AUTOCSETORDER 2660
+#define SCI_AUTOCGETORDER 2661
 #define SCI_ALLOCATE 2446
 #define SCI_TARGETASUTF8 2447
 #define SCI_SETLENGTHFORENCODE 2448
@@ -771,14 +832,19 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define ANNOTATION_HIDDEN 0
 #define ANNOTATION_STANDARD 1
 #define ANNOTATION_BOXED 2
+#define ANNOTATION_INDENTED 3
 #define SCI_ANNOTATIONSETVISIBLE 2548
 #define SCI_ANNOTATIONGETVISIBLE 2549
 #define SCI_ANNOTATIONSETSTYLEOFFSET 2550
 #define SCI_ANNOTATIONGETSTYLEOFFSET 2551
+#define SCI_RELEASEALLEXTENDEDSTYLES 2552
+#define SCI_ALLOCATEEXTENDEDSTYLES 2553
 #define UNDO_MAY_COALESCE 1
 #define SCI_ADDUNDOACTION 2560
 #define SCI_CHARPOSITIONFROMPOINT 2561
 #define SCI_CHARPOSITIONFROMPOINTCLOSE 2562
+#define SCI_SETMOUSESELECTIONRECTANGULARSWITCH 2668
+#define SCI_GETMOUSESELECTIONRECTANGULARSWITCH 2669
 #define SCI_SETMULTIPLESELECTION 2563
 #define SCI_GETMULTIPLESELECTION 2564
 #define SCI_SETADDITIONALSELECTIONTYPING 2565
@@ -792,6 +858,7 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_CLEARSELECTIONS 2571
 #define SCI_SETSELECTION 2572
 #define SCI_ADDSELECTION 2573
+#define SCI_DROPSELECTIONN 2671
 #define SCI_SETMAINSELECTION 2574
 #define SCI_GETMAINSELECTION 2575
 #define SCI_SETSELECTIONNCARET 2576
@@ -845,6 +912,8 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_SCROLLTOEND 2629
 #define SC_TECHNOLOGY_DEFAULT 0
 #define SC_TECHNOLOGY_DIRECTWRITE 1
+#define SC_TECHNOLOGY_DIRECTWRITERETAIN 2
+#define SC_TECHNOLOGY_DIRECTWRITEDC 3
 #define SCI_SETTECHNOLOGY 2630
 #define SCI_GETTECHNOLOGY 2631
 #define SCI_CREATELOADER 2632
@@ -853,6 +922,16 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_FINDINDICATORHIDE 2642
 #define SCI_VCHOMEDISPLAY 2652
 #define SCI_VCHOMEDISPLAYEXTEND 2653
+#define SCI_GETCARETLINEVISIBLEALWAYS 2654
+#define SCI_SETCARETLINEVISIBLEALWAYS 2655
+#define SC_LINE_END_TYPE_DEFAULT 0
+#define SC_LINE_END_TYPE_UNICODE 1
+#define SCI_SETLINEENDTYPESALLOWED 2656
+#define SCI_GETLINEENDTYPESALLOWED 2657
+#define SCI_GETLINEENDTYPESACTIVE 2658
+#define SCI_SETREPRESENTATION 2665
+#define SCI_GETREPRESENTATION 2666
+#define SCI_CLEARREPRESENTATION 2667
 #define SCI_STARTRECORD 3001
 #define SCI_STOPRECORD 3002
 #define SCI_SETLEXER 4001
@@ -876,6 +955,16 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCI_PROPERTYTYPE 4015
 #define SCI_DESCRIBEPROPERTY 4016
 #define SCI_DESCRIBEKEYWORDSETS 4017
+#define SCI_GETLINEENDTYPESSUPPORTED 4018
+#define SCI_ALLOCATESUBSTYLES 4020
+#define SCI_GETSUBSTYLESSTART 4021
+#define SCI_GETSUBSTYLESLENGTH 4022
+#define SCI_GETSTYLEFROMSUBSTYLE 4027
+#define SCI_GETPRIMARYSTYLEFROMSTYLE 4028
+#define SCI_FREESUBSTYLES 4023
+#define SCI_SETIDENTIFIERS 4024
+#define SCI_DISTANCETOSECONDARYSTYLES 4025
+#define SCI_GETSUBSTYLEBASES 4026
 #define SC_MOD_INSERTTEXT 0x1
 #define SC_MOD_DELETETEXT 0x2
 #define SC_MOD_CHANGESTYLE 0x4
@@ -896,7 +985,9 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SC_MOD_CHANGEANNOTATION 0x20000
 #define SC_MOD_CONTAINER 0x40000
 #define SC_MOD_LEXERSTATE 0x80000
-#define SC_MODEVENTMASKALL 0xFFFFF
+#define SC_MOD_INSERTCHECK 0x100000
+#define SC_MOD_CHANGETABSTOPS 0x200000
+#define SC_MODEVENTMASKALL 0x3FFFFF
 #define SC_UPDATE_CONTENT 0x1
 #define SC_UPDATE_SELECTION 0x2
 #define SC_UPDATE_V_SCROLL 0x4
@@ -957,13 +1048,15 @@ typedef sptr_t (*SciFnDirect)(sptr_t ptr, unsigned int iMessage, uptr_t wParam, 
 #define SCN_AUTOCCANCELLED 2025
 #define SCN_AUTOCCHARDELETED 2026
 #define SCN_HOTSPOTRELEASECLICK 2027
+#define SCN_FOCUSIN 2028
+#define SCN_FOCUSOUT 2029
 /* --Autogenerated -- end of section automatically generated from Scintilla.iface */
 
 /* These structures are defined to be exactly the same shape as the Win32
  * CHARRANGE, TEXTRANGE, FINDTEXTEX, FORMATRANGE, and NMHDR structs.
  * So older code that treats Scintilla as a RichEdit will work. */
 
-#ifdef SCI_NAMESPACE
+#if defined(__cplusplus) && defined(SCI_NAMESPACE)
 namespace Scintilla {
 #endif
 
@@ -979,7 +1072,7 @@ struct Sci_TextRange {
 
 struct Sci_TextToFind {
 	struct Sci_CharacterRange chrg;
-	char *lpstrText;
+	const char *lpstrText;
 	struct Sci_CharacterRange chrgText;
 };
 
@@ -1055,7 +1148,7 @@ struct SCNotification {
 	int updated;	/* SCN_UPDATEUI */
 };
 
-#ifdef SCI_NAMESPACE
+#if defined(__cplusplus) && defined(SCI_NAMESPACE)
 }
 #endif
 

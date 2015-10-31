@@ -221,7 +221,7 @@ private:
 	{
 		return styler->ch == '/' && styler->chNext == '*';
 	}
-	bool isHex(char c)
+	bool isHex(int c)
 	{
 		return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
 	}
@@ -244,7 +244,7 @@ private:
 
 bool BKE_Lexer::ParseVarname()
 {
-	QString s(styler->chPrev);
+	QString s(QChar(styler->chPrev));
 	while (styler->More())
 	{
 		if (isalnum(styler->ch) || styler->ch == '_' || styler->ch >= 0x80)
@@ -421,31 +421,40 @@ bool BKE_Lexer::ParseString2()
 	};
 	std::vector<Trans> trans_info;
 	int pos = styler->currentPos;
+	int realpos = pos;
+	unsigned char ch = styler->ch;
 	bool intrans = false;
-	while (styler->More() && !styler->atLineEnd)
+	realpos++;
+	while (ch && ch != '\r' && ch != '\n')
 	{
-		if (!intrans && styler->ch == '\'')
+		if (!intrans && ch == '\'')
 		{
 			//color all
 			if (trans_info.empty())
 			{
-				styler->Forward();
+				styler->ForwardBytes(realpos - pos);
 				styler->SetState(last_state | cur_mask);
 			}
 			else
 			{
-				int pos2 = styler->currentPos + 1;
-				styler->setPos(pos);
+				//int pos2 = styler->currentPos + 1;
+				//styler->setPos(pos);
 				auto it = trans_info.begin();
 				while (it != trans_info.end())
 				{
-					styler->setPos(it->begin);
+					styler->ForwardBytes(it->begin - styler->currentPos);
 					styler->SetState(it->correct ? SCE_BKE_TRANS | cur_mask : SCE_BKE_ERROR | cur_mask);
-					styler->setPos(it->begin + it->len);
+					styler->ForwardBytes(it->len);
 					styler->SetState(SCE_BKE_STRING2 | cur_mask);
+
+					//styler->setPos(it->begin);
+					//styler->SetState(it->correct ? SCE_BKE_TRANS | cur_mask : SCE_BKE_ERROR | cur_mask);
+					//styler->setPos(it->begin + it->len);
+					//styler->SetState(SCE_BKE_STRING2 | cur_mask);
 					it++;
 				}
-				styler->setPos(pos2);
+				//styler->setPos(pos2);
+				styler->ForwardBytes(realpos - styler->currentPos);
 				styler->SetState(last_state | cur_mask);
 			}
 			return true;
@@ -454,7 +463,7 @@ bool BKE_Lexer::ParseString2()
 		{
 			intrans = true;
 			trans_info.push_back(Trans());
-			trans_info.back().begin = styler->currentPos;
+			trans_info.back().begin = realpos;
 			styler->Forward();
 			continue;
 		}
@@ -478,34 +487,41 @@ bool BKE_Lexer::ParseString2()
 				break;
 			case 'o':
 				//need two more num
-				styler->Forward();
-				if (styler->ch >= '0' && styler->ch < '8')
+				ch = styler->GetRelative(realpos - pos);
+				realpos++;
+				if (ch >= '0' && ch < '8')
 				{
-					styler->Forward();
+					ch = styler->GetRelative(realpos - pos);
+					realpos++;
 					trans_info.back().len++;
 				}
-				if (styler->ch >= '0' && styler->ch < '8')
+				if (ch >= '0' && ch < '8')
 				{
-					styler->Forward();
+					ch = styler->GetRelative(realpos - pos);
+					realpos++;
 					trans_info.back().len++;
 				}
 				break;
 			case 'x':
 				//need three more num
-				styler->Forward();
-				if (isHex(styler->ch))
+				ch = styler->GetRelative(realpos - pos);
+				realpos++;
+				if (isHex(ch))
 				{
-					styler->Forward();
+					ch = styler->GetRelative(realpos - pos);
+					realpos++;
 					trans_info.back().len++;
 				}
-				if (isHex(styler->ch))
+				if (isHex(ch))
 				{
-					styler->Forward();
+					ch = styler->GetRelative(realpos - pos);
+					realpos++;
 					trans_info.back().len++;
 				}
-				if (isHex(styler->ch))
+				if (isHex(ch))
 				{
-					styler->Forward();
+					ch = styler->GetRelative(realpos - pos);
+					realpos++;
 					trans_info.back().len++;
 				}
 				break;
@@ -515,7 +531,8 @@ bool BKE_Lexer::ParseString2()
 			}
 			continue;
 		}
-		styler->Forward();
+		ch = styler->GetRelative(realpos - pos);
+		realpos++;
 	}
 	styler->ChangeState(SCE_BKE_ERROR | cur_mask);
 	styler->SetState(last_state | cur_mask);
@@ -526,7 +543,7 @@ void BKE_Lexer::handleBracketsError(BracketsStack &stack)
 {
 	for (auto it = stack.begin(); it != stack.end(); ++it)
 	{
-		styler->resetState(it->first, it->first, SCE_BKE_ERROR | cur_mask);
+		myDoc->SetSingleStyles(it->first, 1, SCE_BKE_ERROR | cur_mask);
 	}
 }
 
@@ -738,20 +755,20 @@ void BKE_Lexer::DoCommand()
 			continue;
 		}
 		styler->SetState(SCE_BKE_ATTRIBUTE | cur_mask);
-		int startPos = styler->currentPos;
-		if (styler->ch >= 0x80 || styler->ch == '_' || isalpha(styler->ch))
+		int startPos = 0;
+		unsigned char ch = styler->ch;
+		if (ch >= 0x80 || ch == '_' || isalpha(ch))
 		{
-			while (styler->More())
+			do
 			{
-				if (styler->ch >= 80 || styler->ch == '_' || isalnum(styler->ch))
-				{
-					styler->Forward();
-				}
-				else
+				startPos++;
+				ch = styler->GetRelative(startPos);
+				if (!(ch >= 80 || ch == '_' || isalnum(ch)))
 					break;
-			}
-			if (styler->ch == '=')
+			} while (ch);
+			if (ch == '=')
 			{
+				styler->ForwardBytes(startPos);
 				styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 				styler->Forward();
 			}
@@ -759,14 +776,12 @@ void BKE_Lexer::DoCommand()
 			{
 				//see as no attr
 				styler->ChangeState(SCE_BKE_DEFAULT | cur_mask);
-				styler->setPos(startPos);
 			}
 		}
 		else
 		{
 			//no attr
 			styler->ChangeState(SCE_BKE_DEFAULT | cur_mask);
-			styler->setPos(startPos);
 		}
 		ParseBegal(false, false, false);
 	}
@@ -816,20 +831,20 @@ void BKE_Lexer::DoAtCommand()
 			continue;
 		}
 		styler->SetState(SCE_BKE_ATTRIBUTE | cur_mask);
-		int startPos = styler->currentPos;
-		if (styler->ch >= 0x80 || styler->ch == '_' || isalpha(styler->ch))
+		int startPos = 0;
+		unsigned char ch = styler->ch;
+		if (ch >= 0x80 || ch == '_' || isalpha(ch))
 		{
-			while (styler->More())
+			do
 			{
-				if (styler->ch >= 0x80 || styler->ch == '_' || isalnum(styler->ch))
-				{
-					styler->Forward();
-				}
-				else
+				startPos++;
+				ch = styler->GetRelative(startPos);
+				if (!(ch >= 80 || ch == '_' || isalnum(ch)))
 					break;
-			}
-			if (styler->ch == '=')
+			} while (ch);
+			if (ch == '=')
 			{
+				styler->ForwardBytes(startPos);
 				styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 				styler->Forward();
 			}
@@ -837,14 +852,12 @@ void BKE_Lexer::DoAtCommand()
 			{
 				//see as no attr
 				styler->ChangeState(SCE_BKE_DEFAULT | cur_mask);
-				styler->setPos(startPos);
 			}
 		}
 		else
 		{
 			//no attr
 			styler->ChangeState(SCE_BKE_DEFAULT | cur_mask);
-			styler->setPos(startPos);
 		}
 		ParseBegal(false, false, true);
 	}
@@ -1051,7 +1064,9 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 	myDoc = pAccess;
 
 	StyleContext sc(startPos, lengthDoc, initStyle, accessor, 0xFF);
+	
 	styler = &sc;
+	cur_mask = initStyle & ~BASE_MASK;
 	if (firstLex)
 	{
 		firstLex = false;
@@ -1059,7 +1074,6 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 
 		unsigned char laststyle = (unsigned char)pAccess->StyleAt(startPos - 1);
 		unsigned char curstyle = (unsigned char)pAccess->StyleAt(startPos);
-		cur_mask = initStyle & ~BASE_MASK;
 		//Lex(startPos, lengthDoc, laststyle, pAccess);
 		//return;
 

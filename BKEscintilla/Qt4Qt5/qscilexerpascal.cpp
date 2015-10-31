@@ -1,23 +1,18 @@
 // This module implements the QsciLexerPascal class.
 //
-// Copyright (c) 2012 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2015 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
-// This file may be used under the terms of the GNU General Public
-// License versions 2.0 or 3.0 as published by the Free Software
-// Foundation and appearing in the files LICENSE.GPL2 and LICENSE.GPL3
-// included in the packaging of this file.  Alternatively you may (at
-// your option) use any later version of the GNU General Public
-// License if such license has been publicly approved by Riverbank
-// Computing Limited (or its successors, if any) and the KDE Free Qt
-// Foundation. In addition, as a special exception, Riverbank gives you
-// certain additional rights. These rights are described in the Riverbank
-// GPL Exception version 1.1, which can be found in the file
-// GPL_EXCEPTION.txt in this package.
+// This file may be used under the terms of the GNU General Public License
+// version 3.0 as published by the Free Software Foundation and appearing in
+// the file LICENSE included in the packaging of this file.  Please review the
+// following information to ensure the GNU General Public License version 3.0
+// requirements will be met: http://www.gnu.org/copyleft/gpl.html.
 // 
-// If you are unsure which license is appropriate for your use, please
-// contact the sales department at sales@riverbankcomputing.com.
+// If you do not wish to use this file under the terms of the GPL version 3.0
+// then you may purchase a commercial license.  For more information contact
+// info@riverbankcomputing.com.
 // 
 // This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 // WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -233,17 +228,17 @@ const char *QsciLexerPascal::keywords(int set) const
     if (set == 1)
         return
             "absolute abstract and array as asm assembler automated begin "
-            "case cdecl class const constructor deprecated destructor dispid "
-            "dispinterface div do downto dynamic else end except export "
-            "exports external far file final finalization finally for forward "
-            "function goto if implementation in inherited initialization "
-            "inline interface is label library message mod near nil not "
-            "object of on or out overload override packed pascal platform "
-            "private procedure program property protected public published "
-            "raise record register reintroduce repeat resourcestring safecall "
-            "sealed set shl shr static stdcall strict string then threadvar "
-            "to try type unit unsafe until uses var varargs virtual while "
-            "with xor"
+            "case cdecl class const constructor delayed deprecated destructor "
+            "dispid dispinterface div do downto dynamic else end except "
+            "experimental export exports external far file final finalization "
+            "finally for forward function goto helper if implementation in "
+            "inherited initialization inline interface is label library "
+            "message mod near nil not object of on operator or out overload "
+            "override packed pascal platform private procedure program "
+            "property protected public published raise record reference "
+            "register reintroduce repeat resourcestring safecall sealed set "
+            "shl shr static stdcall strict string then threadvar to try type "
+            "unit unsafe until uses var varargs virtual while winapi with xor"
             "add default implements index name nodefault read readonly remove "
             "stored write writeonly"
             "package contains requires";

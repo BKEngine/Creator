@@ -1,24 +1,19 @@
 // This module defines the "official" high-level API of the Qt port of
 // Scintilla.
 //
-// Copyright (c) 2012 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2015 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
-// This file may be used under the terms of the GNU General Public
-// License versions 2.0 or 3.0 as published by the Free Software
-// Foundation and appearing in the files LICENSE.GPL2 and LICENSE.GPL3
-// included in the packaging of this file.  Alternatively you may (at
-// your option) use any later version of the GNU General Public
-// License if such license has been publicly approved by Riverbank
-// Computing Limited (or its successors, if any) and the KDE Free Qt
-// Foundation. In addition, as a special exception, Riverbank gives you
-// certain additional rights. These rights are described in the Riverbank
-// GPL Exception version 1.1, which can be found in the file
-// GPL_EXCEPTION.txt in this package.
+// This file may be used under the terms of the GNU General Public License
+// version 3.0 as published by the Free Software Foundation and appearing in
+// the file LICENSE included in the packaging of this file.  Please review the
+// following information to ensure the GNU General Public License version 3.0
+// requirements will be met: http://www.gnu.org/copyleft/gpl.html.
 // 
-// If you are unsure which license is appropriate for your use, please
-// contact the sales department at sales@riverbankcomputing.com.
+// If you do not wish to use this file under the terms of the GPL version 3.0
+// then you may purchase a commercial license.  For more information contact
+// info@riverbankcomputing.com.
 // 
 // This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
 // WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -31,12 +26,11 @@
 extern "C++" {
 #endif
 
-#include <qobject.h>
-#include <qstringlist.h>
-
 #include <QByteArray>
 #include <QList>
+#include <QObject>
 #include <QPointer>
+#include <QStringList>
 
 #include <Qsci/qsciglobal.h>
 #include <Qsci/qscicommand.h>
@@ -98,7 +92,10 @@ public:
         AnnotationStandard = ANNOTATION_STANDARD,
 
         //! Annotations are surrounded by a box.
-        AnnotationBoxed = ANNOTATION_BOXED
+        AnnotationBoxed = ANNOTATION_BOXED,
+
+        //! Annotations are indented to match the text.
+        AnnotationIndented = ANNOTATION_INDENTED,
     };
 
     //! This enum defines the behavior if an auto-completion list contains a
@@ -259,8 +256,15 @@ public:
         RoundBoxIndicator = INDIC_ROUNDBOX,
 
         //! A rectangle around the text with the interior usually more
-        //! transparent than the border.
+        //! transparent than the border.  It does not colour the top pixel of
+        //! the line so that indicators on contiguous lines are visually
+        //! distinct and disconnected.
         StraightBoxIndicator = INDIC_STRAIGHTBOX,
+
+        //! A rectangle around the text with the interior usually more
+        //! transparent than the border.  Unlike StraightBoxIndicator it covers
+        //! the entire character area.
+        FullBoxIndicator = INDIC_FULLBOX,
 
         //! A dashed underline.
         DashesIndicator = INDIC_DASH,
@@ -279,6 +283,18 @@ public:
         //! A version of SquiggleIndicator that uses a pixmap.  This is quicker
         //! but may be of lower quality.
         SquigglePixmapIndicator = INDIC_SQUIGGLEPIXMAP,
+
+        //! A thick underline typically used for the target during Asian
+        //! language input composition.
+        ThickCompositionIndicator = INDIC_COMPOSITIONTHICK,
+
+        //! A thin underline typically used for non-target ranges during Asian
+        //! language input composition.
+        ThinCompositionIndicator = INDIC_COMPOSITIONTHIN,
+
+        //! The color of the text is set to the color of the indicator's
+        //! foreground.
+        TextColorIndicator = INDIC_TEXTFORE,
     };
 
     //! This enum defines the different margin options.
@@ -406,7 +422,10 @@ public:
 
         //! No symbol is drawn but the line is drawn underlined using the
         //! marker's background color.
-        Underline = SC_MARK_UNDERLINE
+        Underline = SC_MARK_UNDERLINE,
+
+        //! A bookmark.
+        Bookmark = SC_MARK_BOOKMARK,
     };
 
     //! This enum defines the different whitespace visibility modes.  When
@@ -432,7 +451,10 @@ public:
         WrapWord = SC_WRAP_WORD,
 
         //! Lines are wrapped at character boundaries.
-        WrapCharacter = SC_WRAP_CHAR
+        WrapCharacter = SC_WRAP_CHAR,
+
+        //! Lines are wrapped at whitespace boundaries.
+        WrapWhitespace = SC_WRAP_WHITESPACE,
     };
 
     //! This enum defines the different line wrap visual flags.
@@ -1083,6 +1105,16 @@ public:
     //! \sa setFoldMarginColors()
     void resetFoldMarginColors();
 
+    //! Resets the background colour of an active hotspot area to the default.
+    //!
+    //! \sa setHotspotBackgroundColor(), resetHotspotForegroundColor()
+    void resetHotspotBackgroundColor();
+
+    //! Resets the foreground colour of an active hotspot area to the default.
+    //!
+    //! \sa setHotspotForegroundColor(), resetHotspotBackgroundColor()
+    void resetHotspotForegroundColor();
+
     //! The fold margin may be drawn as a one pixel sized checkerboard pattern
     //! of two colours, \a fore and \a back.
     //!
@@ -1195,6 +1227,16 @@ public:
     //! Set the foreground colour of indicator \a indicatorNumber to \a col.
     //! If \a indicatorNumber is -1 then the colour of all indicators is set.
     void setIndicatorForegroundColor(const QColor &col, int indicatorNumber = -1);
+
+    //! Set the foreground colour of indicator \a indicatorNumber to \a col
+    //! when the mouse is over it or the caret moved into it.  If
+    //! \a indicatorNumber is -1 then the colour of all indicators is set.
+    void setIndicatorHoverForegroundColor(const QColor &col, int indicatorNumber = -1);
+
+    //! Set the style of indicator \a indicatorNumber to \a style when the
+    //! mouse is over it or the caret moved into it.  If \a indicatorNumber is
+    //! -1 then the style of all indicators is set.
+    void setIndicatorHoverStyle(IndicatorStyle style, int indicatorNumber = -1);
 
     //! Set the outline colour of indicator \a indicatorNumber to \a col.
     //! If \a indicatorNumber is -1 then the colour of all indicators is set.
@@ -1309,6 +1351,24 @@ public:
     //!
     //! \sa setSelectionToEol()
     bool selectionToEol() const;
+
+    //! Sets the background colour of an active hotspot area to \a col.
+    //!
+    //! \sa resetHotspotBackgroundColor(), setHotspotForegroundColor()
+    void setHotspotBackgroundColor(const QColor &col);
+
+    //! Sets the foreground colour of an active hotspot area to \a col.
+    //!
+    //! \sa resetHotspotForegroundColor(), setHotspotBackgroundColor()
+    void setHotspotForegroundColor(const QColor &col);
+
+    //! Enables or disables, according to \a enable, the underlining of an
+    //! active hotspot area.  The default is false.
+    void setHotspotUnderline(bool enable);
+
+    //! Enables or disables, according to \a enable, the wrapping of a hotspot
+    //! area to following lines.  The default is true.
+    void setHotspotWrap(bool enable);
 
     //! Sets whether or not the selection is drawn up to the right hand border.
     //! \a filled is set if the selection is drawn to the border.
@@ -1945,6 +2005,9 @@ protected:
     virtual bool event(QEvent *e);
 
     //! \reimp
+    virtual void changeEvent(QEvent *e);
+
+    //! \reimp
     virtual void contextMenuEvent(QContextMenuEvent *e);
 
 private slots:
@@ -1973,8 +2036,6 @@ private slots:
     void delete_selection();
 
 private:
-    typedef QByteArray ScintillaString;
-
     void detachLexer();
 
     enum IndentState {
@@ -2004,10 +2065,9 @@ private:
     void foldExpand(int &line, bool doExpand, bool force = false,
             int visLevels = 0, int level = -1);
     void setFoldMarker(int marknr, int mark = SC_MARK_EMPTY);
-    QString convertTextS2Q(const char *s) const;
-    ScintillaString convertTextQ2S(const QString &q) const;
     void setLexerStyle(int style);
     void setStylesFont(const QFont &f, int style);
+    void setEnabledColors(int style, QColor &fore, QColor &back);
 
     void braceMatch();
     bool findMatchingBrace(long &brace, long &other, BraceMatch mode);
@@ -2029,7 +2089,7 @@ private:
 
     QString wordAtPosition(int position) const;
 
-    ScintillaString styleText(const QList<QsciStyledText> &styled_text,
+    ScintillaBytes styleText(const QList<QsciStyledText> &styled_text,
             char **styles, int style_offset = 0);
 
     struct FindState

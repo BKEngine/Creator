@@ -363,7 +363,7 @@ public:
 	QString readName()
 	{
 		QByteArray ba;
-		char ch = fetchNextOne();
+		unsigned char ch = fetchNextOne();
 		if (isalpha(ch) || ch == '_' || ch >= 0x80)
 		{
 			do
