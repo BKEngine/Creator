@@ -60,6 +60,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	SendScintilla(SCI_AUTOCSTOPS, "", ",./!@#$%^&*()_+-=\\;'\"[]{}");
 	SendScintilla(SCI_SETUSETABS, true);
 	SendScintilla(SCI_SETINDENT, 0);
+	SendScintilla(SCI_AUTOCSETORDER, SC_ORDER_PERFORMSORT);
 
 	//setIndentationGuides(true) ;
 	Separate = QString(" ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\\n\r");
@@ -516,6 +517,8 @@ QString BkeScintilla::getGlobalList(const QString &ls, const QString &alltext)
 void BkeScintilla::showComplete()
 {
 	int pos = modfieddata.pos + modfieddata.text.length() - 1;
+	if (ChangeType & SC_MOD_DELETETEXT)
+		pos--;
 	unsigned char style = SendScintilla(SCI_GETSTYLEAT, pos);
 	unsigned char ch = SendScintilla(SCI_GETCHARAT, pos);
 	unsigned char curstyle = style;

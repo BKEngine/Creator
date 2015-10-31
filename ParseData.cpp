@@ -850,7 +850,7 @@ void PAModule::skipToNextSentence()
 		try
 		{
 			readToken();
-			if (next.opcode == OP_STOP || next.opcode == OP_END)
+			if (next.opcode == OP_STOP || next.opcode == OP_END || next.opcode == OP_BLOCK2)
 				break;
 		}
 		catch (Var_Except &)
@@ -1453,12 +1453,26 @@ void PAModule::expression(BKE_bytree** tree, int rbp)
 	token = next;
 	readToken();
 	token.opcode += OP_COUNT;
-	(this->*p->funclist[token.opcode])(tree);
+	try
+	{
+		(this->*p->funclist[token.opcode])(tree);
+	}
+	catch (Var_Except &)
+	{
+		skipToNextSentence();
+	}
 	while (!forcequit && rbp < p->lbp[next.opcode])
 	{
 		token = next;
 		readToken();
-		(this->*p->funclist[token.opcode])(tree);
+		try
+		{
+			(this->*p->funclist[token.opcode])(tree);
+		}
+		catch (Var_Except &)
+		{
+			skipToNextSentence();
+		}
 	}
 	forcequit = false;
 }
