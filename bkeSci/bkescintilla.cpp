@@ -162,17 +162,16 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 	//}
 	if (mtype & SC_MOD_INSERTTEXT)
 	{  //文字被插入
-		ChangeType = mtype;
-		modfieddata.pos = pos;
-		modfieddata.type = mtype;
-		modfieddata.line = xline;
-		modfieddata.index = xindex;
-		modfieddata.lineadd = added;
-		modfieddata.text = QString(text);
-
-
 		if (!FileName.isEmpty())
 		{
+			ChangeType = mtype;
+			modfieddata.pos = pos;
+			modfieddata.type = mtype;
+			modfieddata.line = xline;
+			modfieddata.index = xindex;
+			modfieddata.lineadd = added;
+			modfieddata.text = QString(text);
+
 			int buflen = length() + 1;
 			char *buf = new char[buflen];
 			SendScintilla(SCI_GETTEXT, buflen, buf);
@@ -184,12 +183,12 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 	else if (mtype & SC_MOD_DELETETEXT)
 	{
 		//if( xindex < LastKeywordEnd) CheckLine(xline); //一旦删除超过关键点，则需要重新进行解析
-		ChangeType = mtype;
-		modfieddata.pos = pos;
-		modfieddata.type = mtype;
-		modfieddata.line = xline;
-		modfieddata.index = xindex;
-		modfieddata.lineadd = added;
+		//ChangeType = mtype;
+		//modfieddata.pos = pos;
+		//modfieddata.type = mtype;
+		//modfieddata.line = xline;
+		//modfieddata.index = xindex;
+		//modfieddata.lineadd = added;
 		//modfieddata.text = QString(text);
 
 		if (!FileName.isEmpty())

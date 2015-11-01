@@ -1079,5 +1079,25 @@ void initCmd()
 	ADD_PARAM(radius, ptInteger | ptOptional);
 	REG_END();
 
+#define EFFECT_TWO(X, x, info) 	REG_SPE_CMD(effect, x, EFFECT_##X, info);ADD_PARAM(target, ptInteger);ADD_PARAM(mask, ptString | ptOptional);ADD_PARAM(masksp, ptInteger | ptOptional);PROPERTY(mask, masksp, onlyOne);REG_END();
+
+	EFFECT_TWO(DARKEN, Darken, "PS的变暗");
+	EFFECT_TWO(COLORBURN, ColorBurn, "PS的颜色加深");
+	EFFECT_TWO(LINEARBURN, LinearBurn, "PS的线性加深");
+	EFFECT_TWO(LIGHTEN, Lighten, "PS的变亮");
+	EFFECT_TWO(SCREEN, Screen, "PS的滤色");
+	EFFECT_TWO(COLORDODGE, ColorDodge, "PS的颜色减淡");
+	EFFECT_TWO(OVERLAY, Overlay, "PS的叠加");
+	EFFECT_TWO(SOFTLIGHT, SoftLight, "PS的柔光");
+	EFFECT_TWO(HARDLIGHT, HardLight, "PS的强光");
+	EFFECT_TWO(VIVIDLIGHT, VividLight, "PS的亮光");
+	EFFECT_TWO(LINEARLIGHT, LinearLight, "PS的线性光");
+	EFFECT_TWO(PINLIGHT, PinLight, "PS的点光");
+	EFFECT_TWO(HARDMIX, HardMix, "PS的实色混合");
+	EFFECT_TWO(DIFFERENCE, Difference, "PS的差值");
+	EFFECT_TWO(EXCLUSION, Exclusion, "PS的排除");
+
+#undef EFFECT_TWO
+
 	cmd_inited = true;
 };

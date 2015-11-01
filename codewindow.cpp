@@ -1153,8 +1153,17 @@ void CodeWindow::ShowRmenu(const QPoint & pos)
 	QMenu menu(this);
 	//在文件内容上右键菜单
 	int n_pos = currentedit->SendScintilla(BkeScintilla::SCI_POSITIONFROMPOINT, pos.x(), pos.y());
-	Pos p;
-	currentedit->lineIndexFromPosition(n_pos, &p.line, &p.pos);
+
+	auto node = currentedit->analysis->findNode(currentedit->FileName, n_pos);
+
+	if (node)
+	{
+		if (node->isCommand())
+		{
+			QString name = node->name;
+
+		}
+	}
 
 	menu.addAction(btncopyact);
 	menu.addAction(btncutact);
