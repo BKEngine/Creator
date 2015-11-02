@@ -105,6 +105,10 @@ public:
 	BkeLeftFileWidget *filewidget;
 
 
+	QAction *jumpToDef;
+	QAction *jumpToCode;
+	QAction *gotoLabel;
+
 	QAction *btnnextact;
 	QAction *btnlastact;
 	QAction *btnsaveact;
@@ -195,6 +199,9 @@ public slots:
 	void resetLexer();
 	void refreshLabel(BkeScintilla *sci);
 	void refreshLabel(set<QString> &l);
+	void jumpToDefFunc();
+	void jumpToCodeFunc();
+	void jumpToLabelFunc();
 
 private:
 	OtherWindow *othwin;

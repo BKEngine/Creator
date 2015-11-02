@@ -124,6 +124,15 @@ void CodeWindow::CreateBtn()
 	btnselectall = new QAction("全选", this);
 	btnfly = new QAction(QIcon(":/cedit/source/flay.png"), "转到行...", this);
 
+	jumpToDef = new QAction(this);
+	jumpToCode = new QAction(this);
+	gotoLabel = new QAction(this);
+
+	connect(jumpToDef, SIGNAL(triggered()), this, SLOT(jumpToDefFunc()));
+	connect(jumpToCode, SIGNAL(triggered()), this, SLOT(jumpToCodeFunc()));
+	connect(gotoLabel, SIGNAL(triggered()), this, SLOT(jumpToLabelFunc()));
+
+
 	btnsaveact->setShortcut(Qt::CTRL + Qt::Key_S);
 	btncopyact->setShortcut(Qt::CTRL + Qt::Key_C);
 	btnpasteact->setShortcut(Qt::CTRL + Qt::Key_V);
@@ -1161,7 +1170,21 @@ void CodeWindow::ShowRmenu(const QPoint & pos)
 		if (node->isCommand())
 		{
 			QString name = node->name;
+			BKEMacros m;
+			bool f = currentedit->analysis->findMacro(name, &m);
+			if (f)
+			{
+				QString d;
+				d.setNum(m.pos);
+				jumpToDef->setText("转到宏" + m.name + "的声明");
+				jumpToDef->setData(m.definefile + "|" + d);
 
+				jumpToCode->setText("转到宏" + m.name + "的实现");
+				jumpToCode->setData(m.definefile + "|" + m.name);
+
+				menu.addAction(jumpToDef);
+				menu.addAction(jumpToCode);
+			}
 		}
 	}
 
@@ -1591,3 +1614,33 @@ void CodeWindow::ActCopy()
 	currentedit->copy();
 }
 
+void CodeWindow::jumpToDefFunc()
+{
+	QAction *act = (QAction*)sender();
+	QStringList ls = act->data().toString().split('|');
+	int pos = ls[1].toInt();
+	addFile(currentproject->FileDir() + '/' + ls[0], currentproject->FileDir());
+	if (currentedit->FileName != ls[0])
+		return;
+	int line, xpos;
+	currentedit->lineIndexFromPositionByte(pos, &line, &xpos);
+	currentedit->setFirstVisibleLine(line);
+}
+
+void CodeWindow::jumpToCodeFunc()
+{
+	QAction *act = (QAction*)sender();
+	QStringList ls = act->data().toString().split('|');
+	addFile(currentproject->FileDir() + '/' + ls[0], currentproject->FileDir());
+	if (currentedit->FileName != ls[0])
+		return;
+	int pos = currentedit->analysis->findLabel(currentedit->FileName, ls[1]);
+	int line, index;
+	currentedit->lineIndexFromPositionByte(pos, &line, &index);
+	currentedit->setFirstVisibleLine(line);
+}
+
+void CodeWindow::jumpToLabelFunc()
+{
+
+}

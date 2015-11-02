@@ -273,7 +273,7 @@ public:
 	}
 	void skipLineComment()
 	{
-		char ch = textbuf[++idx];
+		char ch = textbuf[idx];
 		while (ch && ch!='\n' && ch!= '\r')
 			ch = textbuf[++idx];
 	}

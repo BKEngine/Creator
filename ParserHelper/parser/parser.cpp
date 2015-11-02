@@ -27,7 +27,7 @@ inline BKE_Variable &getVariableWithoutProp(BKE_Variable &orivar, BKE_array<BKE_
 //#define ADDTOTEMP(a) tempvars.push_back(a);a->release();
 
 #define BUILD_TREE BKE_bytree* &tr=*tree;tr=new BKE_bytree(token);
-#define GET_TREE tr->addChild();expression(&tr->childs.back());if(tr->childs.back()==NULL)throw Var_Except(L"此处期待一个输入", static_cast<bkpulong>(curpos - exp) VAR_EXCEPT_EXT);
+#define GET_TREE tr->addChild();expression(&tr->childs.back());if(tr->childs.back()==NULL){tr->childs.pop_back(); throw Var_Except(L"此处期待一个输入", static_cast<bkpulong>(curpos - exp) VAR_EXCEPT_EXT);}
 #define GET_TREE_OR_NULL tr->addChild();expression(&tr->childs.back());
 #define GET_TREE2(lbp) tr->addChild();expression(&tr->childs.back(), lbp);if(tr->childs.back()==NULL)throw Var_Except(L"此处期待一个输入", static_cast<bkpulong>(curpos - exp) VAR_EXCEPT_EXT);
 #define GET_TREE2_OR_NULL(lbp) tr->addChild();expression(&tr->childs.back(), lbp);
@@ -1462,7 +1462,7 @@ void Parser::nud_if(BKE_bytree** tree)
 	}
 	if(tr->childs[0]->Node.opcode == OP_CONSTVAR + OP_COUNT)
 	{
-		if((bool)tr->childs[1]->Node.var)
+		if((bool)tr->childs[0]->Node.var)
 		{
 			BKE_bytree *res=tr->childs[1];
 			tr->childs[1]=NULL;
@@ -1863,10 +1863,10 @@ void Parser::nud_foreach(BKE_bytree** tree)
 			tr->childs.push_back(new BKE_bytree(next));
 			readToken();
 		}
-		else
-		{
-			THROW(L"此处需要变量", next.pos);
-		}
+		//else
+		//{
+		//	THROW(L"此处需要变量", next.pos);
+		//}
 	}
 	else
 	{
