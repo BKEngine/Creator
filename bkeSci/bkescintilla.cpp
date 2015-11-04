@@ -305,7 +305,7 @@ QString BkeScintilla::getAttrs(const QString &name, const QString &alltext)
 	{
 		BKEMacros macro;
 		bool r = analysis->findMacro(name, &macro);
-		if (r)
+		if (r && !macro.paramqueue.empty())
 		{
 			for (auto &it2 : macro.paramqueue)
 				params.insert(it2.first);
@@ -727,7 +727,7 @@ void BkeScintilla::UiChange(int updated)
 				else
 					modfieddata.pos--;
 				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
-				SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
+				SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count());
 			}
 		}
 	}
@@ -758,15 +758,23 @@ void BkeScintilla::UiChange(int updated)
 			while (len >= 0 && buf[len] == '\n' || buf[len] == '\r')
 				len--;
 			buf[++len] = 0;
-			if (!len || buf[len - 1] == ';' || buf[len - 1] == '}')
-			{
-				//沿用上一行的缩进
-				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
-			}
-			else
+			if (len && (buf[len - 1] == '[' || buf[len - 1] == '{'))
 			{
 				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
 			}
+			else
+			{
+				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+			}
+			//if (!len || buf[len - 1] == ';' || buf[len - 1] == '}')
+			//{
+				//沿用上一行的缩进
+				//SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+			//}
+			//else
+			//{
+			//	SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
+			//}
 			delete[] buf;
 			//int ly = defparser->GetIndentLayer(this, modfieddata.line);
 			//if (ly < 0)

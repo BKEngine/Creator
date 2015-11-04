@@ -107,6 +107,7 @@ MainWindow *MainWindow::_instance = NULL;
 MainWindow::~MainWindow()
 {
 	_instance = NULL;
+	codeedit = NULL;
 }
 
 void MainWindow::CreateMenu()

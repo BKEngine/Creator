@@ -87,10 +87,18 @@ CodeWindow::CodeWindow(QWidget *parent)
 	searchlablelater = 0;
 	isCompileNotice = _NOTICE_ALWAYS;
 
+	tm.setTimerType(Qt::TimerType::VeryCoarseTimer);
+	connect(&tm, SIGNAL(timeout()), this, SLOT(onTimer()));
+	tm.start(60000);
 }
 
 CodeWindow::~CodeWindow()
 {
+}
+
+void CodeWindow::onTimer()
+{
+	backupAll();
 }
 
 void CodeWindow::CreateBtn()
@@ -721,10 +729,48 @@ void CodeWindow::SaveALL()
 	}
 }
 
+void CodeWindow::backupAll()
+{
+	static QDir qd;
+	auto userdir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/.BKE_Creator/";
+	if (!qd.exists(userdir))
+		qd.mkdir(userdir);
+	static QJsonObject jo;
+	static QStringList files;
+	static QJsonDocument jd;
+	if (currentproject)
+		jo.insert("project", currentproject->ProjectFile());
+	files.clear();
+	QWidget *p;
+	BkeDocBase *llm;
+	for (int i = 0; i < stackwidget->count(); i++){
+		llm = docWidgetHash.value(stackwidget->widget(i));
+		if (llm == NULL)
+			continue;
+		else
+		{
+			if (currentproject)
+				files.push_back(currentproject->FileDir() + '/' + llm->edit->FileName);
+			simpleBackup(llm);
+		}
+	}
+	jo.insert("files", QJsonArray::fromStringList(files));
+	jd.setObject(jo);
+	LOLI::AutoWrite(userdir + "pro", jd.toJson());
+	return;
+}
+
 void CodeWindow::SaveFile()
 {
 	simpleSave(currentbase);
 	return;
+}
+
+bool CodeWindow::simpleBackup(BkeDocBase *loli)
+{
+	auto userdir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/.BKE_Creator/";
+	QFileInfo fi(loli->FullName());
+	return LOLI::AutoWrite(userdir + fi.fileName(), loli->edit->text());
 }
 
 void CodeWindow::simpleSave(BkeDocBase *loli)
@@ -1480,6 +1526,7 @@ void CodeWindow::simpleClose(BkeDocBase *loli)
 	filewatcher->removePath(currentbase->FullName()) ;
 
 	loli->edit->close();
+	loli->edit->analysis = NULL;
 	loli->edit->deleteLater();
 	lablelist->setCurrentIndex(-1);
 	delete loli;

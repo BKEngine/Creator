@@ -147,6 +147,7 @@ signals:
 	void searchOne(const QString &file, const QString &fullfile, int line, int start, int end);
 
 public slots:
+	void onTimer();
 	bool CloseAll();
 	void ChangeCurrentEdit(int pos);
 	void SetCurrentEdit(int pos);
@@ -203,6 +204,10 @@ public slots:
 	void jumpToCodeFunc();
 	void jumpToLabelFunc();
 
+public:
+	void backupAll();
+	BkeScintilla *getCurrentEdit(){ return currentedit; };
+
 private:
 	OtherWindow *othwin;
 	ProjectWindow *prowin;
@@ -251,8 +256,10 @@ private:
 		_NOTICE_ALLSAVE
 	};
 
+	QTimer tm;
 	void simpleNew(BkeDocBase *loli, const QString &t);
 	void simpleSave(BkeDocBase *loli);
+	bool simpleBackup(BkeDocBase *loli);
 	void simpleClose(BkeDocBase *loli);
 	void SetCurrentEdit(QWidget *w);
 	void CreateBtn();

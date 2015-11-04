@@ -7,11 +7,60 @@
 #include "singleapplication.h"
 #include <stdint.h>
 #include "quazip/JlCompress.h"
+#include "codewindow.h"
 
 QString title = "BKE Creator - ";
 uint32_t titlehash = 0;
 
 extern void initCmd();
+
+extern CodeWindow *codeedit;
+
+//register error handling in Windows
+#ifdef WIN32
+#include <Windows.h>
+#include <DbgHelp.h>
+
+BOOL CALLBACK EnumWndProc(HWND hwnd, LPARAM lParam)
+{
+	uint32_t h = (uint32_t)GetProp(hwnd, L"title");
+	if (h == titlehash)
+	{
+		*(HWND*)lParam = hwnd;
+		return false;
+	}
+	return true;
+}
+
+#pragma comment(lib, "DbgHelp.lib")
+
+LONG WINAPI ApplicationCrashHandler(EXCEPTION_POINTERS *pException){//程式异常捕获  
+	/*
+	***保存数据代码***
+	*/
+	//创建 Dump 文件  
+	HANDLE hDumpFile = CreateFile((LPCWSTR)QTime::currentTime().toString("HH时mm分ss秒zzz.dmp").utf16(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hDumpFile != INVALID_HANDLE_VALUE){
+		//Dump信息  
+		MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
+		dumpInfo.ExceptionPointers = pException;
+		dumpInfo.ThreadId = GetCurrentThreadId();
+		dumpInfo.ClientPointers = TRUE;
+		//写入Dump文件内容  
+		MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpNormal, &dumpInfo, NULL, NULL);
+	}
+	//保存
+	if (codeedit)
+		codeedit->backupAll();
+	//这里弹出一个错误对话框并退出程序  
+	EXCEPTION_RECORD* record = pException->ExceptionRecord;
+	QString errCode(QString::number(record->ExceptionCode, 16)), errAdr(QString::number((uint)record->ExceptionAddress, 16)), errMod;
+	QMessageBox::critical(NULL, "程式崩溃", "<FONT size=4><div><b>对于发生的错误，表示诚挚的歉意</b><br/></div>" +
+		QString("<div>错误代码：%1</div><div>错误地址：%2</div></FONT>").arg(errCode).arg(errAdr),
+		QMessageBox::Ok);
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+#endif
 
 uint32_t BKE_hash(const wchar_t *str)
 {
@@ -30,23 +79,46 @@ uint32_t BKE_hash(const wchar_t *str)
 	return ret;
 }
 
-#ifdef WIN32
-#include <Windows.h>
+void CheckOpenAL32() ;
+void CheckFileAssociation();
 
-BOOL CALLBACK EnumWndProc(HWND hwnd, LPARAM lParam)
+//检查上次是否正常关闭，返回true表示非正常
+bool checkLastClose(QString &pro, QStringList &files)
 {
-	uint32_t h = (uint32_t)GetProp(hwnd, L"title");
-	if (h == titlehash)
-	{
-		*(HWND*)lParam = hwnd;
+	auto userdir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/.BKE_Creator/";
+	QFile p(userdir + "pro");
+	if (!p.exists())
 		return false;
+	if (!p.isOpen() && !p.open(QFile::ReadOnly))
+		return false;
+	QJsonDocument kk = QJsonDocument::fromJson(p.readAll());
+	if (kk.isNull() || !kk.isObject())
+		return false;
+	auto bkpAdmin = new QJsonObject(kk.object());
+	if (bkpAdmin->isEmpty())
+	{
+		delete bkpAdmin;
+		return false;
+	}
+	pro = bkpAdmin->value("project").toString();
+	auto arr = bkpAdmin->value("files").toArray();
+	files.clear();
+	for (auto &it : arr)
+	{
+		files.push_back(it.toString());
 	}
 	return true;
 }
-#endif
 
-void CheckOpenAL32() ;
-void CheckFileAssociation();
+void clearCloseInfo()
+{
+	auto userdir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/.BKE_Creator/";
+	QDir d(userdir);
+	d.setFilter(QDir::Files);
+	int i, j = d.count();
+	for (i = 0; i < j; i++)
+		d.remove(d[i]);
+}
 
 int main(int argc, char *argv[])
 {
@@ -54,6 +126,7 @@ int main(int argc, char *argv[])
 	QTextCodec *xcodec = QTextCodec::codecForLocale();
 
 #ifdef WIN32
+	SetUnhandledExceptionFilter(ApplicationCrashHandler);
 	wchar_t tmp[MAX_PATH];
 	GetModuleFileNameW(NULL, tmp, MAX_PATH);
 	QString exeDir = QString::fromWCharArray(tmp);
@@ -181,13 +254,40 @@ int main(int argc, char *argv[])
 //    a.setActiveWidget(&test);
 	a.setActiveWindow(&test);
 #ifdef Q_OS_WIN
-	if( BKE_CLOSE_SETTING->value("window/ismax").toBool() ) test.showMaximized();
-	else test.show();
+	if( BKE_CLOSE_SETTING->value("window/ismax").toBool() )
+		test.showMaximized();
+	else 
+		test.show();
 #else
 	test.show();
 #endif
 
-	if( argc > 1){
+	QString pro;
+	QStringList files;
+
+	bool notclose = checkLastClose(pro, files);
+
+	if (notclose)
+	{
+		projectedit->OpenProject(pro);
+		for (auto &it : files)
+		{
+			codeedit->addFile(it, projectedit->workpro->FileDir());
+			auto edit = codeedit->getCurrentEdit();
+			QFileInfo fi(it);
+			if (edit)
+			{
+				auto userdir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/.BKE_Creator/";
+				QFile f(userdir + fi.fileName());
+				QString text;
+				if (LOLI::AutoRead(text, &f))
+				{
+					edit->setText(text);
+				}
+			}
+		}
+	}
+	else if( argc > 1){
 		projectedit->OpenProject(xcodec->toUnicode(QByteArray(argv[1])) );
 	}
 
@@ -215,6 +315,8 @@ int main(int argc, char *argv[])
 	delete BKE_CLOSE_SETTING;
 	delete BKE_USER_SETTING;
 	delete BKE_SKIN_SETTING;
+
+	clearCloseInfo();
 
 	return res;
 }

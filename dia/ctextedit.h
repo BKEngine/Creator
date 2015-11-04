@@ -22,8 +22,6 @@ public:
 	virtual void load();
 	virtual void reset();
 
-	int itemNo;
-
 public slots:
 	void onForecolorClicked();
 	void onBackcolorClicked();

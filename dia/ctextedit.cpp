@@ -24,6 +24,7 @@ CTextEdit::CTextEdit(QWidget *parent) :
 	connect(ui->comboBox_2,SIGNAL(currentTextChanged(QString)),this,SLOT(upFont())) ;
 
 	ui->listBox->setCurrentText( lex->ConfigName() );
+	curindex = ui->listBox->currentIndex();
 
 	load();
 }

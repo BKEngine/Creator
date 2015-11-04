@@ -57,9 +57,11 @@ void erase(Pos p, Pos &org, Pos off)
 
 ParseData::ParseData(QByteArray &file, BKE_VarClosure *clo)
 {
-	//int len = file.length();
-	//textbuf = new char[len + 1];
-	textbuf = file.data();
+	int len = file.length();
+	textbuf = new char[len + 1];
+	//textbuf = file.data();
+	memcpy(textbuf, file.data(), len);
+	textbuf[len] = 0;
 	isLineStart = true;
 	refresh = true;
 	fileclo = new BKE_VarClosure();
@@ -875,7 +877,6 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 {
 	if (!tr)
 		return;
-	int i;
 	try
 	{
 		switch (tr->Node.opcode)
@@ -887,19 +888,22 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 		case OP_QUICKFOR + OP_COUNT:
 		case OP_FOREACH + OP_COUNT:
 		case OP_BLOCK + OP_COUNT:
-		{
-			auto c = new BKE_VarClosure(clo);
-			for (int i = 0; i < tr->childs.size(); i++)
-				_analysisToClosure(tr->childs[i], c, var);
-			c->release();
-		}
-		break;
+			{
+				auto c = new BKE_VarClosure(clo);
+				for (int i = 0; i < tr->childs.size(); i++)
+					_analysisToClosure(tr->childs[i], c, var);
+				c->release();
+			}
+			break;
 		case OP_VAR + OP_COUNT:
 			for (int i = 0; i < tr->childs.size(); i += 2)
 			{
 				auto str = tr->childs[i]->Node.var.asBKEStr();
-				BKE_Variable *v = &clo->getMember(str);
-				_analysisToClosure(tr->childs[i + 1], clo, v);
+				if (!str.isVoid())
+				{
+					BKE_Variable *v = &clo->getMember(str);
+					_analysisToClosure(tr->childs[i + 1], clo, v);
+				}
 			}
 			break;
 		case OP_CONSTVAR + OP_COUNT:
@@ -907,38 +911,48 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 				*var = tr->Node.var;
 			break;
 		case OP_LITERAL + OP_COUNT:
-			tmpvar = &clo->getMember(tr->Node.var.asBKEStr());
+			{
+				auto str = tr->Node.var.asBKEStr();
+				if (!str.isVoid())
+					tmpvar = &clo->getMember(str);
+			}
 			break;
 		case OP_DOT + OP_COUNT:
 		{
 			auto str = tr->childs[0]->Node.var.asBKEStr();
-			if (!clo->withvar)
+			if (!str.isVoid())
 			{
-				tmpvar = &top->getMember(str);
-			}
-			else
-			{
-				if (clo->withvar->vt == VAR_CLASS)
-					tmpvar = &((BKE_VarClass*)clo->withvar)->getMember(str);
-				else if (clo->withvar->vt == VAR_DIC)
-					tmpvar = &((BKE_VarDic*)clo->withvar)->getMember(str);
+				if (!clo->withvar)
+				{
+					tmpvar = &top->getMember(str);
+				}
+				else
+				{
+					if (clo->withvar->vt == VAR_CLASS)
+						tmpvar = &((BKE_VarClass*)clo->withvar)->getMember(str);
+					else if (clo->withvar->vt == VAR_DIC)
+						tmpvar = &((BKE_VarDic*)clo->withvar)->getMember(str);
+				}
 			}
 		}
 		break;
 		case OP_DOT:
+		{
 			tmpvar = NULL;
 			_analysisToClosure(tr->childs[0], clo, NULL);
-			if (tmpvar && tmpvar->getType() == VAR_DIC)
+			auto str = tr->childs[1]->Node.var.asBKEStr();
+			if (tmpvar && tmpvar->getType() == VAR_DIC && !str.isVoid())
 			{
-				tmpvar = &((BKE_VarDic*)tmpvar->obj)->getMember(tr->childs[1]->Node.var.asBKEStr());
+				tmpvar = &((BKE_VarDic*)tmpvar->obj)->getMember(str);
 			}
-			else if (tmpvar && tmpvar->getType() == VAR_CLASS)
+			else if (tmpvar && tmpvar->getType() == VAR_CLASS && !str.isVoid())
 			{
-				tmpvar = &((BKE_VarClass*)tmpvar->obj)->getClassMember(tr->childs[1]->Node.var.asBKEStr());
+				tmpvar = &((BKE_VarClass*)tmpvar->obj)->getClassMember(str);
 			}
 			else
 				tmpvar = NULL;	//识别终止
 			break;
+		}
 		case OP_ARR2 + OP_COUNT:
 			if (var)
 			{
@@ -953,7 +967,7 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 			if (var)
 			{
 				*var = BKE_Variable::dic();
-				i = 0;
+				int i = 0;
 				while (i < tr->childs.size() && tr->childs[i] != NULL)
 				{
 					if (tr->childs[i]->Node.opcode == OP_CONSTVAR + OP_COUNT)
@@ -965,14 +979,48 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 			}
 			break;
 		case OP_FUNCTION + OP_COUNT:
-			clo->setMember(((BKE_VarFunction*)tr->Node.var.obj)->name, tr->Node.var);
-			((BKE_VarFunction*)tr->Node.var.obj)->setClosure(clo);
+			if (tr->Node.var.getType() == VAR_FUNC)
+			{
+				((BKE_VarFunction*)tr->Node.var.obj)->setClosure(clo);
+				if (!((BKE_VarFunction*)tr->Node.var.obj)->name.isVoid())
+					clo->setMember(((BKE_VarFunction*)tr->Node.var.obj)->name, tr->Node.var);
+				if (var)
+					*var = tr->Node.var;
+			}
+			break;
+		case OP_PROPGET + OP_COUNT:
+			{
+				if (tr->childs[0])
+				{
+					BKE_Variable &var = clo->varmap[tr->childs[0]->Node.var.asBKEStr()];
+					if (var.getType() != VAR_PROP)
+					{
+						var = new BKE_VarProp(clo);
+					}
+					static_cast<BKE_VarProp*>(var.obj)->addPropGet(tr->childs[1]);
+					//((BKE_VarProp*)var.obj)->setClosure(cla);
+				}
+			}
+			break;
+		case OP_PROPSET + OP_COUNT:
+			{
+				if (tr->childs[0])
+				{
+					BKE_Variable &var = clo->varmap[tr->childs[0]->Node.var.asBKEStr()];
+					if (var.getType() != VAR_PROP)
+					{
+						var = new BKE_VarProp(clo);
+					}
+					static_cast<BKE_VarProp*>(var.obj)->addPropSet(tr->childs[1]->Node.var.asBKEStr(), tr->childs[2]);
+					//((BKE_VarProp*)var.obj)->setClosure(cla);
+				}
+			}
 			break;
 		case OP_CLASS + OP_COUNT:
 			{
 				BKE_VarClass *cla;
 				BKE_String n = tr->childs[0]->Node.var.asBKEStr();
-				i = 1;
+				int i = 1;
 				bkplong s = tr->childs.size();
 				BKE_array<BKE_VarClass *> extends;
 				while (i < s && tr->childs[i]->Node.opcode == OP_LITERAL)
@@ -1000,6 +1048,8 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 				for (; i < s; i++)
 				{
 					BKE_bytree *&subtr = tr->childs[i];
+					if (!subtr)
+						continue;
 					switch (subtr->Node.opcode)
 					{
 					case OP_STATIC + OP_COUNT:
@@ -1007,7 +1057,8 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 						bkplong ss = subtr->childs.size();
 						for (bkplong j = 0; j < ss; j += 2)
 						{
-							_analysisToClosure(subtr->childs[j + 1], cla, &cla->varmap[subtr->childs[j]->Node.var.asBKEStr()]);
+							if (subtr->childs[j])
+								_analysisToClosure(subtr->childs[j + 1], cla, &cla->varmap[subtr->childs[j]->Node.var.asBKEStr()]);
 						}
 					}
 					break;
@@ -1016,45 +1067,22 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 						bkplong ss = subtr->childs.size();
 						for (bkplong j = 0; j < ss; j += 2)
 						{
-							_analysisToClosure(subtr->childs[j + 1], cla, &cla->classvar[subtr->childs[j]->Node.var.asBKEStr()]);
+							if (subtr->childs[j])
+								_analysisToClosure(subtr->childs[j + 1], cla, &cla->classvar[subtr->childs[j]->Node.var.asBKEStr()]);
 						}
 					}
 					break;
 					case OP_FUNCTION + OP_COUNT:
-					{
-						((BKE_VarFunction*)subtr->Node.var.obj)->setClosure(cla);
-						cla->setMember(((BKE_VarFunction*)subtr->Node.var.obj)->name, subtr->Node.var);
-					}
-					break;
 					case OP_PROPGET + OP_COUNT:
-					{
-						BKE_Variable &var = cla->varmap[subtr->childs[0]->Node.var.asBKEStr()];
-						if (var.getType() != VAR_PROP)
-						{
-							var = new BKE_VarProp(cla);
-						}
-						static_cast<BKE_VarProp*>(var.obj)->addPropGet(subtr->childs[1]);
-						//((BKE_VarProp*)var.obj)->setClosure(cla);
-					}
-					break;
 					case OP_PROPSET + OP_COUNT:
-					{
-						BKE_Variable &var = cla->varmap[subtr->childs[0]->Node.var.asBKEStr()];
-						if (var.getType() != VAR_PROP)
-						{
-							var = new BKE_VarProp(cla);
-						}
-						static_cast<BKE_VarProp*>(var.obj)->addPropSet(subtr->childs[1]->Node.var.asBKEStr(), subtr->childs[2]);
-						//((BKE_VarProp*)var.obj)->setClosure(cla);
-					}
-					break;
+						_analysisToClosure(subtr, cla, var);
 					}
 				}
 			}
 			break;
 		case OP_BRACKET:
 			//如果是新建一个类，那么加入分析
-			if (var && tr->childs[0]->Node.opcode == OP_LITERAL + OP_COUNT)
+			if (var && tr->childs[0] && tr->childs[0]->Node.opcode == OP_LITERAL + OP_COUNT)
 			{
 				auto &v = clo->getMember(tr->childs[0]->Node.var.asBKEStr());
 				if (v.getType() == VAR_CLASS)

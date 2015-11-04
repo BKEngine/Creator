@@ -1282,6 +1282,7 @@ public:
 #endif
 	vector<BKE_String> paramnames;
 	BKE_hashmap<BKE_String, BKE_Variable> initials;
+	BKE_Variable returnvar;
 
 	BKE_VarFunction() = delete;
 	inline BKE_VarFunction(BKE_NativeFunction fun, BKE_Variable *_self = NULL) :BKE_VarObject(VAR_FUNC){ func = new BKE_FunctionCode(fun); self = _self; closure = (BKE_VarClosure *)BKE_VarClosure::global()->addRef(); closure->extraref++; };

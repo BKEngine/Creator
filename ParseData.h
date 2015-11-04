@@ -212,6 +212,7 @@ public:
 
 	~ParseData()
 	{
+		delete[] textbuf;
 		fileclo->release();
 		for (auto &it : fileNodes)
 			delete it;
@@ -403,12 +404,12 @@ public:
 				break;
 			if (ISSPACE(ch) && !yinhao && _stack.empty())
 				break;
-			if (ch == '/' && textbuf[idx + 1] == '/')
+			if (ch == '/' && textbuf[idx + 1] == '/' && !yinhao)
 			{
 				skipLineComment();
 				continue;
 			}
-			if (ch == '/' && textbuf[idx + 1] == '*')
+			if (ch == '/' && textbuf[idx + 1] == '*' && !yinhao)
 			{
 				skipBlockComment();
 				continue;
