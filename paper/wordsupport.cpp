@@ -21,8 +21,8 @@ void WordSupport::setText(const QString &t, int pos)
 
 void WordSupport::Gopos(int pos)
 {
-    cch = SafeChar(pos);
-    nch = SafeChar(pos + 1);
+	cch = SafeChar(pos);
+	nch = SafeChar(pos + 1);
 	currentpos = pos;
 	more = (currentpos < text.length());
 	atLineEnd = IsLineEnd(currentpos);
@@ -37,7 +37,7 @@ void WordSupport::Gopos(int pos)
 
 void WordSupport::GoPos2(int pos)
 {
-    Gopos(pos);
+	Gopos(pos);
 	IgnoreEmpty();
 	cch = SafeChar(pos);
 	nch = SafeChar(pos + 1);
@@ -122,7 +122,7 @@ void WordSupport::NextWord()
 
 QString WordSupport::GetWord(int from, int &end)
 {
-    end = currentpos;
+	end = currentpos;
 	if (from >= text.length()) return QString();
 	Gopos(from);
 	IgnoreEmpty();
@@ -339,7 +339,7 @@ void WordSupport::RightExp(const QString &t)
 bool WordSupport::IsNumber(const QString &t)
 {
 	bool ok;
-	t.toInt(&ok);
+	t.toInt(&ok, 0);
 	if (!ok)
 	{
 		t.toDouble(&ok);
@@ -365,18 +365,18 @@ bool WordSupport::IsColor(const QString &t)
 	else
 	{
 		bool ok;
-		t.toUInt(&ok);
+		t.toUInt(&ok, 0);
 		return ok;
 	}
 }
 
 bool WordSupport::IsFontColor(const QString &t)
 {
-    QString s = t.toLower();
-    if(s.size()>=2 && s.left(1)==QChar('"') && s.right(1)==QChar('"'))
-        s = s.mid(1, s.size()-2);
-    if(s.isEmpty())
-        return true;
+	QString s = t.toLower();
+	if(s.size()>=2 && s.left(1)==QChar('"') && s.right(1)==QChar('"'))
+		s = s.mid(1, s.size()-2);
+	if(s.isEmpty())
+		return true;
 	if (IsColor(s))
 		return true;
 
