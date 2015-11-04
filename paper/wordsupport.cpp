@@ -338,35 +338,36 @@ void WordSupport::RightExp(const QString &t)
 
 bool WordSupport::IsNumber(const QString &t)
 {
-	QString s = t.toLower();
-	if (s.startsWith("0x")) s = s.right(s.length() - 2);
-	else if (s.endsWith('h') || s.endsWith('b')) s = s.left(s.length() - 1);
-
-	if (s.isEmpty()) return false;
-
-	for (int i = 0; i < s.size(); i++){
-		if (!s.at(i).isNumber()) return false;
+	bool ok;
+	t.toInt(&ok);
+	if (!ok)
+	{
+		t.toDouble(&ok);
 	}
-
-	return true;
+	return ok;
 }
 
 bool WordSupport::IsColor(const QString &t)
 {
-	QString s = t.toLower();
-	bool isSharp;
-	if (t.startsWith("0x") && s.length() == 8)
-		isSharp = false;
-	else if (t.startsWith("#") && (s.length() == 4 || s.length() == 7))
-		isSharp = true;
-	else
+	int start = 0;
+	if (t.startsWith("#"))
+	{
+		int len = t.length();
+		if (len == 3 || len == 5 || len == 7 || len == 9)
+		{
+			QString s = t.mid(1);
+			bool ok;
+			t.toUInt(&ok, 16);
+			return ok;
+		}
 		return false;
-
-	s = s.right(s.length() - (1 + !isSharp));
-	for (int i = 0; i < s.length(); i++){
-		if (!s.at(i).isLower() && !s.at(i).isNumber()) return false;
 	}
-	return true;
+	else
+	{
+		bool ok;
+		t.toUInt(&ok);
+		return ok;
+	}
 }
 
 bool WordSupport::IsFontColor(const QString &t)

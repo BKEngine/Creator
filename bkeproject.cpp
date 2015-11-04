@@ -264,8 +264,8 @@ void BkeProject::MakeImport()
 	config->writeFile();
 
 	//语法分析
-	lex->ParserFile("macro.bkscr", dirs);
-	OutFilelist.append(lex->GetImportFiles()); //导入的脚本，将在脚本中属于例外
+	//lex->ParserFile("macro.bkscr", dirs);
+	//OutFilelist.append(lex->GetImportFiles()); //导入的脚本，将在脚本中属于例外
 
 	//config.bkpsr单独放
 	//main.bkscr放到脚本项目底下，其余放宏
