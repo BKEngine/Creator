@@ -1010,16 +1010,19 @@ BKE_Variable& BKE_Variable::operator = (const BKE_Variable &v)
 	}
 	//if (!isVar())
 	//	_throw(L"常量不能赋值");
-	//if a=a, we do nothing
-	if (obj && obj == v.obj)
-		return *this;
-	clear();
+	
+	auto rawobj = obj;
 	num = v.num;
 	str = v.str;
 	obj = v.obj;
-	vt = v.vt;
 	if (obj)
 		obj->addRef();
+	vt = v.vt;
+	//clear rawobj
+	if (!MemoryPool().clearflag && rawobj)
+	{
+		rawobj->release();
+	}
 	return *this;
 }
 
@@ -1044,15 +1047,18 @@ BKE_Variable& BKE_Variable::operator = (BKE_Variable &&v)
 	}
 	//if (!isVar())
 	//	_throw(L"常量不能赋值");
-	//if a=a, we do nothing
-	if (obj && obj == v.obj)
-		return *this;
-	clear();
+
+	auto rawobj = obj;
 	num = std::move(v.num);
 	str = std::move(v.str);
 	obj = v.obj;
 	v.obj = NULL;
 	vt = v.vt;
+	//clear rawobj
+	if (!MemoryPool().clearflag && rawobj)
+	{
+		rawobj->release();
+	}
 	return *this;
 }
 
@@ -1070,17 +1076,23 @@ BKE_Variable& BKE_Variable::operator = (BKE_VarObject *v)
 	}
 	//if (!isVar())
 	//	_throw(L"常量不能赋值");
-	//if a=a, we do nothing
-	if (obj && obj == v)
-		return *this;
-	clear();
 	if (!v)
 	{
 		vt = VAR_NONE;
+		clear();
 		return *this;
 	}
-	vt = v->vt;
-	obj = v;
+	else
+	{
+		auto rawobj = obj;
+		vt = v->vt;
+		obj = v;
+		//clear rawobj
+		if (!MemoryPool().clearflag && rawobj)
+		{
+			rawobj->release();
+		}
+	}
 	return *this;
 }
 

@@ -60,7 +60,6 @@ void BkeParser::ParserModel(bool issub)
 {
     errorid = 0 ;
     wordadmin->SetParserModel(true);
-    int k ;
     wordadmin->NextWord();
     while( wordadmin->more ){
 
@@ -171,7 +170,6 @@ int  BkeParser::RightExp(bool next)
     if( wordadmin->cWord == "=" || wordadmin->cWord == "(" || wordadmin->cWord == "[")
         wordadmin->NextWord();
 
-    CompleteBase *le ;
     QString czb ;
     static int ea = 0 ;
     static int eb = 0 ;
@@ -207,6 +205,7 @@ int  BkeParser::RightExp(bool next)
         czb = wordadmin->pWord ; //更前一个
         wordadmin->NextWord();
     }
+	return 0;
 }
 
 
@@ -640,7 +639,18 @@ void BkeParser::TextBeChange(BkeModifiedBase *modbase,QsciScintilla *sciedit)
 
     if( key1.isEmpty() ) showtype = SHOW_USECOMMANDLIST ;
 
-    if( !key1.isEmpty() && IfHasThenSet(key1) && !key2.isEmpty() && IfHasThenSet(key2))  ;
+	if (!key1.isEmpty())
+	{
+		if (IfHasThenSet(key1))
+		{
+			if (!key2.isEmpty())
+			{
+				IfHasThenSet(key2);
+			}
+		}
+	}
+
+    //if( !key1.isEmpty() && IfHasThenSet(key1) && !key2.isEmpty() && IfHasThenSet(key2))  ;
     if( key2.isEmpty() ) showtype = SHOW_AUTOCOMMANDLIST ;
 
     if( modbase->text == ";" ) showtype = SHOW_USECOMMANDLIST ;
@@ -692,6 +702,7 @@ int  BkeParser::GetIndentLayer(QsciScintilla *edit,int line)
 			else
 				return 0;
 		}
+		return 0;
     }
     else return 0 ;
 }

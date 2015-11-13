@@ -4,7 +4,11 @@
 #include <math.h>
 #include <random>
 #include <functional>
+#if BKE_CREATOR
+#include "bkutf8.h"
+#else
 #include <bkutf8.h>
+#endif
 
 #include "parser.h"
 
@@ -42,8 +46,9 @@ namespace Parser_Util
 	NATIVE_FUNC(array)
 	{
 		BKE_VarArray *arr=new BKE_VarArray();
-		for(int i=0;i<paramarray->getCount();i++)
-			arr->pushMember(PARAM(i));
+		if(paramarray)
+			for(int i=0;i<paramarray->getCount();i++)
+				arr->pushMember(PARAM(i));
 		return arr;
 	};
 
@@ -71,18 +76,18 @@ namespace Parser_Util
 	NATIVE_FUNC(log)
 	{
 		setlocale(LC_ALL, "");
-		if(!PARAMEXIST(0))
+		if (!PARAMEXIST(0))
 			RETURNDEFAULT;
 		wstring res;
 		PARAM(0).save(res);
-		wcout<<res;
-		for(int i=1;i<paramarray->getCount();i++)
+		wcout << res;
+		for (int i = 1; i < paramarray->getCount(); i++)
 		{
 			res.clear();
 			PARAM(i).save(res);
-			wcout<<L","<<res.c_str();
+			wcout << L"," << res.c_str();
 		}
-		wcout<<L"\n";
+		wcout << L"\n";
 		RETURNDEFAULT;
 	}
 
@@ -94,7 +99,7 @@ namespace Parser_Util
 		wstring res;
 		PARAM(0).save(res);
 		wcout << res;
-		for (int i = 1; i<paramarray->getCount(); i++)
+		for (int i = 1; i < paramarray->getCount(); i++)
 		{
 			res = L"";
 			if (PARAM(i).getType() == VAR_STR)
@@ -199,8 +204,8 @@ namespace Parser_Util
 		do 
 		{
 			per = (float)bkpRandomDouble(0., 1.);
-		} while (per == 1.f);
-		return (bkplong)(a+(b-a)*per);
+		} while (per == 0.f || per == 1.f);
+		return floor(a+(b-a)*per);
 	}
 
 	////typeof(xxx)
@@ -228,12 +233,15 @@ namespace Parser_Util
 
 	NATIVE_FUNC(char)
 	{
-		MINIMUMPARAMNUM(1);
+		if(!PARAMEXIST(0))
+			return 0;
+		const wstring &ss = PARAM(0).asBKEStr().getConstStr();
+		if(ss.empty())
+			return 0;
 #if WCHAR_MAX==0xFFFFFFFF
-		wchar_t s = PARAM(0).asString()[0];
+		wchar_t s = ss[0];
 		return (bkplong)s;
 #else
-		const wstring &ss = PARAM(0).asBKEStr().getConstStr();
 		bkplong a = ss[0];
 		if (a >= 0xD800 && a <= 0xDFFF)
 		{
@@ -404,7 +412,8 @@ namespace Parser_Util
 
 	NATIVE_FUNC(toString)
 	{
-		MINIMUMPARAMNUM(1);
+		if (!PARAMEXIST(0))
+			RETURNDEFAULT;
 		wstring res;
 		bool format = false;
 		if (PARAMEXIST(1) && (bool)PARAM(1) == true)
@@ -503,7 +512,7 @@ namespace Parser_Util
 			{
 				Regex *r = (Regex *)((BKE_VarClass *)PARAM(0).obj)->native;
 				const wstring &s = self->str.getConstStr();
-				for (int i = (int)s.size() - 2; i >= 0; i--)
+				for (int i = (int)s.size() - 1; i >= 0; i--)
 				{
 					if (std::regex_match(s.substr(i), r->reg))
 						return true;
@@ -562,6 +571,9 @@ namespace Parser_Util
 	NATIVE_FUNC(indexOf)
 	{
 		MINIMUMPARAMNUM(1);
+		bkplong start = (bkplong)PARAM(1);
+		if (start < 0 || start > self->str.getConstStr().length())
+			return -1;
 #ifdef HAS_REGEX
 		if (PARAM(0).getType() == VAR_CLASS)
 		{
@@ -569,7 +581,7 @@ namespace Parser_Util
 			{
 				Regex *r = (Regex *)((BKE_VarClass *)PARAM(0).obj)->native;
 				std::wsmatch m;
-				if(!std::regex_search(self->str.getConstStr(), m, r->reg))
+				if(!std::regex_search(self->str.getConstStr().substr(start), m, r->reg))
 					return -1;
 				else
 					return (bkplong)m.position();
@@ -577,8 +589,8 @@ namespace Parser_Util
 			throw Var_Except(L"参数1必须是Regex的子类或字符串");
 		}
 #endif
-		bkplong s = static_cast<bkplong>(self->str.getConstStr().find(PARAM(0).asString(), (bkplong)PARAM(1)));
-		if (s > (bkplong)self->str.getConstStr().size())
+		bkplong s = static_cast<bkplong>(self->str.getConstStr().find(PARAM(0).asString(), start));
+		if (s > wstring::npos)
 			return -1;
 		return s;
 	}
@@ -586,6 +598,9 @@ namespace Parser_Util
 	NATIVE_FUNC(lastIndexOf)
 	{
 		MINIMUMPARAMNUM(1);
+		bkplong endpos = (bkplong)PARAM(1);
+		if (endpos < 0)
+			return -1;
 #ifdef HAS_REGEX
 		if (PARAM(0).getType() == VAR_CLASS)
 		{
@@ -594,7 +609,7 @@ namespace Parser_Util
 				Regex *r = (Regex *)((BKE_VarClass *)PARAM(0).obj)->native;
 				std::wsmatch m;
 				const wstring &s = self->str.getConstStr();
-				for (int i = (int)s.size() - 2; i >= 0; i--)
+				for (int i = endpos - 1; i >= 0; i--)
 				{
 					std::regex_search((const wstring &)s.substr(i), m, r->reg);
 					if (!m.empty())
@@ -605,7 +620,7 @@ namespace Parser_Util
 			throw Var_Except(L"参数1必须是Regex的子类或字符串");
 		}
 #endif
-		bkplong s = static_cast<bkplong>(self->str.getConstStr().rfind(PARAM(0).asString(), (bkplong)PARAM(1)));
+		bkplong s = static_cast<bkplong>(self->str.getConstStr().rfind(PARAM(0).asString(), endpos));
 		if (s > (bkplong)self->str.getConstStr().size())
 			return -1;
 		return s;
@@ -624,7 +639,10 @@ namespace Parser_Util
 	NATIVE_FUNC(substring)
 	{
 		MINIMUMPARAMNUM(1);
-		if(PARAMEXIST(1))
+		bkplong start = (bkplong)PARAM(0);
+		if (start < 0 || self->str.getConstStr().length() <= start)
+			RETURNDEFAULT;
+		if (PARAMEXIST(1))
 			return self->str.substr((bkplong)PARAM(0), (bkplong)PARAM(1));
 		else
 			return self->str.substr((bkplong)PARAM(0));
@@ -666,7 +684,7 @@ namespace Parser_Util
 					if (!PARAMEXIST(paramno))
 						throw Var_Except(L"参数数目不足");
 #ifdef _MSC_VER
-                    wchar_t buf2[512];
+					wchar_t buf2[512];
 					if (towupper(ch) == L'S')
 						swprintf(buf2, 512, mode.c_str(), ((wstring)PARAM(paramno++)).c_str());
 					else if (towupper(ch) == L'G')
@@ -675,14 +693,14 @@ namespace Parser_Util
 						swprintf(buf2, 512, mode.c_str(), (float)(PARAM(paramno++).asNumber()));
 					else
 						swprintf(buf2, 512, mode.c_str(), PARAM(paramno++).asInteger());
-                    res.append(buf2);
+					res.append(buf2);
 #else
 					char buf3[1024];
 					string _mode = UniToUTF8(mode);
 					if (towupper(ch) == L'S')
 					{
-                        wstring str = (wstring)PARAM(paramno++).asString();
-                        string __tmp = UniToUTF8(str);
+						wstring str = (wstring)PARAM(paramno++).asString();
+						string __tmp = UniToUTF8(str);
 						snprintf(buf3, 1024, _mode.c_str(), __tmp.c_str());
 					}
 					else if (towupper(ch) == L'G')
@@ -697,7 +715,7 @@ namespace Parser_Util
 					{
 						snprintf(buf3, 1024, _mode.c_str(), (int)PARAM(paramno++).asInteger());
 					}
-                    res.append(UniFromUTF8(buf3, (bkpulong)strlen(buf3)));
+					res.append(UniFromUTF8(buf3, (bkpulong)strlen(buf3)));
 #endif
 					
 					continue;
@@ -747,21 +765,21 @@ namespace Parser_Util
 		}
 #endif
 		const wstring &src = self->str.getConstStr();
-		wstring split=PARAM(0);
-		bkplong splitsize=static_cast<bkplong>(split.size());
-		BKE_VarArray *arr=new BKE_VarArray();
-		int start=0;
-		bkplong srcsize=(bkplong)src.size();
-		while(start<srcsize)
+		wstring split = PARAM(0);
+		bkplong splitsize = static_cast<bkplong>(split.size());
+		BKE_VarArray *arr = new BKE_VarArray();
+		int start = 0;
+		bkplong srcsize = (bkplong)src.size();
+		while (start < srcsize)
 		{
-			bkplong pos=static_cast<bkplong>(src.find(split, start));
-			if(pos==src.npos)
+			bkplong pos = static_cast<bkplong>(src.find(split, start));
+			if (pos == src.npos)
 				break;
-			if(pos>start || !PARAM(1))
-				arr->pushMember(src.substr(start, pos-start));
+			if (pos > start || !PARAM(1))
+				arr->pushMember(src.substr(start, pos - start));
 			start = pos + splitsize;
 		}
-		if(start<srcsize)
+		if (start < srcsize)
 			arr->pushMember(src.substr(start));
 		else if (!PARAM(1))
 			arr->pushMember(BKE_Variable());
@@ -771,7 +789,6 @@ namespace Parser_Util
 	//add(xx,xx,xx,...)
 	NATIVE_FUNC(add)
 	{
-		MINIMUMPARAMNUM(1);
 		int i=0;
 		long cnt=paramarray->getCount();
 		while(i<cnt)
@@ -781,7 +798,6 @@ namespace Parser_Util
 
 	NATIVE_FUNC(remove)
 	{
-		MINIMUMPARAMNUM(1);
 		int i=0;
 		while(i<paramarray->getCount())
 		{
@@ -796,7 +812,6 @@ namespace Parser_Util
 
 	NATIVE_FUNC(erase)
 	{
-		MINIMUMPARAMNUM(1);
 		int i=0;
 		while (i<paramarray->getCount())
 		{
@@ -853,7 +868,7 @@ namespace Parser_Util
 		case VAR_DIC:
 			{
 				auto it = ((BKE_VarDic *)self->obj)->varmap.find(var.asBKEStr());
-				if (it == ((BKE_VarDic *)self->obj)->varmap.end())
+				if (it == ((BKE_VarDic *)self->obj)->varmap.end() || it->second.isVoid())
 					RETURNDEFAULT;
 				return 1;
 			}
@@ -1076,7 +1091,8 @@ namespace Parser_Util
 		BKE_VarArray *arr = new BKE_VarArray();
 		for (auto it = varmap.begin(); it != varmap.end(); it++)
 		{
-			arr->pushMember(it->first);
+			if (!it->second.isVoid())
+				arr->pushMember(it->first);
 		}
 		return arr;
 	}
@@ -1087,7 +1103,8 @@ namespace Parser_Util
 		BKE_VarArray *arr = new BKE_VarArray();
 		for (auto it = varmap.begin(); it != varmap.end(); it++)
 		{
-			arr->pushMember(it->second);
+			if (!it->second.isVoid())
+				arr->pushMember(it->second);
 		}
 		return arr;
 	}
@@ -1102,9 +1119,10 @@ namespace Parser_Util
 		auto &&varmap = ((BKE_VarDic*)self->obj)->varmap;
 		auto v = new BKE_VarArray();
 		v->vararray.reserve(varmap.getCount());
-		for (auto i : varmap)
+		for (auto &&i : varmap)
 		{
-			v->vararray.push_back(i.first);
+			if (!i.second.isVoid())
+				v->vararray.push_back(i.first);
 		}
 		BKE_Variable ss = L"+";
 		if (PARAMEXIST(0))
@@ -1115,6 +1133,7 @@ namespace Parser_Util
 			quickSort(v->vararray, 0, varmap.getCount() - 1, [&](const BKE_Variable &a, const BKE_Variable &b)
 				{
 					auto arr = (BKE_VarArray*)tmp.obj;
+					arr->clear();
 					arr->pushMember(varmap[a.str]);
 					arr->pushMember(varmap[b.str]);
 					return (bool)((BKE_VarFunction*)PARAM(0).obj)->run(arr);
@@ -1166,25 +1185,31 @@ namespace Parser_Util
 		return new Date();
 	}
 
+	REG_FUNC_BEGIN(Date)
+	{
+		FUNC_INFO(getYear),
+		FUNC_INFO(getMonth),
+		FUNC_INFO(getDay),
+		FUNC_INFO(getHour),
+		FUNC_INFO(getMinute),
+		FUNC_INFO(getSecond),
+
+		FUNC_INFO(setYear),
+		FUNC_INFO(setMonth),
+		FUNC_INFO(setDay),
+		FUNC_INFO(setHour),
+		FUNC_INFO(setMinute),
+		FUNC_INFO(setSecond),
+
+		FUNC_INFO(format),
+	}
+	REG_FUNC_END;
+
 	NATIVECLASS_INIT()
 	{
 		PREPARECLASS();
 		ENABLECREATE();
-		REG_FUNC(getYear);
-		REG_FUNC(getMonth);
-		REG_FUNC(getDay);
-		REG_FUNC(getHour);
-		REG_FUNC(getMinute);
-		REG_FUNC(getSecond);
-
-		REG_FUNC(setYear);
-		REG_FUNC(setMonth);
-		REG_FUNC(setDay);
-		REG_FUNC(setHour);
-		REG_FUNC(setMinute);
-		REG_FUNC(setSecond);
-
-		REG_FUNC(format);
+		REG_FUNC(Date);
 	}
 
 	NATIVECLASS_FUNC(getYear)
@@ -1283,7 +1308,7 @@ namespace Parser_Util
 		while (i < s)
 		{
 			wchar_t ch = format[i++];
-			if (ch != L'%' || shrink)
+			if (ch != L'%' && !shrink)
 				res.push_back(ch);
 			else
 			{
@@ -1348,28 +1373,41 @@ namespace Parser_Util
 #define CURRENTCLASS Math
 #endif
 
+	REG_GET_BEGIN(Math)
+	{
+		GET_INFO(PI),
+		GET_INFO(E),
+	}
+	REG_GET_END;
+
+	REG_FUNC_BEGIN(Math)
+	{
+		FUNC_INFO(sgn),
+		FUNC_INFO(pow),
+		FUNC_INFO(abs),
+		FUNC_INFO(sqrt),
+		FUNC_INFO(lg),
+		FUNC_INFO(ln),
+		FUNC_INFO(log),
+		FUNC_INFO(floor),
+		FUNC_INFO(ceil),
+		FUNC_INFO(round),
+		FUNC_INFO(sin),
+		FUNC_INFO(cos),
+		FUNC_INFO(tan),
+		FUNC_INFO(asin),
+		FUNC_INFO(acos),
+		FUNC_INFO(atan),
+		FUNC_INFO(random),
+	}
+	REG_FUNC_END;
+
 	NATIVECLASS_INIT()
 	{
 		PREPARECLASS();
 		DISABLECREATE();
-		REG_GET(PI);
-		REG_GET(E);
-		REG_FUNC(sgn);
-		REG_FUNC(abs);
-		REG_FUNC(sqrt);
-		REG_FUNC(lg);
-		REG_FUNC(ln);
-		REG_FUNC(log);
-		REG_FUNC(floor);
-		REG_FUNC(ceil);
-		REG_FUNC(round);
-		REG_FUNC(sin);
-		REG_FUNC(cos);
-		REG_FUNC(tan);
-		REG_FUNC(asin);
-		REG_FUNC(acos);
-		REG_FUNC(atan);
-		REG_FUNC(random);
+		REG_GET(Math);
+		REG_FUNC(Math);
 	}
 
 	NATIVECLASS_GET(PI)
@@ -1397,6 +1435,12 @@ namespace Parser_Util
 	{
 		MINIMUMPARAMNUM(1);
 		return fabs(PARAM(0).asNumber());
+	}
+	
+	NATIVECLASS_FUNC(pow)
+	{
+		MINIMUMPARAMNUM(2);
+		return powf(PARAM(0).asNumber(), PARAM(1).asNumber());
 	}
 
 	NATIVECLASS_FUNC(sqrt)
@@ -1491,15 +1535,22 @@ namespace Parser_Util
 #undef CURRENTCLASS
 #define CURRENTCLASS Regex
 #endif
+
+	REG_FUNC_BEGIN(Regex)
+	{
+		FUNC_INFO(search),
+		FUNC_INFO(matchAll),
+		FUNC_INFO(getSubMatch),
+		FUNC_INFO(replaceFirst),
+		FUNC_INFO(replaceAll),
+	}
+	REG_FUNC_END;
+
 	NATIVECLASS_INIT()
 	{
 		PREPARECLASS();
 		ENABLECREATE();
-		REG_FUNC(search);
-		REG_FUNC(matchAll);
-		REG_FUNC(getSubMatch);
-		REG_FUNC(replaceFirst);
-		REG_FUNC(replaceAll);
+		REG_FUNC(Regex);
 	}
 
 	//Regex(reg, ignorecase=false)
@@ -1515,9 +1566,9 @@ namespace Parser_Util
 		MINIMUMPARAMNUM(1);
 		std::wsmatch m;
 		wstring tmp = (wstring)PARAM(0);
-		if(!std::regex_search(tmp, m, instance->reg))
-			RETURNDEFAULT;
 		auto arr = new BKE_VarArray();
+		if(!std::regex_search(tmp, m, instance->reg))
+			return arr;
 		while (!m.empty())
 		{
 			arr->pushMember(m[0].str());
@@ -1543,10 +1594,10 @@ namespace Parser_Util
 		MINIMUMPARAMNUM(1);
 		std::wsmatch m;
 		wstring src = PARAM(0);
-		if(!std::regex_search(src, m, instance->reg))
-			RETURNDEFAULT;
 		auto arr = new BKE_VarArray();
-		for (auto i : m)
+		if(!std::regex_search(src, m, instance->reg))
+			return arr;
+		for (auto &&i : m)
 		{
 			arr->pushMember(i.str());
 		}
@@ -1632,14 +1683,20 @@ namespace Parser_Util
 #define CURRENTCLASS Flags
 #endif
 
+	REG_FUNC_BEGIN(Flags)
+	{
+		FUNC_INFO(contains),
+		FUNC_INFO(split),
+		FUNC_INFO(mask),
+		FUNC_INFO(merge),
+	};
+	REG_FUNC_END;
+
 	NATIVECLASS_INIT()
 	{
 		PREPARECLASS();
 		DISABLECREATE();
-		REG_FUNC(contains);
-		REG_FUNC(split);
-		REG_FUNC(mask);
-		REG_FUNC(merge);
+		REG_FUNC(Flags);
 	}
 
 	NATIVECLASS_CREATENEW()
@@ -1661,13 +1718,15 @@ namespace Parser_Util
 		bkpulong container = PARAM(0);
 		BKE_VarArray *arr = new BKE_VarArray();
 		bkpulong mask = 1;
-		while (mask != 0xF0000000)
+		int idx = 0;
+		while (idx < 32)
 		{
 			if (container & mask)
 			{
 				arr->pushMember(mask);
 			}
 			mask <<= 1;
+			idx++;
 		}
 		return arr;
 	}
@@ -1692,128 +1751,599 @@ namespace Parser_Util
 		return container;
 	}
 
+	REG_FUNC_BEGIN(Global)
+	{
+		/**
+		*  @param str
+		*  @return value
+		*  @brief  返回str的执行结果。
+		*/
+		{ QUICKFUNC(eval) },
+		/**
+		*  @param str
+		*  @return number
+		*  @brief  执行str，然后返回执行用的时间（单位ms）。
+		*/
+		{ QUICKFUNC(time) },
+		/**
+		*  @return number
+		*  @brief  返回当前的时间戳（单位ms）。
+		*/
+		{ QUICKFUNC(clock) },
+		/**
+		*  @param (value1, value2, ...)
+		*  @brief  逐个打印参数，逗号分隔。
+		*/
+		{ QUICKFUNC(log) },
+		/**
+		*  @param (str1, str2, ...)
+		*  @brief  逐个打印字符串内容，逗号分隔。
+		*/
+		{ QUICKFUNC(print) },
+		/**
+		*  @param num1(, num2)
+		*  @brief  生成一个数组。
+		*  如果没有num2，那么生成的是[0, 1, ..., num1-1]
+		*  如果num2>num1，那么生成的是[num1, num1+1, ..., num2-1]
+		*  如果num2<num1，那么生成的是[num1, num1-1, ..., num2+1]
+		*  如果num2=num1，那么生成的是空数组
+		*/
+		{ QUICKFUNC(range) },
+		/**
+		*  @param num1(, num2)
+		*  @brief  生成一个随机整数。
+		*  如果没有num2，那么相当于random(0, num1)，表现见下：
+		*  如果num2>num1，那么生成的是num1到num2-1之间的一个整数
+		*  如果num2<num1，那么生成的是num2到num1-1之间的一个整数
+		*  如果num2=num1，那么返回num1
+		*/
+		{ QUICKFUNC(random) },
+		/**
+		*  @param num
+		*  @return string
+		*  @brief  相当于(string)(int)num，先对数字取整，然后生成相应的字符串。
+		*/
+		{ QUICKFUNC(itoa) },
+		/**
+		*  @param num
+		*  @return string
+		*  @brief  同itoa，只是生成的字符串是全角的'０', '１'等字符。
+		*/
+		{ QUICKFUNC(itoa2) },
+		/**
+		*  @param string
+		*  @return integer
+		*  @brief  返回string[0]对应的unicode编码。没有则返回0。
+		*/
+		{ QUICKFUNC(char) },
+		/**
+		*  @param value
+		*  @return integer
+		*  @brief  返回value对应的32位hash值。
+		*/
+		{ QUICKFUNC(hash) },
+		/**
+		*  @param value
+		*  @return integer
+		*  @brief  返回value对应的hash值（short版本）。
+		*/
+		{ QUICKFUNC(hash16) },
+#ifdef ENABLE_FILE
+		/**
+		*	@param string filename 文件名
+		*	@return string
+		*	@brief 读取一个文件，返回里面的原始内容（字符串）
+		*	@example 以下将演示一个从内容为
+		*		abc
+		*		的1.txt文件载入为数组的示例：
+		*	@example_code [].loadFile("1.txt")
+		*	@example_result "abc"
+		*/
+		{ QUICKFUNC(loadFile) },
+		/**
+		*	@param string filename 文件名
+		*	@param string str 将要保存的字符串
+		*	@bool append=false 是否追加在文件末尾。若为否，则覆盖整个文件。
+		*	@return bool 是否成功
+		*	@brief 将一个字符串写入文件。
+		*/
+		{ QUICKFUNC(saveFile) },
+		/**
+		*	@param string filename 文件名
+		*	@param string str 将要保存的字符串
+		*	@return bool 是否成功
+		*	@brief 将一个字符串添加到文件末尾。等同于{@link saveFile}(filename, str, -1);
+		*/
+		{ QUICKFUNC(appendFile) },
+		/**
+		*	@param string filename 文件名
+		*	@param bool krmode=false 若为真，表示双引号字符串可以像单引号字符串一样使用转义（此时不使用原有的""表示"的功能）
+		*	@param bool rawstr=false 若为真，表示字符串可以跨行
+		*	@return var 反序列化的结果
+		*	@brief 对文件读取并且解析（反序列化），将结果返回。
+		*	@body 等同于{@link eval}({@link loadFile}(filename, krmode, rawstr));
+		*/
+		{ QUICKFUNC(evalFile) },
+#endif
+		/**
+		*  @param value
+		*  @param bool format 是否格式化
+		*  @return string
+		*  @brief  将value转变成字符串，format表示是否加上缩进格式。
+		*  @example 以下将演示一个数组[1,2,3]的toString结果
+		*  @example_code toString([1,2,3])
+		*  @example_result [1,2,3]
+		*  @example_code toString([1,2,3], true)
+		*  @example_result [
+		*		1,
+		*		2,
+		*		3
+		*	]
+		*/
+		{ QUICKFUNC(toString) },
+		/**
+		*  @param classname, dic(, nativedata)
+		*  @return class instance
+		*  @brief  内部用，用于从保存的类对象中还原。
+		*/
+		{ QUICKFUNC(loadClass) },
+	}
+	REG_FUNC_END;
+
+	REG_FUNC_BEGIN(Undefined)
+	{
+		/**
+		*	@class undefined（内部保留类）
+		*   @param value
+		*   @return bool
+		*   @brief  比较本对象与value值是否相等。
+		*/
+		{QUICKFUNC(equals)},
+	}
+	REG_FUNC_END;
+
+	REG_GET_BEGIN(String)
+	{
+		/**
+		*	@class string（内部保留类）
+		*   @return integer
+		*   @brief  返回字符串的长度。
+		*/
+		{ QUICKGETTER(length) },
+		/**
+		*	@class string（内部保留类）
+		*   @return integer
+		*   @brief  同length，返回字符串的长度。
+		*/
+		{ L"size", &Parser_Util::nativeGet_length }
+	}
+	REG_GET_END;
+
+	REG_FUNC_BEGIN(String)
+	{
+		/**
+		*	@class string（内部保留类）
+		*	@param start(, len)
+		*   @return string
+		*   @brief  取从start开始长度为len的子串，如果省略len，则取到原字符串末尾。如果start位置不合法，则返回空串。
+		*/
+		{ QUICKFUNC(substring) },
+		/**
+		*	@class string（内部保留类）
+		*	@param start(, len)
+		*   @return string
+		*   @brief  同substring，取从start开始长度为len的子串，如果省略len，则取到原字符串末尾。如果start位置不合法，则返回空串。
+		*/
+		{ L"substr", &Parser_Util::nativeFunc_substring },
+		/**
+		*	@class string（内部保留类）
+		*	@param (arg1, arg2, ...)
+		*   @return string
+		*   @brief  格式化字符串，以本字符串为格式，根据传入的参数生成一个新的字符串。
+		*   @example 以下将演示用"%04d"来格式化233的结果
+		*   @example_code "%04d".sprintf(233)
+		*   @example_result "0233"
+		*/
+		{ QUICKFUNC(sprintf) },
+		/**
+		*	@class string（内部保留类）
+		*	@param str | regexp(, ignorenull = false)
+		*   @return array
+		*   @brief  第一个参数为字符串或正则表达式类。用第一个参数分割原字符串得到一串数组，ignorenull表示是否忽略结果数组中的空串，如果为真，结果数组中的空串将被抹去
+		*   @example 以下将演示用","来分割"1,2,,3"的结果
+		*   @example_code "1,2,,3".split(",")
+		*   @example_result ["1", "2", "", "3"]
+		*   @example_code "1,2,,3".split(",", true)
+		*   @example_result ["1", "2", "3"]
+		*/
+		{ QUICKFUNC(split) },
+		/**
+		*	@class string（内部保留类）
+		*	@param str | regexp(, startpos = 0)
+		*   @return integer
+		*   @brief  第一个参数为字符串或正则表达式类。从startpos位置开始，寻找第一次出现参数1的位置。
+		*   @example 以下将演示在"1,2,,3"的查找","的结果
+		*   @example_code "1,2,,3".indexOf(",")
+		*   @example_result 1
+		*   @example_code "1,2,,3".indexOf(",", 2)
+		*   @example_result 3
+		*/
+		{ QUICKFUNC(indexOf) },
+		/**
+		*	@class string（内部保留类）
+		*	@param str | regexp(, endpos = 0)
+		*   @return integer
+		*   @brief  第一个参数为字符串或正则表达式类。从endpos位置开始，向前寻找第一次出现参数1的位置。
+		*   @example 以下将演示在"1,2,,3"的查找","的结果
+		*   @example_code "1,2,,3".lastIndexOf(",")
+		*   @example_result 4
+		*   @example_code "1,2,,3".lastIndexOf(",", 2)
+		*   @example_result 1
+		*/
+		{ QUICKFUNC(lastIndexOf) },
+		/**
+		*	@class string（内部保留类）
+		*	@param str | regexp, str2
+		*   @return string
+		*   @brief  参数为字符串或正则表达式类。将原字符串中str1全部替换为str2。
+		*   @example 以下将演示将"aaa"中"a"替换为"ab"的结果
+		*   @example_code "aaa".replace("a", "ab")
+		*   @example_result "ababab"
+		*/
+		{ QUICKFUNC(replace) },
+		/**
+		*  @param value
+		*  @return bool
+		*  @brief  比较本对象与value值是否相等。
+		*/
+		{ QUICKFUNC(equals) },
+		/**
+		*	@class string（内部保留类）
+		*	@param str | regexp
+		*   @return bool
+		*   @brief  参数为字符串或正则表达式类。返回原字符串是否已参数给定的字符串开头。
+		*/
+		{ QUICKFUNC(beginWith) },
+		/**
+		*	@class string（内部保留类）
+		*	@param str | regexp
+		*   @return bool
+		*   @brief  参数为字符串或正则表达式类。返回原字符串是否已参数给定的字符串结尾。
+		*/
+		{ QUICKFUNC(endWith) },
+		//被删除，老老实实=""就好了，"233".clear()会带来隐患。
+		//{ QUICKFUNC(clear) },
+
+		/**
+		*	@class string（内部保留类）
+		*   @return string
+		*   @brief  返回新字符串，原字符串中所有大写字母被转化为小写。
+		*/
+		{ QUICKFUNC(toLowerCase) },
+		/**
+		*	@class string（内部保留类）
+		*   @return string
+		*   @brief  返回新字符串，原字符串中所有小写字母被转化为大写。
+		*/
+		{ QUICKFUNC(toUpperCase) },
+	}
+	REG_FUNC_END;
+
+	REG_SET_BEGIN(Array)
+	{
+		/**
+		*	@class array（内部保留类）
+		*   @return integer
+		*   @brief  返回数组的长度。
+		*/
+		{ QUICKGETTER(length) },
+		/**
+		*	@class array（内部保留类）
+		*   @return integer
+		*   @brief  同length，返回数组的长度。
+		*/
+		{ L"size", &Parser_Util::nativeGet_length }
+	}
+	REG_SET_END;
+
+	REG_FUNC_BEGIN(Array)
+	{
+		/**
+		*	@class array（内部保留类）
+		*	@param (arg1, arg2, ...)
+		*   @brief  向数组尾部添加参数。
+		*/
+		{ QUICKFUNC(add) },
+		/**
+		*	@class array（内部保留类）
+		*	@param (arg1, arg2, ...)
+		*   @brief  从数组中删除与参数相同的元素，使用==比较。
+		*/
+		{ QUICKFUNC(remove) },
+		/**
+		*	@class array（内部保留类）
+		*	@param (index1, index2, ...)
+		*   @brief  从数组中删除参数对应下标的元素，负数表示从后往前数，注意是从前往后逐个删除的，所以erase(1,1)会删除原数组下标为1,2位置的元素。越界会抛出异常。
+		*/
+		{ QUICKFUNC(erase) },
+		/**
+		*	@class array（内部保留类）
+		*	@param index, value
+		*   @brief  在数组index位置插入一个新的value。
+		*   @example 以下将演示在[1,2,3]的2位置插入4的结果
+		*   @example_code var a=[1,2,3];
+		*	a.insert(2,4);
+		*	log(a)
+		*   @example_result [1,2,4,3]
+		*/
+		{ QUICKFUNC(insert) },
+		/**
+		*	@class array（内部保留类）
+		*	@param value
+		*	@return integer
+		*   @brief  返回数组中第一个等于value的元素的位置，使用==比较，找不到返回-1。
+		*/
+		{ QUICKFUNC(find) },
+		/**
+		*	@class array（内部保留类）
+		*	@param (str)
+		*	@return string
+		*   @brief  将数组中所有元素转成字符串，然后用str连接。
+		*   @example 以下将演示用"-"连接[1,2,3]的结果
+		*   @example_code [1,2,3].join("-")
+		*   @example_result "1-2-3"
+		*/
+		{ QUICKFUNC(join) },
+		/**
+		*	@class array（内部保留类）
+		*	@param (arr1, arr2, ...)
+		*	@return string
+		*   @brief  但会将此数组与参数中所有数组的元素连接起来形成的大数组，原数组不受影响。
+		*   @example 以下将演示[1,2,3]和[3,2,1]连接的结果
+		*   @example_code [1,2,3].concat([3,2,1])
+		*   @example_result [1,2,3,3,2,1]
+		*/
+		{ QUICKFUNC(concat) },
+		/**
+		*	@class array（内部保留类）
+		*	@param func | modestr = "+"
+		*   @brief  根据指定的函数或模式排序。会改动原字符串，没有返回值。
+		*	如果指定的是函数，将把此函数（func(a,b)）当做<的比较函数，从小到大排序。
+		*	如果指定的是模式字符串，则：
+		*		"+"：以默认的比较运算符从小到大排序
+		*		"-"：以默认的比较运算符从大到小排序
+		*		"0"：按数值从小到大排序
+		*		"9"：按数值从大到小排序
+		*		"a"：按字符串从小到大排序
+		*		"z"：按字符串从大到小排序
+		*   @example 以下将演示[1,2,3]按"-"排序的结果
+		*   @example_code var a=[1,2,3];
+		*	a.sort("9");
+		*	log(a)
+		*   @example_result [3,2,1]
+		*/
+		{ QUICKFUNC(sort) },
+		/**
+		*	@class array（内部保留类）
+		*	@return array
+		*   @brief  复制出一份一样的新数组，更改新数组不会影响原数组。
+		*/
+		{ QUICKFUNC(clone) },
+		/**
+		*	@class array（内部保留类）
+		*   @param value
+		*   @return bool
+		*   @brief  比较本对象与value值是否相等。如果value是数组，会比较每个元素是否相等，长度较短的数组会补上void去做比较
+		*   @example 以下将演示[1,2,3]和[1,2,3,0]的比较
+		*   @example_code [1,2,3].equals([1,2,3,0])
+		*   @example_result true
+		*/
+		{ QUICKFUNC(equals) },
+		/**
+		*	@class array（内部保留类）
+		*   @brief  清空本数组。
+		*/
+		{ QUICKFUNC(clear) },
+		/**
+		*	@class array（内部保留类）
+		*	@return value
+		*   @brief  随机返回数组中一个元素。
+		*/
+		{ L"random", &Parser_Util::nativeFunc_array_random },
+#ifdef ENABLE_FILE
+		/**
+		*	@class array（内部保留类）
+		*	@param string filename 文件名
+		*	@param bool append=false 是否追加在文件末尾。若为否，则覆盖整个文件。
+		*	@brief 将字符串数组按照换行合并，并保存到文件
+		*	@example 以下将演示一个从内容为["a","b","c"]的数组写入文件的示例：
+		*	@example_code [].save("1.txt")
+		*/
+		{ QUICKFUNC(save) },
+		/**
+		*	@class array（内部保留类）
+		*	@static
+		*	@param string filename 文件名
+		*	@return array
+		*	@brief 读取文件并按照换行切分为数组。
+		*	@example 以下将演示一个从内容为
+		*		a
+		*		b
+		*		c
+		*		的1.txt文件载入为数组的示例：
+		*	@example_code [].load("1.txt")
+		*	@example_result ["a","b","c"]
+		*/
+		{ QUICKFUNC(load) },
+		/**
+		*	@class array（内部保留类）
+		*	@param string filename 文件名
+		*	@param string mode=void 模式。若首字母为'o'则字符串的其余部分代表一个偏移，文件将从该偏移处进行覆盖保存，负值将从文件末尾进行计算。若首字母为'z'则与'o'类似，只不过将启用压缩。
+		*	@brief 将数组进行序列化，并保存到文件。
+		*	@body 文件的内容可以直接使用{@link evalFile}进行反序列化，读取至变量。
+		*	@example 以下将演示一个从内容为[1,2,3]的字典写入文件的示例：
+		*	@example_code [1,2,3].saveStruct("1.txt")
+		*/
+		{ QUICKFUNC(saveStruct) },
+#endif
+	}
+	REG_FUNC_END;
+
+	REG_FUNC_BEGIN(Dictionary)
+	{
+		/**
+		*	@class dictionary（内部保留类）
+		*	@param (arg1, arg2, ...)
+		*   @brief  从字典中删除值与参数相同的元素，使用==比较。
+		*/
+		{ QUICKFUNC(remove) },
+		/**
+		*	@class dictionary（内部保留类）
+		*	@param (arg1, arg2, ...)
+		*   @brief  从字典中删除键与参数相同的元素，使用==比较。
+		*/
+		{ QUICKFUNC(erase) },
+		/**
+		*	@class dictionary（内部保留类）
+		*	@return dictionary
+		*   @brief  复制出一份一样的新字典，更改新字典不会影响原字典。
+		*/
+		{ QUICKFUNC(clone) },
+		/**
+		*	@class dictionary（内部保留类）
+		*	@param value
+		*	@return bool
+		*   @brief  返回字典中是否存在key为value的键，值为空（void）的键将被视为无效键。
+		*/
+		{ QUICKFUNC(find) },
+		/**
+		*	@class dictionary（内部保留类）
+		*	@return array
+		*   @brief  返回[键1, 值1, 键2, 值2, ...]的数组，值为void的键将被无视。
+		*/
+		{ QUICKFUNC(toArray) },
+		/**
+		*	@class dictionary（内部保留类）
+		*   @param value
+		*   @return bool
+		*   @brief  比较本对象与value值是否相等。如果value是字典，会比较每对键-值是否相等，不存在的键会认为值是void去做比较。
+		*   @example 以下将演示%[key1:1,key2:2]和%[key1:1,key2:2,key3:3]的比较
+		*   @example_code %[key1:1,key2:2].equals(%[key1:1,key2:2,key3:3])
+		*   @example_result false
+		*/
+		{ QUICKFUNC(equals) },
+		/**
+		*	@class dictionary（内部保留类）
+		*   @param dic
+		*   @brief  与新字典合并，重复的键将被覆盖。
+		*/
+		{ QUICKFUNC(update) },
+		/**
+		*	@class dictionary（内部保留类）
+		*   @param dic
+		*   @brief  从本字典中去除参数字典中包含的有效键（即值不为void）。
+		*/
+		{ QUICKFUNC(except) },
+		/**
+		*	@class dictionary（内部保留类）
+		*   @return array
+		*   @brief  返回所有有效键组成的数组。
+		*/
+		{ QUICKFUNC(getKeyArray) },
+		/**
+		*	@class dictionary（内部保留类）
+		*   @return array
+		*   @brief  返回所有有效键的值组成的数组。
+		*/
+		{ QUICKFUNC(getValueArray) },
+		/**
+		*	@class dictionary（内部保留类）
+		*	@param func | modestr = "+"
+		*	@return array
+		*   @brief  按值排序所有的有效键，比较的方式根据指定的函数或模式决定。
+		*	如果指定的是函数，将把此函数（func(a,b)）当做<的比较函数，从小到大排序。
+		*	如果指定的是模式字符串，则：
+		*		"+"：以默认的比较运算符从小到大排序
+		*		"-"：以默认的比较运算符从大到小排序
+		*		"0"：按数值从小到大排序
+		*		"9"：按数值从大到小排序
+		*		"a"：按字符串从小到大排序
+		*		"z"：按字符串从大到小排序
+		*   @example 以下将演示%[key1:1,key2:2,key3:3]按"-"排序的结果
+		*   @example_code %[key1:1,key2:2,key3:3].sort("9");
+		*   @example_result ["key3", "key2", "key1"]
+		*/
+		{ QUICKFUNC(sortKeyByValue) },
+		/**
+		*	@class array（内部保留类）
+		*   @brief  清空本字典。
+		*/
+		{ QUICKFUNC(clear) },
+#ifdef ENABLE_FILE
+		/**
+		*	@class dictionary（内部保留类）
+		*	@param string filename 文件名
+		*	@param string mode=void 模式。若首字母为'o'则字符串的其余部分代表一个偏移，文件将从该偏移处进行覆盖保存，负值将从文件末尾进行计算。若首字母为'z'则与'o'类似，只不过将启用压缩。
+		*	@brief 将数组进行序列化，并保存到文件。
+		*	@body 文件的内容可以直接使用{@link evalFile}进行反序列化，读取至变量。
+		*	@example 以下将演示一个从内容为%[key:1]的字典写入文件的示例：
+		*	@example_code %[key:1].saveStruct("1.txt")
+		*/
+		{ QUICKFUNC(saveStruct) },
+#endif
+	}
+	REG_FUNC_END;
+
 	void registerExtend(Parser *p)
 	{
 		//register inner classes and global functions
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(eval));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(time));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(clock));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(log));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(print));
-		//BKE_VarClosure::Global()->addNativeFunction(QUICKFUNC(typeof));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(range));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(random));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(itoa));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(itoa2));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(char));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(hash));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(hash16));
-#ifdef ENABLE_FILE
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(loadFile));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(saveFile));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(appendFile));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(evalFile));
-#endif
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(toString));
-		BKE_VarClosure::global()->addNativeFunction(QUICKFUNC(loadClass));
-		//BKE_VarClosure::Global()->addNativeFunction(QUICKFUNC(int));
+		BKE_VarClosure *global = BKE_VarClosure::global();
+		BKE_VarClass *_class = (BKE_VarClass *)global;
+		REG_FUNC(Global);
 
 		//undefined
-		BKE_VarClass *undefined = new BKE_VarClass(L"undefined");
-		BKE_VarClass *num_class = new BKE_VarClass(L"number");
-		BKE_VarClass *str_class = new BKE_VarClass(L"string");
-		BKE_VarClass *arr_class = new BKE_VarClass(L"array");
-		BKE_VarClass *dic_class = new BKE_VarClass(L"dictionary");
-		BKE_VarClass *fun_class = new BKE_VarClass(L"function");
-		BKE_VarClass *clo_class = new BKE_VarClass(L"closure");
+		BKE_String s_undefined(L"undefined");
+		_class = new BKE_VarClass(s_undefined);
+		REG_FUNC(Undefined);
+		global->forceSetMember(s_undefined, _class);
 
-		//undefined->addNativePropGet(QUICKGETTER(type));
-		undefined->addNativeFunction(QUICKFUNC(equals));
+		//number
+		BKE_String s_number(L"number");
+		_class = new BKE_VarClass(s_number);
+		REG_FUNC(Undefined);
+		global->forceSetMember(s_number, _class);
 
-		//num_class->addNativePropGet(QUICKGETTER(type));
-		num_class->addNativeFunction(QUICKFUNC(equals));
-		//num_class->innerCreateInstance=&Parser_Util::Native_number;
+		//string
+		BKE_String s_string(L"string");
+		_class = new BKE_VarClass(s_string);
+		REG_GET(String);
+		REG_FUNC(String);
+		global->forceSetMember(s_string, _class);
 
-		//str_class->addNativePropGet(QUICKGETTER(type));
-		str_class->addNativePropGet(QUICKGETTER(length));
-		str_class->addNativePropGet(L"size", &Parser_Util::nativeGet_length);
-		str_class->addNativeFunction(QUICKFUNC(substring));
-		str_class->addNativeFunction(L"substr", &Parser_Util::nativeFunc_substring);
-		str_class->addNativeFunction(QUICKFUNC(sprintf));
-		str_class->addNativeFunction(QUICKFUNC(split));
-		str_class->addNativeFunction(QUICKFUNC(indexOf));
-		str_class->addNativeFunction(QUICKFUNC(lastIndexOf));
-		str_class->addNativeFunction(QUICKFUNC(replace));
-		str_class->addNativeFunction(QUICKFUNC(equals));
-		str_class->addNativeFunction(QUICKFUNC(beginWith));
-		str_class->addNativeFunction(QUICKFUNC(endWith));
-		str_class->addNativeFunction(QUICKFUNC(clear));
-		str_class->addNativeFunction(QUICKFUNC(toLowerCase));
-		str_class->addNativeFunction(QUICKFUNC(toUpperCase));
-		//str_class->innerCreateInstance=&Parser_Util::Native_string;
+		//array
+		BKE_String s_array(L"array");
+		_class = new BKE_VarClass(s_array);
+		REG_GET(String);  // Yes, the same getter list as String
+		REG_SET(Array);
+		REG_FUNC(Array);
+		global->forceSetMember(s_array, _class);
 
-		//arr_class->addNativePropGet(QUICKGETTER(type));
-		arr_class->addNativePropGet(QUICKGETTER(length));
-		arr_class->addNativePropSet(QUICKSETTER(length));
-		arr_class->addNativePropGet(L"size", &Parser_Util::nativeGet_length);
-		arr_class->addNativePropSet(L"size", &Parser_Util::nativeSet_length);
-		arr_class->addNativeFunction(QUICKFUNC(add));
-		arr_class->addNativeFunction(QUICKFUNC(remove));
-		arr_class->addNativeFunction(QUICKFUNC(erase));
-		arr_class->addNativeFunction(QUICKFUNC(insert));
-		arr_class->addNativeFunction(QUICKFUNC(find));
-		arr_class->addNativeFunction(QUICKFUNC(join));
-		arr_class->addNativeFunction(QUICKFUNC(concat));
-		arr_class->addNativeFunction(QUICKFUNC(sort));
-		arr_class->addNativeFunction(QUICKFUNC(clone));
-		arr_class->addNativeFunction(QUICKFUNC(equals));
-		arr_class->addNativeFunction(QUICKFUNC(clear));
-		arr_class->addNativeFunction(L"random", &Parser_Util::nativeFunc_array_random);
-		arr_class->innerCreateInstance = &Parser_Util::nativeFunc_array;
-#ifdef ENABLE_FILE
-		arr_class->addNativeFunction(QUICKFUNC(save));
-		arr_class->addNativeFunction(QUICKFUNC(load));
-#endif
+		BKE_String s_dictionary(L"dictionary");
+		_class = new BKE_VarClass(s_dictionary);
+		_class->innerCreateInstance = &Parser_Util::nativeFunc_dictionary;
+		REG_GET(String);  // Yes, the same getter list as String
+		REG_FUNC(Dictionary);
+		global->forceSetMember(s_dictionary, _class);
 
-		//dic_class->addNativePropGet(QUICKGETTER(type));
-		dic_class->addNativePropGet(QUICKGETTER(length));
-		dic_class->addNativePropGet(L"size", &Parser_Util::nativeGet_length);
-		dic_class->addNativeFunction(QUICKFUNC(remove));
-		dic_class->addNativeFunction(QUICKFUNC(erase));
-		dic_class->addNativeFunction(QUICKFUNC(clone));
-		dic_class->addNativeFunction(QUICKFUNC(find));
-		dic_class->addNativeFunction(QUICKFUNC(toArray));
-		dic_class->addNativeFunction(QUICKFUNC(equals));
-		dic_class->addNativeFunction(QUICKFUNC(update));
-		dic_class->addNativeFunction(QUICKFUNC(except));
-		dic_class->addNativeFunction(QUICKFUNC(getKeyArray));
-		dic_class->addNativeFunction(QUICKFUNC(getValueArray));
-		dic_class->addNativeFunction(QUICKFUNC(sortKeyByValue));
-		dic_class->addNativeFunction(QUICKFUNC(clear));
-		dic_class->innerCreateInstance = &Parser_Util::nativeFunc_dictionary;
-#ifdef ENABLE_FILE
-		dic_class->addNativeFunction(QUICKFUNC(saveStruct));
-#endif
-
-		//fun_class->addNativePropGet(QUICKGETTER(type));
-		fun_class->addNativeFunction(QUICKFUNC(equals));
-
-		//clo_class->addNativePropGet(QUICKGETTER(type));
-		clo_class->addNativeFunction(QUICKFUNC(equals));
-
-		BKE_VarClosure::global()->setMember(L"undefined", undefined);
-		BKE_VarClosure::global()->setMember(L"number", num_class);
-		BKE_VarClosure::global()->setMember(L"string", str_class);
-		BKE_VarClosure::global()->setMember(L"array", arr_class);
-		BKE_VarClosure::global()->setMember(L"dictionary", dic_class);
-		BKE_VarClosure::global()->setMember(L"function", fun_class);
-		BKE_VarClosure::global()->setMember(L"closure", clo_class);
-
-		//undefined->release();
-		//num_class->release();
-		//str_class->release();
-		//arr_class->release();
-		//dic_class->release();
+		BKE_String s_function(L"function");
+		_class = new BKE_VarClass(s_function);
+		REG_FUNC(Undefined);
+		global->forceSetMember(s_function, _class);
+		
+		BKE_String s_closure(L"closure");
+		_class = new BKE_VarClass(s_closure);
+		REG_FUNC(Undefined);
+		global->forceSetMember(s_closure, _class);
 
 		//othe native class
 		p->registerClass(QUICKCLASS(Date));

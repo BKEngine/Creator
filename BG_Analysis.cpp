@@ -333,9 +333,8 @@ void BG_Analysis::run()
 			}
 		}
 		auto &sci = filebuf[cur];
-		msgmutex.unlock();
-
 		ParseData *p = new ParseData(sci, topclo);
+		msgmutex.unlock();
 
 		while (!stop && !cancel)
 		{

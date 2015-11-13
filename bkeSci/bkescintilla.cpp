@@ -507,6 +507,10 @@ QString BkeScintilla::getGlobalList(const QString &ls, const QString &alltext)
 	std::set<QString> params;
 	getAllMembers(p->fileclo, params);
 	analysis->unlockFile();
+	for (auto &it : global_bke_info.BagelWords)
+	{
+		params.insert(it + "?9");
+	}
 	for (auto &it2 : params)
 	{
 		res += ' ';
@@ -630,8 +634,15 @@ void BkeScintilla::showComplete()
 			QStringList ls = attrContext.split('.');
 			if (ls.size() == 1 && ls[0].length() <= 2)
 				return;
+			else if (ls.size() == 1)
+			{
+				completeList = getGlobalList(ls[0], context);
+			}
+			else
+			{
+				completeList = getValList(ls, context);
+			}
 			lastContext = ls.back();
-			completeList = getValList(ls, context);
 			completeType = SHOW_AUTOVALLIST;
 		}
 		cmdname.remove(0, 1);
@@ -886,20 +897,21 @@ void BkeScintilla::UiChange(int updated)
 		{
 			char match[2];
 			bool caret = false;
+			int rawstyle = style & 63;
 			switch (ch)
 			{
 			case '(':
-				if ((style & 63 == SCE_BKE_STRING) || (style & 63 == SCE_BKE_STRING2))
+				if ((rawstyle == SCE_BKE_STRING) || (rawstyle == SCE_BKE_STRING2))
 					break;
 				match[0] = ')';
 				break;
 			case '[':
-				if ((style & 63 == SCE_BKE_STRING) || (style & 63 == SCE_BKE_STRING2))
+				if ((rawstyle == SCE_BKE_STRING) || (rawstyle == SCE_BKE_STRING2))
 					break;
 				match[0] = ']';
 				break;
 			case '{':
-				if ((style & 63 == SCE_BKE_STRING) || (style & 63 == SCE_BKE_STRING2))
+				if ((rawstyle == SCE_BKE_STRING) || (rawstyle == SCE_BKE_STRING2))
 					break;
 				match[0] = '}';
 				break;
@@ -1205,7 +1217,7 @@ int BkeScintilla::findFirst1(const QString fstr, bool cs, bool exp, bool word, b
 	ClearIndicators(BKE_INDICATOR_FIND);
 
 	BkeIndicatorBase abc;
-	int a, len, b;
+	int a, len;
 	len = this->length();
 	refind = false;
 	findlast.Clear();
@@ -1372,6 +1384,9 @@ bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr, bool cs
 
 void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word)
 {
+	//关闭补全，自动提示等等
+	ChangeIgnore = true;
+
 	int flag = (cs ? SCFIND_MATCHCASE : 0) |
 		(word ? SCFIND_WHOLEWORD : 0) |
 		(exp ? SCFIND_REGEXP : 0);
@@ -1413,6 +1428,8 @@ void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool
 	}
 
 	ChangeStateFlag &= (~BKE_CHANGE_REPLACE);
+
+	ChangeIgnore = false;
 }
 
 BkeIndicatorBase BkeScintilla::ReplaceFind(const QString &rstr)

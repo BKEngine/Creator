@@ -41,8 +41,9 @@ const unsigned char PreparedDataFormatVersion = 0;
 
 
 // This class contains prepared API information.
-struct QsciAPIsPrepared
+class QsciAPIsPrepared
 {
+public:
     // The word dictionary is a map of individual words and a list of positions
     // each occurs in the sorted list of APIs.  A position is a tuple of the
     // index into the list of APIs and the index into the particular API.

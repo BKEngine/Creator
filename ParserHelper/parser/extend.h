@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+
 #include "BKE_variable.h"
 #include <fstream>
 
@@ -36,10 +37,27 @@
 #define NATIVECLASS_CREATENEW() BKE_NativeClass* CURRENTCLASS::nativeCreateNew(const BKE_VarClass *self, const BKE_VarArray *paramarray)
 #define NATIVECLASS_SUPERINIT() super::nativeInit(nativeSuperName)
 
-#define REG_FUNC(name) _class->addNativeFunction(L###name, &CURRENTCLASS::nativeFunc_##name);
-#define REG_FUNC_ALIAS(alias, name) _class->addNativeFunction(L###name, &CURRENTCLASS::nativeFunc_##name);
-#define REG_GET(name) _class->addNativePropGet(L###name, &CURRENTCLASS::nativeGet_##name);
-#define REG_SET(name) _class->addNativePropSet(L###name, &CURRENTCLASS::nativeSet_##name);
+#define _REG(c,name) \
+		for(auto ptr = c##Native##name##List, end = c##Native##name##List + sizeof(c##Native##name##List)/sizeof(c##Native##name##List[0]); ptr < end; ptr++) \
+		{ \
+			 _class->addNative##name((*ptr).first, (*ptr).second); \
+		} \
+
+#define REG_FUNC_BEGIN(c)  static const pair<const wchar_t *, BKE_NativeFunction> c##NativeFunctionList[] =
+#define REG_SET_BEGIN(c)  static const pair<const wchar_t *, BKE_NativeFunction> c##NativePropSetList[] =
+#define REG_GET_BEGIN(c)  static const pair<const wchar_t *, BKE_NativeFunction> c##NativePropGetList[] =
+#define REG_FUNC_END  
+#define REG_SET_END  
+#define REG_GET_END  
+
+#define REG_FUNC(c) _REG(c,Function)
+#define REG_SET(c) _REG(c,PropSet)
+#define REG_GET(c) _REG(c,PropGet)
+
+#define FUNC_INFO(name) {L###name, &CURRENTCLASS::nativeFunc_##name}
+#define FUNC_ALIAS_INFO(alias, name) {L###name, &CURRENTCLASS::nativeFunc_##name}
+#define GET_INFO(name) {L###name, &CURRENTCLASS::nativeGet_##name}
+#define SET_INFO(name) {L###name, &CURRENTCLASS::nativeSet_##name}
 
 template<class T>
 void _bkpCheckClassInstance(BKE_VarObject *__obj, T && __classname)
@@ -76,21 +94,8 @@ T *_bkpGetClassInstance(BKE_VarObject *__obj, T2 && __classname)
 #define QUICKSETTER(f) L###f, &Parser_Util::nativeSet_##f
 #define QUICKCLASS(f) L###f, new Parser_Util::f()
 
-#define PREPARECLASS() \
-	auto &v=BKE_VarClosure::global()->getMember(name);	\
-	if(v.getType()!=VAR_CLASS)							\
-	{													\
-		v.setVoid();									\
-		v.vt=VAR_CLASS;									\
-		if(_class)										\
-			v.obj=new BKE_VarClass(name, _class);		\
-		else											\
-			v.obj = new BKE_VarClass(name);				\
-		if(((BKE_VarClass*)v.obj)->native)				\
-			delete ((BKE_VarClass*)v.obj)->native;		\
-		((BKE_VarClass*)v.obj)->native = this;		\
-	}													\
-	_class = (BKE_VarClass*)v.obj;
+#define PREPARECLASS() this->_prepareClass(name)
+	
 
 #define DISABLECREATE() _class->cannotcreate=true;
 #define ENABLECREATE() _class->cannotcreate=false;
@@ -101,8 +106,9 @@ namespace Parser_Util
 	void registerExtend(Parser *p);
 
 	/**
-	*	数据类。
-	*	{@b 可实例化。}
+	 *	时间类。
+	 *	{@b 可实例化。}
+	 *  @brief 使用Date()直接创建，时间为当前时间。
 	*/
 	class Date:public BKE_NativeClass
 	{
@@ -204,11 +210,11 @@ namespace Parser_Util
 		NATIVE_FUNC(setSecond);
 
 		/**
-		*  @param  formatString
+		*  @param  string formatString 格式字符串
 		*  @return 格式化后的字符串
 		*  @brief  根据提供的格式化字串返回格式化后的字符串。
-		           格式化字串里：%Y，%M，%D，%h，%m，%s分别表示全宽度的年份（四位）、月份（两位）、日期（两位）、24小时制的小时（两位）、分钟（两位）、秒（两位）
-		                         %#Y，%#M，%#D，%#h，%#m，%#s分别表示压缩宽度，其中年份固定为两位，其余的在前面有无效0的时候会省略0
+				   格式化字串里：%Y，%M，%D，%h，%m，%s分别表示全宽度的年份（四位）、月份（两位）、日期（两位）、24小时制的小时（两位）、分钟（两位）、秒（两位）
+								 %#Y，%#M，%#D，%#h，%#m，%#s分别表示压缩宽度，其中年份固定为两位，其余的在前面有无效0的时候会省略0
 								 %%代表一个%
 		*/
 		NATIVE_FUNC(format);
@@ -237,108 +243,133 @@ namespace Parser_Util
 		NATIVE_CREATENEW(){ return NULL; }
 
 		/**
+		 *  @static
 		 *  @brief 只读属性。
 		 */
 		NATIVE_GET(PI);
 
 		/**
+		 *  @static
 		 *  @brief 只读属性。
 		 */
 		NATIVE_GET(E);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 符号函数,大于0返回1,等于0(误差10^-8)返回0,小于0返回-1。
 		 */
 		NATIVE_FUNC(sgn);
 
+		/**
+		 *  @static
+		 *  @param x, y
+		 *  @brief 指数函数，返回x^y
+		*/
+		NATIVE_FUNC(pow);
+
 		/*
+		 *  @static
 		 *  @param var
 		 *  @brief 返回绝对值。
 		 */
 		NATIVE_FUNC(abs);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回平方根。
 		 */
 		NATIVE_FUNC(sqrt);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回以10为底的对数。
 		 */
 		NATIVE_FUNC(lg);
 
 		/**
+		 *  @static
 		 *  @param var
-		 *  @brief 返回自然数。
+		 *  @brief 返回自然对数。
 		 */
 		NATIVE_FUNC(ln);
 
 		/**
+		 *  @static
 		 *  @param base,var
-		 *  @brief 以base为底的对数值。
+		 *  @brief 返回以base为底的对数值。
 		 */
 		NATIVE_FUNC(log);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回小于或等于var的最大整数。
 		 */
 		NATIVE_FUNC(floor);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回大于或等于var的最小整数。
 		 */
 		NATIVE_FUNC(ceil);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回返回四舍五入后的整数。
 		 */
 		NATIVE_FUNC(round);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回返回正弦值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(sin);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回余弦值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(cos);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回正切值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(tan);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回反正弦值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(asin);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回反余弦值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(acos);
 
 		/**
+		 *  @static
 		 *  @param var
 		 *  @brief 返回反正切值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(atan);
 
 		/**
+		 *  @static
 		 *  @return float 0-1的浮点数
-		 *  @brief 返回0-1的浮点数。
+		 *  @brief 返回0-1的浮点数。和全局的random相比，这里采用的是随机数性能更好速度更慢些的mt19937算法。
 		 */
 		NATIVE_FUNC(random);
 
@@ -349,7 +380,7 @@ namespace Parser_Util
 	/**
 	*   @正则表达式类。
 	*   {@b 可实例化。}
-	*   @brief 使用Regex(regstr[,ignorecase-false])创建。
+	*   @brief 使用Regex(regstr[,ignorecase=false])创建。
 	*/
 	class Regex :public BKE_NativeClass
 	{
@@ -365,7 +396,7 @@ namespace Parser_Util
 		/**
 		 *  @param string
 		 *  @return array
-		 *  @brief 返回所有匹配到的数组
+		 *  @brief 返回所有匹配到的数组，匹配失败将返回空数组。
 		 *  @example 以下将演示一个从内容为
 		 *  "a1b2c3"
 		 *  的字符串中匹配数组的示例
@@ -377,14 +408,14 @@ namespace Parser_Util
 		/**
 		 *  @param string
 		 *  @return bool
-		 *  @brief 判断这个正则表达式是否可以全部匹配这个字符串,可以返回true,否则返回false
+		 *  @brief 判断这个正则表达式是否可以全部匹配这个字符串,可以返回true,否则返回false。
 		 */
 		NATIVE_FUNC(matchAll);
 
 		/**
 		 *  @param string
 		 *  @return array
-		 *  @brief 返回子匹配(即正则表达式里用()括住的字符串的匹配)数组。
+		 *  @brief 返回子匹配(即正则表达式里用()括住的字符串的匹配)数组，没有子匹配将返回空数组。
 		 *  @example 以下将演示一个从内容为
 		 *  “abcd”
 		 *  的字符串中匹配到的数组
@@ -394,7 +425,8 @@ namespace Parser_Util
 		NATIVE_FUNC(getSubMatch);
 
 		/**
-		 *  @param string,dst
+		 *  @param string src 源字符串
+		 *  @param string dst 目标字符串
 		 *  @return string
 		 *  @brief 将src里第一个匹配替换成dst，dst里可以使用\1,\2等表示子匹配，\0表示整个的匹配串。
 		 *  @example 以下将演示一个从内容为
@@ -406,7 +438,8 @@ namespace Parser_Util
 		NATIVE_FUNC(replaceFirst);
 
 		/**
-		 *  @param string,dst
+		 *  @param string src 源字符串
+		 *  @param string dst 目标字符串
 		 *  @return string
 		 *  @brief 同replaceFirst,只是对所有匹配串都进行替换
 		 */
@@ -414,6 +447,12 @@ namespace Parser_Util
 	};
 #endif
 
+	/**
+	*   @标记类。
+	*   @singleton
+	*   {@b 不可实例化。}
+	*   @brief 用于处理按位设置标记的情况，最多0-31位共32个标记。
+	*/
 	class Flags : public BKE_NativeClass
 	{
 	public:
@@ -422,9 +461,46 @@ namespace Parser_Util
 
 		NATIVE_CREATENEW();
 
+		/**
+		*  @param number num
+		*  @param number flags 要查找的标记的合集
+		*  @return bool
+		*  @brief 判断num里有没有flags里的所有标记
+		*  @example 以下将演示一个从内容为
+		*  0xF0 的标记中判断是否存在 0xC1 中的所有标记
+		*  @example_code Flags.contains(0xF0, 0xC1)
+		*  @example_result false
+		*/
 		NATIVE_FUNC(contains);
+
+		/**
+		*  @param num
+		*  @return array
+		*  @brief 返回一个数组，包含num里所有存在的标记。
+		*/
 		NATIVE_FUNC(split);
+
+		/**
+		*  @param number num
+		*  @param number flags 要查找的标记的合集
+		*  @return bool
+		*  @brief 返回num是否包含flags的某一标记。
+		*  @example 以下将演示一个从内容为
+		*  0xF0 的标记中判断是否存在 0xC1 中的某一标记
+		*  @example_code Flags.mask(0xF0, 0xC1)
+		*  @example_result true
+		*/
 		NATIVE_FUNC(mask);
+
+		/**
+		*  @param num(, flag1, flag2, ...)
+		*  @return number
+		*  @brief 将num设置完所有参数中的标记后返回。
+		*  @example 以下将演示一个从内容为
+		*  0x02 的标记中合并上 0x01, 0x10
+		*  @example_code Flags.merge(0x02, 0x01, 0x10)
+		*  @example_result 0x13
+		*/
 		NATIVE_FUNC(merge);
 	};
 };

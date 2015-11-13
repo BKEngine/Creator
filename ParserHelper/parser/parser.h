@@ -22,7 +22,9 @@ class Parser
 {
 	friend class BKE_FunctionCode;
 	friend class BKE_VarFunction;
+#if BKE_CREATOR
 	friend class PAModule;
+#endif
 
 protected:
 	BKE_hashmap<wstring, BKE_Variable> constmap;
@@ -138,8 +140,13 @@ protected:
 		setupDebugInfo();
 	}
 
+#if BKE_CREATOR
 	virtual void expression(BKE_bytree** tree, int rbp = 0);
 	virtual void readToken();
+#else
+	void expression(BKE_bytree** tree, int rbp=0);
+	void readToken();
+#endif
   
 	void nud_this(BKE_bytree **tree);
 	void nud_var(BKE_bytree **tree);

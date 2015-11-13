@@ -640,6 +640,7 @@ private:
 	BKE_Variable *tmpvar;
 	BKE_VarClosure *top;
 	void _analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Variable *var);
+	bool _analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_Variable *var);
 
 public:
 	PAModule(const QString &str);
@@ -671,6 +672,8 @@ public:
 	}
 
 	void analysisToClosure(BKE_VarClosure *clo);
+
+	BKE_Variable analysisToPos(BKE_VarClosure *clo, int pos);
 };
 
 inline bool isVarName(const QString &s)

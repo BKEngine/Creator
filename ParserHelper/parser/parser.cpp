@@ -209,19 +209,19 @@ BKE_Variable BKE_VarFunction::run(const BKE_bytree *tr, BKE_VarClosure *_tr)
 	//set default value
 	for (auto i : initials)
 	{
-		tmp->setMember(i.first, i.second);
+		tmp->forceSetMember(i.first, i.second);
 	}
 	for (bkplong i = 0; i<(bkplong)paramnames.size(); i++)
 	{
 		if (paramnames[i][0] != L'*' && j < tr->childs.size())
-			tmp->setMember(paramnames[i], Parser::getInstance()->innerRun(tr->childs[j++], _tr, tmpvars));
+			tmp->forceSetMember(paramnames[i], Parser::getInstance()->innerRun(tr->childs[j++], _tr, tmpvars));
 		else
 		{
 			wstring name = paramnames[i].substr(1);
 			BKE_VarArray *arr = new BKE_VarArray();
 			for (; j < tr->childs.size(); j++)
 				arr->pushMember(Parser::getInstance()->innerRun(tr->childs[j], _tr, tmpvars));
-			tmp->setMember(name, arr);
+			tmp->forceSetMember(name, arr);
 		}
 	}
 	try
@@ -2349,7 +2349,7 @@ void Parser::nud_class(BKE_bytree** tree)
 		default:
 			{THROW(L"语法错误，只能接static, var，function，propget或propset子句", next.pos); };
 		}
-		if (next.opcode == OP_STOP)
+		while (next.opcode == OP_STOP)
 		{
 			readToken();
 			continue;
@@ -2743,9 +2743,9 @@ NUD_FUNC(foreach)
 			for(int i=0;i<s;i++)
 			{
 				if (!n1.isVoid())
-					tmp->setMember(n1, i);
+					tmp->forceSetMember(n1, i);
 				if (!n2.isVoid())
-					tmp->setMember(n2, ((BKE_VarArray*)clo.obj)->vararray[i]);
+					tmp->forceSetMember(n2, ((BKE_VarArray*)clo.obj)->vararray[i]);
 				try
 				{
 					BKE_array<BKE_Variable> _tmpvars;
@@ -2769,9 +2769,9 @@ NUD_FUNC(foreach)
 			for(;it!=((BKE_VarDic*)clo.obj)->varmap.end();it++)
 			{
 				if (!n1.isVoid())
-					tmp->setMember(n1, it->first);
+					tmp->forceSetMember(n1, it->first);
 				if (!n2.isVoid())
-					tmp->setMember(n2, it->second);
+					tmp->forceSetMember(n2, it->second);
 				try
 				{
 					BKE_array<BKE_Variable> _tmpvars;
@@ -2914,7 +2914,7 @@ NUD_FUNC(function)
 	((BKE_VarFunction*)tree->Node.var.obj)->setClosure(_this);
 	if (!tree->Node.var.isVoid())
 	{
-		return /*BKE_VarClosure::Global()*/_this->getMember(((BKE_VarFunction*)tree->Node.var.obj)->name) = tree->Node.var;
+		return /*BKE_VarClosure::Global()*/_this->setMember(((BKE_VarFunction*)tree->Node.var.obj)->name, tree->Node.var);
 	}
 	return tree->Node.var;
 }
@@ -2941,11 +2941,10 @@ NUD_FUNC(var)
 	{
 		BKE_Variable &v = innerRun(tree->childs[i + 1], _this, tmpvars);
 		RECORDPOS;
-		//不用setMember是因为var要检查变量不是系统保留的常量（如basic_layer，bgm，在global闭包下var bgm应当报错）
 		if (v.getType() != VAR_PROP)
-			_this->getMember(tree->childs[i]->Node.var.asBKEStr()) = v;
+			_this->setMember(tree->childs[i]->Node.var.asBKEStr(), v);
 		else
-			_this->getMember(tree->childs[i]->Node.var.asBKEStr()) = ((BKE_VarProp*)v.obj)->get();
+			_this->setMember(tree->childs[i]->Node.var.asBKEStr(), ((BKE_VarProp*)v.obj)->get());
 	}
 	RETURNNULL;
 }
@@ -3030,7 +3029,7 @@ NUD_FUNC(delete)
 			((BKE_VarClass*)leftvar.obj)->deleteThisMember(rightvar.asBKEStr());
 			break;
 		case VAR_ARRAY:
-			((BKE_VarArray*)leftvar.obj)->deleteMemberIndex(rightvar.asInteger());
+			((BKE_VarArray*)leftvar.obj)->deleteMemberIndex((short)rightvar.asInteger());
 			break;
 		default:
 			throw Var_Except(L"语法错误，无法取变量");
@@ -3548,7 +3547,7 @@ LED_FUNC(param)
 	if (leftvar.getType() != VAR_FUNC && leftvar.getType() != VAR_CLASS)
 	{
 		runpos=tree->Node.pos;
-		throw Var_Except(L"左操作数必须是函数");
+		throw Var_Except(tree->Node.var.forceAsString() + L"的类型为" + leftvar.getChineseTypeString() + L"，并非一个函数。");
 	}
 	try
 	{
@@ -3861,10 +3860,13 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 		int i = 1;
 		while (i < s)
 		{
-			if (i>1)
-				res += L',';
 			if (tree->childs[i]->Node.opcode == OP_LITERAL)
-				res += L" extends " + tree->childs[i]->Node.var.asBKEStr().getConstStr();
+			{
+				if (i == 1)
+					res += L" extends " + tree->childs[i]->Node.var.asBKEStr().getConstStr();
+				else
+					res += L',' + tree->childs[i]->Node.var.asBKEStr().getConstStr();
+			}
 			else
 				break;
 			i++;
@@ -3894,7 +3896,7 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 	}
 		break;
 	case OP_PROPGET + OP_COUNT:
-		res += L"propset " + tree->childs[0]->Node.var.asBKEStr().getConstStr() + L"()";
+		res += L"propget " + tree->childs[0]->Node.var.asBKEStr().getConstStr() + L"()";
 		unParse(tree->childs[1], res);
 		break;
 	case OP_PROPSET + OP_COUNT:
@@ -4165,8 +4167,8 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 	case OP_INCONTEXTOF:
 		unParse(tree->childs[0], res); res += L" incontextof "; unParse(tree->childs[1], res); break;
 	case OP_STATIC + OP_COUNT:
-		res += L"static ";
-		unParse(tree->childs[0], res);
+		res += L"static " + tree->childs[0]->Node.var.asBKEStr().getConstStr() + L"=";
+		unParse(tree->childs[1], res);
 		break;
 	default:
 		//fatal error

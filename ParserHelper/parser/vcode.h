@@ -153,6 +153,18 @@ public:
 			clone->childs.push_back(this->childs[i]->clone());
 		return clone;
 	}
+
+	int getFirstPos()
+	{
+		int childpos = Node.pos;
+		if (!childs.empty())
+		{
+			int pos2 = childs[0]->getFirstPos();
+			if (childpos > pos2)
+				childpos = pos2;
+		}
+		return childpos;
+	}
 };
 
 #endif

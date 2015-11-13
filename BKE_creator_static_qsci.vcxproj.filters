@@ -244,9 +244,6 @@
     <ClCompile Include="dia\ctextedit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParserHelper\parser\extend_wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="function.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -272,9 +269,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ParserHelper\parser\parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\parserextend_wrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="projectwindow.cpp">
@@ -603,6 +597,12 @@
     </ClCompile>
     <ClCompile Include="Debug\moc_ScintillaQt.cpp">
       <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\extend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\parser\parserextend.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -991,6 +991,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BKEscintilla\src\UnicodeFromUTF8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\parser\parserextend.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

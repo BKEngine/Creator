@@ -537,29 +537,43 @@ public:
 
 	T* allocate()
 	{
-		//return (T*)(al->allocate());
+#if BKE_CREATOR
 		return (T*)malloc(sizeof(T));
+#else
+		return (T*)(al->allocate());
+#endif
 	}
 
 	T* allocate(size_t count)
 	{
-		//if (count > 1)
+#if BKE_CREATOR
+		return (T*)malloc(sizeof(T) * count);
+#else
+		if (count > 1)
 			return (T*)malloc(sizeof(T) * count);
-		//return (T*)(al->allocate());
+		return (T*)(al->allocate());
+#endif
 	}
 
 	void deallocate(T* p)
 	{
+#if BKE_CREATOR
 		free(p);
-		//al->deallocate(p);
+#else
+		al->deallocate(p);
+#endif
 	}
 
 	void deallocate(T* p, size_t count)
 	{
-		//if (count > 1)
+#if BKE_CREATOR
+		free(p);
+#else
+		if (count > 1)
 			free(p);
-		//else
-		//	al->deallocate(p);
+		else
+			al->deallocate(p);
+#endif
 	}
 
 	T* op_new()

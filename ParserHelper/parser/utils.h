@@ -5,7 +5,11 @@
 //#define ENABLE_FILE
 #define HAS_REGEX
 
+#if BKE_CREATOR
 #define PARSER_MULTITHREAD 1
+#else
+#define PARSER_MULTITHREAD 0
+#endif
 
 #include <string>
 #include <sstream>
@@ -122,7 +126,11 @@ enum VarType
 #if defined(WIN32) && 0
 #define W_FUNCTION WSTR2(__FUNCTION__)
 #else
+#if BKE_CREATOR
 #include "bkutf8.h"
+#else
+#include <bkutf8.h>
+#endif
 #define W_FUNCTION UniFromUTF7(__FUNCTION__)
 #endif
 #define W_LINE WSTR2NUM(__LINE__)
@@ -186,7 +194,7 @@ struct GlobalStructures
 	GlobalMemoryPool *globalMemoryPool;
 	BKE_VarClosure *globalClosure;
 	GlobalStructures();
-    void init();
+	void init();
 };
 
 extern GlobalStructures _globalStructures;

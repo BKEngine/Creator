@@ -167,7 +167,7 @@ public:
 			//update buffer
 			filebuf[file] = buffer;
 		}
-		if (std::find(macrofiles.begin(), macrofiles.end(), file) != macrofiles.end())
+		if (file == "macro.bkscr" || std::find(macrofiles.begin(), macrofiles.end(), file) != macrofiles.end())
 		{
 			newmacrofile = true;
 			if (cur_state == STATE_PARSEMACRO)

@@ -355,6 +355,8 @@ QTreeWidgetItem *BkeProject::FindItem(QTreeWidgetItem *dest, const QString &dir,
 		else return 0;
 	}
 
+	SortTree(dest);
+
 	return root;
 }
 

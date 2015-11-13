@@ -209,7 +209,7 @@ void ProjectWindow::SetCurrentItem(const QString &file)
 {
 	if (!workpro)
 		return;
-	BkeProject *abc;
+	//BkeProject *abc;
 	QTreeWidgetItem *le = workpro->FindItemAll(file);
 	if (le)
 	{
@@ -500,9 +500,14 @@ void ProjectWindow::RenameFile(const ItemInfo &f)
 	if (!p->checkIsDir(f))
 	{
 		//file
-		QString name = QInputDialog::getText(this, "重命名", "输入新名称(文件路径和文件类型不可更改)");
+		bool change;
+		QString name = QInputDialog::getText(this, "重命名", "输入新名称(文件路径和文件类型不可更改)", QLineEdit::Normal, chopFileNameWithoutExt(f.FullName), &change);
+		if (!change)
+			return;
 		QString ext = chopFileExt(f.Name);
 		name = chopFileNameWithoutExt(name) + '.' + ext;
+		if (name == ".bkscr")
+			return;
 		QString rawname = p->FileDir() + f.FullName;
 		QString newname = p->FileDir() + f.Dirs + '/' + name;
 		QFile temp(newname);

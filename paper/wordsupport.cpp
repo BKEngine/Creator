@@ -410,6 +410,7 @@ bool WordSupport::IsLastSeparate(QChar c, int pos)
 			else return false;
 		}
 	}
+	return false;
 }
 
 //获取指定位置的所在行，小于0为当前行，其他不存在时返回空

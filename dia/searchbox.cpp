@@ -262,9 +262,9 @@ void SearchBox::ReplaceAllText()
 	{
 		QMessageBox b;
 		b.setWindowTitle("警告");
-		b.setText("要启用撤销功能，必须打开所有受到影响的文件，确定打开吗？");
-		b.addButton("是", QMessageBox::AcceptRole);
-		b.addButton("否", QMessageBox::RejectRole);
+		b.setText("要启用撤销功能，必须打开所有受到影响的文件，要打开吗？");
+		b.addButton("打开", QMessageBox::AcceptRole);
+		b.addButton("不打开", QMessageBox::RejectRole);
 		b.addButton("放弃替换操作", QMessageBox::DestructiveRole);
 		auto res = b.exec();
 		if (res == QMessageBox::DestructiveRole)

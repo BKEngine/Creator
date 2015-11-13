@@ -89,7 +89,8 @@ CodeWindow::CodeWindow(QWidget *parent)
 
 	tm.setTimerType(Qt::TimerType::VeryCoarseTimer);
 	connect(&tm, SIGNAL(timeout()), this, SLOT(onTimer()));
-	tm.start(60000);
+	float interval = BKE_CLOSE_SETTING->value("autosavetime", 1).toFloat();
+	tm.start((int)(60000 * interval));
 }
 
 CodeWindow::~CodeWindow()
@@ -605,7 +606,7 @@ void CodeWindow::replaceAllFile(const QString &searchstr, const QString &replace
 	QString base = currentproject->FileDir();
 	for (auto &&it : ls)
 	{
-		replaceOneFile(base + it, searchstr, replacestr, iscase, isregular, isword, stayopen);
+		replaceOneFile(base + '/' + it, searchstr, replacestr, iscase, isregular, isword, stayopen);
 	}
 }
 
@@ -720,7 +721,6 @@ void CodeWindow::LastEdit()
 
 void CodeWindow::SaveALL()
 {
-	QWidget *p;
 	BkeDocBase *llm;
 	for (int i = 0; i < stackwidget->count(); i++){
 		llm = docWidgetHash.value(stackwidget->widget(i));
@@ -741,7 +741,6 @@ void CodeWindow::backupAll()
 	if (currentproject)
 		jo.insert("project", currentproject->ProjectFile());
 	files.clear();
-	QWidget *p;
 	BkeDocBase *llm;
 	for (int i = 0; i < stackwidget->count(); i++){
 		llm = docWidgetHash.value(stackwidget->widget(i));
@@ -792,6 +791,8 @@ void CodeWindow::simpleSave(BkeDocBase *loli)
 	//更新文件被改写的时间
 	loli->upFileTime();
 	filewatcher->addPath(loli->FullName());
+	//同时更新自动备份
+	simpleBackup(loli);
 }
 
 //另存为

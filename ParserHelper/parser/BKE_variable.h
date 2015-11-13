@@ -46,11 +46,6 @@ public:
 
 	void insertKey(void *p, bkplong size)
 	{
-//#if PARSER_DEBUG==2
-//		this->operator[] (p) = c++;
-//#else
-//		BKE_hashmap<void *, _dummy_class, 12>::insertKey(p);
-//#endif
 		operator[](p) = size;
 	}
 
@@ -95,20 +90,24 @@ public:
 	void* operator new (size_t size)
 	{
 		void *p;
-		//if (size <= 4 * SMALL)
-		//	p = allocator_array()[(size + 3) / 4]->dynamic_allocate();
-		//else
-			p = malloc(size);
+#if PARSER_MULTITHREAD
+		p = malloc(size);
 		if (p)
 		{
-#if PARSER_MULTITHREAD
 			MemoryPool().lock();
 			MemoryPool().insertKey(p, (bkpulong)size);
 			MemoryPool().unlock();
-#else
-			MemoryPool().insertKey(p, (bkpulong)size);
-#endif
 		}
+#else
+		if (size <= 4 * SMALL)
+			p = allocator_array()[(size + 3) / 4]->dynamic_allocate();
+		else
+			p = malloc(size);
+		if (p)
+		{
+			MemoryPool().insertKey(p, (bkpulong)size);
+		}
+#endif
 		return p;
 	};
 
@@ -127,14 +126,22 @@ public:
 #endif
 			auto it = MemoryPool().find(p);
 			//先做兼容处理，找到bug再说
-			if (it != MemoryPool().end())
+			if (it == MemoryPool().end())
 			{
-				//if (it->second <= 4 * SMALL)
-				//	allocator_array()[(it->second + 3) / 4]->dynamic_deallocate(p);
-				//else
-					free(p);
-				MemoryPool().erase(it);
+#if PARSER_MULTITHREAD
+				MemoryPool().unlock();
+#endif
+				return;
 			}
+#if PARSER_MULTITHREAD
+			free(p);
+#else
+			if (it->second <= 4 * SMALL)
+				allocator_array()[(it->second + 3) / 4]->dynamic_deallocate(p);
+			else
+				free(p);
+#endif
+			MemoryPool().erase(it);
 #if PARSER_MULTITHREAD
 		MemoryPool().unlock();
 #endif
@@ -206,6 +213,7 @@ class BKE_Variable
 private:
 	inline void clear()
 	{
+		//注意三个等号重载那copy了这里代码
 		if (!MemoryPool().clearflag && obj)
 		{
 			obj->release(); obj = NULL; 
@@ -988,12 +996,18 @@ public:
 	inline void update(const BKE_VarDic *v)
 	{
 		for (auto it = v->varmap.begin(); it != v->varmap.end(); it++)
-			varmap[it->first] = it->second;
+		{
+			if (!it->second.isVoid())
+				varmap[it->first] = it->second;
+		}
 	}
 	inline void except(const BKE_VarDic *v)
 	{
 		for (auto it = v->varmap.begin(); it != v->varmap.end(); it++)
-			varmap.erase(it->first);
+		{
+			if (!it->second.isVoid())
+				varmap.erase(it->first);
+		}
 	}
 	inline bool contains(const BKE_String &s)
 	{
@@ -1004,8 +1018,11 @@ public:
 		BKE_VarArray *arr = new BKE_VarArray();
 		for (auto it = varmap.begin(); it != varmap.end(); it++)
 		{
-			arr->pushMember(it->first);
-			arr->pushMember(it->second);
+			if (!it->second.isVoid())
+			{
+				arr->pushMember(it->first);
+				arr->pushMember(it->second);
+			}
 		}
 		return arr;
 	};
@@ -1141,7 +1158,14 @@ public:
 			return varmap[key];
 		return *var;
 	}
-	inline BKE_Variable& setMember(const BKE_String &key, const BKE_Variable &obj){ return varmap.insert(key, obj); };
+	inline BKE_Variable& forceSetMember(const BKE_String &key, const BKE_Variable &obj){ return varmap.insert(key, obj); };
+	inline BKE_Variable& setMember(const BKE_String &key, const BKE_Variable &obj)
+	{
+		BKE_Variable &var = varmap[key];
+		if (!var.isVar() && !var.isTemp()) { throw Var_Except(L"操作数必须是变量" VAR_EXCEPT_EXT); }
+		var = obj;
+		return var;
+	};
 	inline void setConstMember(const BKE_String &key, const BKE_Variable &obj)
 	{
 		BKE_Variable &var = varmap[key];
@@ -1152,6 +1176,7 @@ public:
 	inline void setConstVar(const BKE_String &key, const BKE_Variable &obj)
 	{
 		BKE_Variable &var = varmap[key];
+		if (!var.isVar() && !var.isTemp()) { throw Var_Except(L"操作数必须是变量" VAR_EXCEPT_EXT); }
 		var = obj;
 		var.makeUnchangable();
 	};
@@ -1241,6 +1266,9 @@ private:
 public:
 	BKE_NativeFunction native;
 	BKE_bytree *code;
+#if BKE_CREATOR
+	BKE_Variable returnvar;
+#endif
 
 	inline BKE_FunctionCode():BKE_VarObject(VAR_FUNCCODE_P), native(NULL), code(NULL){};
 	inline BKE_FunctionCode(BKE_NativeFunction func) :BKE_VarObject(VAR_FUNCCODE_P), native(func), code(NULL){};
@@ -1254,7 +1282,9 @@ class BKE_VarFunction :public BKE_VarObject
 	friend class Parser;
 	friend class BKE_Variable;
 	friend class BKE_VarClass;
+#if BKE_CREATOR
 	friend class PAModule;
+#endif
 private:
 	BKE_FunctionCode *func;
 	BKE_Variable* self;
@@ -1282,7 +1312,6 @@ public:
 #endif
 	vector<BKE_String> paramnames;
 	BKE_hashmap<BKE_String, BKE_Variable> initials;
-	BKE_Variable returnvar;
 
 	BKE_VarFunction() = delete;
 	inline BKE_VarFunction(BKE_NativeFunction fun, BKE_Variable *_self = NULL) :BKE_VarObject(VAR_FUNC){ func = new BKE_FunctionCode(fun); self = _self; closure = (BKE_VarClosure *)BKE_VarClosure::global()->addRef(); closure->extraref++; };
@@ -1305,6 +1334,7 @@ public:
 		rawexp = f.rawexp;
 #endif
 	};
+
 	inline BKE_Variable run(BKE_VarArray *params)
 	{
 		if (func->native)
@@ -1313,7 +1343,7 @@ public:
 		BKE_VarObjectAutoReleaser cc(clo);
 		for (auto &i : initials)
 		{
-			clo->setMember(i.first, i.second);
+			clo->forceSetMember(i.first, i.second);
 		}
 		int j = 0;
 		int pcount = params ? params->getCount() : 0;
@@ -1323,7 +1353,7 @@ public:
 				break;
 			if (paramnames[i][0] != L'*')
 			{
-				clo->setMember(paramnames[i], params->quickGetMember(j));
+				clo->forceSetMember(paramnames[i], params->quickGetMember(j));
 				j++;
 			}
 			else
@@ -1333,7 +1363,7 @@ public:
 				if (params)
 					for (; j < pcount; j++)
 						arr->pushMember(params->quickGetMember(j));
-				clo->setMember(name, arr);
+				clo->forceSetMember(name, arr);
 			}
 		}
 		return func->run(self, params, clo);
@@ -1380,6 +1410,9 @@ inline void BKE_VarClosure::addNativeFunction(const BKE_String &key, BKE_NativeF
 
 class BKE_VarProp :public BKE_VarObject
 {
+#if BKE_CREATOR
+	friend class PAModule;
+#endif
 private:
 	BKE_FunctionCode *funcget;
 	BKE_FunctionCode *funcset;
@@ -1469,7 +1502,7 @@ public:
 			BKE_Variable tmp = BKE_Variable::arrayWithObjects(v);
 			BKE_VarClosure *clo = getClo();
 			if (!setparam.empty() && clo)
-				clo->setMember(setparam, v);
+				clo->forceSetMember(setparam, v);
 			funcset->run(self, static_cast<BKE_VarArray*>(tmp.obj), clo);
 		}
 	}
@@ -1499,6 +1532,8 @@ class BKE_VarClass;
 
 class BKE_NativeClass
 {
+protected:
+	void _prepareClass(const wstring &name);
 public:
 	BKE_VarClass *_class;
 	BKE_NativeClass() = delete;
@@ -1927,6 +1962,24 @@ public:
 		return false;
 	}
 };
+
+inline void BKE_NativeClass::_prepareClass(const wstring &name)
+{
+	auto &v = BKE_VarClosure::global()->getMember(name);
+	if (v.getType() != VAR_CLASS)
+	{
+		v.setVoid();
+		v.vt = VAR_CLASS;
+		if (_class)
+			v.obj = new BKE_VarClass(name, _class);
+		else
+			v.obj = new BKE_VarClass(name);
+		if (((BKE_VarClass*)v.obj)->native)
+			delete ((BKE_VarClass*)v.obj)->native;
+		((BKE_VarClass*)v.obj)->native = this;
+	}
+	_class = (BKE_VarClass*)v.obj;
+}
 
 inline BKE_VarClass *BKE_VarClosure::getThisClosure()
 {

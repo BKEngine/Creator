@@ -3,7 +3,11 @@
 #include <errno.h>
 #include <limits.h>
 #include <iostream>
+#if BKE_CREATOR
 #include "bkutf8.h"
+#else
+#include <bkutf8.h>
+#endif
 #include <stdio.h>
 
 #ifdef _WIN32
@@ -208,10 +212,10 @@ bkplong bkpColor2Int(const wstring &src)
 	case 6:
 		(*(unsigned short*)(n + 6)) = 0xFF;
 	case 8:
-		color |= 0x01000000 * (*(unsigned short*)(n + 6));
-		color |= 0x010000 * (*(unsigned short*)(n));
-		color |= 0x0100 * (*(unsigned short*)(n + 2));
-		color |= 0x01 * (*(unsigned short*)(n + 4));
+		color |= ((int)(*(unsigned short*)(n + 6))) << 24;
+		color |= ((int)(*(unsigned short*)(n))) << 16;
+		color |= ((int)(*(unsigned short*)(n + 2))) << 8;
+		color |= ((int)(*(unsigned short*)(n + 4)));
 		break;
 	default:
 		break;
@@ -221,20 +225,40 @@ bkplong bkpColor2Int(const wstring &src)
 
 wstring bkpInt2Str(bkplong v)
 {
-	char buf[36];
+	char buf[16];
+#ifdef _MSC_VER
 	itoa(v, buf, 10);
+#else
+	sprintf(buf, "%d", v);
+#endif
 	return UniFromUTF7(buf, strlen(buf));
 }
+
+void EliminateTrailingFloatZeros(char *iValue)
+{
+	char *p = 0;
+	for (p = iValue; *p; ++p)
+	{
+		if ('.' == *p) {
+			while (*++p);
+			while ('0' == *--p) *p = '\0';
+			if (*p == '.') *p = '\0';
+			break;
+		}
+	}
+}
+
 wstring bkpInt2Str(double v)
 {
-	char buf[36];
-	sprintf(buf, "%lf", v);
+	char buf[24];
+	sprintf(buf, "%f", v);
+	EliminateTrailingFloatZeros(buf);
 	return UniFromUTF7(buf, strlen(buf));
 }
 
 wstring bkpInt2HexStr(double v)
 {
-	char buf[36] = "0x";
+	char buf[24] = "0x";
 	sprintf(buf+2, "%x", (bkplong)v);
 	return UniFromUTF7(buf, strlen(buf));
 }
@@ -450,7 +474,7 @@ double getutime()
 
 #include <random>
 
-std::mt19937 random_pool(std::time(NULL));
+std::mt19937 random_pool((unsigned int)std::time(NULL));
 
 bkplong bkpRandomInt()
 {

@@ -39,7 +39,17 @@ LONG WINAPI ApplicationCrashHandler(EXCEPTION_POINTERS *pException){//程式异�
 	***保存数据代码***
 	*/
 	//创建 Dump 文件  
-	HANDLE hDumpFile = CreateFile((LPCWSTR)QTime::currentTime().toString("HH时mm分ss秒zzz.dmp").utf16(), GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	auto t = time(NULL);
+	auto tm = localtime(&t);
+	wchar_t modulename[FILENAME_MAX];
+	GetModuleFileName(NULL, modulename, FILENAME_MAX);
+	wstring path = modulename;
+	size_t pos = path.find_last_of(L"/\\");
+	if (pos != wstring::npos)
+		modulename[pos + 1] = 0;
+	wchar_t filename[512];
+	swprintf(filename, L"%s\\%04d-%02d-%02d %02d:%02d:%02d.dmp", modulename, tm->tm_year, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+	HANDLE hDumpFile = CreateFile(filename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDumpFile != INVALID_HANDLE_VALUE){
 		//Dump信息  
 		MINIDUMP_EXCEPTION_INFORMATION dumpInfo;
@@ -47,17 +57,17 @@ LONG WINAPI ApplicationCrashHandler(EXCEPTION_POINTERS *pException){//程式异�
 		dumpInfo.ThreadId = GetCurrentThreadId();
 		dumpInfo.ClientPointers = TRUE;
 		//写入Dump文件内容  
-		MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpNormal, &dumpInfo, NULL, NULL);
+		MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpFilterMemory, &dumpInfo, NULL, NULL);
+		CloseHandle(hDumpFile);
 	}
+	//这里弹出一个错误对话框并退出程序  
+	EXCEPTION_RECORD* record = pException->ExceptionRecord;
+	wchar_t msg[100];
+	swprintf(msg, L"抱歉崩溃了。error code:%08X", record->ExceptionCode);
+	MessageBox(NULL, msg, L"崩溃", 0);
 	//保存
 	if (codeedit)
 		codeedit->backupAll();
-	//这里弹出一个错误对话框并退出程序  
-	EXCEPTION_RECORD* record = pException->ExceptionRecord;
-	QString errCode(QString::number(record->ExceptionCode, 16)), errAdr(QString::number((uint)record->ExceptionAddress, 16)), errMod;
-	QMessageBox::critical(NULL, "程式崩溃", "<FONT size=4><div><b>对于发生的错误，表示诚挚的歉意</b><br/></div>" +
-		QString("<div>错误代码：%1</div><div>错误地址：%2</div></FONT>").arg(errCode).arg(errAdr),
-		QMessageBox::Ok);
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 #endif
