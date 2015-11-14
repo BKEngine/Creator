@@ -1211,7 +1211,7 @@ int BkeScintilla::findFirst1(const QString fstr, bool cs, bool exp, bool word, b
 	findstr_length = fstrdata.length();
 	findflag = (cs ? SCFIND_MATCHCASE : 0) |
 		(word ? SCFIND_WHOLEWORD : 0) |
-		(exp ? SCFIND_REGEXP : 0);
+		(exp ? SCFIND_CXX11REGEX | SCFIND_REGEXP : 0);
 
 	SendScintilla(SCI_SETINDICATORCURRENT, BKE_INDICATOR_FIND);
 	ClearIndicators(BKE_INDICATOR_FIND);

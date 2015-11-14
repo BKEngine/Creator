@@ -130,6 +130,8 @@ void clearCloseInfo()
 		d.remove(d[i]);
 }
 
+#include "BKS_info.h"
+
 int main(int argc, char *argv[])
 {
 	QApplication::setApplicationName("BKE_Creator");
@@ -235,9 +237,9 @@ int main(int argc, char *argv[])
 	LOLI_CLEAR_TEMP(BKE_CURRENT_DIR+"/temp");  //清空临时文件夹
 
 	// 读取api命令
-	if( !LOLI::AutoRead(BKE_API_FILE,BKE_CURRENT_DIR+"/command.api") ){
-		QMessageBox::information(0,"初始化","读取API列表失败",QMessageBox::Ok) ;
-	}
+	//if( !LOLI::AutoRead(BKE_API_FILE,BKE_CURRENT_DIR+"/command.api") ){
+	//	QMessageBox::information(0,"初始化","读取API列表失败",QMessageBox::Ok) ;
+	//}
 
 	//读取最近使用列表
 	QString ks ;
@@ -247,8 +249,8 @@ int main(int argc, char *argv[])
 	BKE_Recently_Files = ks.split("\r\n") ;
 
 	//读取默认方法api列表
-	BkeCreator::ReadApiList(&SYSlist,BKE_CURRENT_DIR+"/class.api",8) ;
-	BkeCreator::ReadApiList(&KEYlist,BKE_CURRENT_DIR+"/parser.api",9) ;
+	//BkeCreator::ReadApiList(&SYSlist,BKE_CURRENT_DIR+"/class.api",8) ;
+	//BkeCreator::ReadApiList(&KEYlist,BKE_CURRENT_DIR+"/parser.api",9) ;
 
 	//setting
 	BKE_CLOSE_SETTING = new QSettings(BKE_CURRENT_DIR+"/setting.ini",QSettings::IniFormat) ;
@@ -258,6 +260,7 @@ int main(int argc, char *argv[])
 
 	//<<<<<<<---------------
 
+	global_bke_info.init();
 
 	MainWindow test ;
 

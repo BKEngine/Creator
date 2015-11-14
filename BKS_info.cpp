@@ -8,7 +8,7 @@ GLOBALSTRUCTURES_INIT();
 
 BKE_Info global_bke_info;
 
-BKE_Info::BKE_Info()
+void BKE_Info::init()
 {
 	//Parser_GlobalInit();
 	Parser::getInstance();

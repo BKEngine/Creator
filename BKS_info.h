@@ -9,6 +9,9 @@
 
 #include "function.h"
 
+#undef VOID
+#undef IGNORE
+
 struct ParamInfo
 {
 	enum
@@ -33,7 +36,9 @@ class BkeProject;
 class BKE_Info
 {
 public:
-	BKE_Info();
+	BKE_Info(){};
+
+	void init();
 
 	BKE_VarClosure *glo;
 
