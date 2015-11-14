@@ -2697,11 +2697,11 @@ long BuiltinRegex::FindText(Document *doc, int minPos, int maxPos, const char *s
                         int *length) {
 
 #ifdef CXX11_REGEX
-	if (flags & SCFIND_CXX11REGEX) {
+//	if (flags & SCFIND_CXX11REGEX) {
 			return Cxx11RegexFindText(doc, minPos, maxPos, s,
 			caseSensitive, length, search);
-	}
-#endif
+//	}
+#else
 
 	const RESearchRange resr(doc, minPos, maxPos);
 
@@ -2774,6 +2774,7 @@ long BuiltinRegex::FindText(Document *doc, int minPos, int maxPos, const char *s
 	}
 	*length = lenRet;
 	return pos;
+#endif
 }
 
 const char *BuiltinRegex::SubstituteByPosition(Document *doc, const char *text, int *length) {

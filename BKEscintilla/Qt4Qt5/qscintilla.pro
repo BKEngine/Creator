@@ -33,7 +33,7 @@ INCLUDEPATH += . ../include ../lexlib ../src
 DEFINES += SCINTILLA_QT SCI_LEXER
 
 greaterThan(QT_MAJOR_VERSION, 4) {
-	QT += widgets printsupport
+	QT += widgets
 
     greaterThan(QT_MINOR_VERSION, 1) {
 	    macx:QT += macextras

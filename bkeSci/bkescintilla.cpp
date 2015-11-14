@@ -1642,18 +1642,18 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 {
 	QsciScintilla::setLexer(lex);
 	//读取用户设置
-//	QFont f;
-//	for (int i = 0; i < 256; i++){
-//		f = lex->defaultFont(i);
-//        SendScintilla(SCI_STYLESETFONT, i, f.family().toUtf8().constData());
-//		SendScintilla(SCI_STYLESETSIZE, i, f.pointSize());
-//		SendScintilla(SCI_STYLESETITALIC, i, f.italic());
-//		SendScintilla(SCI_STYLESETBOLD, i, f.bold());
-//		SendScintilla(SCI_STYLESETUNDERLINE, i, f.underline());
-//
-////		SendScintilla(SCI_STYLESETFORE, i, lex->color(i));
-////		SendScintilla(SCI_STYLESETBACK, i, lex->paper(i));
-//	}
+	QFont f;
+	for (int i = 0; i < 256; i++){
+		f = lex->defaultFont(i);
+        SendScintilla(SCI_STYLESETFONT, i, f.family().toUtf8().constData());
+		SendScintilla(SCI_STYLESETSIZE, i, f.pointSize());
+		SendScintilla(SCI_STYLESETITALIC, i, f.italic());
+		SendScintilla(SCI_STYLESETBOLD, i, f.bold());
+		SendScintilla(SCI_STYLESETUNDERLINE, i, f.underline());
+
+//		SendScintilla(SCI_STYLESETFORE, i, lex->color(i));
+//		SendScintilla(SCI_STYLESETBACK, i, lex->paper(i));
+	}
 
 	QFont ft("Courier");
 	ft.setPointSize(lex->defaultFont(0).pointSize());
