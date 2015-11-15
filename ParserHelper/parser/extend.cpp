@@ -580,8 +580,9 @@ namespace Parser_Util
 			if (((BKE_VarClass *)PARAM(0).obj)->isInstanceof(L"Regex"))
 			{
 				Regex *r = (Regex *)((BKE_VarClass *)PARAM(0).obj)->native;
+				wstring tmp = self->str.getConstStr().substr(start);
 				std::wsmatch m;
-				if(!std::regex_search(self->str.getConstStr().substr(start), m, r->reg))
+				if(!std::regex_search(tmp, m, r->reg))
 					return -1;
 				else
 					return (bkplong)m.position();
