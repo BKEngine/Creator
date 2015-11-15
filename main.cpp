@@ -48,7 +48,7 @@ LONG WINAPI ApplicationCrashHandler(EXCEPTION_POINTERS *pException){//程式异�
 	if (pos != wstring::npos)
 		modulename[pos + 1] = 0;
 	wchar_t filename[512];
-	swprintf(filename, L"%s\\%04d-%02d-%02d %02d:%02d:%02d.dmp", modulename, tm->tm_year, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
+	swprintf(filename, L"%s%04d-%02d-%02d %02d-%02d-%02d.dmp", modulename, tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
 	HANDLE hDumpFile = CreateFile(filename, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hDumpFile != INVALID_HANDLE_VALUE){
 		//Dump信息  
@@ -57,7 +57,7 @@ LONG WINAPI ApplicationCrashHandler(EXCEPTION_POINTERS *pException){//程式异�
 		dumpInfo.ThreadId = GetCurrentThreadId();
 		dumpInfo.ClientPointers = TRUE;
 		//写入Dump文件内容  
-		MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpFilterMemory, &dumpInfo, NULL, NULL);
+		MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hDumpFile, MiniDumpScanMemory, &dumpInfo, NULL, NULL);
 		CloseHandle(hDumpFile);
 	}
 	//这里弹出一个错误对话框并退出程序  
