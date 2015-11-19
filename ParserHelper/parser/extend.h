@@ -55,7 +55,7 @@
 #define REG_GET(c) _REG(c,PropGet)
 
 #define FUNC_INFO(name) {L###name, &CURRENTCLASS::nativeFunc_##name}
-#define FUNC_ALIAS_INFO(alias, name) {L###name, &CURRENTCLASS::nativeFunc_##name}
+#define FUNC_ALIAS_INFO(alias, name) {L###alias, &CURRENTCLASS::nativeFunc_##name}
 #define GET_INFO(name) {L###name, &CURRENTCLASS::nativeGet_##name}
 #define SET_INFO(name) {L###name, &CURRENTCLASS::nativeSet_##name}
 

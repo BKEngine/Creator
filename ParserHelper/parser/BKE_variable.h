@@ -479,7 +479,7 @@ public:
 
 	BKE_Variable clone() const;
 
-	inline void copyFrom(const BKE_Variable &v){ *this = v.clone(); }
+	void copyFrom(const BKE_Variable &v);
 
 	inline void forceSet(const BKE_Variable &v)
 	{
@@ -814,7 +814,7 @@ public:
 			vararray.resize(v->getCount());
 			for (int i = 0; i<v->getCount(); i++)
 			{
-				vararray[i] = v->quickGetMember(i).clone();
+				vararray[i].copyFrom(v->quickGetMember(i));
 			}
 		}
 	};
@@ -988,7 +988,7 @@ public:
 			clear();
 			for (auto it = v->varmap.begin(); it != v->varmap.end(); it++)
 			{
-				varmap[it->first] = it->second.clone();
+				varmap[it->first].copyFrom(it->second);
 			}
 		}
 		return this;
@@ -1206,7 +1206,7 @@ public:
 			clear();
 			for (auto it = v->varmap.begin(); it != v->varmap.end(); it++)
 			{
-				varmap[it->first] = it->second.clone();
+				varmap[it->first].copyFrom(it->second);
 			}
 		}
 		return this;

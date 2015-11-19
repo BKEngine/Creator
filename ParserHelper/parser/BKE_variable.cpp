@@ -766,6 +766,37 @@ BKE_Variable BKE_Variable::clone() const
 	}
 }
 
+void BKE_Variable::copyFrom(const BKE_Variable &v)
+{
+	clear();
+	vt = VAR_NONE;
+	switch (v.vt)
+	{
+	case VAR_ARRAY:
+	{
+		auto arr = new BKE_VarArray();
+		arr->cloneFrom(static_cast<const BKE_VarArray *>(v.obj));
+		*this = arr;
+	}
+	break;
+	case VAR_DIC:
+	{
+		auto dic = new BKE_VarDic();
+		dic->cloneFrom(static_cast<const BKE_VarDic *>(obj));
+		*this = dic;
+	}
+	break;
+	default:
+		if (v.obj)
+		{
+			vt = v.vt;
+			obj = v.obj->addRef();
+		}
+		else
+			*this = v;
+	}
+}
+
 BKE_Variable& BKE_Variable::operator = (bkpshort v)
 {
 	if (getType() == VAR_PROP)

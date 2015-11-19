@@ -873,6 +873,8 @@ void PAModule::analysisToClosure(BKE_VarClosure *clo)
 	}
 }
 
+#define EXIST_N(n) (tr->childs.size() > n && tr->childs[n])
+
 void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Variable *var)
 {
 	if (!tr)
@@ -923,6 +925,8 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 			break;
 		case OP_DOT + OP_COUNT:
 		{
+			if (!EXIST_N(0))
+				break;
 			auto str = tr->childs[0]->Node.var.asBKEStr();
 			if (!str.isVoid())
 			{
@@ -952,6 +956,8 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 		break;
 		case OP_DOT:
 		{
+			if (!EXIST_N(0))
+				break;
 			tmpvar = NULL;
 			_analysisToClosure(tr->childs[0], clo, NULL);
 			auto str = tr->childs[1]->Node.var.asBKEStr();
@@ -972,6 +978,8 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 			break;
 		}
 		case OP_RETURN + OP_COUNT:
+			if (!EXIST_N(0))
+				break;
 			_analysisToClosure(tr->childs[0], clo, var);
 			break;
 		case OP_ARR2 + OP_COUNT:
@@ -1016,7 +1024,11 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 			break;
 		case OP_PROPGET + OP_COUNT:
 			{
-				if (tr->childs[0] && !tr->childs[0]->Node.var.isVoid())
+				if (!EXIST_N(0))
+					break;
+				if (!EXIST_N(1))
+					break;
+				if (!tr->childs[0]->Node.var.isVoid())
 				{
 					BKE_Variable &var = clo->varmap[tr->childs[0]->Node.var.asBKEStr()];
 					if (var.getType() != VAR_PROP)
@@ -1031,7 +1043,13 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 			break;
 		case OP_PROPSET + OP_COUNT:
 			{
-				if (tr->childs[0] && !tr->childs[0]->Node.var.isVoid())
+				if (!EXIST_N(0))
+					break;
+				if (!EXIST_N(1))
+					break;
+				if (!EXIST_N(2))
+					break;
+				if (!tr->childs[0]->Node.var.isVoid())
 				{
 					BKE_Variable &var = clo->varmap[tr->childs[0]->Node.var.asBKEStr()];
 					if (var.getType() != VAR_PROP)
@@ -1045,7 +1063,7 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 			}
 			break;
 		case OP_CLASS + OP_COUNT:
-			if (tr->childs.size() > 0 && tr->childs[0])
+			if (EXIST_N(0))
 			{
 				BKE_VarClass *cla;
 				BKE_String n = tr->childs[0]->Node.var.asBKEStr();
@@ -1110,7 +1128,9 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 			}
 			break;
 		case OP_BRACKET:
-			if (var && tr->childs[0] && tr->childs[0]->Node.opcode == OP_LITERAL + OP_COUNT)
+			if (!EXIST_N(0))
+				break;
+			if (var && tr->childs[0]->Node.opcode == OP_LITERAL + OP_COUNT)
 			{
 				if (!tr->childs[0]->Node.var.isVoid())
 				{
@@ -1135,6 +1155,10 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 		case OP_SETMOD:
 		case OP_SETPOW:
 		case OP_SETSET:
+			if (!EXIST_N(0))
+				break;
+			if (!EXIST_N(1))
+				break;
 			tmpvar = NULL;
 			_analysisToClosure(tr->childs[0], clo, NULL);
 			_analysisToClosure(tr->childs[1], clo, tmpvar);
