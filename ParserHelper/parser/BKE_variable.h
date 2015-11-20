@@ -1544,6 +1544,7 @@ public:
 	virtual void nativeLoad(const BKE_Variable &var){}
 	//*_class=self
 	virtual BKE_NativeClass* nativeCreateNew(const BKE_VarClass *self, const BKE_VarArray *paramarray) = 0;
+	virtual BKE_NativeClass* nativeCreateNULL(){ return NULL; };
 };
 
 class Parser;
@@ -1895,7 +1896,7 @@ public:
 		}
 	}
 
-	void construct(BKE_VarArray *paramarray, BKE_VarClass *_this)
+	void construct(BKE_VarArray *paramarray, BKE_VarClass *_this, bool force = false)
 	{
 		if (parent != BKE_VarClosure::global())
 			static_cast<BKE_VarClass*>(parent)->construct(paramarray, _this);
@@ -1904,7 +1905,10 @@ public:
 			//override parent class's nativeclass
 			if (_this->native)
 				delete _this->native;
-			_this->native = this->native->nativeCreateNew(_this, paramarray);
+			if (!force)
+				_this->native = this->native->nativeCreateNew(_this, paramarray);
+			else
+				_this->native = this->native->nativeCreateNULL();
 			if (!_this->native)
 			{
 				_this->release();
@@ -1929,7 +1933,7 @@ public:
 		}
 	}
 
-	BKE_Variable createInstance(BKE_VarArray *paramarray)
+	BKE_Variable createInstance(BKE_VarArray *paramarray, bool force = false)
 	{
 		if (!isdef)
 		{
@@ -1942,7 +1946,7 @@ public:
 		if (cannotcreate)
 			throw Var_Except(L"不允许创建该类（" + classname.getConstStr() + L"）的实例");
 		BKE_VarClass* cla = new BKE_VarClass(this);
-		construct(paramarray, cla);
+		construct(paramarray, cla, force);
 		return cla;
 	}
 

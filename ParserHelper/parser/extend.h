@@ -27,6 +27,7 @@
 #define NATIVE_LOAD() virtual void nativeLoad(const BKE_Variable &var) override
 #define NATIVE_CREATENEW() virtual BKE_NativeClass* nativeCreateNew(const BKE_VarClass *self, const BKE_VarArray *paramarray) override
 #define NATIVE_SUPPERINIT(_class) typedef _class super; const wchar_t * nativeSuperName = L###_class
+#define NATIVE_CREATENULL(classname) virtual BKE_NativeClass* nativeCreateNULL() override{return new classname();}
 
 #define NATIVECLASS_FUNC(name) BKE_Variable CURRENTCLASS::nativeFunc_##name(_FUNC_PARAM)
 #define NATIVECLASS_GET(name) BKE_Variable CURRENTCLASS::nativeGet_##name(_FUNC_PARAM)
@@ -100,6 +101,26 @@ T *_bkpGetClassInstance(BKE_VarObject *__obj, T2 && __classname)
 #define DISABLECREATE() _class->cannotcreate=true;
 #define ENABLECREATE() _class->cannotcreate=false;
 
+//// 格式标准
+// @breif 简要说明
+// @body 详细说明
+// @prototype 参数原型，不定参数或参数个数不同意义不同的时候使用
+// @param type name[=xxx] [comment] 参数的详细定义，anytype用来指代任意值
+// @return type [comment]返回值的类型及说明
+// @example 示例说明
+// @example_code 示例代码
+// @example_result 示例结果
+// @name 强行更改名称（如log_ol用）
+// @static
+// @class
+// @type 同 @return
+
+//@singleton和不可实例化同意思，忽略
+
+//{}里，@b是粗体，@i是斜体，@t是\t，@box是方框，@link是链接
+//anytype表示任意类型
+
+
 namespace Parser_Util
 {
 	
@@ -118,6 +139,8 @@ namespace Parser_Util
 		NATIVE_INIT();
 
 		NATIVE_CREATENEW();
+
+		NATIVE_CREATENULL(Date);
 
 		Date() :BKE_NativeClass(L"Date")
 		{
@@ -138,19 +161,19 @@ namespace Parser_Util
 		}
 
 		/**
-		 *  @return 数型 年份
+		 *  @return number 年份
 		 *  @brief  返回当前的年份。
 		 */
 		NATIVE_FUNC(getYear);
 
 		/**
-		*  @param value
+		*  @param number year
 		*  @brief 设置当前的年份。
 		*/
 		NATIVE_FUNC(setYear);
 
 		/**
-		 *  @return 数型 月份
+		 *  @return number 月份
 		 *  @brief  返回当前的月份(1-12)。
 		 */
 		NATIVE_FUNC(getMonth);
@@ -162,7 +185,7 @@ namespace Parser_Util
 		NATIVE_FUNC(setMonth);
 
 		/**
-		 *  @return 数型 日期
+		 *  @return number 日期
 		 *  @brief  返回当前的日期(1-31)。
 		 */
 		NATIVE_FUNC(getDay);
@@ -174,7 +197,7 @@ namespace Parser_Util
 		NATIVE_FUNC(setDay);
 
 		/**
-		 *  @return 数型 小时
+		 *  @return number 小时
 		 *  @brief  返回现在的小时(0-23)。
 		 */
 		NATIVE_FUNC(getHour);
@@ -186,7 +209,7 @@ namespace Parser_Util
 		NATIVE_FUNC(setHour);
 
 		/**
-		 *  @return 数型 分钟
+		 *  @return number 分钟
 		 *  @brief  返回现在的分钟(0-59)。
 		 */
 		NATIVE_FUNC(getMinute);
@@ -198,7 +221,7 @@ namespace Parser_Util
 		NATIVE_FUNC(setMinute);
 
 		/**
-		 *  @return 数型 秒数
+		 *  @return number 秒数
 		 *  @brief  返回现在的秒数(0-59)。
 		 */
 		NATIVE_FUNC(getSecond);
@@ -213,7 +236,7 @@ namespace Parser_Util
 		*  @param  string formatString 格式字符串
 		*  @return 格式化后的字符串
 		*  @brief  根据提供的格式化字串返回格式化后的字符串。
-				   格式化字串里：%Y，%M，%D，%h，%m，%s分别表示全宽度的年份（四位）、月份（两位）、日期（两位）、24小时制的小时（两位）、分钟（两位）、秒（两位）
+		*  @body	格式化字串里：%Y，%M，%D，%h，%m，%s分别表示全宽度的年份（四位）、月份（两位）、日期（两位）、24小时制的小时（两位）、分钟（两位）、秒（两位）
 								 %#Y，%#M，%#D，%#h，%#m，%#s分别表示压缩宽度，其中年份固定为两位，其余的在前面有无效0的时候会省略0
 								 %%代表一个%
 		*/
@@ -256,119 +279,137 @@ namespace Parser_Util
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return integer
 		 *  @brief 符号函数,大于0返回1,等于0(误差10^-8)返回0,小于0返回-1。
 		 */
 		NATIVE_FUNC(sgn);
 
 		/**
 		 *  @static
-		 *  @param x, y
+		 *  @param number x
+		 *  @param number y
+		 *  @return number
 		 *  @brief 指数函数，返回x^y
 		*/
 		NATIVE_FUNC(pow);
 
 		/*
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return number
 		 *  @brief 返回绝对值。
 		 */
 		NATIVE_FUNC(abs);
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return number
 		 *  @brief 返回平方根。
 		 */
 		NATIVE_FUNC(sqrt);
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return number
 		 *  @brief 返回以10为底的对数。
 		 */
 		NATIVE_FUNC(lg);
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return number
 		 *  @brief 返回自然对数。
 		 */
 		NATIVE_FUNC(ln);
 
 		/**
 		 *  @static
-		 *  @param base,var
-		 *  @brief 返回以base为底的对数值。
+		 *  @param number base
+		 *  @param number x
+		 *  @return number
+		 *  @brief 返回以base为底的x的对数值。
 		 */
 		NATIVE_FUNC(log);
 
 		/**
 		 *  @static
-		 *  @param var
-		 *  @brief 返回小于或等于var的最大整数。
+		 *  @param number x
+		 *  @return integer
+		 *  @brief 返回小于或等于x的最大整数。
 		 */
 		NATIVE_FUNC(floor);
 
 		/**
 		 *  @static
-		 *  @param var
-		 *  @brief 返回大于或等于var的最小整数。
+		 *  @param number x
+		 *  @return integer
+		 *  @brief 返回大于或等于x的最小整数。
 		 */
 		NATIVE_FUNC(ceil);
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return integer
 		 *  @brief 返回返回四舍五入后的整数。
 		 */
 		NATIVE_FUNC(round);
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return number
 		 *  @brief 返回返回正弦值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(sin);
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return number
 		 *  @brief 返回余弦值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(cos);
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return number
 		 *  @brief 返回正切值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(tan);
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return number
 		 *  @brief 返回反正弦值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(asin);
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return number
 		 *  @brief 返回反余弦值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(acos);
 
 		/**
 		 *  @static
-		 *  @param var
+		 *  @param number x
+		 *  @return number
 		 *  @brief 返回反正切值,参数单位为弧度。
 		 */
 		NATIVE_FUNC(atan);
 
 		/**
 		 *  @static
-		 *  @return float 0-1的浮点数
+		 *  @return number 0-1的浮点数
 		 *  @brief 返回0-1的浮点数。和全局的random相比，这里采用的是随机数性能更好速度更慢些的mt19937算法。
 		 */
 		NATIVE_FUNC(random);
@@ -393,8 +434,10 @@ namespace Parser_Util
 
 		NATIVE_CREATENEW();
 
+		NATIVE_CREATENULL(Regex);
+
 		/**
-		 *  @param string
+		 *  @param string str
 		 *  @return array
 		 *  @brief 返回所有匹配到的数组，匹配失败将返回空数组。
 		 *  @example 以下将演示一个从内容为
@@ -406,18 +449,18 @@ namespace Parser_Util
 		NATIVE_FUNC(search);
 
 		/**
-		 *  @param string
+		 *  @param string str
 		 *  @return bool
 		 *  @brief 判断这个正则表达式是否可以全部匹配这个字符串,可以返回true,否则返回false。
 		 */
 		NATIVE_FUNC(matchAll);
 
 		/**
-		 *  @param string
+		 *  @param string str
 		 *  @return array
 		 *  @brief 返回子匹配(即正则表达式里用()括住的字符串的匹配)数组，没有子匹配将返回空数组。
 		 *  @example 以下将演示一个从内容为
-		 *  “abcd”
+		 *  "abcd"
 		 *  的字符串中匹配到的数组
 		 *  @example_code Regex("(.)bc(.)").getSubMatch("abcd")
 		 *  @example_result ["abcd","a","d"]
@@ -430,7 +473,7 @@ namespace Parser_Util
 		 *  @return string
 		 *  @brief 将src里第一个匹配替换成dst，dst里可以使用\1,\2等表示子匹配，\0表示整个的匹配串。
 		 *  @example 以下将演示一个从内容为
-		 *  “abcd”
+		 *  "abcd"
 		 *  的字符串中匹配到的字符串
 		 *  @example_code Regex("(.)bc(.)").replaceFirst("abcd","\0\1\2")
 		 *  @example_result “abcdad”
@@ -441,7 +484,7 @@ namespace Parser_Util
 		 *  @param string src 源字符串
 		 *  @param string dst 目标字符串
 		 *  @return string
-		 *  @brief 同replaceFirst,只是对所有匹配串都进行替换
+		 *  @brief 同{@link replaceFirst},只是对所有匹配串都进行替换
 		 */
 		NATIVE_FUNC(replaceAll);
 	};
@@ -457,9 +500,12 @@ namespace Parser_Util
 	{
 	public:
 		Flags() :BKE_NativeClass(L"Flags"){};
+
 		NATIVE_INIT();
 
 		NATIVE_CREATENEW();
+
+		NATIVE_CREATENULL(Flags);
 
 		/**
 		*  @param number num
@@ -474,7 +520,7 @@ namespace Parser_Util
 		NATIVE_FUNC(contains);
 
 		/**
-		*  @param num
+		*  @param number num
 		*  @return array
 		*  @brief 返回一个数组，包含num里所有存在的标记。
 		*/
@@ -493,7 +539,7 @@ namespace Parser_Util
 		NATIVE_FUNC(mask);
 
 		/**
-		*  @param num(, flag1, flag2, ...)
+		*  @prototype number num(, number flag1, number flag2, ...)
 		*  @return number
 		*  @brief 将num设置完所有参数中的标记后返回。
 		*  @example 以下将演示一个从内容为

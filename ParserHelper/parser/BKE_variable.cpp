@@ -782,7 +782,7 @@ void BKE_Variable::copyFrom(const BKE_Variable &v)
 	case VAR_DIC:
 	{
 		auto dic = new BKE_VarDic();
-		dic->cloneFrom(static_cast<const BKE_VarDic *>(obj));
+		dic->cloneFrom(static_cast<const BKE_VarDic *>(v.obj));
 		*this = dic;
 	}
 	break;

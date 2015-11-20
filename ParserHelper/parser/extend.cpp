@@ -437,7 +437,8 @@ namespace Parser_Util
 		{
 			throw Var_Except(L"传入的第二个参数必须是字典。");
 		}
-		auto cla = static_cast<BKE_VarClass*>(var.obj)->createInstance(NULL);
+		//TODO:有些系统类需要传入参数数组而不是NULL
+		auto cla = static_cast<BKE_VarClass*>(var.obj)->createInstance(NULL, true);
 		auto obj = static_cast<BKE_VarClass*>(cla.obj);
 		obj->varmap.Union(static_cast<BKE_VarDic*>(PARAM(1).obj)->varmap, true);
 		if (obj->native)
@@ -580,7 +581,7 @@ namespace Parser_Util
 			if (((BKE_VarClass *)PARAM(0).obj)->isInstanceof(L"Regex"))
 			{
 				Regex *r = (Regex *)((BKE_VarClass *)PARAM(0).obj)->native;
-				wstring tmp = self->str.getConstStr().substr(start);
+				std::wstring tmp = self->str.getConstStr().substr(start);
 				std::wsmatch m;
 				if(!std::regex_search(tmp, m, r->reg))
 					return -1;
@@ -1755,13 +1756,13 @@ namespace Parser_Util
 	REG_FUNC_BEGIN(Global)
 	{
 		/**
-		*  @param str
-		*  @return value
+		*  @param string str
+		*  @return anytype
 		*  @brief  返回str的执行结果。
 		*/
 		{ QUICKFUNC(eval) },
 		/**
-		*  @param str
+		*  @param string str
 		*  @return number
 		*  @brief  执行str，然后返回执行用的时间（单位ms）。
 		*/
@@ -1772,59 +1773,63 @@ namespace Parser_Util
 		*/
 		{ QUICKFUNC(clock) },
 		/**
-		*  @param (value1, value2, ...)
+		*  @prototype (anytype value1, anytype value2, ...)
 		*  @brief  逐个打印参数，逗号分隔。
 		*/
 		{ QUICKFUNC(log) },
 		/**
-		*  @param (str1, str2, ...)
-		*  @brief  逐个打印字符串内容，逗号分隔。
+		*  @prototype (string str1, string str2, ...)
+		*  @brief  逐个打印字符串内容（没有双引号），逗号分隔。
 		*/
 		{ QUICKFUNC(print) },
 		/**
-		*  @param num1(, num2)
+		*  @prototype number num1
+		*  @prototype number num1, number num2
 		*  @brief  生成一个数组。
-		*  如果没有num2，那么生成的是[0, 1, ..., num1-1]
-		*  如果num2>num1，那么生成的是[num1, num1+1, ..., num2-1]
-		*  如果num2<num1，那么生成的是[num1, num1-1, ..., num2+1]
-		*  如果num2=num1，那么生成的是空数组
+		*  @body 如果是第一种形式，那么生成的是[0, 1, ..., num1-1]
+		*  如果是第二种形式，那么：
+		*  {@t}如果num2>num1，那么生成的是[num1, num1+1, ..., num2-1]
+		*  {@t}如果num2<num1，那么生成的是[num1, num1-1, ..., num2+1]
+		*  {@t}如果num2=num1，那么生成的是空数组
 		*/
 		{ QUICKFUNC(range) },
 		/**
-		*  @param num1(, num2)
+		*  @prototype number num1
+		*  @prototype number num1, number num2
 		*  @brief  生成一个随机整数。
-		*  如果没有num2，那么相当于random(0, num1)，表现见下：
-		*  如果num2>num1，那么生成的是num1到num2-1之间的一个整数
-		*  如果num2<num1，那么生成的是num2到num1-1之间的一个整数
-		*  如果num2=num1，那么返回num1
+		*  @body 如果是第一种形式，那么相当于random(0, num1)。
+		*  如果是第二种形式，那么：
+		*  {@t}如果num2>num1，那么生成的是num1到num2-1之间的一个整数
+		*  {@t}如果num2<num1，那么生成的是num2到num1-1之间的一个整数
+		*  {@t}如果num2=num1，那么返回num1
 		*/
 		{ QUICKFUNC(random) },
 		/**
-		*  @param num
+		*  @param number num
 		*  @return string
 		*  @brief  相当于(string)(int)num，先对数字取整，然后生成相应的字符串。
 		*/
 		{ QUICKFUNC(itoa) },
 		/**
-		*  @param num
+		*  @param number num
 		*  @return string
 		*  @brief  同itoa，只是生成的字符串是全角的'０', '１'等字符。
 		*/
 		{ QUICKFUNC(itoa2) },
 		/**
-		*  @param string
+		*  @param string str
 		*  @return integer
-		*  @brief  返回string[0]对应的unicode编码。没有则返回0。
+		*  @brief  返回str[0]对应的unicode编码。没有则返回0。
 		*/
 		{ QUICKFUNC(char) },
 		/**
-		*  @param value
+		*  @param anytype value
 		*  @return integer
 		*  @brief  返回value对应的32位hash值。
 		*/
 		{ QUICKFUNC(hash) },
 		/**
-		*  @param value
+		*  @param anytype value
 		*  @return integer
 		*  @brief  返回value对应的hash值（short版本）。
 		*/
@@ -1835,7 +1840,7 @@ namespace Parser_Util
 		*	@return string
 		*	@brief 读取一个文件，返回里面的原始内容（字符串）
 		*	@example 以下将演示一个从内容为
-		*		abc
+		*		{@box abc}
 		*		的1.txt文件载入为数组的示例：
 		*	@example_code [].loadFile("1.txt")
 		*	@example_result "abc"
@@ -1844,7 +1849,7 @@ namespace Parser_Util
 		/**
 		*	@param string filename 文件名
 		*	@param string str 将要保存的字符串
-		*	@bool append=false 是否追加在文件末尾。若为否，则覆盖整个文件。
+		*	@param bool append=false 是否追加在文件末尾。若为否，则覆盖整个文件。
 		*	@return bool 是否成功
 		*	@brief 将一个字符串写入文件。
 		*/
@@ -1867,7 +1872,7 @@ namespace Parser_Util
 		{ QUICKFUNC(evalFile) },
 #endif
 		/**
-		*  @param value
+		*  @param anytype value
 		*  @param bool format 是否格式化
 		*  @return string
 		*  @brief  将value转变成字符串，format表示是否加上缩进格式。
@@ -1876,14 +1881,14 @@ namespace Parser_Util
 		*  @example_result [1,2,3]
 		*  @example_code toString([1,2,3], true)
 		*  @example_result [
-		*		1,
-		*		2,
-		*		3
+		*		{@t}1,
+		*		{@t}2,
+		*		{@t}3
 		*	]
 		*/
 		{ QUICKFUNC(toString) },
 		/**
-		*  @param classname, dic(, nativedata)
+		*  @prototype string classname, sictionary dic(, anytype nativedata)
 		*  @return class instance
 		*  @brief  内部用，用于从保存的类对象中还原。
 		*/
@@ -1895,7 +1900,7 @@ namespace Parser_Util
 	{
 		/**
 		*	@class undefined（内部保留类）
-		*   @param value
+		*   @param anytype value
 		*   @return bool
 		*   @brief  比较本对象与value值是否相等。
 		*/
@@ -1914,7 +1919,7 @@ namespace Parser_Util
 		/**
 		*	@class string（内部保留类）
 		*   @return integer
-		*   @brief  同length，返回字符串的长度。
+		*   @brief  同{@link length}，返回字符串的长度。
 		*/
 		{ L"size", &Parser_Util::nativeGet_length }
 	}
@@ -1924,21 +1929,24 @@ namespace Parser_Util
 	{
 		/**
 		*	@class string（内部保留类）
-		*	@param start(, len)
+		*	@prototype integer start
+		*	@prototype integer start, integer len
 		*   @return string
-		*   @brief  取从start开始长度为len的子串，如果省略len，则取到原字符串末尾。如果start位置不合法，则返回空串。
+		*   @brief 取子串
+		*   @body  取从start开始长度为len的子串，如果省略len，则取到原字符串末尾。如果start位置不合法，则返回空串。
 		*/
 		{ QUICKFUNC(substring) },
 		/**
 		*	@class string（内部保留类）
-		*	@param start(, len)
+		*	@prototype integer start
+		*	@prototype integer start, integer len
 		*   @return string
-		*   @brief  同substring，取从start开始长度为len的子串，如果省略len，则取到原字符串末尾。如果start位置不合法，则返回空串。
+		*   @brief  同{@link substring}，取从start开始长度为len的子串，如果省略len，则取到原字符串末尾。如果start位置不合法，则返回空串。
 		*/
 		{ L"substr", &Parser_Util::nativeFunc_substring },
 		/**
 		*	@class string（内部保留类）
-		*	@param (arg1, arg2, ...)
+		*	@prototype (anytype arg1, anytype arg2, ...)
 		*   @return string
 		*   @brief  格式化字符串，以本字符串为格式，根据传入的参数生成一个新的字符串。
 		*   @example 以下将演示用"%04d"来格式化233的结果
@@ -1948,7 +1956,8 @@ namespace Parser_Util
 		{ QUICKFUNC(sprintf) },
 		/**
 		*	@class string（内部保留类）
-		*	@param str | regexp(, ignorenull = false)
+		*	@prototype string str(, ignorenull = false)
+		*	@prototype Regex regexp(, ignorenull = false)
 		*   @return array
 		*   @brief  第一个参数为字符串或正则表达式类。用第一个参数分割原字符串得到一串数组，ignorenull表示是否忽略结果数组中的空串，如果为真，结果数组中的空串将被抹去
 		*   @example 以下将演示用","来分割"1,2,,3"的结果
@@ -1960,7 +1969,8 @@ namespace Parser_Util
 		{ QUICKFUNC(split) },
 		/**
 		*	@class string（内部保留类）
-		*	@param str | regexp(, startpos = 0)
+		*	@prototype string str(, startpos = 0)
+		*	@prototype Regex regexp(, startpos = 0)
 		*   @return integer
 		*   @brief  第一个参数为字符串或正则表达式类。从startpos位置开始，寻找第一次出现参数1的位置。
 		*   @example 以下将演示在"1,2,,3"的查找","的结果
@@ -1972,7 +1982,8 @@ namespace Parser_Util
 		{ QUICKFUNC(indexOf) },
 		/**
 		*	@class string（内部保留类）
-		*	@param str | regexp(, endpos = 0)
+		*	@prototype string str(, endpos = 0)
+		*	@prototype Regex regexp(, endpos = 0)
 		*   @return integer
 		*   @brief  第一个参数为字符串或正则表达式类。从endpos位置开始，向前寻找第一次出现参数1的位置。
 		*   @example 以下将演示在"1,2,,3"的查找","的结果
@@ -1984,7 +1995,8 @@ namespace Parser_Util
 		{ QUICKFUNC(lastIndexOf) },
 		/**
 		*	@class string（内部保留类）
-		*	@param str | regexp, str2
+		*	@prototype string str, string str2
+		*	@prototype Regex regexp, string str2
 		*   @return string
 		*   @brief  参数为字符串或正则表达式类。将原字符串中str1全部替换为str2。
 		*   @example 以下将演示将"aaa"中"a"替换为"ab"的结果
@@ -1993,21 +2005,23 @@ namespace Parser_Util
 		*/
 		{ QUICKFUNC(replace) },
 		/**
-		*  @param value
+		*  @param anytype value
 		*  @return bool
 		*  @brief  比较本对象与value值是否相等。
 		*/
 		{ QUICKFUNC(equals) },
 		/**
 		*	@class string（内部保留类）
-		*	@param str | regexp
+		*	@prototype string str
+		*	@prototype Regex regexp
 		*   @return bool
 		*   @brief  参数为字符串或正则表达式类。返回原字符串是否已参数给定的字符串开头。
 		*/
 		{ QUICKFUNC(beginWith) },
 		/**
 		*	@class string（内部保留类）
-		*	@param str | regexp
+		*	@prototype string str
+		*	@prototype Regex regexp
 		*   @return bool
 		*   @brief  参数为字符串或正则表达式类。返回原字符串是否已参数给定的字符串结尾。
 		*/
@@ -2051,43 +2065,43 @@ namespace Parser_Util
 	{
 		/**
 		*	@class array（内部保留类）
-		*	@param (arg1, arg2, ...)
+		*	@prototype (anytype arg1, anytype arg2, ...)
 		*   @brief  向数组尾部添加参数。
 		*/
 		{ QUICKFUNC(add) },
 		/**
 		*	@class array（内部保留类）
-		*	@param (arg1, arg2, ...)
+		*	@prototype (anytype arg1, anytype arg2, ...)
 		*   @brief  从数组中删除与参数相同的元素，使用==比较。
 		*/
 		{ QUICKFUNC(remove) },
 		/**
 		*	@class array（内部保留类）
-		*	@param (index1, index2, ...)
+		*	@prototype (integer index1, integer index2, ...)
 		*   @brief  从数组中删除参数对应下标的元素，负数表示从后往前数，注意是从前往后逐个删除的，所以erase(1,1)会删除原数组下标为1,2位置的元素。越界会抛出异常。
 		*/
 		{ QUICKFUNC(erase) },
 		/**
 		*	@class array（内部保留类）
-		*	@param index, value
+		*	@prototype integer index, anytype value
 		*   @brief  在数组index位置插入一个新的value。
 		*   @example 以下将演示在[1,2,3]的2位置插入4的结果
 		*   @example_code var a=[1,2,3];
 		*	a.insert(2,4);
-		*	log(a)
+		*	log(a);
 		*   @example_result [1,2,4,3]
 		*/
 		{ QUICKFUNC(insert) },
 		/**
 		*	@class array（内部保留类）
-		*	@param value
+		*	@param anytype value
 		*	@return integer
 		*   @brief  返回数组中第一个等于value的元素的位置，使用==比较，找不到返回-1。
 		*/
 		{ QUICKFUNC(find) },
 		/**
 		*	@class array（内部保留类）
-		*	@param (str)
+		*	@param string str="" 分隔符
 		*	@return string
 		*   @brief  将数组中所有元素转成字符串，然后用str连接。
 		*   @example 以下将演示用"-"连接[1,2,3]的结果
@@ -2097,9 +2111,9 @@ namespace Parser_Util
 		{ QUICKFUNC(join) },
 		/**
 		*	@class array（内部保留类）
-		*	@param (arr1, arr2, ...)
+		*	@prototype (array arr1, array arr2, ...)
 		*	@return string
-		*   @brief  但会将此数组与参数中所有数组的元素连接起来形成的大数组，原数组不受影响。
+		*   @brief  会将此数组与参数中所有数组的元素连接起来形成的大数组，原数组不受影响。
 		*   @example 以下将演示[1,2,3]和[3,2,1]连接的结果
 		*   @example_code [1,2,3].concat([3,2,1])
 		*   @example_result [1,2,3,3,2,1]
@@ -2107,20 +2121,23 @@ namespace Parser_Util
 		{ QUICKFUNC(concat) },
 		/**
 		*	@class array（内部保留类）
-		*	@param func | modestr = "+"
+		*	@prototype function func
+		*   @prototype string modestr="+"
+		*	@param function func 排序函数
+		*   @param string modestr="+" 排序模式字符串
 		*   @brief  根据指定的函数或模式排序。会改动原字符串，没有返回值。
-		*	如果指定的是函数，将把此函数（func(a,b)）当做<的比较函数，从小到大排序。
+		*	@body 如果指定的是函数，将把此函数（func(a,b)）当做<的比较函数，从小到大排序。
 		*	如果指定的是模式字符串，则：
-		*		"+"：以默认的比较运算符从小到大排序
-		*		"-"：以默认的比较运算符从大到小排序
-		*		"0"：按数值从小到大排序
-		*		"9"：按数值从大到小排序
-		*		"a"：按字符串从小到大排序
-		*		"z"：按字符串从大到小排序
+		*		{@t}"+"：以默认的比较运算符从小到大排序
+		*		{@t}"-"：以默认的比较运算符从大到小排序
+		*		{@t}"0"：按数值从小到大排序
+		*		{@t}"9"：按数值从大到小排序
+		*		{@t}"a"：按字符串从小到大排序
+		*		{@t}"z"：按字符串从大到小排序
 		*   @example 以下将演示[1,2,3]按"-"排序的结果
 		*   @example_code var a=[1,2,3];
 		*	a.sort("9");
-		*	log(a)
+		*	log(a);
 		*   @example_result [3,2,1]
 		*/
 		{ QUICKFUNC(sort) },
@@ -2132,7 +2149,7 @@ namespace Parser_Util
 		{ QUICKFUNC(clone) },
 		/**
 		*	@class array（内部保留类）
-		*   @param value
+		*   @param anytype value
 		*   @return bool
 		*   @brief  比较本对象与value值是否相等。如果value是数组，会比较每个元素是否相等，长度较短的数组会补上void去做比较
 		*   @example 以下将演示[1,2,3]和[1,2,3,0]的比较
@@ -2147,7 +2164,7 @@ namespace Parser_Util
 		{ QUICKFUNC(clear) },
 		/**
 		*	@class array（内部保留类）
-		*	@return value
+		*	@return anytype
 		*   @brief  随机返回数组中一个元素。
 		*/
 		{ L"random", &Parser_Util::nativeFunc_array_random },
@@ -2168,9 +2185,9 @@ namespace Parser_Util
 		*	@return array
 		*	@brief 读取文件并按照换行切分为数组。
 		*	@example 以下将演示一个从内容为
-		*		a
-		*		b
-		*		c
+		*		{@box}a
+		*		{@box}b
+		*		{@box}c
 		*		的1.txt文件载入为数组的示例：
 		*	@example_code [].load("1.txt")
 		*	@example_result ["a","b","c"]
@@ -2179,10 +2196,10 @@ namespace Parser_Util
 		/**
 		*	@class array（内部保留类）
 		*	@param string filename 文件名
-		*	@param string mode=void 模式。若首字母为'o'则字符串的其余部分代表一个偏移，文件将从该偏移处进行覆盖保存，负值将从文件末尾进行计算。若首字母为'z'则与'o'类似，只不过将启用压缩。
+		*	@param string mode="" 模式。若首字母为'o'则字符串的其余部分代表一个偏移，文件将从该偏移处进行覆盖保存，负值将从文件末尾进行计算。若首字母为'z'则与'o'类似，只不过将启用压缩。
 		*	@brief 将数组进行序列化，并保存到文件。
 		*	@body 文件的内容可以直接使用{@link evalFile}进行反序列化，读取至变量。
-		*	@example 以下将演示一个从内容为[1,2,3]的字典写入文件的示例：
+		*	@example 以下将演示一个从内容为[1,2,3]的数组写入文件的示例：
 		*	@example_code [1,2,3].saveStruct("1.txt")
 		*/
 		{ QUICKFUNC(saveStruct) },
@@ -2194,13 +2211,13 @@ namespace Parser_Util
 	{
 		/**
 		*	@class dictionary（内部保留类）
-		*	@param (arg1, arg2, ...)
+		*	@prototype (anytype arg1, anytype arg2, ...)
 		*   @brief  从字典中删除值与参数相同的元素，使用==比较。
 		*/
 		{ QUICKFUNC(remove) },
 		/**
 		*	@class dictionary（内部保留类）
-		*	@param (arg1, arg2, ...)
+		*	@prototype (anytype arg1, anytype arg2, ...)
 		*   @brief  从字典中删除键与参数相同的元素，使用==比较。
 		*/
 		{ QUICKFUNC(erase) },
@@ -2212,9 +2229,9 @@ namespace Parser_Util
 		{ QUICKFUNC(clone) },
 		/**
 		*	@class dictionary（内部保留类）
-		*	@param value
+		*	@param string key
 		*	@return bool
-		*   @brief  返回字典中是否存在key为value的键，值为空（void）的键将被视为无效键。
+		*   @brief  返回字典中是否存在键名为key的键，值为空（void）的键将被视为无效键。
 		*/
 		{ QUICKFUNC(find) },
 		/**
@@ -2225,7 +2242,7 @@ namespace Parser_Util
 		{ QUICKFUNC(toArray) },
 		/**
 		*	@class dictionary（内部保留类）
-		*   @param value
+		*   @param anytype value
 		*   @return bool
 		*   @brief  比较本对象与value值是否相等。如果value是字典，会比较每对键-值是否相等，不存在的键会认为值是void去做比较。
 		*   @example 以下将演示%[key1:1,key2:2]和%[key1:1,key2:2,key3:3]的比较
@@ -2235,13 +2252,13 @@ namespace Parser_Util
 		{ QUICKFUNC(equals) },
 		/**
 		*	@class dictionary（内部保留类）
-		*   @param dic
+		*   @param dictionary dic
 		*   @brief  与新字典合并，重复的键将被覆盖。
 		*/
 		{ QUICKFUNC(update) },
 		/**
 		*	@class dictionary（内部保留类）
-		*   @param dic
+		*   @param dictionary dic
 		*   @brief  从本字典中去除参数字典中包含的有效键（即值不为void）。
 		*/
 		{ QUICKFUNC(except) },
@@ -2259,17 +2276,20 @@ namespace Parser_Util
 		{ QUICKFUNC(getValueArray) },
 		/**
 		*	@class dictionary（内部保留类）
-		*	@param func | modestr = "+"
+		*	@prototype function func
+		*   @prototype string modestr="+"
+		*	@param function func 排序函数
+		*   @param string modestr="+" 排序模式字符串
 		*	@return array
 		*   @brief  按值排序所有的有效键，比较的方式根据指定的函数或模式决定。
-		*	如果指定的是函数，将把此函数（func(a,b)）当做<的比较函数，从小到大排序。
+		*	@body 如果指定的是函数，将把此函数（func(a,b)）当做<的比较函数，从小到大排序。
 		*	如果指定的是模式字符串，则：
-		*		"+"：以默认的比较运算符从小到大排序
-		*		"-"：以默认的比较运算符从大到小排序
-		*		"0"：按数值从小到大排序
-		*		"9"：按数值从大到小排序
-		*		"a"：按字符串从小到大排序
-		*		"z"：按字符串从大到小排序
+		*		{@t}"+"：以默认的比较运算符从小到大排序
+		*		{@t}"-"：以默认的比较运算符从大到小排序
+		*		{@t}"0"：按数值从小到大排序
+		*		{@t}"9"：按数值从大到小排序
+		*		{@t}"a"：按字符串从小到大排序
+		*		{@t}"z"：按字符串从大到小排序
 		*   @example 以下将演示%[key1:1,key2:2,key3:3]按"-"排序的结果
 		*   @example_code %[key1:1,key2:2,key3:3].sort("9");
 		*   @example_result ["key3", "key2", "key1"]
@@ -2284,7 +2304,7 @@ namespace Parser_Util
 		/**
 		*	@class dictionary（内部保留类）
 		*	@param string filename 文件名
-		*	@param string mode=void 模式。若首字母为'o'则字符串的其余部分代表一个偏移，文件将从该偏移处进行覆盖保存，负值将从文件末尾进行计算。若首字母为'z'则与'o'类似，只不过将启用压缩。
+		*	@param string mode="" 模式。若首字母为'o'则字符串的其余部分代表一个偏移，文件将从该偏移处进行覆盖保存，负值将从文件末尾进行计算。若首字母为'z'则与'o'类似，只不过将启用压缩。
 		*	@brief 将数组进行序列化，并保存到文件。
 		*	@body 文件的内容可以直接使用{@link evalFile}进行反序列化，读取至变量。
 		*	@example 以下将演示一个从内容为%[key:1]的字典写入文件的示例：

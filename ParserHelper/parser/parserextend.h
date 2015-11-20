@@ -580,6 +580,8 @@ namespace Parser_Util
 
 		NATIVE_CREATENEW();
 
+		NATIVE_CREATENULL(Channel);
+
 		NATIVE_SAVE()
 		{
 			return channel_index;
@@ -724,6 +726,8 @@ namespace Parser_Util
 			return new Sprite(PARAM(0)); 
 		}
 
+		NATIVE_CREATENULL(Sprite);
+
 		NATIVE_SAVE()
 		{
 			return index;
@@ -823,6 +827,8 @@ namespace Parser_Util
 			return new MessageLayer(PARAM(0));
 		}
 
+		NATIVE_CREATENULL(MessageLayer);
+
 		NATIVE_GET(curposX);
 		NATIVE_GET(curposY);
 
@@ -845,6 +851,8 @@ namespace Parser_Util
 				return new TextSprite(-1);
 			return new TextSprite(PARAM(0));
 		}
+
+		NATIVE_CREATENULL(TextSprite);
 
 		NATIVE_GET(color);
 		NATIVE_GET(text);
@@ -875,6 +883,8 @@ namespace Parser_Util
 			return new Button(PARAM(0));
 		}
 
+		NATIVE_CREATENULL(Button);
+
 		NATIVE_GET(idle);
 		NATIVE_GET(hover);
 		NATIVE_GET(click);
@@ -898,6 +908,8 @@ namespace Parser_Util
 				return new Live2DSprite(-1);
 			return new Live2DSprite(PARAM(0));
 		}
+
+		NATIVE_CREATENULL(Live2DSprite);
 
 		//int startMotion(name, no=0, priority="normal")
 		//返回值0成功，-1表示priority被占用
@@ -947,6 +959,8 @@ namespace Parser_Util
 				return new Spine(-1);
 			return new Spine(PARAM(0));
 		}
+
+		NATIVE_CREATENULL(Spine);
 
 		NATIVE_GET(boundingBox);
 
@@ -1000,6 +1014,8 @@ namespace Parser_Util
 		NATIVE_INIT();
 
 		NATIVE_CREATENEW();
+
+		NATIVE_CREATENULL(Event);
 
 		NATIVE_SAVE();
 
@@ -1125,6 +1141,8 @@ namespace Parser_Util
 
 		NATIVE_CREATENEW();
 
+		NATIVE_CREATENULL(CSVParser);
+
 		NATIVE_FUNC(doFile);
 
 		NATIVE_FUNC(doDocument);
@@ -1152,6 +1170,8 @@ namespace Parser_Util
 
 		NATIVE_CREATENEW();
 
+		NATIVE_CREATENULL(DownloadManager);
+		
 		NATIVE_SAVE();
 
 		NATIVE_LOAD();
@@ -1357,6 +1377,8 @@ namespace Parser_Util
 				arr->vararray[i - 1] = paramarray->vararray[i];
 			return new Timer(PARAM(0), (float)PARAM(1), arr);
 		}
+
+		NATIVE_CREATENULL(Timer);
 
 		NATIVE_SAVE()
 		{
