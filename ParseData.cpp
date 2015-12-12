@@ -586,6 +586,7 @@ bool ParseData::Parse()
 		if (idx >= idx2)
 			return true;
 		isLineStart = skipLineEnd();
+repos:
 		char ch = getNextOne();
 		if (!ch)
 			return false;
@@ -606,7 +607,7 @@ bool ParseData::Parse()
 			ch = getNextOne();
 
 		if (ch == '\r' || ch == '\n')
-			continue;
+			goto repos;
 
 		if (!(ch == '@' || ch == '[' || ch == '#' || ch == '*'))
 		{
@@ -769,6 +770,7 @@ bool ParseData::Parse()
 					}
 					skipLineComment();
 					skipLineEnd();
+					skipSpace();
 					ch = textbuf[idx];
 				}
 				node->name = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
@@ -803,6 +805,8 @@ PAModule::PAModule(const QString &str) : Parser(false), expstr(str.toStdWString(
 	expsize = expstr.size();
 	NextIsBareWord = false;
 	forcequit = false;
+
+	setupDebugInfo();
 
 	//copy lbp, pre, runner
 	memcpy(lbp, p->lbp, sizeof(lbp));

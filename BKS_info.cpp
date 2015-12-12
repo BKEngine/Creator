@@ -14,7 +14,7 @@ void BKE_Info::init()
 	Parser::getInstance();
 	registerExtendFunction();
 	glo = BKE_VarClosure::global();
-	QStringList ls = QString("if for while do foreach function class propget propset continue break return var delete try throw this super global int string number const typeof instanceof extends in else then catch with static switch case true false void").split(' ');
+	QStringList ls = QString("enum if for while do foreach function class propget propset continue break return var delete try throw this super global int string number const typeof instanceof extends in else then catch with static switch case true false void").split(' ');
 	for (auto &&v : ls)
 	{
 		BagelWords.insert(v);

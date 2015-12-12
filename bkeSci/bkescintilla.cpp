@@ -694,7 +694,7 @@ void BkeScintilla::UiChange(int updated)
 	int tabWidth = SendScintilla(SCI_GETTABWIDTH);
 
 	ChangeIgnore++;
-	if (ChangeType & SC_PERFORMED_USER)
+	if ((ChangeType & SC_PERFORMED_USER) && modfieddata.lineadd == 0)
 	{
 		BkeStartUndoAction();
 	}

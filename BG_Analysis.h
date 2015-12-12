@@ -143,6 +143,7 @@ private:
 	}
 
 	void parseMacro(const QString &file);
+	void notifyExit();
 
 public:
 	/// <summary>

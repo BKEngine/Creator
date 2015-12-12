@@ -143,7 +143,7 @@ public:
 #endif
 			MemoryPool().erase(it);
 #if PARSER_MULTITHREAD
-		MemoryPool().unlock();
+			MemoryPool().unlock();
 #endif
 		}
 	};
@@ -529,13 +529,13 @@ public:
 	}
 	inline BKE_Variable operator ! () const{ return asBoolean() ? 0 : 1; };
 	//++a
-	inline BKE_Variable& operator ++ (){ auto a = asNumber(); num = a + 1; return (*this = num); };
+	inline BKE_Variable& operator ++ (){ auto a = asNumber(); a += 1; return (*this = a); };
 	//a++
-	inline BKE_Variable operator ++ (int){ auto a = asNumber(); num = a + 1; return a; };
+	inline BKE_Variable operator ++ (int){ auto a = asNumber(); *this = a + 1; return a; };
 	//--a
-	inline BKE_Variable& operator -- (){ auto a = asNumber(); num = a - 1; return (*this = num); };
+	inline BKE_Variable& operator -- (){ auto a = asNumber(); a -= 1; return (*this = a); };
 	//a--
-	inline BKE_Variable operator -- (int){ auto a = asNumber(); num = a - 1; return a; };
+	inline BKE_Variable operator -- (int){ auto a = asNumber(); *this = a - 1; return a; };
 	BKE_Variable& operator += (const BKE_Variable &v);
 	BKE_Variable& operator -= (const BKE_Variable &v);
 	BKE_Variable& operator [] (const BKE_Variable &v) const;

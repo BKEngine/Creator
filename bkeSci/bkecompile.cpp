@@ -28,7 +28,7 @@ void BkeCompile::CompileLang(const QString &dir, bool release/* = false*/)
 	QString lang = QString::fromStdWString(global_bke_info.projsetting[L"lang"].getString(L"chn"));
 	QString langopt = dir + "/" + BKE_PROJECT_NAME + ".user|langopt";
 #ifdef Q_OS_WIN
-	cmd->start(BKE_CURRENT_DIR + "/tool/" + exeName + ".exe", QStringList() << dir << "-nopause" << "-lang" << lang << "-langopt" << langopt);
+	cmd->start(BKE_CURRENT_DIR + "/tool/" + exeName + ".exe", QStringList() << dir << "-nopause" << "-nocompile" << "-lang" << lang << "-langopt" << langopt);
 #elif defined(Q_OS_MAC)
 	/*QString str = "./BKCompiler_Dev '" + dir + "'-nopause";
 	QFile file(BKE_CURRENT_DIR + "/run_bkc.sh");
@@ -59,7 +59,7 @@ void BkeCompile::Compile(const QString &dir, bool release/* = false*/)
 	list.clear();
 	QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
 #ifdef Q_OS_WIN
-	cmd->start(BKE_CURRENT_DIR + "/tool/"+exeName+".exe", QStringList() << dir << "-nopause");
+	cmd->start(BKE_CURRENT_DIR + "/tool/" + exeName + ".exe", QStringList() << dir << "-nopause" << "-nocompile");
 #elif defined(Q_OS_MAC)
 	/*QString str = "./BKCompiler_Dev '" + dir + "'-nopause";
 	QFile file(BKE_CURRENT_DIR + "/run_bkc.sh");
