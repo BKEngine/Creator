@@ -783,6 +783,14 @@ void CodeWindow::simpleSave(BkeDocBase *loli)
 		loli->SetFileName(temp);
 	}
 
+	if (!loli->edit->isModified())
+		return;
+
+	//delete bkbin
+	QFileInfo finfo(*loli->File());
+	QDir bin(finfo.filePath());
+	bin.remove(finfo.completeBaseName() + ".bkbin");
+
 	if (!LOLI::AutoWrite(loli->File(), loli->edit->text(), "UTF-8")){
 		QMessageBox::critical(this, "", "文件：\r\n" + currentbase->FullName() + " 写出失败！");
 		return;
