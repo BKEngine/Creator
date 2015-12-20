@@ -9,6 +9,7 @@ class BkeCompile : public QObject
 	Q_OBJECT
 public:
 	explicit BkeCompile(QObject *parent = 0);
+	~BkeCompile();
 
 	void Compile(const QString &dir, bool release = false);
 	void CompileLang(const QString &dir, bool release = false);
@@ -26,7 +27,6 @@ signals:
 private:
 	QByteArray result;
 	QProcess *cmd;
-	QString text;
 	QTextCodec *codec;
 	QStringList list;
 

@@ -13,17 +13,21 @@ QObject(parent)
 	cmd = NULL;
 }
 
+BkeCompile::~BkeCompile()
+{
+	if (cmd)
+	{
+		delete cmd;
+	}
+}
+
 void BkeCompile::CompileLang(const QString &dir, bool release/* = false*/)
 {
-	result.clear();
-	if (cmd)
-		delete cmd;
-	cmd = new QProcess(this);
+	cmd = new QProcess();
 	connect(cmd, SIGNAL(readyReadStandardOutput()), this, SLOT(StandardOutput()));
 	connect(cmd, SIGNAL(finished(int)), this, SLOT(finished(int)));
 	connect(cmd, SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
 	cmd->setWorkingDirectory(dir);
-	list.clear();
 	QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
 	QString lang = QString::fromStdWString(global_bke_info.projsetting[L"lang"].getString(L"chn"));
 	QString langopt = dir + "/" + BKE_PROJECT_NAME + ".user|langopt";
@@ -48,15 +52,11 @@ void BkeCompile::CompileLang(const QString &dir, bool release/* = false*/)
 
 void BkeCompile::Compile(const QString &dir, bool release/* = false*/)
 {
-	result.clear();
-	if (cmd)
-		delete cmd;
-	cmd = new QProcess(this);
+	cmd = new QProcess();
 	connect(cmd, SIGNAL(readyReadStandardOutput()), this, SLOT(StandardOutput()));
 	connect(cmd, SIGNAL(finished(int)), this, SLOT(finished(int)));
 	connect(cmd, SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
 	cmd->setWorkingDirectory(dir);
-	list.clear();
 	QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
 #ifdef Q_OS_WIN
 	cmd->start(BKE_CURRENT_DIR + "/tool/" + exeName + ".exe", QStringList() << dir << "-nopause" << "-nocompile");
@@ -80,7 +80,6 @@ void BkeCompile::Compile(const QString &dir, bool release/* = false*/)
 void BkeCompile::StandardOutput()
 {
 	QByteArray temp = cmd->readAll();
-	result.append(temp);
 	QString name = codec->toUnicode(temp);
 	if (name.endsWith(".bkscr") && list.indexOf(name) < 0) {
 		list.append(name);
@@ -91,15 +90,15 @@ void BkeCompile::StandardOutput()
 void BkeCompile::finished(int exitCode)
 {
 	emit CompliteFinish();
-	//delete cmd ;
-	//cmd = 0 ;
+	delete cmd ;
+	cmd = NULL;
+	list.clear();
+	result.clear();
 }
 
 QString BkeCompile::Result()
 {
-	text.clear();
-	text = codec->toUnicode(result);
-	return text;
+	return codec->toUnicode(result);
 }
 
 void BkeCompile::error(QProcess::ProcessError e)
@@ -127,6 +126,4 @@ void BkeCompile::error(QProcess::ProcessError e)
 		break;
 	}
 	emit CompliteError(s);
-	//delete cmd;
-	//cmd = 0;
 }

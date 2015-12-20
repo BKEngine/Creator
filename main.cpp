@@ -158,11 +158,12 @@ int main(int argc, char *argv[])
 	}
 #endif
 
+/*
 #ifdef QT_DEBUG
 #ifdef WIN32
 	BKE_CURRENT_DIR = QString("G:/BKE_creator/file") ;
 #endif
-#endif
+#endif*/
 
    QApplication a(argc, argv);
 

@@ -604,6 +604,9 @@
     <ClCompile Include="ParserHelper\parser\parserextend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="release\moc_ScintillaQt.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">

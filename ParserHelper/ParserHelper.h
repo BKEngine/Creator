@@ -36,8 +36,8 @@ public:
     bool operator == (const QBkeVariableRef &r) const;
     QBkeVariableRef &operator = (const QBkeVariableRef &r);
     QBkeVariableRef &operator = (const QBkeVariable &r);
-    QBkeVariableRef &operator - (const QBkeVariableRef &r);
-    QBkeVariableRef &operator - (const QBkeVariable &r);
+    QBkeVariableRef operator - (const QBkeVariableRef &r);
+    QBkeVariableRef operator - (const QBkeVariable &r);
     QBkeVariableRef &operator -= (const QBkeVariableRef &r);
     QBkeVariableRef &operator -= (const QBkeVariable &r);
     void redirect(QBkeVariable &v);

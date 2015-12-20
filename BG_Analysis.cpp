@@ -9,6 +9,7 @@
 #include <DbgHelp.h>
 //for windows debug
 // a C++ exception class thart contains the SEH information
+/*
 class CSEHException {
 
 public:
@@ -47,7 +48,7 @@ public:
 void _cdecl TranslateSEHtoCE(UINT code, PEXCEPTION_POINTERS pep)
 {
 	throw CSEHException(code, pep);
-}
+}*/
 #endif
 
 unsigned int runAddress;
@@ -472,11 +473,14 @@ void testAddr()
 	}
 }
 
+extern LONG WINAPI ApplicationCrashHandler(EXCEPTION_POINTERS *pException);
+
 void BG_Analysis::run()
 {
 #if WIN32
-	_set_se_translator(TranslateSEHtoCE);
+//	_set_se_translator(TranslateSEHtoCE);
 	AddVectoredExceptionHandler(0, VectoredHandler);
+	SetUnhandledExceptionFilter(ApplicationCrashHandler);
 	//testAddr();
 	__asm call testAddr;
 	//dumpDebug();
@@ -774,15 +778,6 @@ void BG_Analysis::run()
 			dumpExcept(e, 1);
 			simpleDump(&firstException);
 			newmacrofile = false;
-			notifyExit();
-		}
-		catch (CSEHException &e)
-		{
-			extern LONG WINAPI ApplicationCrashHandler(EXCEPTION_POINTERS *pException);
-			EXCEPTION_POINTERS ep;
-			ep.ContextRecord = &e.m_context;
-			ep.ExceptionRecord = &e.m_exceptionRecord;
-			ApplicationCrashHandler(&ep);
 			notifyExit();
 		}
 	}
