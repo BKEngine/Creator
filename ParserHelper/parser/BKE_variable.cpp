@@ -4,30 +4,40 @@
 void GlobalMemoryPool::purge()
 {
 	clearflag = true;
-	for (auto &it : *this)
+	MemoryPoolHeader *h = start.next;
+	while (h != &stop)
 	{
-		((BKE_VarObject*)it.first)->forceDelete();
+		void *p = h + 1;
+		((BKE_VarObject*)p)->forceDelete();
+		h = h->next;
 	}
-	for (auto &it : *this)
+	h = start.next;
+	while (h != &stop)
 	{
-		if (it.second <= 4 * SMALL)
-			allocator_array()[(it.second + 3) / 4]->dynamic_deallocate(it.first);
+		MemoryPoolHeader *tmp = h;
+		h = h->next;
+#if PARSER_MULTITHREAD
+		free(tmp);
+#else
+		if (h->size <= 4 * SMALL)
+			allocator_array()[(h->size + 3) / 4]->dynamic_deallocate(tmp);
 		else
-			free(it.first);
+			free(tmp);
+#endif
 	}
-	clear();
 };
-
 
 void GlobalMemoryPool::finalize()
 {
-	for (auto &it : *this)
+	MemoryPoolHeader *h = start.next;
+	while (h!= &stop)
 	{
-		if (((BKE_VarObject*)it.first)->vt == VAR_CLASS)
+		void *p = h + 1;
+		if (((BKE_VarObject*)p)->vt == VAR_CLASS)
 		{
-			((BKE_VarClass*)it.first)->finalize();
+			((BKE_VarClass*)p)->finalize();
 		}
-			
+		h = h->next;
 	}
 }
 

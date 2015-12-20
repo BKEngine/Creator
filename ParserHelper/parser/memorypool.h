@@ -439,6 +439,8 @@ inline _BKE_allocator<1> *get_allocator(int size)
 
 static inline void __init_memorypool()
 {
+#if BKE_CREATOR
+#else
 	switch (SMALL)
 	{
 	case 32:get_allocator<32>();
@@ -474,6 +476,7 @@ static inline void __init_memorypool()
 	case 2:get_allocator<2>();
 	case 1:get_allocator<1>();
 	}
+#endif
 }
 
 inline int __get_memorypool_memory()

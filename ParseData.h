@@ -643,6 +643,12 @@ private:
 	bool _analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_Variable *var);
 
 public:
+	~PAModule()
+	{
+		if (restree)
+			restree->release();
+	}
+
 	PAModule(const QString &str);
 
 	BKE_bytree *getTree()

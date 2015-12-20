@@ -12,8 +12,19 @@
 #pragma push_macro("new")
 #undef new
 
+struct MemoryPoolHeader
+{
+	MemoryPoolHeader *last;
+	MemoryPoolHeader *next;
+	int32_t size;	//total size include header
+	int32_t magic;
+	int32_t reserve;
+};
+
+#define PARSER_MAGIC 0x2333998
+
 //#if PARSER_DEBUG==2
-class GlobalMemoryPool : public BKE_hashmap<void *, bkpulong>
+class GlobalMemoryPool
 //#else
 //class GlobalMemoryPool : public BKE_hashmap<void *, _dummy_class, 12>
 //#endif
@@ -22,6 +33,8 @@ private:
 #if PARSER_MULTITHREAD
 	recursive_mutex mu;
 #endif
+	MemoryPoolHeader start, stop;
+	int32_t nums;
 
 public:
 #if PARSER_DEBUG==2
@@ -31,9 +44,13 @@ public:
 
 	GlobalMemoryPool()
 	{
-		resizeTableSize(16);
 		__init_memorypool();
 		clearflag = false;
+		start.last = NULL;
+		stop.next = NULL;
+		start.next = &stop;
+		stop.last = &start;
+		nums = 0;
 #if PARSER_DEBUG==2
 		c=0;
 #endif
@@ -44,9 +61,25 @@ public:
 	inline void unlock(){ mu.unlock(); }
 #endif
 
+	//p is the raw pointer
 	void insertKey(void *p, bkplong size)
 	{
-		operator[](p) = size;
+		MemoryPoolHeader *h = (MemoryPoolHeader*)p;
+		h->size = size;
+		h->magic = PARSER_MAGIC;
+		h->next = &stop;
+		h->last = stop.last;
+		stop.last = h;
+		h->last->next = h;
+		nums++;
+	}
+
+	void erase(void *p)
+	{
+		MemoryPoolHeader *h = (MemoryPoolHeader*)p;
+		h->next->last = h->last;
+		h->last->next = h->next;
+		nums--;
 	}
 
 	void finalize();
@@ -90,6 +123,7 @@ public:
 	void* operator new (size_t size)
 	{
 		void *p;
+		size += sizeof(MemoryPoolHeader);
 #if PARSER_MULTITHREAD
 		p = malloc(size);
 		if (p)
@@ -108,7 +142,7 @@ public:
 			MemoryPool().insertKey(p, (bkpulong)size);
 		}
 #endif
-		return p;
+		return (MemoryPoolHeader*)p + 1;
 	};
 
 	void* operator new (size_t size, const char *, int){ return operator new(size); };
@@ -124,24 +158,26 @@ public:
 #if PARSER_MULTITHREAD
 			MemoryPool().lock();
 #endif
-			auto it = MemoryPool().find(p);
+			MemoryPoolHeader *h = (MemoryPoolHeader*)p - 1;
+			//auto it = MemoryPool().find(p);
 			//先做兼容处理，找到bug再说
-			if (it == MemoryPool().end())
+			//if (it == MemoryPool().end())
+			if (h->magic != PARSER_MAGIC)
 			{
 #if PARSER_MULTITHREAD
 				MemoryPool().unlock();
 #endif
 				return;
 			}
+			MemoryPool().erase(h);
 #if PARSER_MULTITHREAD
-			free(p);
+			free(h);
 #else
-			if (it->second <= 4 * SMALL)
-				allocator_array()[(it->second + 3) / 4]->dynamic_deallocate(p);
+			if (h->size <= 4 * SMALL)
+				allocator_array()[(h->size + 3) / 4]->dynamic_deallocate(h);
 			else
-				free(p);
+				free(h);
 #endif
-			MemoryPool().erase(it);
 #if PARSER_MULTITHREAD
 			MemoryPool().unlock();
 #endif
