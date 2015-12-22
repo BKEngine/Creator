@@ -1230,8 +1230,8 @@
     <None Include="bkeico.ico">
       <Filter>Distribution Files</Filter>
     </None>
-    <None Include="ico.rc">
-      <Filter>Distribution Files</Filter>
-    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ico.rc" />
   </ItemGroup>
 </Project>

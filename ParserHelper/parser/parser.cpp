@@ -226,6 +226,8 @@ BKE_Variable BKE_VarFunction::run(const BKE_bytree *tr, BKE_VarClosure *_tr)
 	}
 	try
 	{
+		if (self)
+			tmp->setMember(L"__self", *self);
 		BKE_Variable &res = Parser::getInstance()->innerRun(func->code, tmp, tmpvars);
 		return res;
 	}
@@ -300,6 +302,8 @@ BKE_Variable BKE_FunctionCode::run(BKE_Variable *self, BKE_VarArray *paramarray,
 		return (*native)(self, paramarray, _this);
 	try
 	{
+		if (self)
+			_this->setMember(L"__self", *self);
 		BKE_array<BKE_Variable> tmpvars;
 		return Parser::getInstance()->innerRun(code, _this, tmpvars);
 	}
