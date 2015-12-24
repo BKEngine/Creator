@@ -1882,6 +1882,8 @@ public:
 		}
 	}
 
+	inline void addStaticMember(const wstring &key, const BKE_Variable &var){ varmap.insert(key, var); };
+
 	inline void addNativeFunction(const BKE_String &key, BKE_NativeFunction func)
 	{
 		auto f = new BKE_VarFunction(func);
@@ -1889,8 +1891,7 @@ public:
 		f->setSelf(this);
 		varmap[key] = f;
 	};
-
-	void addNativePropGet(const BKE_String &key, BKE_NativeFunction func)
+	inline void addNativePropGet(const BKE_String &key, BKE_NativeFunction func)
 	{
 		BKE_Variable &var = varmap[key];
 		if (var.getType() != VAR_PROP)
@@ -1900,7 +1901,7 @@ public:
 		}
 		static_cast<BKE_VarProp*>(var.obj)->addPropGet(func);
 	};
-	void addNativePropSet(const BKE_String &key, BKE_NativeFunction func)
+	inline void addNativePropSet(const BKE_String &key, BKE_NativeFunction func)
 	{
 		BKE_Variable &var = varmap[key];
 		if (var.getType() != VAR_PROP)
@@ -1910,7 +1911,6 @@ public:
 		}
 		static_cast<BKE_VarProp*>(var.obj)->addPropSet(func);
 	};
-	inline void addStaticMember(const wstring &key, const BKE_Variable &var){ varmap.insert(key, var); };
 
 	inline bool hasClassMember(const BKE_String &key) const
 	{

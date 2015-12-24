@@ -153,7 +153,7 @@ bkplong bkpwcstoxl(const wchar_t *nptr, const wchar_t **endptr, int ibase, int f
 		else if ( flags & FL_NEG )
 			number = (bkpulong)BKPLONG_MAX+1;
 		else
-			number = LONG_MAX;
+			number = BKPULONG_MAX;
 	}
 
 	if (endptr != NULL)
@@ -231,7 +231,7 @@ wstring bkpInt2Str(bkplong v)
 #else
 	sprintf(buf, "%d", v);
 #endif
-	return UniFromUTF7(buf, strlen(buf));
+	return UniFromUTF7(buf, (bkpulong)strlen(buf));
 }
 
 void EliminateTrailingFloatZeros(char *iValue)

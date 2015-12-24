@@ -2319,12 +2319,14 @@ namespace ParserUtils
 	{
 		//register inner classes and global functions
 		BKE_VarClosure *global = BKE_VarClosure::global();
-		BKE_VarClass *_class = (BKE_VarClass *)global;
-		REG_FUNC(Global);
+		{
+			BKE_VarClosure *_class = global;
+			REG_FUNC(Global);
+		}
 
 		//undefined
 		BKE_String s_undefined(L"undefined");
-		_class = new BKE_VarClass(s_undefined);
+		BKE_VarClass *_class = new BKE_VarClass(s_undefined);
 		REG_FUNC(Undefined);
 		global->forceSetMember(s_undefined, _class);
 
