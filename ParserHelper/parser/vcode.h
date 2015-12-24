@@ -109,6 +109,7 @@ public:
 	/*BKE_opcode*/bkplong opcode;	//we need += operation on it
 	BKE_Variable var;
 	bkplong pos;
+	bkplong pos2;	//对某些符号(如[{)来说记录另一半的位置
 
 	BKE_Node(BKE_opcode op = OP_END, int var = 0) :opcode(op), pos(0){}
 	BKE_Node(const BKE_Node &r) :opcode(r.opcode), var(r.var), pos(r.pos){}

@@ -639,6 +639,8 @@ private:
 
 	BKE_Variable *tmpvar;
 	BKE_VarClosure *top;
+	BKE_Variable topvar;
+	BKE_Variable posvar;	//used by analysisToPos
 	void _analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Variable *var);
 	bool _analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_Variable *var);
 

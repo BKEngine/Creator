@@ -871,6 +871,7 @@ void PAModule::analysisToClosure(BKE_VarClosure *clo)
 	if (!restree || !clo)
 		return;
 	top = clo;
+	topvar = top->addRef();
 	for (int i = 0; i < restree->childs.size(); i++)
 	{
 		_analysisToClosure(restree->childs[i], clo, NULL);
@@ -977,8 +978,19 @@ void PAModule::_analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Varia
 				if (var)
 					*var = *tmpvar;
 			}
+			else if (tmpvar && tmpvar->getType() == VAR_CLO && !str.isVoid())
+			{
+				tmpvar = &((BKE_VarClosure*)tmpvar->obj)->getMember(str);
+				if (var)
+					*var = *tmpvar;
+			}
 			else
 				tmpvar = NULL;	//识别终止
+			break;
+		}
+		case OP_GLOBAL + OP_COUNT:
+		{
+			tmpvar = &topvar;
 			break;
 		}
 		case OP_RETURN + OP_COUNT:
@@ -1576,13 +1588,21 @@ BKE_Variable PAModule::analysisToPos(BKE_VarClosure *clo, int pos)
 	if (!restree || !clo)
 		return BKE_Variable();
 	top = clo;
-	BKE_Variable v;
+	topvar = top->addRef();
 	for (int i = 0; i < restree->childs.size(); i++)
 	{
-		if (!_analysisToPos(restree->childs[i], clo, pos, &v))
+		if (!restree->childs[i])
+			continue;
+		if (restree->childs[i]->Node.pos2 <= pos)
+			_analysisToClosure(restree->childs[i], clo, NULL);
+		else
+		{
+			posvar = clo->addRef();
+			_analysisToPos(restree->childs[i], clo, pos, NULL);
 			break;
+		}
 	}
-	return v;
+	return posvar;
 }
 
 bool PAModule::_analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_Variable *var)
@@ -1592,6 +1612,7 @@ bool PAModule::_analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_
 	int p1 = tr->getFirstPos();
 	if (p1 > pos)
 		return false;
+	BKE_Variable rawv = posvar;
 	try
 	{
 		switch (tr->Node.opcode)
@@ -1603,41 +1624,171 @@ bool PAModule::_analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_
 		case OP_QUICKFOR + OP_COUNT:
 		case OP_FOREACH + OP_COUNT:
 		case OP_BLOCK + OP_COUNT:
-		{
-			auto c = new BKE_VarClosure(clo);
-			for (int i = 0; i < tr->childs.size(); i++)
 			{
-				if(!_analysisToPos(tr->childs[i], c, pos, var))
-					break;
+				auto c = new BKE_VarClosure(clo);
+				posvar = c->addRef();
+				for (int i = 0; i < tr->childs.size(); i++)
+				{
+					if (!tr->childs[i])
+						continue;
+					if (tr->childs[i]->Node.pos2 <= pos)
+						_analysisToClosure(tr->childs[i], clo, var);
+					else
+					{
+						_analysisToPos(tr->childs[i], c, pos, var);
+						c->release();
+						return false;
+					}
+				}
+				c->release();
+				posvar = rawv;
 			}
-			c->release();
-		}
-		break;
+			break;
 		case OP_RESERVE + OP_COUNT:
 			for (int i = 0; i < tr->childs.size(); i++)
 			{
-				if (!_analysisToPos(tr->childs[i], clo, pos, var))
+				if (!tr->childs[i])
+					continue;
+				if (tr->childs[i]->Node.pos2 <= pos)
+					_analysisToClosure(tr->childs[i], clo, var);
+				else
+				{
+					*var = rawv;
+					_analysisToPos(tr->childs[i], clo, pos, var);
 					break;
+				}
 			}
 			break;
 		case OP_VAR + OP_COUNT:
 			for (int i = 0; i < tr->childs.size(); i += 2)
 			{
+				int startpos = tr->childs[i]->Node.pos;
+				if (startpos >= pos)
+					return false;
 				auto str = tr->childs[i]->Node.var.asBKEStr();
 				int endpos = tr->childs[i]->Node.pos + str.getConstStr().length();
-				if (!str.isVoid() && endpos < pos)
+				//这是因为光标处于当前文字中间时：var ss|ss，不对其进行分析，即此时不认为ssss变量已定义
+				if (!str.isVoid())
 				{
 					BKE_Variable *v = &clo->getMember(str);
-					_analysisToClosure(tr->childs[i + 1], clo, v);
-				}
-				if (endpos >= pos)
-				{
-					if (var)
-						*var = clo->addRef();
-					return false;
+					_analysisToPos(tr->childs[i + 1], clo, pos, v);
 				}
 			}
 			break;
+		case OP_CONSTVAR + OP_COUNT:
+			if (var)
+				*var = tr->Node.var;
+			break;
+		case OP_LITERAL + OP_COUNT:
+			{
+				auto str = tr->Node.var.asBKEStr();
+				if (!str.isVoid())
+					tmpvar = &clo->getMember(str);
+			}
+			break;
+		case OP_DOT + OP_COUNT:
+			{
+				if (!EXIST_N(0))
+					break;
+				auto str = tr->childs[0]->Node.var.asBKEStr();
+				if (!str.isVoid() && tr->childs[0]->Node.pos + str.getConstStr().length() < pos)
+				{
+					if (!clo->withvar)
+					{
+						tmpvar = &top->getMember(str);
+						if (var)
+							*var = *tmpvar;
+					}
+					else
+					{
+						if (clo->withvar->vt == VAR_CLASS)
+						{
+							tmpvar = &((BKE_VarClass*)clo->withvar)->getMember(str);
+							if (var)
+								*var = *tmpvar;
+						}
+						else if (clo->withvar->vt == VAR_DIC)
+						{
+							tmpvar = &((BKE_VarDic*)clo->withvar)->getMember(str);
+							if (var)
+								*var = *tmpvar;
+						}
+					}
+				}
+			}
+			break;
+		case OP_DOT:
+			{
+				if (!EXIST_N(0))
+					break;
+				tmpvar = NULL;
+				if (!_analysisToPos(tr->childs[0], clo, pos, NULL))
+					return false;
+				auto str = tr->childs[1]->Node.var.asBKEStr();
+				if (tr->childs[1]->Node.pos + str.getConstStr().length() >= pos)
+				{
+					tmpvar = NULL;
+					return false;
+				}
+				if (tmpvar && tmpvar->getType() == VAR_DIC && !str.isVoid())
+				{
+					tmpvar = &((BKE_VarDic*)tmpvar->obj)->getMember(str);
+					if (var)
+						*var = *tmpvar;
+				}
+				else if (tmpvar && tmpvar->getType() == VAR_CLASS && !str.isVoid())
+				{
+					tmpvar = &((BKE_VarClass*)tmpvar->obj)->getClassMember(str);
+					if (var)
+						*var = *tmpvar;
+				}
+				else if (tmpvar && tmpvar->getType() == VAR_CLO && !str.isVoid())
+				{
+					tmpvar = &((BKE_VarClosure*)tmpvar->obj)->getMember(str);
+					if (var)
+						*var = *tmpvar;
+				}
+				else
+					tmpvar = NULL;	//识别终止
+				break;
+			}
+		case OP_GLOBAL + OP_COUNT:
+			{
+				tmpvar = &topvar;
+				break;
+			}
+		case OP_RETURN + OP_COUNT:
+			if (!EXIST_N(0))
+				break;
+			_analysisToPos(tr->childs[0], clo, pos, var);
+			break;
+		case OP_ARR2 + OP_COUNT:
+			if (var)
+			{
+				*var = BKE_Variable::array();
+				for (int i = 0; i < tr->childs.size() - 1; i++)
+				{
+					if(!_analysisToPos(tr->childs[i], clo, pos, &(*var)[i]))
+						return false;
+				}
+			}
+			break;
+		case OP_DIC + OP_COUNT:
+			if (var)
+			{
+				*var = BKE_Variable::dic();
+				int i = 0;
+				while (i < tr->childs.size() && tr->childs[i] != NULL)
+				{
+					if (tr->childs[i]->Node.opcode == OP_CONSTVAR + OP_COUNT)
+					{
+						_analysisToClosure(tr->childs[i], clo, &(*var)[tr->childs[i]->Node.var]);
+					}
+					i += 2;
+				}
+			}
+			break;
+
 		}
 	}
 	catch (Var_Except &){}

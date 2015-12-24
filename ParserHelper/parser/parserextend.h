@@ -27,7 +27,7 @@ class BKE_Graphic;
 
 typedef int BKE_ObjectID;
 
-namespace Parser_Util
+namespace ParserUtils
 {
 	/**
 	*	@class array

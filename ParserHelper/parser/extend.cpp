@@ -16,7 +16,7 @@
 #include <Windows.h>
 #endif
 
-namespace Parser_Util
+namespace ParserUtils
 {
 	//native constructor of inner types : number(int) , string, array, dictionary
 	//NATIVE_FUNC(number)
@@ -1921,7 +1921,7 @@ namespace Parser_Util
 		*   @return integer
 		*   @brief  同{@link length}，返回字符串的长度。
 		*/
-		{ L"size", &Parser_Util::nativeGet_length }
+		{ L"size", &ParserUtils::nativeGet_length }
 	}
 	REG_GET_END;
 
@@ -1943,7 +1943,7 @@ namespace Parser_Util
 		*   @return string
 		*   @brief  同{@link substring}，取从start开始长度为len的子串，如果省略len，则取到原字符串末尾。如果start位置不合法，则返回空串。
 		*/
-		{ L"substr", &Parser_Util::nativeFunc_substring },
+		{ L"substr", &ParserUtils::nativeFunc_substring },
 		/**
 		*	@class string（内部保留类）
 		*	@prototype (anytype arg1, anytype arg2, ...)
@@ -2057,7 +2057,7 @@ namespace Parser_Util
 		*   @return integer
 		*   @brief  同length，返回数组的长度。
 		*/
-		{ L"size", &Parser_Util::nativeGet_length }
+		{ L"size", &ParserUtils::nativeGet_length }
 	}
 	REG_SET_END;
 
@@ -2167,7 +2167,7 @@ namespace Parser_Util
 		*	@return anytype
 		*   @brief  随机返回数组中一个元素。
 		*/
-		{ L"random", &Parser_Util::nativeFunc_array_random },
+		{ L"random", &ParserUtils::nativeFunc_array_random },
 #ifdef ENABLE_FILE
 		/**
 		*	@class array（内部保留类）
@@ -2351,7 +2351,7 @@ namespace Parser_Util
 
 		BKE_String s_dictionary(L"dictionary");
 		_class = new BKE_VarClass(s_dictionary);
-		_class->innerCreateInstance = &Parser_Util::nativeFunc_dictionary;
+		_class->innerCreateInstance = &ParserUtils::nativeFunc_dictionary;
 		REG_GET(String);  // Yes, the same getter list as String
 		REG_FUNC(Dictionary);
 		global->forceSetMember(s_dictionary, _class);

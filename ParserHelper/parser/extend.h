@@ -90,10 +90,10 @@ T *_bkpGetClassInstance(BKE_VarObject *__obj, T2 && __classname)
 #define PARAMCOUNT() (paramarray ? paramarray->getCount() : 0);
 #define MINIMUMPARAMNUM(n) if(!PARAMEXIST(n-1)) throw Var_Except(L"参数数目不足");
 
-#define QUICKFUNC(f) L###f, &Parser_Util::nativeFunc_##f
-#define QUICKGETTER(f) L###f, &Parser_Util::nativeGet_##f
-#define QUICKSETTER(f) L###f, &Parser_Util::nativeSet_##f
-#define QUICKCLASS(f) L###f, new Parser_Util::f()
+#define QUICKFUNC(f) L###f, &ParserUtils::nativeFunc_##f
+#define QUICKGETTER(f) L###f, &ParserUtils::nativeGet_##f
+#define QUICKSETTER(f) L###f, &ParserUtils::nativeSet_##f
+#define QUICKCLASS(f) L###f, new ParserUtils::f()
 
 #define PREPARECLASS() this->_prepareClass(name)
 	
@@ -121,7 +121,7 @@ T *_bkpGetClassInstance(BKE_VarObject *__obj, T2 && __classname)
 //anytype表示任意类型
 
 
-namespace Parser_Util
+namespace ParserUtils
 {
 	
 	void registerExtend(Parser *p);
@@ -252,7 +252,7 @@ namespace Parser_Util
 #endif
 
 	/**
-	*   @数学类。
+	*   数学类。
 	*   @singleton
 	*   {@b 不可实例化。}
 	*/
@@ -419,7 +419,7 @@ namespace Parser_Util
 #ifdef HAS_REGEX
 
 	/**
-	*   @正则表达式类。
+	*   正则表达式类。
 	*   {@b 可实例化。}
 	*   @brief 使用Regex(regstr[,ignorecase=false])创建。
 	*/
@@ -491,7 +491,7 @@ namespace Parser_Util
 #endif
 
 	/**
-	*   @标记类。
+	*   标记类。
 	*   @singleton
 	*   {@b 不可实例化。}
 	*   @brief 用于处理按位设置标记的情况，最多0-31位共32个标记。

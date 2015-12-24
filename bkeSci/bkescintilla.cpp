@@ -57,13 +57,13 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	setMarginsBackgroundColor(QColor(240, 240, 240));
 	//setAutoIndent(true);
 	
-	SendScintilla(SCI_AUTOCSTOPS, "", ",./!@#$%^&*()+-=\\;'\"[]{}");
+	SendScintilla(SCI_AUTOCSTOPS, "", " ~,./!@#$%^&*()+-=\\;'[]{}|:?<>");
 	SendScintilla(SCI_SETUSETABS, true);
 	SendScintilla(SCI_SETINDENT, 0);
 	SendScintilla(SCI_AUTOCSETORDER, SC_ORDER_PERFORMSORT);
 
 	//setIndentationGuides(true) ;
-	Separate = QString(" ~!@#$%^&*()-+*/|{}[]:;/=.,?><\\\n\r");
+	Separate = QString(" ~!@#$%^&*()-+/|{}[]:;/=.,?><\\\n\r");
 	AutoState = AUTO_NULL;
 	ChangeIgnore = 0;
 	UseCallApi = false;
@@ -434,9 +434,12 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 	{
 		if (!idx)
 		{
-			v = p->fileclo->getMember(ls[idx].toStdWString());
+			if (ls[idx] == "global")
+				v = p->fileclo->addRef();
+			else
+				v = p->fileclo->getMember(ls[idx].toStdWString());
 		}
-		else if (v.getType() == VAR_DIC || v.getType() == VAR_CLASS)
+		else if (v.getType() == VAR_DIC || v.getType() == VAR_CLASS || v.getType() == VAR_CLO)
 		{
 			v = v.dot(ls[idx].toStdWString());
 		}
@@ -463,6 +466,16 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		{
 			params.insert(QString::fromStdWString(it.first.getConstStr() + L"?0"));
 		}
+		analysis->unlockFile();
+		for (auto &it2 : params)
+		{
+			res += ' ';
+			res += it2;
+		}
+		res.remove(0, 1);
+		return res;
+	case VAR_CLO:
+		getAllMembers((BKE_VarClosure*)v.obj, params);
 		analysis->unlockFile();
 		for (auto &it2 : params)
 		{

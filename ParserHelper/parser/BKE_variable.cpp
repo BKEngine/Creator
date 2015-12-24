@@ -4,40 +4,31 @@
 void GlobalMemoryPool::purge()
 {
 	clearflag = true;
-	MemoryPoolHeader *h = start.next;
-	while (h != &stop)
+	for (auto &it : buffer)
 	{
-		void *p = h + 1;
-		((BKE_VarObject*)p)->forceDelete();
-		h = h->next;
+		BKE_VarObject *p = (BKE_VarObject*)(&it + 1);
+		p->forceDelete();
 	}
-	h = start.next;
-	while (h != &stop)
+	for (auto it = buffer.begin(); it != buffer.end();)
 	{
-		MemoryPoolHeader *tmp = h;
-		h = h->next;
-#if PARSER_MULTITHREAD
-		free(tmp);
-#else
-		if (h->size <= 4 * SMALL)
-			allocator_array()[(h->size + 3) / 4]->dynamic_deallocate(tmp);
+		auto it2 = it++;
+		if (it2->size <= 4 * SMALL)
+			allocator_array()[(it2->size + 3) / 4]->dynamic_deallocate(it2);
 		else
-			free(tmp);
-#endif
+			free(it2);
 	}
+	buffer.clear();
 };
+
 
 void GlobalMemoryPool::finalize()
 {
-	MemoryPoolHeader *h = start.next;
-	while (h!= &stop)
+	for (auto &it : buffer)
 	{
-		void *p = h + 1;
-		if (((BKE_VarObject*)p)->vt == VAR_CLASS)
+		if (((BKE_VarObject*)&it)->vt == VAR_CLASS)
 		{
-			((BKE_VarClass*)p)->finalize();
+			((BKE_VarClass*)&it)->finalize();
 		}
-		h = h->next;
 	}
 }
 
@@ -502,7 +493,7 @@ BKE_VarDic *BKE_Variable::asDic() const
 	case VAR_DIC:
 		return static_cast<BKE_VarDic*>(obj);
 	default:
-		_throw(L"无法转化为数组");
+		_throw(L"无法转化为字典");
 	}
 }
 
@@ -515,7 +506,7 @@ BKE_VarFunction *BKE_Variable::asFunc() const
 	case VAR_FUNC:
 		return static_cast<BKE_VarFunction*>(obj);
 	default:
-		_throw(L"无法转化为数组");
+		_throw(L"无法转化为方法");
 	}
 }
 
@@ -528,7 +519,7 @@ BKE_VarClass *BKE_Variable::asClass() const
 	case VAR_CLASS:
 		return static_cast<BKE_VarClass*>(obj);
 	default:
-		_throw(L"无法转化为数组");
+		_throw(L"无法转化为类");
 	}
 }
 
@@ -1926,12 +1917,12 @@ bool BKE_Variable::dotFunc(const BKE_String &funcname, BKE_Variable &out)
 		{
 			if (vv->getType() == VAR_FUNC)
 			{
-				out = new BKE_VarFunction(*static_cast<BKE_VarFunction*>(vv->obj), BKE_VarClosure::global(), this);
+				out = new BKE_VarFunction(*static_cast<BKE_VarFunction*>(vv->obj), BKE_VarClosure::global(), *this);
 				return true;
 			}
 			if (vv->getType() == VAR_PROP)
 			{
-				out = new BKE_VarProp(*static_cast<BKE_VarProp*>(vv->obj), NULL, this);
+				out = new BKE_VarProp(*static_cast<BKE_VarProp*>(vv->obj), NULL, *this);
 				return true;
 			}
 		}
@@ -1993,10 +1984,10 @@ BKE_Variable& BKE_Variable::dot(const BKE_String &funcname)
 	else
 	{
 		BKE_Variable &vv = static_cast<BKE_VarClass*>(obj)->getClassMember(funcname);
-		if (vv.getType() == VAR_FUNC)
-			static_cast<BKE_VarFunction*>(vv.obj)->setSelf(*this);
-		if (vv.getType() == VAR_PROP)
-			static_cast<BKE_VarProp*>(vv.obj)->setSelf(*this);
+		//if (vv.getType() == VAR_FUNC)
+		//	static_cast<BKE_VarFunction*>(vv.obj)->setSelf(*this);
+		//if (vv.getType() == VAR_PROP)
+		//	static_cast<BKE_VarProp*>(vv.obj)->setSelf(*this);
 		return vv;
 	}
 }

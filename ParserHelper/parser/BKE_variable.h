@@ -33,8 +33,7 @@ private:
 #if PARSER_MULTITHREAD
 	recursive_mutex mu;
 #endif
-	MemoryPoolHeader start, stop;
-	int32_t nums;
+	BKE_ListTemplate<MemoryPoolHeader> buffer;
 
 public:
 #if PARSER_DEBUG==2
@@ -46,11 +45,6 @@ public:
 	{
 		__init_memorypool();
 		clearflag = false;
-		start.last = NULL;
-		stop.next = NULL;
-		start.next = &stop;
-		stop.last = &start;
-		nums = 0;
 #if PARSER_DEBUG==2
 		c=0;
 #endif
@@ -61,25 +55,17 @@ public:
 	inline void unlock(){ mu.unlock(); }
 #endif
 
-	//p is the raw pointer
 	void insertKey(void *p, bkplong size)
 	{
-		MemoryPoolHeader *h = (MemoryPoolHeader*)p;
-		h->size = size;
-		h->magic = PARSER_MAGIC;
-		h->next = &stop;
-		h->last = stop.last;
-		stop.last = h;
-		h->last->next = h;
-		nums++;
+		MemoryPoolHeader *m = (MemoryPoolHeader*)p;
+		m->size = size;
+		m->magic = PARSER_MAGIC;
+		buffer.push_back(m);
 	}
 
-	void erase(void *p)
+	void erase(MemoryPoolHeader *p)
 	{
-		MemoryPoolHeader *h = (MemoryPoolHeader*)p;
-		h->next->last = h->last;
-		h->last->next = h->next;
-		nums--;
+		buffer.erase(p);
 	}
 
 	void finalize();
@@ -158,28 +144,27 @@ public:
 #if PARSER_MULTITHREAD
 			MemoryPool().lock();
 #endif
-			MemoryPoolHeader *h = (MemoryPoolHeader*)p - 1;
-			//auto it = MemoryPool().find(p);
+			MemoryPoolHeader *m = (MemoryPoolHeader*)p;
+			m--;
 			//先做兼容处理，找到bug再说
-			//if (it == MemoryPool().end())
-			if (h->magic != PARSER_MAGIC)
+			if(m->magic != PARSER_MAGIC)
 			{
 #if PARSER_MULTITHREAD
 				MemoryPool().unlock();
 #endif
 				return;
 			}
-			MemoryPool().erase(h);
+			MemoryPool().erase(m);
 #if PARSER_MULTITHREAD
-			free(h);
+			free(m);
 #else
-			if (h->size <= 4 * SMALL)
-				allocator_array()[(h->size + 3) / 4]->dynamic_deallocate(h);
+			if (m->size <= 4 * SMALL)
+				allocator_array()[(m->size + 3) / 4]->dynamic_deallocate(m);
 			else
-				free(h);
+				free(m);
 #endif
 #if PARSER_MULTITHREAD
-			MemoryPool().unlock();
+		MemoryPool().unlock();
 #endif
 		}
 	};
@@ -1323,12 +1308,18 @@ class BKE_VarFunction :public BKE_VarObject
 #endif
 private:
 	BKE_FunctionCode *func;
-	BKE_Variable* self;
+	//从*self改为self，这意味着int和string类的function（如replace）再也不可以更改原字符串的内容了【
+	//同时要注意额外增减extraref
+	BKE_Variable self;
 	BKE_VarClosure *closure;
 	BKE_String name;
 
 	virtual ~BKE_VarFunction()
 	{
+		if (self.getType() == VAR_CLASS)
+		{
+			self.forceAsClosure()->extraref--;
+		}
 		if (!MemoryPool().clearflag)
 		{
 			func->release();
@@ -1350,9 +1341,29 @@ public:
 	BKE_hashmap<BKE_String, BKE_Variable> initials;
 
 	BKE_VarFunction() = delete;
-	inline BKE_VarFunction(BKE_NativeFunction fun, BKE_Variable *_self = NULL) :BKE_VarObject(VAR_FUNC){ func = new BKE_FunctionCode(fun); self = _self; closure = (BKE_VarClosure *)BKE_VarClosure::global()->addRef(); closure->extraref++; };
-	inline BKE_VarFunction(BKE_bytree *tree, BKE_Variable *_self = NULL) :BKE_VarObject(VAR_FUNC){ func = new BKE_FunctionCode(tree); self = _self; closure = (BKE_VarClosure *)BKE_VarClosure::global()->addRef(); closure->extraref++; };
-	BKE_VarFunction(const BKE_VarFunction &f, BKE_VarClosure *c = BKE_VarClosure::global(), BKE_Variable *_self = NULL) :BKE_VarObject(VAR_FUNC)
+	inline BKE_VarFunction(BKE_NativeFunction fun, BKE_Variable _self = BKE_Variable()) :BKE_VarObject(VAR_FUNC)
+	{ 
+		func = new BKE_FunctionCode(fun); 
+		self = _self;
+		if (self.getType() == VAR_CLASS)
+		{
+			static_cast<BKE_VarClosure*>(self.obj)->extraref++;
+		}
+		closure = (BKE_VarClosure *)BKE_VarClosure::global()->addRef();
+		closure->extraref++; 
+	};
+	inline BKE_VarFunction(BKE_bytree *tree, BKE_Variable _self = BKE_Variable()) :BKE_VarObject(VAR_FUNC)
+	{ 
+		func = new BKE_FunctionCode(tree);
+		self = _self;
+		if (self.getType() == VAR_CLASS)
+		{
+			static_cast<BKE_VarClosure*>(self.obj)->extraref++;
+		}
+		closure = (BKE_VarClosure *)BKE_VarClosure::global()->addRef();
+		closure->extraref++; 
+	};
+	BKE_VarFunction(const BKE_VarFunction &f, BKE_VarClosure *c = BKE_VarClosure::global(), const BKE_Variable &_self = BKE_Variable()) :BKE_VarObject(VAR_FUNC)
 	{ 
 		func = (BKE_FunctionCode*)f.func->addRef(); 
 		initials = f.initials; 
@@ -1362,7 +1373,11 @@ public:
 			self = _self; 
 		else 
 			self = f.self; 
-		closure = c; 
+		if (self.getType() == VAR_CLASS)
+		{
+			static_cast<BKE_VarClosure*>(self.obj)->extraref++;
+		}
+		closure = c;
 		c->addRef(); 
 		closure->extraref++; 
 #if PARSER_DEBUG
@@ -1374,7 +1389,7 @@ public:
 	inline BKE_Variable run(BKE_VarArray *params)
 	{
 		if (func->native)
-			return (func->native)(self, params, getClo());
+			return (func->native)(&self, params, getClo());
 		BKE_VarClosure *clo = new BKE_VarClosure(getClo());
 		BKE_VarObjectAutoReleaser cc(clo);
 		for (auto &i : initials)
@@ -1402,13 +1417,45 @@ public:
 				clo->forceSetMember(name, arr);
 			}
 		}
-		return func->run(self, params, clo);
+		return func->run(&self, params, clo);
 	}
 	//used in parser
 	BKE_Variable run(const BKE_bytree *tr, BKE_VarClosure *_tr);
-	inline void setSelf(BKE_Variable &v){ self = &v; };
-	inline void setClosure(BKE_VarClosure *c){ closure->extraref--;  closure->release(); closure = c; c->addRef(); c->extraref++; }
-	inline bool isNativeFunction(){ return func->native != NULL; };
+	inline void setSelf(const BKE_Variable &v)
+	{
+		if (self.getType() == VAR_CLASS)
+		{
+			static_cast<BKE_VarClosure*>(self.obj)->extraref--;
+		}
+		self = v;
+		if (self.getType() == VAR_CLASS)
+		{
+			static_cast<BKE_VarClosure*>(self.obj)->extraref++;
+		}
+	};
+	inline void setSelf(BKE_VarClosure *v)
+	{
+		if (self.obj == v)
+			return;
+		if (self.getType() == VAR_CLASS)
+		{
+			static_cast<BKE_VarClosure*>(self.obj)->extraref--;
+		}
+		self = v->addRef();
+		v->extraref++;
+	}
+	inline void setClosure(BKE_VarClosure *c)
+	{
+		closure->extraref--;
+		closure->release();
+		closure = c;
+		c->addRef();
+		c->extraref++;
+	}
+	inline bool isNativeFunction()
+	{
+		return func->native != NULL;
+	};
 	wstring functionSimpleInfo() const
 	{
 		wstring s = L"(";
@@ -1443,7 +1490,6 @@ inline void BKE_VarClosure::addNativeFunction(const BKE_String &key, BKE_NativeF
 	varmap[key] = f;
 }
 
-
 class BKE_VarProp :public BKE_VarObject
 {
 #if BKE_CREATOR
@@ -1452,12 +1498,19 @@ class BKE_VarProp :public BKE_VarObject
 private:
 	BKE_FunctionCode *funcget;
 	BKE_FunctionCode *funcset;
-	BKE_Variable *self;
+	//倒是因为prop无法获得其引用所以一定随着class的析构而析构，所以closure只需为一个弱引用就行了……
 	BKE_VarClosure *closure;
+
+	//然而self还是要注意增减extraref
+	mutable BKE_Variable self;
 	BKE_String setparam;
 
 	virtual ~BKE_VarProp()
 	{
+		if (self.getType() == VAR_CLASS)
+		{
+			self.forceAsClosure()->extraref--;
+		}
 		if (funcget)
 			funcget->release();
 		if (funcset)
@@ -1466,9 +1519,13 @@ private:
 
 	inline BKE_VarClosure *getClo() const
 	{
-		return closure ? closure : (self ? self->forceAsClosure() : NULL);
+		//有self时，说明是类的prop，使用类的闭包
+		auto clo = self.forceAsClosure();
+		return clo ? clo : closure;
 	}
 public:
+
+	BKE_String name;
 	//BKE_VarProp(BKE_Variable *_self/* = NULL*/, BKE_NativeFunction get = NULL, BKE_NativeFunction set = NULL)
 	//{
 	//	funcget = funcset = NULL;
@@ -1487,14 +1544,14 @@ public:
 			funcget = new BKE_FunctionCode(get);
 		if (set)
 			funcset = new BKE_FunctionCode(set);
-		self = NULL;
 		closure = clo;
 	}
-	BKE_VarProp(const BKE_VarProp &p, BKE_VarClosure *c = NULL, BKE_Variable *_self = NULL)
+	BKE_VarProp(const BKE_VarProp &p, BKE_VarClosure *c = NULL, const BKE_Variable &_self = BKE_Variable())
 		:BKE_VarObject(VAR_PROP)
 	{
 		funcget = p.funcget;
 		funcset = p.funcset;
+		name = p.name;
 		if (funcget)
 			funcget->addRef();
 		if (funcset)
@@ -1503,6 +1560,10 @@ public:
 			self = _self;
 		else
 			self = p.self;
+		if (self.getType() == VAR_CLASS)
+		{
+			static_cast<BKE_VarClosure*>(self.obj)->extraref++;
+		}
 		closure = c;
 		setparam = p.setparam;
 	}
@@ -1512,14 +1573,39 @@ public:
 	inline void addPropSet(const BKE_String &setparam, BKE_bytree *set){ if (funcset)funcset->release(); funcset = new BKE_FunctionCode(set); this->setparam = setparam; }
 	inline bool hasGet() const { return !!funcget; }
 	inline bool hasSet() const { return !!funcset; }
-	inline void setSelf(const BKE_Variable &v){ self = (BKE_Variable *)&v; };
-	inline void setClosure(const BKE_VarClosure *c){ closure = (BKE_VarClosure*)c; }
+	inline void setSelf(const BKE_Variable &v)
+	{
+		if (self.getType() == VAR_CLASS)
+		{
+			static_cast<BKE_VarClosure*>(self.obj)->extraref--;
+		}
+		self = v;
+		if (self.getType() == VAR_CLASS)
+		{
+			static_cast<BKE_VarClosure*>(self.obj)->extraref++;
+		}
+	};
+	inline void setSelf(BKE_VarClosure *v)
+	{
+		if (self.obj == v)
+			return;
+		if (self.getType() == VAR_CLASS)
+		{
+			static_cast<BKE_VarClosure*>(self.obj)->extraref--;
+		}
+		self = v->addRef();
+		v->extraref++;
+	}
+	inline void setClosure(const BKE_VarClosure *c)
+	{
+		closure = (BKE_VarClosure*)c;
+	}
 
 	inline BKE_Variable get() const
 	{
 		if (funcget)
 		{
-			BKE_Variable v = funcget->run(self, NULL, getClo());
+			BKE_Variable v = funcget->run(&self, NULL, getClo());
 			if (v.getType() == VAR_PROP)
 			{
 				if (v.obj == this)
@@ -1539,7 +1625,7 @@ public:
 			BKE_VarClosure *clo = getClo();
 			if (!setparam.empty() && clo)
 				clo->forceSetMember(setparam, v);
-			funcset->run(self, static_cast<BKE_VarArray*>(tmp.obj), clo);
+			funcset->run(&self, static_cast<BKE_VarArray*>(tmp.obj), clo);
 		}
 	}
 };
@@ -1584,13 +1670,13 @@ public:
 };
 
 class Parser;
-namespace Parser_Util{
+namespace ParserUtils{
 	void registerExtend(Parser *p);
 }
 
 class BKE_VarClass :public BKE_VarClosure
 {
-	friend void Parser_Util::registerExtend(Parser *);
+	friend void ParserUtils::registerExtend(Parser *);
 	friend class Parser;
 private:
 	bool finalized;
@@ -1690,11 +1776,11 @@ public:
 		{
 			if (it.second.getType() == VAR_FUNC)
 			{
-				varmap[it.first].forceSet(new BKE_VarFunction(*(BKE_VarFunction*)(it.second.obj), this));
+				varmap[it.first].forceSet(new BKE_VarFunction(*(BKE_VarFunction*)(it.second.obj), this, this->addRef()));
 			}
 			else if (it.second.getType() == VAR_PROP)
 			{
-				varmap[it.first].forceSet(new BKE_VarProp(*(BKE_VarProp*)(it.second.obj), this));
+				varmap[it.first].forceSet(new BKE_VarProp(*(BKE_VarProp*)(it.second.obj), this, this->addRef()));
 			}
 			else
 			{
@@ -1727,11 +1813,11 @@ public:
 			{
 				if (it.second.getType() == VAR_FUNC)
 				{
-					varmap[it.first].forceSet(new BKE_VarFunction(*(BKE_VarFunction*)(it.second.obj), this));
+					varmap[it.first].forceSet(new BKE_VarFunction(*(BKE_VarFunction*)(it.second.obj), this, this->addRef()));
 				}
 				else if (it.second.getType() == VAR_PROP)
 				{
-					varmap[it.first].forceSet(new BKE_VarProp(*(BKE_VarProp*)(it.second.obj), this));
+					varmap[it.first].forceSet(new BKE_VarProp(*(BKE_VarProp*)(it.second.obj), this, this->addRef()));
 				}
 				else
 				{
@@ -1765,11 +1851,11 @@ public:
 		{
 			if (it.second.getType() == VAR_FUNC)
 			{
-				varmap[it.first].forceSet(new BKE_VarFunction(*(BKE_VarFunction*)(it.second.obj), this));
+				varmap[it.first].forceSet(new BKE_VarFunction(*(BKE_VarFunction*)(it.second.obj), this, this->addRef()));
 			}
 			else if (it.second.getType() == VAR_PROP)
 			{
-				varmap[it.first].forceSet(new BKE_VarProp(*(BKE_VarProp*)(it.second.obj), this));
+				varmap[it.first].forceSet(new BKE_VarProp(*(BKE_VarProp*)(it.second.obj), this, this->addRef()));
 			}
 			//not copy static varS
 		}
@@ -1800,6 +1886,7 @@ public:
 	{
 		auto f = new BKE_VarFunction(func);
 		f->setClosure(this);
+		f->setSelf(this);
 		varmap[key] = f;
 	};
 
@@ -1809,6 +1896,7 @@ public:
 		if (var.getType() != VAR_PROP)
 		{
 			var = new BKE_VarProp(this);
+			static_cast<BKE_VarProp*>(var.obj)->setSelf(this);
 		}
 		static_cast<BKE_VarProp*>(var.obj)->addPropGet(func);
 	};
@@ -1818,6 +1906,7 @@ public:
 		if (var.getType() != VAR_PROP)
 		{
 			var = new BKE_VarProp(this);
+			static_cast<BKE_VarProp*>(var.obj)->setSelf(this);
 		}
 		static_cast<BKE_VarProp*>(var.obj)->addPropSet(func);
 	};
@@ -1843,6 +1932,10 @@ public:
 		if (it != varmap.end())
 		{
 			(*var) = &it->second;
+			if (it->second.getType() == VAR_FUNC)
+				it->second.forceAsFunc()->setSelf(const_cast<BKE_VarClass*>(this));
+			else if(it->second.getType() == VAR_PROP)
+				it->second.forceAsProp()->setSelf(const_cast<BKE_VarClass*>(this));
 			return true;
 		}
 		if (!isdef)
@@ -1952,6 +2045,7 @@ public:
 			}
 		}
 		//else
+		if(!force)	//loadClass的时候不经过构造函数
 		{
 			BKE_array<BKE_VarFunction*> cons;
 			getAllConstructors(&cons, _this);

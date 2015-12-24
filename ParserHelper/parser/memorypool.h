@@ -533,6 +533,9 @@ private:
 	};
 
 public:
+	typedef T value_type;
+	typedef int32_t size_type;
+
 	BKE_allocator()
 	{
 		al = get_allocator<(sizeof(T) + MEMORY_UNIT - 1) / MEMORY_UNIT>();

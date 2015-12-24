@@ -226,8 +226,7 @@ BKE_Variable BKE_VarFunction::run(const BKE_bytree *tr, BKE_VarClosure *_tr)
 	}
 	try
 	{
-		if (self)
-			tmp->setMember(L"__self", *self);
+		tmp->setMember(L"__self", self);
 		BKE_Variable &res = Parser::getInstance()->innerRun(func->code, tmp, tmpvars);
 		return res;
 	}
@@ -294,18 +293,23 @@ BKE_FunctionCode::BKE_FunctionCode(BKE_bytree *code)
 
 BKE_Variable BKE_FunctionCode::run(BKE_Variable *self, BKE_VarArray *paramarray, BKE_VarClosure *_this) const
 {
-	if (_this == NULL)
-	{
-		_this = BKE_VarClosure::global();
-	}
+	//get run closure
 	if(native)
-		return (*native)(self, paramarray, _this);
+		return (*native)(self, paramarray, _this);		//native function uses _this, because they didn't need extra closure
+	BKE_VarClosure *tmp = NULL;
+	if (!_this)
+	{
+		tmp = new BKE_VarClosure(BKE_VarClosure::global());
+	}
+	else
+		tmp = new BKE_VarClosure(_this);
+	BKE_VarObjectAutoReleaser _tmp(tmp);
 	try
 	{
 		if (self)
-			_this->setMember(L"__self", *self);
+			tmp->setMember(L"__self", *self);
 		BKE_array<BKE_Variable> tmpvars;
-		return Parser::getInstance()->innerRun(code, _this, tmpvars);
+		return Parser::getInstance()->innerRun(code, tmp, tmpvars);
 	}
 	catch(Special_Except &e)
 	{
@@ -345,7 +349,7 @@ void Parser::init()
 	addConst(L"void",none);
 	//addConst(L"global", BKE_VarClosure::Global()->addRef());
 
-	Parser_Util::registerExtend(this);
+	ParserUtils::registerExtend(this);
 
 	//register operators
 	opmap[L"var"] = OP_VAR;
@@ -1103,6 +1107,10 @@ void Parser::expression(BKE_bytree** tree, int rbp)
 #endif
 		(this->*funclist[token.opcode])(tree);
 	}
+	if (*tree)
+	{
+		(*tree)->Node.pos2 = next.pos;
+	}
 	forcequit = false;
 }
 
@@ -1567,6 +1575,7 @@ void Parser::nud_array(BKE_bytree** tree)
 	{
 		THROW(getPos(p) + L"[需要]结尾。", next.pos);
 	};
+	tr->Node.pos2 = next.pos;
 	readToken();
 	if(cancal)
 	{
@@ -1643,6 +1652,7 @@ void Parser::nud_dic(BKE_bytree** tree)
 	{
 		THROW(getPos(p) + L"%[需要]结尾。", next.pos);
 	};
+	tr->Node.pos2 = next.pos;
 	readToken();
 	if(cancal)
 	{
@@ -1701,6 +1711,7 @@ void Parser::nud_block(BKE_bytree** tree)
 	{
 		THROW(getPos(p) + L"{需要}结尾。", next.pos);
 	}
+	tr->Node.pos2 = next.pos;
 	//override optimization introduce many NULL error
 
 	//if(cancal)
@@ -2894,6 +2905,7 @@ NUD_FUNC(propget)
 	if (var.getType() != VAR_PROP)
 	{
 		var = new BKE_VarProp(NULL);
+		static_cast<BKE_VarProp*>(var.obj)->name = tree->childs[0]->Node.var.asBKEStr();
 	}
 	static_cast<BKE_VarProp*>(var.obj)->addPropGet(tree->childs[1]);
 	RETURNNULL;
@@ -2907,6 +2919,7 @@ NUD_FUNC(propset)
 	if (var.getType() != VAR_PROP)
 	{
 		var = new BKE_VarProp(NULL);
+		static_cast<BKE_VarProp*>(var.obj)->name = tree->childs[0]->Node.var.asBKEStr();
 	}
 	static_cast<BKE_VarProp*>(var.obj)->addPropSet(tree->childs[1]->Node.var.asBKEStr(), tree->childs[2]);
 	RETURNNULL;
@@ -3139,6 +3152,7 @@ NUD_FUNC(class)
 				if (var.getType() != VAR_PROP)
 				{
 					var = new BKE_VarProp(cla);
+					static_cast<BKE_VarProp*>(var.obj)->name = subtr->childs[0]->Node.var.asBKEStr();
 				}
 				static_cast<BKE_VarProp*>(var.obj)->addPropGet(subtr->childs[1]);
 				//((BKE_VarProp*)var.obj)->setClosure(cla);
@@ -3150,6 +3164,7 @@ NUD_FUNC(class)
 				if (var.getType() != VAR_PROP)
 				{
 					var = new BKE_VarProp(cla);
+					static_cast<BKE_VarProp*>(var.obj)->name = subtr->childs[0]->Node.var.asBKEStr();
 				}
 				static_cast<BKE_VarProp*>(var.obj)->addPropSet(subtr->childs[1]->Node.var.asBKEStr(), subtr->childs[2]);
 				//((BKE_VarProp*)var.obj)->setClosure(cla);

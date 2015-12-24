@@ -785,3 +785,180 @@ template <class Key_t>
 class BKE_hashset : public BKE_hashmap < Key_t, _dummy_class >
 {
 };
+
+//T.last and T.next must be exist and be the first two element
+template <class T>
+class BKE_ListTemplate
+{
+protected:
+	T* _start[2];
+	T* _stop[2];
+
+	T* start;
+	T* stop;
+
+	int num;
+
+	struct _Iterator
+	{
+		friend class BKE_ListTemplate;
+	private:
+		mutable T *node;
+	public:
+		_Iterator() :node(NULL) {};
+
+		_Iterator(T *n) :node(n) {};
+
+		_Iterator& operator =(const _Iterator &it)
+		{
+			node = it.node;
+			return *this;
+		}
+		const _Iterator& operator ++() const
+		{
+			_ASSERT_EXPR(node->next != NULL, L"end iterator不能再++");
+			this->node = node->next;
+			return *this;
+		}
+		_Iterator& operator ++()
+		{
+			_ASSERT_EXPR(node->next != NULL, L"end iterator不能再++");
+			this->node = node->next;
+			return *this;
+		}
+		const _Iterator& operator --() const
+		{
+			_ASSERT_EXPR(node->last != NULL, L"begin iterator不能再--");
+			this->node = node->last;
+			return *this;
+		}
+		_Iterator& operator --()
+		{
+			_ASSERT_EXPR(node->last != NULL, L"begin iterator不能再--");
+			this->node = node->last;
+			return *this;
+		}
+		bool operator ==(const _Iterator &it) const
+		{
+			return node == it.node;
+		}
+		inline bool operator !=(const _Iterator &it) const
+		{
+			return node != it.node;
+		}
+		const _Iterator operator ++(int) const
+		{
+			auto it = *this;
+			++(*this);
+			return it;
+		}
+		const _Iterator operator --(int) const
+		{
+			auto it = *this;
+			--(*this);
+			return it;
+		}
+		_Iterator operator ++(int)
+		{
+			auto it = *this;
+			++(*this);
+			return it;
+		}
+		_Iterator operator --(int)
+		{
+			auto it = *this;
+			--(*this);
+			return it;
+		}
+		T *operator ->()
+		{
+			_ASSERT_EXPR(node->next != NULL, L"end没有->运算");
+			return node;
+		}
+		const T *operator ->() const
+		{
+			_ASSERT_EXPR(node->next != NULL, L"end没有->运算");
+			return node;
+		}
+		T &operator *()
+		{
+			return *node;
+		}
+		const T &operator *() const
+		{
+			return *node;
+		}
+		operator T* ()
+		{
+			return node;
+		}
+		operator const T* () const
+		{
+			return node;
+		}
+	};
+
+public:
+	typedef _Iterator iterator;
+	typedef const _Iterator const_iterator;
+
+	BKE_ListTemplate()
+	{
+		start = (T*)_start;
+		stop = (T*)_stop;
+
+		_start[0] = NULL;
+		_start[1] = stop;
+		_stop[0] = start;
+		_stop[1] = NULL;
+
+		num = 0;
+	}
+
+	inline iterator begin() const
+	{
+		return iterator(start->next);
+	}
+
+	inline const_iterator cbegin() const
+	{
+		return begin();
+	}
+
+	inline iterator end() const
+	{
+		return iterator(stop);
+	}
+
+	inline const_iterator cend() const
+	{
+		return end();
+	}
+
+	iterator push_back(T* p)
+	{
+		p->next = stop;
+		p->last = stop->last;
+		p->last->next = p;
+		stop->last = p;
+		num++;
+		return iterator(p);
+	}
+
+	iterator erase(T* p)
+	{
+		p->next->last = p->last;
+		p->last->next = p->next;
+		num--;
+		return iterator(p->next);
+	}
+
+	void clear()
+	{
+		num = 0;
+		_start[0] = NULL;
+		_start[1] = stop;
+		_stop[0] = start;
+		_stop[1] = NULL;
+	}
+};

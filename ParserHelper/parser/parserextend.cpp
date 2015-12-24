@@ -42,7 +42,7 @@ BKE_Variable BKE_EvalFile(const wstring &filename, BKE_VarClosure *clo)
 	return BKE_Variable();
 }
 
-namespace Parser_Util
+namespace ParserUtils
 {
 	//array.load(filename)
 	NATIVE_FUNC(load)
@@ -2470,7 +2470,7 @@ void registerExtendFunction()
 	clo->addNativeFunction(QUICKFUNC(appendFile));
 	clo->addNativeFunction(QUICKFUNC(evalFile));
 	clo->addNativeFunction(QUICKFUNC(fileExist));
-	clo->addNativeFunction(L"log", &Parser_Util::nativeFunc_log_ol);
+	clo->addNativeFunction(L"log", &ParserUtils::nativeFunc_log_ol);
 
 	p->registerClass(QUICKCLASS(System));
 	p->registerClass(QUICKCLASS(Scripts));
