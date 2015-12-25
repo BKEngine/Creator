@@ -58,7 +58,7 @@
         <string>当前脚本使用的语言代号：</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEdit">
+      <widget class="QComboBox" name="comboBox">
        <property name="geometry">
         <rect>
          <x>180</x>

@@ -25,6 +25,7 @@ public:
 
 private:
 	Ui::CLangEdit *ui;
+	QStringList langs;
 
 	void removeRow(const QString &tag);
 	int findRow(const QString &tag);

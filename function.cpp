@@ -7,7 +7,7 @@ QString BKE_USE_NAME("BkeUse.bkpuse") ;
 QString BKE_PROJECT_WORKPRO ;
 QString BKE_API_FILE ;
 QString BKE_PROJECT_DIR ;
-QString BKE_CREATOR_VERTION("2014_09_23a\t") ;
+QString BKE_CREATOR_VERTION("2015_12_25\t") ;
 QStringList BKE_Recently_Project ;
 QStringList BKE_Recently_Files ;
 QJsonObject BKE_MARKS_OBJECT ;

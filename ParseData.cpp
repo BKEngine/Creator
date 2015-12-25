@@ -1655,7 +1655,7 @@ bool PAModule::_analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_
 				{
 					*var = rawv;
 					_analysisToPos(tr->childs[i], clo, pos, var);
-					break;
+					return false;
 				}
 			}
 			break;
@@ -1663,15 +1663,16 @@ bool PAModule::_analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_
 			for (int i = 0; i < tr->childs.size(); i += 2)
 			{
 				int startpos = tr->childs[i]->Node.pos;
-				if (startpos >= pos)
-					return false;
 				auto str = tr->childs[i]->Node.var.asBKEStr();
 				int endpos = tr->childs[i]->Node.pos + str.getConstStr().length();
+				if (endpos >= pos)
+					return false;
 				//这是因为光标处于当前文字中间时：var ss|ss，不对其进行分析，即此时不认为ssss变量已定义
 				if (!str.isVoid())
 				{
 					BKE_Variable *v = &clo->getMember(str);
 					_analysisToPos(tr->childs[i + 1], clo, pos, v);
+					return false;
 				}
 			}
 			break;
@@ -1682,6 +1683,9 @@ bool PAModule::_analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_
 		case OP_LITERAL + OP_COUNT:
 			{
 				auto str = tr->Node.var.asBKEStr();
+				int endpos = tr->Node.pos + str.getConstStr().length();
+				if (endpos >= pos)
+					return false;
 				if (!str.isVoid())
 					tmpvar = &clo->getMember(str);
 			}

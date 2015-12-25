@@ -12,10 +12,14 @@ void GlobalMemoryPool::purge()
 	for (auto it = buffer.begin(); it != buffer.end();)
 	{
 		auto it2 = it++;
+#if PARSER_MULTITHREAD
+		free(it2);
+#else
 		if (it2->size <= 4 * SMALL)
 			allocator_array()[(it2->size + 3) / 4]->dynamic_deallocate(it2);
 		else
 			free(it2);
+#endif
 	}
 	buffer.clear();
 };

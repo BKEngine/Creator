@@ -6,7 +6,8 @@
 
 CLangEdit::CLangEdit(QWidget *parent) :
 QWidget(parent),
-ui(new Ui::CLangEdit)
+ui(new Ui::CLangEdit),
+langs({ "chs", "cht", "eng", "jpn", "kor" })
 {
 	ui->setupUi(this);
 
@@ -18,23 +19,24 @@ ui(new Ui::CLangEdit)
 	ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
 
+	ui->comboBox->insertItems(0, langs);
+
 	load();
 }
 
 CLangEdit::~CLangEdit()
 {
-
 	delete ui;
 }
 
 void CLangEdit::save()
 {
-	if (ui->lineEdit->text().isEmpty())
+	if (ui->comboBox->currentText().isEmpty())
 	{
 		QMessageBox::warning(NULL, "警告", "语言编号不能为空");
-		ui->lineEdit->setText("chn");
+		ui->comboBox->setCurrentIndex(0);
 	}
-	global_bke_info.projsetting[L"lang"] = ui->lineEdit->text().toStdWString();
+	global_bke_info.projsetting[L"lang"] = ui->comboBox->currentText().toStdWString();
 
 	BKE_Variable tempset = new BKE_VarDic();
 
@@ -70,7 +72,9 @@ void CLangEdit::save()
 
 void CLangEdit::reset()
 {
-	ui->lineEdit->setText("chn");
+	ui->comboBox->clear();
+	ui->comboBox->insertItems(0, langs);
+	ui->comboBox->setCurrentIndex(0);
 
 	ui->tableWidget->clearContents();
 
@@ -84,7 +88,15 @@ void CLangEdit::reset()
 
 void CLangEdit::load()
 {
-	ui->lineEdit->setText(QString::fromStdWString(global_bke_info.projsetting[L"lang"].getString(L"chn")));
+	QString lng = QString::fromStdWString(global_bke_info.projsetting[L"lang"].getString(L"chs"));
+	if (langs.contains(lng))
+	{
+		ui->comboBox->setCurrentText(lng);
+	}
+	else
+	{
+		ui->comboBox->setCurrentIndex(0);
+	}
 
 	auto opt = global_bke_info.projsetting[L"langopt"];
 
