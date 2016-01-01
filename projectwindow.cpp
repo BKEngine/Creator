@@ -174,7 +174,7 @@ void ProjectWindow::ShowRmenu(const QPoint & pos)
 
 	mn.addSeparator();
 
-	if (info.Layer >= 1 && info.IconKey == workpro->dirsico->cacheKey())
+	if (info.Layer == 1 || (info.Layer > 1 && info.IconKey == workpro->dirsico->cacheKey()))
 	{
 		auto info2 = info.getLayer1ItemInfo();
 		if (info2.Name == "宏")

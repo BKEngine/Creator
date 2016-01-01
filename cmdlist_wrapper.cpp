@@ -1,15 +1,27 @@
-﻿#include <weh.h>
+﻿#if BKE_CREATOR
+#include <weh.h>
 #include "cmdlist_wrapper.h"
+#else
+#include "cmdlist.h"
+#endif
 
+#if BKE_CREATOR
 #define REG_CMD(a, b) do{ auto &_v = CmdList[#a]; _v.name=#a; _v.detail = b;
-//#define REG_CMD(a) do{ auto &_v = CmdList[#a]; _v.name=#a; _v.detail = "说明暂缺";
 #define REG_CMD_VERSION(a, v, b) REG_CMD(a, b);
 #define REG_END() }while(0)
 #define ADD_PARAM(b, c, ...) _v.argNames.push_back(#b);_v.argFlags.push_back(c);_v.argAutoList.push_back("");
 #define ADD_LIST(a) _v.argAutoList.back()=a;
 #define PROPERTY(a, b, c) 
 #define REG_SPE_CMD(a, b, c, d) { auto &_p = SpecialCmdList[#a].modes[#b]; _p.first = c; auto &_v = _p.second; _v.name=#b;_v.detail = d; /*_v.argNames.push_back("mode"); _v.argFlags.push_back(ptString);*/
-//#define REG_SPE_CMD(a, b, c) { auto &_p = SpecialCmdList[#a].modes[#b]; _p.first = c; auto &_v = _p.second; _v.name=#b; _v.argNames.push_back("mode"); _v.argFlags.push_back(ptString);
+#else
+#define REG_CMD(a, b) do{ auto &_v = CmdList[L###a]; _v.name=L###a; _v.detail = L#b;
+#define REG_CMD_VERSION(a, v, b) REG_CMD(a, b); _v.version = v;
+#define REG_END() }while(0)
+#define ADD_PARAM(b, c, ...) _v.addArg(L###b, c, ##__VA_ARGS__ )
+#define ADD_LIST(a) 
+#define PROPERTY(a, b, c) _v.properties.push_back(make_tuple(L###a,L###b,c))
+#define REG_SPE_CMD(a, b, c, d) { auto &_p = SpecialCmdList[L###a].modes[L###b]; _p.first = c; auto &_v = _p.second; _v.name=L###b; _v.addArg(L"mode", ptString); _v.detail = L#d;
+#endif
 
 #define AVALIABLE_AFTER(a) DynamicVersionInfo::availableAfter(a)
 #define AVALIABLE_BEFORE(a) DynamicVersionInfo::availableBefore(a)
@@ -17,6 +29,7 @@
 QHash<QString, BKECmdInfo> CmdList;
 QHash<QString, BKESpecialCmdInfo> SpecialCmdList;
 
+#if BKE_CREATOR
 bool cmd_inited = false;
 
 std::unordered_map<std::wstring, int> allEnums=
@@ -83,6 +96,7 @@ std::unordered_map<std::wstring, int> allEnums=
 	{ L"sharpen", EFFECT_SHARPEN },
 	{ L"edge", EFFECT_EDGE },
 };
+#endif
 
 void initCmd()
 {
@@ -624,7 +638,7 @@ void initCmd()
 	ADD_PARAM(vertical, ptBool | ptOptional);
 	REG_END();
 
-	REG_CMD(zorder, "");
+	REG_CMD(zorder, "设置或获取一个精灵的z轴高度");
 	ADD_PARAM(index, ptInteger);
 	ADD_PARAM(set, ptInteger | ptOptional);
 	ADD_PARAM(get, ptVariable | ptOptional);
@@ -835,13 +849,13 @@ void initCmd()
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, rotateto, ACTION_ROTATETO, "控制精灵绝对旋转至某一角度的动作");
-	ADD_PARAM(rotate, ptInteger);
+	ADD_PARAM(rotate, ptNumber);
 	ADD_PARAM(time, ptTime | ptOptional);
 	ADD_PARAM(target, ptInteger | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, rotateby, ACTION_ROTATEBY, "控制精灵相对旋转某一角度的动作");
-	ADD_PARAM(rotate, ptInteger);
+	ADD_PARAM(rotate, ptNumber);
 	ADD_PARAM(time, ptTime | ptOptional);
 	ADD_PARAM(target, ptInteger | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
@@ -917,6 +931,23 @@ void initCmd()
 	ADD_PARAM(offset, ptTime | ptOptional);
 	ADD_PARAM(speed, ptInteger | ptOptional);
 	ADD_PARAM(target, ptInteger | ptOptional);
+	REG_END();
+	REG_SPE_CMD(action, catmullromby, ACTION_CATMULLROMBY, "");
+	ADD_PARAM(time, ptTime);
+	ADD_PARAM(points, ptArray);
+	ADD_PARAM(target, ptInteger | ptOptional);
+	REG_END();
+	REG_SPE_CMD(action, catmullromto, ACTION_CATMULLROMTO, "");
+	ADD_PARAM(time, ptTime);
+	ADD_PARAM(points, ptArray);
+	ADD_PARAM(target, ptInteger | ptOptional);
+	REG_END();
+	REG_SPE_CMD(action, scissorcatmullromby, ACTION_SCISSORBY, "");
+	ADD_PARAM(rect, ptRect);
+	ADD_PARAM(points, ptArray);
+	ADD_PARAM(time, ptTime);
+	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(ease, ptString | ptInteger | ptOptional);
 	REG_END();
 
 	REG_SPE_CMD(action, delay, ACTION_DELAY, "只能用于queue或者parallel中，用于两个动作间的时间间隔");
@@ -1099,5 +1130,7 @@ void initCmd()
 
 #undef EFFECT_TWO
 
+#if BKE_CREATOR
 	cmd_inited = true;
+#endif
 };
