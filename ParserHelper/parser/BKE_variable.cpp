@@ -802,6 +802,50 @@ void BKE_Variable::copyFrom(const BKE_Variable &v)
 	}
 }
 
+void BKE_Variable::assignStructure(BKE_Variable &v, BKE_hashmap<void*, void*> &pMap, bool first)
+{
+	clear();
+	vt = VAR_NONE;
+	if (v.obj && pMap.contains(v.obj))
+	{
+		*this = BKE_VarObjectSafeReferencer((BKE_VarObject*)pMap[v.obj]);
+		return;
+	}
+	switch (v.vt)
+	{
+		case VAR_CLO:
+		{
+			auto clo = new BKE_VarClosure();
+			clo->assignStructure((BKE_VarClosure*)v.obj, pMap);
+			*this = clo;
+		}
+		break;
+		case VAR_CLASS:
+		{
+			auto cla = new BKE_VarClass(L"");
+			cla->assignStructure((BKE_VarClass*)v.obj, pMap);
+			*this = cla;
+		}
+		break;
+		case VAR_FUNC:
+		{
+			BKE_VarFunction *func = new BKE_VarFunction((BKE_NativeFunction)nullptr);
+			func->assignStructure((BKE_VarFunction*)v.obj, pMap);
+			*this = func;
+		}
+		break;
+		case VAR_PROP:
+		{
+			BKE_VarProp *prop = new BKE_VarProp();
+			prop->assignStructure((BKE_VarProp*)v.obj, pMap);
+			*this = prop;
+		}
+		break;
+		default:
+			copyFrom(v);
+	}
+}
+
 BKE_Variable& BKE_Variable::operator = (bkpshort v)
 {
 	if (getType() == VAR_PROP)
@@ -2107,4 +2151,185 @@ void BKE_Variable::push_back(const BKE_Variable &v)
 	{
 		((BKE_VarArray*)obj)->pushMember(v);
 	}
+}
+
+void BKE_VarClosure::assignStructure(BKE_VarClosure *v, BKE_hashmap<void*, void*> &pMap, bool first)
+{
+	if (parent)
+	{
+		parent->release();
+	}
+	clear();
+	pMap[v] = this;
+	if (!first && v->parent)
+	{
+		if (pMap.contains(v->parent))
+		{
+			parent = BKE_VarObjectSafeReferencer((BKE_VarClosure*)pMap[v->parent]);
+		}
+		else
+		{
+			parent = new BKE_VarClosure();
+			parent->assignStructure(v->parent, pMap);
+			pMap[v->parent] = parent;
+		}
+	}
+	else
+		parent = BKE_VarObjectSafeReferencer(v->parent);
+	for (auto it = v->varmap.begin(); it != v->varmap.end(); it++)
+	{
+		varmap[it->first].assignStructure(it->second, pMap);
+	}
+}
+
+void BKE_VarClass::assignStructure(BKE_VarClass *cla, BKE_hashmap<void*, void*> &pMap, bool first)
+{
+	for (int i = 0; i < parents.size(); i++)
+		parents[i]->release();
+	if (defclass)
+		defclass->release();
+	classname = cla->classname;
+	isdef = cla->isdef;
+	finalized = cla->finalized;
+	delayrelease = cla->delayrelease;
+	cannotcreate = cla->cannotcreate;
+	if (!first)
+	{
+		//assign parents
+		parents.resize(cla->parents.size());
+		for (int i = 0; i < cla->parents.size(); i++)
+		{
+			if (cla->parents[i] == NULL)
+				parents[i] = NULL;
+			else
+			{
+				if (pMap.contains(cla->parents[i]))
+				{
+					parents[i] = BKE_VarObjectSafeReferencer((BKE_VarClass*)pMap[cla->parents[i]]);
+				}
+				else
+				{
+					parents[i] = new BKE_VarClass(L"");
+					parents[i]->assignStructure(cla->parents[i], pMap);
+					pMap[cla->parents[i]] = parents[i];
+				}
+			}
+		}
+		//assign def
+		if (cla->defclass)
+		{
+			if (pMap.contains(cla->defclass))
+			{
+				defclass = BKE_VarObjectSafeReferencer((BKE_VarClass*)pMap[cla->defclass]);
+			}
+			else
+			{
+				defclass = new BKE_VarClass(L"");
+				defclass->assignStructure(cla->defclass, pMap);
+				pMap[cla->defclass] = defclass;
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < cla->parents.size(); i++)
+			parents[i] = BKE_VarObjectSafeReferencer((BKE_VarClass*)cla->parents[i]);
+		cla->defclass = BKE_VarObjectSafeReferencer(defclass);
+	}
+	if (isdef)
+		parent->extraref--;
+	BKE_VarClosure::assignStructure(cla, pMap, first);
+	parent->extraref++;
+	for (auto it = cla->classvar.begin(); it != cla->classvar.end(); it++)
+	{
+		classvar[it->first].assignStructure(it->second, pMap);
+	}
+}
+
+void BKE_VarFunction::assignStructure(BKE_VarFunction *f, BKE_hashmap<void*, void*> &pMap, bool first)
+{
+	func->release();
+	func = BKE_VarObjectSafeReferencer((BKE_FunctionCode*)f->func);
+	if (self.getType() == VAR_CLASS)
+	{
+		self.forceAsClosure()->extraref--;
+	}
+	self.assignStructure(f->self, pMap);
+	if (self.getType() == VAR_CLASS)
+	{
+		static_cast<BKE_VarClosure*>(self.obj)->extraref++;
+	}
+	closure->extraref--;
+	closure->release();
+	if (!first && f->closure)
+	{
+		if (pMap.contains(f->closure))
+		{
+			closure = BKE_VarObjectSafeReferencer((BKE_VarClosure*)pMap[f->closure]);
+			closure->extraref++;
+		}
+		else
+		{
+			if (f->closure->vt == VAR_CLO)
+			{
+				closure = new BKE_VarClosure();
+				closure->assignStructure(f->closure, pMap);
+			}
+			else
+			{
+				closure = new BKE_VarClass(L"");
+				((BKE_VarClass*)closure)->assignStructure((BKE_VarClass*)f->closure, pMap);
+			}
+			pMap[f->closure] = closure;
+			closure->extraref++;
+		}
+	}
+	else
+	{
+		closure = BKE_VarObjectSafeReferencer(f->closure);
+		closure->extraref++;
+	}
+	name = f->name;
+	paramnames = f->paramnames;
+	for (auto &v : f->initials)
+	{
+		initials[v.first].assignStructure(v.second, pMap);
+	}
+}
+
+void BKE_VarProp::assignStructure(BKE_VarProp *p, BKE_hashmap<void*, void*> &pMap, bool first)
+{
+	if (funcget)
+		funcget->release();
+	if (funcset)
+		funcset->release();
+	if (self.getType() == VAR_CLASS)
+	{
+		self.forceAsClosure()->extraref--;
+	}
+	funcget = BKE_VarObjectSafeReferencer(p->funcget);
+	funcset = BKE_VarObjectSafeReferencer(p->funcset);
+	self.assignStructure(p->self, pMap);
+	if (self.getType() == VAR_CLASS)
+	{
+		static_cast<BKE_VarClosure*>(self.obj)->extraref++;
+	}
+	if (!first && p->closure)
+	{
+		if (pMap.contains(p->closure))
+		{
+			closure = (BKE_VarClosure*)pMap[p->closure];
+		}
+		else
+		{
+			closure = new BKE_VarClosure();
+			closure->assignStructure(p->closure, pMap);
+			pMap[p->closure] = closure;
+			//预先构造一个弱引用似乎不太科学
+			closure->ref--;
+		}
+	}
+	else
+		closure = p->closure;
+	setparam = p->setparam;
 }

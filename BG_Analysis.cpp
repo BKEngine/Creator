@@ -274,9 +274,15 @@ BG_Analysis::BG_Analysis(const QString &p)
 	newmacrofile = false;
 	pdir = p;
 	backup_topclo = new BKE_VarClosure();
-	backup_topclo->cloneFrom(global_bke_info.glo);
-	topclo = new BKE_VarClosure();;
-	topclo->cloneFrom(global_bke_info.glo);
+	//backup_topclo->cloneFrom(global_bke_info.glo);
+	BKE_hashmap<void*, void*> pMap;
+	pMap[BKE_VarClosure::global()] = BKE_VarClosure::global();
+	backup_topclo->assignStructure(global_bke_info.glo, pMap, true);
+	topclo = new BKE_VarClosure();
+	//topclo->cloneFrom(global_bke_info.glo);
+	pMap.clear();
+	pMap[BKE_VarClosure::global()] = BKE_VarClosure::global();
+	topclo->assignStructure(global_bke_info.glo, pMap, true);
 	this->start();
 }
 
@@ -522,7 +528,10 @@ void BG_Analysis::run()
 						//analysis macros
 						backup_macrodata.clear();
 						backup_topclo->clear();
-						backup_topclo->cloneFrom(global_bke_info.glo);
+						//backup_topclo->cloneFrom(global_bke_info.glo);
+						BKE_hashmap<void*, void*> pMap;
+						pMap[BKE_VarClosure::global()] = BKE_VarClosure::global();
+						backup_topclo->assignStructure(global_bke_info.glo, pMap, true);
 
 						msgmutex.lock();
 						backup_macrofiles.clear();
@@ -661,7 +670,10 @@ void BG_Analysis::run()
 							macrodata = backup_macrodata;
 							macrofiles = backup_macrofiles;
 							topclo->clear();
-							topclo->cloneFrom(backup_topclo);
+							//topclo->cloneFrom(backup_topclo);
+							BKE_hashmap<void*, void*> pMap;
+							pMap[BKE_VarClosure::global()] = BKE_VarClosure::global();
+							topclo->assignStructure(backup_topclo, pMap, true);
 							msgmutex.unlock();
 						}
 					}

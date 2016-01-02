@@ -501,6 +501,7 @@ public:
 	BKE_Variable clone() const;
 
 	void copyFrom(const BKE_Variable &v);
+	void assignStructure(BKE_Variable &v, BKE_hashmap<void*, void*> &pMap, bool first = false);
 
 	inline void forceSet(const BKE_Variable &v)
 	{
@@ -1240,6 +1241,7 @@ public:
 	void addNativePropGet(const BKE_String &key, BKE_NativeFunction func);
 	void addNativePropSet(const BKE_String &key, BKE_NativeFunction func);
 	BKE_VarClass *getThisClosure();
+	void assignStructure(BKE_VarClosure *v, BKE_hashmap<void*, void*> &pMap, bool first = false);
 };
 
 //copy is banned
@@ -1481,6 +1483,7 @@ public:
 		s += L")";
 		return s;
 	}
+	void assignStructure(BKE_VarFunction *f, BKE_hashmap<void*, void*> &pMap, bool first = false);
 	//inline void release(){ ref--; if (ref <= 0)delete this; };
 };
 
@@ -1536,6 +1539,7 @@ public:
 	//	vt = VAR_PROP;
 	//	self = _self;
 	//}
+
 	BKE_VarProp(BKE_VarClosure *clo = NULL, BKE_NativeFunction get = NULL, BKE_NativeFunction set = NULL)
 		:BKE_VarObject(VAR_PROP)
 	{
@@ -1628,6 +1632,7 @@ public:
 			funcset->run(&self, static_cast<BKE_VarArray*>(tmp.obj), clo);
 		}
 	}
+	void assignStructure(BKE_VarProp *p, BKE_hashmap<void*, void*> &pMap, bool first = false);
 };
 
 inline void BKE_VarClosure::addNativePropGet(const BKE_String &key, BKE_NativeFunction func)
@@ -1720,8 +1725,10 @@ private:
 		{
 			for (int i = 0; i < parents.size(); i++)
 				parents[i]->release();
+			if (parent)
+				parent->extraref--;
 			if (!isdef)
-				parent->release();
+				defclass->release();
 		}
 	};
 	BKE_NativeFunction innerCreateInstance;
@@ -1748,6 +1755,7 @@ public:
 		classname = name;
 		vt = VAR_CLASS;
 		isdef = true;
+		context->extraref++;
 		//_this = new BKE_VarThis(this);
 		cannotcreate = false;
 		finalized = false;
@@ -1762,6 +1770,7 @@ public:
 		classname = name;
 		vt = VAR_CLASS;
 		isdef = true;
+		context->extraref++;
 		check(parent);
 		parent->addRef();
 		for (auto &&it : parent->classvar)
@@ -1800,6 +1809,7 @@ public:
 		defclass = NULL;
 		classname = name;
 		vt = VAR_CLASS;
+		context->extraref++;
 		isdef = true;
 		cannotcreate = false;
 		for (int i = 0; i < parent.size(); i++)
@@ -1842,6 +1852,8 @@ public:
 		native = na;
 		defclass = parent;
 		parent->addRef();
+		parent->extraref++;
+		//now parent has an extra ref
 		for (auto &&it : parent->classvar)
 			varmap[it.first] = it.second.clone();
 		//_this->release();
@@ -1862,7 +1874,28 @@ public:
 		finalized = false;
 		delayrelease = false;
 	};
-
+	inline BKE_VarClass *cloneFrom(const BKE_VarClass *v)
+	{
+		//copy parent
+		for (int i = 0; i < parents.size(); i++)
+			parents[i]->release();
+		parents.resize(v->parents.size());
+		for (int i = 0; i < parents.size(); i++)
+		{
+			parents[i] = new BKE_VarClass(v->parents[i]->classname);
+			parents[i]->cloneFrom(v->parents[i]);
+		}
+		if (v)
+		{
+			clear();
+			for (auto it = v->varmap.begin(); it != v->varmap.end(); it++)
+			{
+				varmap[it->first].copyFrom(it->second);
+			}
+		}
+		return this;
+	}
+	void assignStructure(BKE_VarClass *cla, BKE_hashmap<void*, void*> &pMap, bool first = false);
 	void finalize()
 	{
 		if (!finalized && !isdef && !MemoryPool().clearflag)

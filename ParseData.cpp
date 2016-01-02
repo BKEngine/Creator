@@ -65,7 +65,10 @@ ParseData::ParseData(QByteArray &file, BKE_VarClosure *clo)
 	isLineStart = true;
 	refresh = true;
 	fileclo = new BKE_VarClosure();
-	fileclo->cloneFrom(clo);
+	//fileclo->cloneFrom(clo);
+	BKE_hashmap<void*, void*> pMap;
+	pMap[BKE_VarClosure::global()] = BKE_VarClosure::global();
+	fileclo->assignStructure(clo, pMap, true);
 }
 
 void ParseData::getLabels(set<QString> &l)
