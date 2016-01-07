@@ -1352,7 +1352,7 @@ public:
 			static_cast<BKE_VarClosure*>(self.obj)->extraref++;
 		}
 		closure = (BKE_VarClosure *)BKE_VarClosure::global()->addRef();
-		closure->extraref++; 
+		//closure->extraref++; 
 	};
 	inline BKE_VarFunction(BKE_bytree *tree, BKE_Variable _self = BKE_Variable()) :BKE_VarObject(VAR_FUNC)
 	{ 
@@ -1363,7 +1363,7 @@ public:
 			static_cast<BKE_VarClosure*>(self.obj)->extraref++;
 		}
 		closure = (BKE_VarClosure *)BKE_VarClosure::global()->addRef();
-		closure->extraref++; 
+		//closure->extraref++; 
 	};
 	BKE_VarFunction(const BKE_VarFunction &f, BKE_VarClosure *c = BKE_VarClosure::global(), const BKE_Variable &_self = BKE_Variable()) :BKE_VarObject(VAR_FUNC)
 	{ 
@@ -1381,7 +1381,8 @@ public:
 		}
 		closure = c;
 		c->addRef(); 
-		closure->extraref++; 
+		if (c->vt == VAR_CLASS)
+			closure->extraref++; 
 #if PARSER_DEBUG
 		linestartpos = f.linestartpos;
 		rawexp = f.rawexp;
@@ -1448,11 +1449,13 @@ public:
 	}
 	inline void setClosure(BKE_VarClosure *c)
 	{
-		closure->extraref--;
+		if (closure->vt == VAR_CLASS)
+			closure->extraref--;
 		closure->release();
 		closure = c;
 		c->addRef();
-		c->extraref++;
+		if (closure->vt == VAR_CLASS)
+			c->extraref++;
 	}
 	inline bool isNativeFunction()
 	{

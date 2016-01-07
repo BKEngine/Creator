@@ -1802,3 +1802,4 @@ bool PAModule::_analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_
 
 	return true;
 }
+

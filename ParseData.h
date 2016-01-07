@@ -213,6 +213,7 @@ public:
 	~ParseData()
 	{
 		delete[] textbuf;
+		fileclo->clear();
 		fileclo->release();
 		for (auto &it : fileNodes)
 			delete it;

@@ -614,7 +614,11 @@ void ProjectWindow::CloseProject(const ItemInfo &f)
 void ProjectWindow::ShowInDir(const ItemInfo &f)
 {
 	BkeProject *p = FindPro(f.ProName);
-	QString n = p->FileDir() + info.FullName;
+	QString n = p->FileDir();
+	if (info.Layer > 1)
+		n += info.FullName;
+	else
+		n += '/';
 #if defined(Q_OS_WIN)
 	n.replace('/', '\\');
 	QByteArray a = ("/select," + n).toLocal8Bit();
