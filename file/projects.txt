@@ -1,4 +1,6 @@
-﻿G:/once/Dev/BkeProject.bkp
+﻿G:/BKEProject/MaruRe/Project/BkeProject.bkp
+E:/快盘/sharebox/moshangboy@163.com/leiku/BKE工程/雷叔养了小酷拉/BkeProject.bkp
+G:/once/Dev/BkeProject.bkp
 G:/World's End/World's end/BkeProject.bkp
 G:/BKEProject/BKE-Demo/BkeProject.bkp
 G:/tttest/BkeProject.bkp
@@ -6,5 +8,3 @@ D:/BKE-Demo/BkeProject.bkp
 G:/BKEProject/BKE demo_v4/BkeProject.bkp
 F:/BKEProject/BKE demo/BkeProject.bkp
 F:/BKEProject/Mazu/BkeProject.bkp
-F:/work/QT/BKE_Creator/file/test/BkeProject.bkp
-C:/Users/taiga/Desktop/青春/BkeProject.bkp

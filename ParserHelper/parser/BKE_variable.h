@@ -97,7 +97,7 @@ public:
 	
 	virtual void release()
 	{ 
-		if (--ref <= 0 ) 
+		if (--ref == 0 ) 
 			delete this;
 	}
 
@@ -1128,7 +1128,7 @@ public:
 	{
 		if (extraref > 0 && ref - 1 == extraref)
 			varmap.clear();
-		if (--ref <= 0 
+		if (--ref == 0 
 //#ifndef _DEBUG_MEM
 			//&& !MemoryPool().clearflag
 //#endif
@@ -1706,7 +1706,7 @@ private:
 			}
 			varmap.clear();
 		}
-		if (--ref <= 0)
+		if (--ref == 0)
 		{
 			delete this;
 		}

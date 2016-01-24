@@ -275,6 +275,8 @@ protected:
 		}
 	}
 
+	bool clearlock;
+
 public:
 	typedef _Iterator iterator;
 	typedef const _Iterator const_iterator;
@@ -301,8 +303,9 @@ public:
 
 	void clear()
 	{
-		if (!buf || !count)
+		if (!buf || !count || clearlock)
 			return;
+		clearlock = true;
 		auto s = start.next;
 		while (s != &stop)
 		{
@@ -314,6 +317,7 @@ public:
 		start.next = &stop;
 		stop.last = &start;
 		count = 0;
+		clearlock = false;
 	}
 
 	template<typename T>
@@ -443,7 +447,7 @@ public:
 	};
 
 	//hashlevel根据hash表中元素的大约个数来选取，hash表的大小为2的hashlevel次方
-	BKE_hashmap(int initsize = HASH_LEVEL) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end))
+	BKE_hashmap(int initsize = HASH_LEVEL) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end)), clearlock(false)
 	{
 		//static_assert(hashlevel >= 4, "hashlevel必须不小于4");
 		this->hashsize = 1 << initsize;
@@ -464,7 +468,7 @@ public:
 		KeyValuePair(const _Key_t &k, const _Val_t &v) :key(k), value(v){}
 	};
 
-	BKE_hashmap(std::initializer_list<KeyValuePair> l) :BKE_hashmap(l.size() < 16 ? 4 : HASH_LEVEL)
+	BKE_hashmap(std::initializer_list<KeyValuePair> l) :BKE_hashmap(l.size() < 16 ? 4 : HASH_LEVEL), clearlock(false)
 	{
 		for (auto it = l.begin(); it != l.end(); it++)
 			insert(it->key, it->value);
@@ -502,7 +506,7 @@ public:
 
 	//copy constructor
 	//notice: the sequence of Nodes in same leaf may not same
-	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end))
+	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end)), clearlock(false)
 	{
 		hashsize = h.hashsize;
 		buf = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
@@ -528,7 +532,7 @@ public:
 	}
 
 	template<class T>
-	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h, const T &func) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end))
+	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h, const T &func) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end)), clearlock(false)
 	{
 		hashsize = h.hashsize;
 		buf = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
@@ -556,7 +560,7 @@ public:
 		}
 	}
 
-	BKE_hashmap(BKE_hashmap<_Key_t, _Val_t> &&h) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end))
+	BKE_hashmap(BKE_hashmap<_Key_t, _Val_t> &&h) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end)), clearlock(false)
 	{
 		hashsize = h.hashsize;
 		buf = h.buf;
