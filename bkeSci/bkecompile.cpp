@@ -81,6 +81,7 @@ void BkeCompile::StandardOutput()
 {
 	QByteArray temp = cmd->readAll();
 	QString name = codec->toUnicode(temp);
+	result.append(temp);
 	if (name.endsWith(".bkscr") && list.indexOf(name) < 0) {
 		list.append(name);
 		emit NewFileReady(list.size());
@@ -90,7 +91,7 @@ void BkeCompile::StandardOutput()
 void BkeCompile::finished(int exitCode)
 {
 	emit CompliteFinish();
-	delete cmd ;
+	cmd->deleteLater();
 	cmd = NULL;
 	list.clear();
 	result.clear();
