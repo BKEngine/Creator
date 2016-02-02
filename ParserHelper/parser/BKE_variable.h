@@ -119,8 +119,8 @@ public:
 			MemoryPool().unlock();
 		}
 #else
-		if (size <= 4 * SMALL)
-			p = allocator_array()[(size + 3) / 4]->dynamic_allocate();
+		if (size <= MEMORY_UNIT * SMALL)
+			p = allocator_array()[(size + MEMORY_UNIT - 1) / MEMORY_UNIT]->dynamic_allocate();
 		else
 			p = malloc(size);
 		if (p)
@@ -158,8 +158,8 @@ public:
 #if PARSER_MULTITHREAD
 			free(m);
 #else
-			if (m->size <= 4 * SMALL)
-				allocator_array()[(m->size + 3) / 4]->dynamic_deallocate(m);
+			if (m->size <= MEMORY_UNIT * SMALL)
+				allocator_array()[(m->size + MEMORY_UNIT - 1) / MEMORY_UNIT]->dynamic_deallocate(m);
 			else
 				free(m);
 #endif
@@ -212,8 +212,7 @@ T BKE_VarObjectSafeReleaser(T o)
 class BKE_VarClosure;
 class BKE_VarThis;
 class BKE_Variable;
-template <int T> class BKE_VarArrayTemplate;
-typedef BKE_VarArrayTemplate<4> BKE_VarArray;
+class BKE_VarArray;
 typedef BKE_Variable(*BKE_NativeFunction)(const BKE_Variable *self, const BKE_VarArray *paramarray, BKE_VarClosure *_this);
 
 enum
@@ -728,26 +727,31 @@ inline BKE_Variable::~BKE_Variable()
 };
 
 //include array, dic, closure, func, prop, class
-template <int T = 4>
-class BKE_VarArrayTemplate :public BKE_VarObject
+class BKE_VarArray :public BKE_VarObject
 {
 private:
-	virtual ~BKE_VarArrayTemplate(){};
+	virtual ~BKE_VarArray()
+	{
+	};
 
 public:
-	BKE_array<BKE_Variable, T> vararray;
+	BKE_array<BKE_Variable> vararray;
 
-	inline BKE_VarArrayTemplate() :BKE_VarObject(VAR_ARRAY){};
-	BKE_VarArrayTemplate(std::initializer_list<BKE_Variable> l) :BKE_VarObject(VAR_ARRAY){ vararray.resize((bkplong)l.size()); for (auto it = l.begin(); it != l.end(); it++) vararray[(bkplong)(it - l.begin())] = *it; }
+	inline BKE_VarArray() :BKE_VarObject(VAR_ARRAY)
+	{
+	};
+	BKE_VarArray(std::initializer_list<BKE_Variable> l) :BKE_VarObject(VAR_ARRAY), vararray(l)
+	{
+	}
 	inline bkplong getCount() const
 	{
 		return vararray.size();
 	};
 	BKE_Variable& getMember(short index)
 	{
-		if (index<0)
+		if (index < 0)
 			index += getCount();
-		if (index<0)
+		if (index < 0)
 			throw Var_Except(L"下标越界（过小）");
 		if (index >= (bkplong)vararray.size())
 		{
@@ -757,13 +761,13 @@ public:
 	};
 	const BKE_Variable& getMember(short index) const
 	{
-		if (index<0)
+		if (index < 0)
 			index += getCount();
-		if (index<0)
+		if (index < 0)
 			throw Var_Except(L"下标越界（过小）");
 		if (index >= (bkplong)vararray.size())
 		{
-			const_cast<BKE_array<BKE_Variable, T> *>(&this->vararray)->resize(index + 1);
+			const_cast<BKE_array<BKE_Variable>*>(&vararray)->resize(index + 1);
 		}
 		return vararray[index];
 	};
@@ -776,9 +780,9 @@ public:
 	void insertMember(short index, const BKE_Variable &obj)
 	{
 		bkplong cnt = getCount();
-		if (index<0)
+		if (index < 0)
 			index += cnt;
-		if (index<0)
+		if (index < 0)
 			throw Var_Except(L"下标越界（过小）");
 		if (index >= cnt)
 		{
@@ -789,9 +793,9 @@ public:
 	}
 	void setMember(short index, const BKE_Variable &obj)
 	{
-		if (index<0)
+		if (index < 0)
 			index += getCount();
-		if (index<0)
+		if (index < 0)
 			throw Var_Except(L"下标越界（过小）");
 		if (index >= vararray.size())
 			vararray.resize(index + 1);
@@ -799,9 +803,9 @@ public:
 	}
 	void setMember(short index, BKE_Variable &&obj)
 	{
-		if (index<0)
+		if (index < 0)
 			index += getCount();
-		if (index<0)
+		if (index < 0)
 			throw Var_Except(L"下标越界（过小）");
 		if (index >= vararray.size())
 			vararray.resize(index + 1);
@@ -813,7 +817,7 @@ public:
 	}
 	void deleteMemberIndex(short index)
 	{
-		if (index<0)
+		if (index < 0)
 			index += getCount();
 		if (index < 0 || index >= vararray.size())
 			return;
@@ -827,21 +831,19 @@ public:
 	{
 		vararray.clear();
 	}
-	template<int TT>
-	void cloneFrom(const BKE_VarArrayTemplate<TT> *v)
+	void cloneFrom(const BKE_VarArray *v)
 	{
 		if (v)
 		{
 			clear();
 			vararray.resize(v->getCount());
-			for (int i = 0; i<v->getCount(); i++)
+			for (int i = 0; i < v->getCount(); i++)
 			{
 				vararray[i].copyFrom(v->quickGetMember(i));
 			}
 		}
 	};
-	template<int TT>
-	void concat(const BKE_VarArrayTemplate<TT> *v)
+	void concat(const BKE_VarArray *v)
 	{
 		if (v)
 		{
@@ -864,8 +866,7 @@ public:
 		//	return;
 		vararray.resize(l);
 	}
-	template<int TT>
-	bool equals(const BKE_VarArrayTemplate<TT> *v) const
+	bool equals(const BKE_VarArray *v) const
 	{
 		bkplong s1 = getCount();
 		bkplong s2 = v ? v->getCount() : 0;
@@ -891,7 +892,7 @@ public:
 	}
 	int indexOf(const BKE_Variable &v) const
 	{
-		for (int i = 0; i < vararray.size();i++)
+		for (int i = 0; i < vararray.size(); i++)
 		{
 			if (vararray[i] == v)
 				return i;
@@ -912,8 +913,6 @@ public:
 		return res;
 	}
 };
-
-typedef BKE_VarArrayTemplate<4> BKE_VarArray;
 
 template<class T> BKE_Variable::BKE_Variable(initializer_list<T> list)
 {
@@ -1542,7 +1541,6 @@ public:
 	//	vt = VAR_PROP;
 	//	self = _self;
 	//}
-
 	BKE_VarProp(BKE_VarClosure *clo = NULL, BKE_NativeFunction get = NULL, BKE_NativeFunction set = NULL)
 		:BKE_VarObject(VAR_PROP)
 	{
@@ -1918,8 +1916,6 @@ public:
 		}
 	}
 
-	inline void addStaticMember(const wstring &key, const BKE_Variable &var){ varmap.insert(key, var); };
-
 	inline void addNativeFunction(const BKE_String &key, BKE_NativeFunction func)
 	{
 		auto f = new BKE_VarFunction(func);
@@ -1927,7 +1923,8 @@ public:
 		f->setSelf(this);
 		varmap[key] = f;
 	};
-	inline void addNativePropGet(const BKE_String &key, BKE_NativeFunction func)
+
+	void addNativePropGet(const BKE_String &key, BKE_NativeFunction func)
 	{
 		BKE_Variable &var = varmap[key];
 		if (var.getType() != VAR_PROP)
@@ -1937,7 +1934,7 @@ public:
 		}
 		static_cast<BKE_VarProp*>(var.obj)->addPropGet(func);
 	};
-	inline void addNativePropSet(const BKE_String &key, BKE_NativeFunction func)
+	void addNativePropSet(const BKE_String &key, BKE_NativeFunction func)
 	{
 		BKE_Variable &var = varmap[key];
 		if (var.getType() != VAR_PROP)
@@ -1947,6 +1944,7 @@ public:
 		}
 		static_cast<BKE_VarProp*>(var.obj)->addPropSet(func);
 	};
+	inline void addStaticMember(const wstring &key, const BKE_Variable &var){ varmap.insert(key, var); };
 
 	inline bool hasClassMember(const BKE_String &key) const
 	{

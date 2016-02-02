@@ -788,6 +788,33 @@ namespace ParserUtils
 		return arr;
 	}
 
+	//以str中任意一个字符分割
+	//xxx.split(str, ignorenull=false)
+	NATIVE_FUNC(splitany)
+	{
+		MINIMUMPARAMNUM(1);
+		const wstring &src = self->str.getConstStr();
+		wstring split = PARAM(0);
+		bkplong splitsize = 1;
+		BKE_VarArray *arr = new BKE_VarArray();
+		int start = 0;
+		bkplong srcsize = (bkplong)src.size();
+		while (start < srcsize)
+		{
+			bkplong pos = static_cast<bkplong>(src.find_first_of(split, start));
+			if (pos == src.npos)
+				break;
+			if (pos > start || !PARAM(1))
+				arr->pushMember(src.substr(start, pos - start));
+			start = pos + splitsize;
+		}
+		if (start < srcsize)
+			arr->pushMember(src.substr(start));
+		else if (!PARAM(1))
+			arr->pushMember(BKE_Variable());
+		return arr;
+	}
+
 	//add(xx,xx,xx,...)
 	NATIVE_FUNC(add)
 	{
@@ -1967,6 +1994,18 @@ namespace ParserUtils
 		*   @example_result ["1", "2", "3"]
 		*/
 		{ QUICKFUNC(split) },
+		/**
+		*	@class string（内部保留类）
+		*	@prototype string str(, ignorenull = false)
+		*   @return array
+		*   @brief  第一个参数为字符串。用字符串中任意字符分割原字符串得到一串数组，ignorenull表示是否忽略结果数组中的空串，如果为真，结果数组中的空串将被抹去
+		*   @example 以下将演示用"()"来分割"(1,2,3)(4,5,6)"的结果
+		*   @example_code "(1,2,3)(4,5,6)".split("()", true)
+		*   @example_result ["1,2,3", "4,5,6"]
+		*   @example_code "(1,2,3)(4,5,6)".split("(),", true)
+		*   @example_result ["1", "2", "3", "4", "5", "6"]
+		*/
+		{ QUICKFUNC(splitany) },
 		/**
 		*	@class string（内部保留类）
 		*	@prototype string str(, startpos = 0)
