@@ -17,7 +17,7 @@ TEMPLATE = app
 CONFIG += warn_off qt
 CONFIG+= c++11
 
-DEFINES += QT SCI_LEXER
+DEFINES += QT SCI_LEXER SCINTILLA_QT BKE_CREATOR
 #if use in linux,you must use a full name
 #LIBS += /usr/lib/i386-linux-gnu/libqscintilla2.a
 
@@ -113,15 +113,30 @@ SOURCES += ./main.cpp \
     ParserHelper/parser/BKE_number.cpp \
     ParserHelper/parser/BKE_string.cpp \
     ParserHelper/parser/BKE_variable.cpp \
-    ParserHelper/parser/extend_wrapper.cpp \
     ParserHelper/parser/parser.cpp \
-    ParserHelper/parser/parserextend_wrapper.cpp \
     ParserHelper/parser/utils.cpp \
     dia/cdiroption.cpp \
     dia/cskinoption.cpp \
     dia/Setoptiondia.cpp \
     dia/WaitWindow.cpp \
     dia/versioninfo.cpp \
+    ParserHelper/parser/bkutf8.cpp \
+    ParserHelper/parser/extend.cpp \
+    ParserHelper/parser/parserextend.cpp \
+    BG_Analysis.cpp \
+    cmdlist_wrapper.cpp \
+    ParseData.cpp \
+    dia/GameProperty.cpp \
+    dia/LangOpt.cpp \
+    dia/doubleinput.cpp \
+    bkeSci/autolex.cpp \
+    BKEscintilla/Qt4Qt5/InputMethod.cpp \
+    BKEscintilla/lexlib/CharacterCategory.cpp \
+    BKEscintilla/src/CaseConvert.cpp \
+    BKEscintilla/src/CaseFolder.cpp \
+    BKEscintilla/src/EditModel.cpp \
+    BKEscintilla/src/EditView.cpp \
+    BKEscintilla/src/MarginView.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -228,6 +243,21 @@ HEADERS  += \
     dia/Setoptiondia.h \
     dia/WaitWindow.h \
     dia/versioninfo.h \
+    dia/doubleinput.h \
+    dia/GameProperty.h \
+    dia/LangOpt.h \
+    BG_Analysis.h \
+    BKS_info.h \
+    cmdlist_wrapper.h \
+    ParseData.h \
+    bkeSci/autolex.h \
+    BKEscintilla/lexlib/StringCopy.h \
+    BKEscintilla/src/CaseConvert.h \
+    BKEscintilla/src/CaseFolder.h \
+    BKEscintilla/src/EditModel.h \
+    BKEscintilla/src/EditView.h \
+    BKEscintilla/src/MarginView.h \
+    BKEscintilla/src/UnicodeFromUTF8.h
 
 RESOURCES += \
     source.qrc
@@ -242,15 +272,21 @@ FORMS += \
     dia/WaitWindow.ui \
     dia/versioninfo.ui \
     dia/wizard/qbkewizard.ui \
-    dia/bkeconfigdialog.ui
+    dia/bkeconfigdialog.ui \
+    dia/LangOpt.ui \
+    dia/GameProperty.ui \
+    dia/doubleinput.ui
 
 mac{
     LIBS += -L$$PWD/quazip -lquazip
 }
 
+unix:!mac:{
+QMAKE_LFLAGS_RPATH=
+QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib\'"
+}
 linux{
-    QMAKE_RPATHDIR = :\'\$\$ORIGIN\'
-    #QMAKE_RPATH = .
+
 }
 
 DISTFILES += \

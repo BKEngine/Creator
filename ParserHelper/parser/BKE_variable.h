@@ -417,7 +417,7 @@ public:
 	{
 		static T convertTo(const BKE_Variable &_this, Args&&...args)
 		{
-			return _this.operator T();
+            return (T)(_this);
 		}
 
 		static BKE_Variable convertFrom(const T& v)

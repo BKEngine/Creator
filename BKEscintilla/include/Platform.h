@@ -42,13 +42,13 @@
 #undef PLAT_QT
 #define PLAT_QT 1
 
+// This is needed to work around an HP-UX bug with Qt4.
 #include <Qsci/qsciglobal.h>
+#include <qnamespace.h>
 QT_BEGIN_NAMESPACE
 class QPainter;
 QT_END_NAMESPACE
 
-// This is needed to work around an HP-UX bug with Qt4.
-#include <qnamespace.h>
 
 #elif defined(TK)
 #undef PLAT_TK
@@ -359,7 +359,7 @@ public:
 	virtual void SetUnicodeMode(bool unicodeMode_)=0;
 	virtual void SetDBCSMode(int codePage)=0;
 
-#if defined(PLAT_QT)
+#if PLAT_QT
     virtual void Init(QPainter *p)=0;
     virtual void DrawXPM(PRectangle rc, const XPM *xpm)=0;
 #endif

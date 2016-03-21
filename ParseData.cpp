@@ -1,6 +1,6 @@
 ﻿#include "weh.h"
 #include "ParseData.h"
-#include "bkeSci\bkescintilla.h"
+#include "bkeSci/bkescintilla.h"
 
 const char *InidicatorMSG[]=
 {
@@ -22,7 +22,7 @@ const char *InidicatorMSG[]=
 	"import的文件%2不在工程内或文件不存在",
 	"macro命令缺少必需的属性name",
 	"macro不能与系统命令重名",
-	"macro名称必须为常量字符串表达式",
+    "macro名称必须为常量字符串表达式",
 	NULL
 };
 

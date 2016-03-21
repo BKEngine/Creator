@@ -113,7 +113,7 @@ bool checkLastClose(QString &pro, QStringList &files)
 	pro = bkpAdmin->value("project").toString();
 	auto arr = bkpAdmin->value("files").toArray();
 	files.clear();
-	for (auto &it : arr)
+    for (auto &&it : arr)
 	{
 		files.push_back(it.toString());
 	}
@@ -145,17 +145,25 @@ int main(int argc, char *argv[])
 #else
 	QString exeDir = xcodec->toUnicode( QByteArray(argv[0]) ) ;
 #endif
-#ifndef Q_OS_MAC
-	BKE_CURRENT_DIR = QFileInfo( exeDir ).path() ;
+#ifdef Q_OS_LINUX
+    QDir dir = QFileInfo( exeDir ).absoluteDir();
+    dir.cdUp();
+    dir.cd("share");
+    BKE_CURRENT_DIR = dir.absolutePath();
 	//qt has a bug in 5.2.1(windows)? so I use setLibraryPaths
-	QApplication::addLibraryPath( BKE_CURRENT_DIR ) ;
 #else
+#ifdef Q_OS_MAC
 	{
 		QDir d = QFileInfo( exeDir ).dir();
 		d.cdUp();
 		d.cd("PlugIns");
 		QApplication::addLibraryPath(d.absolutePath());
 	}
+#else
+    BKE_CURRENT_DIR = QFileInfo( exeDir ).path();
+    //qt has a bug in 5.2.1(windows)? so I use setLibraryPaths
+    QApplication::addLibraryPath( BKE_CURRENT_DIR ) ;
+#endif
 #endif
 
 /*

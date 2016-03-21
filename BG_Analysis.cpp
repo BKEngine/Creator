@@ -1,55 +1,14 @@
 ﻿#include <weh.h>
 #include "BG_Analysis.h"
-#include "bkeSci\bkescintilla.h"
-#include "loli\loli_island.h"
+#include "bkeSci/bkescintilla.h"
+#include "loli/loli_island.h"
 #include "BKS_info.h"
 
 #if WIN32
 #include <Windows.h>
 #include <DbgHelp.h>
 //for windows debug
-// a C++ exception class thart contains the SEH information
-/*
-class CSEHException {
 
-public:
-
-	CSEHException(unsigned int code, PEXCEPTION_POINTERS pep)
-	{
-
-		m_exceptionCode = code;
-
-		m_exceptionRecord = *pep->ExceptionRecord;
-
-		m_context = *pep->ContextRecord;
-
-		assert(m_exceptionCode == m_exceptionRecord.ExceptionCode);
-
-	}
-
-	operator unsigned int() { return m_exceptionCode; }
-
-
-
-	//same as exceptionRecord.ExceptionCode
-
-	unsigned int m_exceptionCode;
-
-	//exception code, crash address, etc,
-
-	EXCEPTION_RECORD m_exceptionRecord;
-
-	// CPU registers and flags
-
-	CONTEXT m_context;
-
-};
-
-void _cdecl TranslateSEHtoCE(UINT code, PEXCEPTION_POINTERS pep)
-{
-	throw CSEHException(code, pep);
-}*/
-#endif
 
 unsigned int runAddress;
 
@@ -149,6 +108,8 @@ void simpleDump(PEXCEPTION_POINTERS ExceptionInfo)
 		CloseHandle(hDumpFile);
 	}
 }
+
+#endif
 
 void dumpExcept(Var_Except &e, int code)
 {
@@ -468,6 +429,8 @@ void BG_Analysis::parseMacro(const QString &file)
 	}
 }
 
+#if WIN32
+
 void testAddr()
 {
 	void* stack[2];
@@ -480,6 +443,8 @@ void testAddr()
 }
 
 extern LONG WINAPI ApplicationCrashHandler(EXCEPTION_POINTERS *pException);
+
+#endif
 
 void BG_Analysis::run()
 {
@@ -782,13 +747,17 @@ void BG_Analysis::run()
 		catch (Var_Except &e)
 		{
 			dumpExcept(e, 0);
+#if WIN32
 			simpleDump(&firstException);
+#endif
 			newmacrofile = false;
 		}
 		catch (std::exception &e)
 		{
 			dumpExcept(e, 1);
+#if WIN32
 			simpleDump(&firstException);
+ #endif
 			newmacrofile = false;
 			notifyExit();
 		}

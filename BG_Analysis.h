@@ -7,7 +7,7 @@
 #include <list>
 #include <algorithm>
 #include "cmdlist_wrapper.h"
-#include "ParserHelper\parser\parser.h"
+#include "ParserHelper/parser/parser.h"
 
 using std::atomic_bool;
 

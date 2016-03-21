@@ -468,7 +468,7 @@ public:
 		KeyValuePair(const _Key_t &k, const _Val_t &v) :key(k), value(v){}
 	};
 
-	BKE_hashmap(std::initializer_list<KeyValuePair> l) :BKE_hashmap(l.size() < 16 ? 4 : HASH_LEVEL), clearlock(false)
+    BKE_hashmap(std::initializer_list<KeyValuePair> l) :BKE_hashmap(l.size() < 16 ? 4 : HASH_LEVEL)
 	{
 		for (auto it = l.begin(); it != l.end(); it++)
 			insert(it->key, it->value);
