@@ -6,56 +6,215 @@
 #include <cassert>
 #include <initializer_list>
 #include <map>
-
-#include "defines.h"
+#include <stdint.h>
 
 #include "memorypool.h"
 
+#pragma push_macro("new")
+#undef new
+
 //copied from MS xstddef
 template<class T>
-bkplong BKE_hash(const T &val)
+int32_t BKE_hash(const T &val)
 {
-	const bkpulong _FNV_offset_basis = 2166136261U;
-	const bkpulong _FNV_prime = 16777619U;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
 	const unsigned char *p = (const unsigned char*)&val;
 	const unsigned char *plim = (const unsigned char*)&val + sizeof(T);
-	bkpulong ret = _FNV_offset_basis;
+	uint32_t ret = _FNV_offset_basis;
 	while (p < plim)
 	{
 		ret ^= (unsigned char)*p;
 		ret *= _FNV_prime;
 		p++;
 	}
-	return (bkplong)ret;
+	return (int32_t)ret;
 };
 
 template<class T>
-bkplong BKE_hash(const T *val)
+inline int32_t BKE_hash(const T* val)
 {
-	const bkpulong _FNV_offset_basis = 2166136261U;
-	const bkpulong _FNV_prime = 16777619U;
-	const unsigned char *p = (const unsigned char*)&val;
-	const unsigned char *plim = (const unsigned char*)&val + sizeof(T);
-	bkpulong ret = _FNV_offset_basis;
-	while (p < plim)
-	{
-		ret ^= (unsigned char)*p;
-		ret *= _FNV_prime;
-		p++;
-	}
-	return (bkplong)ret;
+	return BKE_hash(*val);
+};
+
+template<class T>
+inline int32_t BKE_hash(T* val)
+{
+	return BKE_hash(*val);
 };
 
 template<>
-bkplong BKE_hash(const std::wstring &str);
-template<>
-bkplong BKE_hash(const std::string &str);
-template<>
-bkplong BKE_hash(const wchar_t* str);
-template<>
-bkplong BKE_hash(const char * str);
+inline int32_t BKE_hash(const std::wstring &str)
+{
+	if (str.empty()) return 0;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
+	const wchar_t *c = str.c_str();
+	uint32_t ret = _FNV_offset_basis;
+	while (*c)
+	{
+		ret ^= (uint32_t)*c;
+		ret *= _FNV_prime;
+		c++;
+	}
+	return (int32_t)ret;
+};
 
-#define HASH_LEVEL 8
+template<>
+inline int32_t BKE_hash(const std::string &str)
+{
+	if (str.empty()) return 0;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
+	const char *c = str.c_str();
+	uint32_t ret = _FNV_offset_basis;
+	while (*c)
+	{
+		ret ^= (uint32_t)*c;
+		ret *= _FNV_prime;
+		c++;
+	}
+	return (int32_t)ret;
+};
+
+template<>
+inline int32_t BKE_hash(const std::u16string &str)
+{
+	if (str.empty()) return 0;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
+	auto c = str.c_str();
+	uint32_t ret = _FNV_offset_basis;
+	while (*c)
+	{
+		ret ^= (uint32_t)*c;
+		ret *= _FNV_prime;
+		c++;
+	}
+	return (int32_t)ret;
+};
+
+template<>
+inline int32_t BKE_hash(const wchar_t* str)
+{
+	if (!*str)
+		return 0;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
+	const wchar_t *c = str;
+	uint32_t ret = _FNV_offset_basis;
+	while (*c)
+	{
+		ret ^= (uint32_t)*c;
+		ret *= _FNV_prime;
+		c++;
+	}
+	return (int32_t)ret;
+}
+
+template<>
+inline int32_t BKE_hash(wchar_t* str)
+{
+	if (!*str)
+		return 0;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
+	wchar_t *c = str;
+	uint32_t ret = _FNV_offset_basis;
+	while (*c)
+	{
+		ret ^= (uint32_t)*c;
+		ret *= _FNV_prime;
+		c++;
+	}
+	return (int32_t)ret;
+}
+
+template<>
+inline int32_t BKE_hash(const char *str)
+{
+	if (!*str)
+		return 0;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
+	const char *c = str;
+	uint32_t ret = _FNV_offset_basis;
+	while (*c)
+	{
+		ret ^= (uint32_t)*c;
+		ret *= _FNV_prime;
+		c++;
+	}
+	return (int32_t)ret;
+}
+
+template<>
+inline int32_t BKE_hash(char *str)
+{
+	if (!*str)
+		return 0;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
+	char *c = str;
+	uint32_t ret = _FNV_offset_basis;
+	while (*c)
+	{
+		ret ^= (uint32_t)*c;
+		ret *= _FNV_prime;
+		c++;
+	}
+	return (int32_t)ret;
+}
+
+template<>
+inline int32_t BKE_hash(const char16_t *str)
+{
+	if (!*str)
+		return 0;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
+	const char16_t *c = str;
+	uint32_t ret = _FNV_offset_basis;
+	while (*c)
+	{
+		ret ^= (uint32_t)*c;
+		ret *= _FNV_prime;
+		c++;
+	}
+	return (int32_t)ret;
+}
+
+template<>
+inline int32_t BKE_hash(char16_t *str)
+{
+	if (!*str)
+		return 0;
+	const uint32_t _FNV_offset_basis = 2166136261U;
+	const uint32_t _FNV_prime = 16777619U;
+	char16_t *c = str;
+	uint32_t ret = _FNV_offset_basis;
+	while (*c)
+	{
+		ret ^= (uint32_t)*c;
+		ret *= _FNV_prime;
+		c++;
+	}
+	return (int32_t)ret;
+}
+
+template<>
+inline int32_t BKE_hash(const void* p)
+{
+	return (int32_t)(intptr_t)p;
+}
+
+template<>
+inline int32_t BKE_hash(void* p)
+{
+	return (int32_t)(intptr_t)p;
+}
+
+#define HASH_LEVEL 5
 
 #ifdef _DEBUG
 #ifndef _ASSERT_EXPR
@@ -84,27 +243,40 @@ buf						start
 template<class _Key_t, class _Val_t>
 class BKE_hashmap
 {
+	static BKE_allocator<void*> memal;
 protected:
-	bkplong hashsize;
-	bkplong count;
+	int32_t hashsize;
+	int32_t count;
 
 	struct _Content
 	{
 		const _Key_t first;
 		_Val_t second;
 
-		_Content(){};
+		_Content()
+		{
+		};
 
-		_Content(const _Key_t &k) :first(k) {};
+		_Content(const _Key_t &k) :first(k), second(_Val_t())
+		{
+		};
 
-		_Content(_Key_t &&k) :first(std::move(k)){};
+		_Content(_Key_t &&k) :first(std::move(k)), second(_Val_t())
+		{
+		};
 
-		_Content(const _Content &c) :first(c.first), second(c.second){};
+		_Content(const _Content &c) :first(c.first), second(c.second)
+		{
+		};
 
-		_Content(_Content &&c) :first(std::move(c.first)), second(std::move(c.second)){};
+		_Content(_Content &&c) :first(std::move(c.first)), second(std::move(c.second))
+		{
+		};
 
 		template<typename T, typename TT>
-		_Content(const T &k, const TT &v) :first(k), second(v){};
+		_Content(const T &k, const TT &v) :first(k), second(v)
+		{
+		};
 	};
 
 	struct BKE_HashNode
@@ -112,25 +284,39 @@ protected:
 		BKE_HashNode *next;
 		BKE_HashNode *last;
 		_Content ct;
-		bkplong index;
-		bkplong hashvalue;
+		int32_t index;
+		int32_t hashvalue;
 
-		BKE_HashNode(){};
+		BKE_HashNode()
+		{
+		};
 
-		BKE_HashNode(const _Key_t &k) :ct(k){};
+		BKE_HashNode(const _Key_t &k) :ct(k)
+		{
+		};
 
-		BKE_HashNode(_Key_t &&k) :ct(std::move(k)) {};
+		BKE_HashNode(_Key_t &&k) :ct(std::move(k))
+		{
+		};
 
-		BKE_HashNode(BKE_HashNode &&c) :ct(std::move(c.ct)), index(c.index), hashvalue(c.hashvalue){ };
+		BKE_HashNode(BKE_HashNode &&c) :ct(std::move(c.ct)), index(c.index), hashvalue(c.hashvalue)
+		{
+		};
 
-		BKE_HashNode(const BKE_HashNode &c) :ct(c.ct), index(c.index), hashvalue(c.hashvalue){ };
+		BKE_HashNode(const BKE_HashNode &c) :ct(c.ct), index(c.index), hashvalue(c.hashvalue)
+		{
+		};
 
 		template<typename T, typename TT>
-		BKE_HashNode(const T &k, const TT &v) :ct(k, v){};
+		BKE_HashNode(const T &k, const TT &v) :ct(k, v)
+		{
+		};
 	};
 
-	char _head[sizeof(BKE_HashNode)];
-	char _end[sizeof(BKE_HashNode)];
+	//char _head[sizeof(BKE_HashNode)];
+	//char _end[sizeof(BKE_HashNode)];
+
+	BKE_HashNode *_dummy[4];
 
 	BKE_allocator<BKE_HashNode> al;
 
@@ -143,21 +329,26 @@ protected:
 	BKE_HashNode &start;
 	BKE_HashNode &stop;
 
+public:
+	//status cache
+	int deletetick;
+	int inserttick;
+
+protected:
 	struct _Iterator
 	{
 		friend class BKE_hashmap;
 	private:
 		mutable BKE_HashNode *node;
 	public:
-		_Iterator() :node(NULL){};
+		_Iterator() = default;
 
-		_Iterator(BKE_HashNode *n) :node(n){};
-
-		_Iterator& operator =(const _Iterator &it)
+		_Iterator(BKE_HashNode *n) :node(n)
 		{
-			node = it.node;
-			return *this;
-		}
+		};
+
+		_Iterator& operator =(const _Iterator &it) = default;
+
 		const _Iterator& operator ++() const
 		{
 			_ASSERT_EXPR(node->next != NULL, L"end iterator不能再++");
@@ -234,16 +425,20 @@ protected:
 		}
 	};
 
-	template<typename T, 
-		typename = typename std::enable_if<std::is_constructible<_Key_t, T>::value>::type
-	>
-	BKE_HashNode *_getNode(T &&key)
+	//不能保证BKE_hash(key)和BKE_hash(_Key_t(key))一样
+	//template<typename T,
+	//	typename = typename std::enable_if<std::is_constructible<_Key_t, T>::value>::type
+	//>
+		BKE_HashNode *_getNode(const _Key_t &key)
 	{
-		bkplong ha = BKE_hash(key);
-		bkplong h = ha & (hashsize - 1);
+		int32_t ha = BKE_hash(key);
+		int32_t h = ha & (hashsize - 1);
 		if (buf[h] == NULL)
 		{
-			buf[h] = al.op_new(std::forward<T>(key));
+			//buf[h] = al.op_new(std::forward<T>(key));
+			inserttick++;
+			buf[h] = al.allocate();
+			new (buf[h]) BKE_HashNode(key);
 			buf[h]->index = h;
 			buf[h]->hashvalue = ha;
 			buf[h]->next = start.next;
@@ -251,6 +446,12 @@ protected:
 			start.next->last = buf[h];
 			start.next = buf[h];
 			count++;
+			if(count > hashsize)
+			{
+				auto res = buf[h];
+				resizeTableSize(hashsize << 1);
+				return res;
+			}
 			return buf[h];
 		}
 		else
@@ -262,20 +463,83 @@ protected:
 					return node;
 				node = node->next;
 			}
-			//insert after buf[h]
-			auto newnode = al.op_new(std::forward<T>(key));
+			//insert before buf[h]
+			//auto newnode = al.op_new(std::forward<T>(key));
+			inserttick++;
+			auto newnode = al.allocate();
+			new (newnode) BKE_HashNode(key);
 			newnode->index = h;
 			newnode->hashvalue = ha;
-			newnode->last = buf[h];
-			newnode->next = buf[h]->next;
-			buf[h]->next->last = newnode;
-			buf[h]->next = newnode;
+			newnode->last = buf[h]->last;
+			newnode->next = buf[h];
+			buf[h]->last->next = newnode;
+			buf[h]->last = newnode;
+			buf[h] = newnode;
 			count++;
+			if (count > hashsize)
+			{
+				resizeTableSize(hashsize << 1);
+			}
 			return newnode;
 		}
 	}
 
-	bool clearlock;
+		BKE_HashNode *_getNode(_Key_t &&key)
+		{
+			int32_t ha = BKE_hash(key);
+			int32_t h = ha & (hashsize - 1);
+			if (buf[h] == NULL)
+			{
+				//buf[h] = al.op_new(std::forward<T>(key));
+				inserttick++;
+				buf[h] = al.allocate();
+				new (buf[h]) BKE_HashNode(std::move(key));
+				buf[h]->index = h;
+				buf[h]->hashvalue = ha;
+				buf[h]->next = start.next;
+				buf[h]->last = &start;
+				start.next->last = buf[h];
+				start.next = buf[h];
+				count++;
+				if (count > hashsize)
+				{
+					auto res = buf[h];
+					resizeTableSize(hashsize << 1);
+					return res;
+				}
+				return buf[h];
+			}
+			else
+			{
+				auto node = buf[h];
+				while (node && node->index == h)
+				{
+					if (node->ct.first == key)
+						return node;
+					node = node->next;
+				}
+				//insert before buf[h]
+				//auto newnode = al.op_new(std::forward<T>(key));
+				inserttick++;
+				auto newnode = al.allocate();
+				new (newnode) BKE_HashNode(std::move(key));
+				newnode->index = h;
+				newnode->hashvalue = ha;
+				newnode->last = buf[h]->last;
+				newnode->next = buf[h];
+				buf[h]->last->next = newnode;
+				buf[h]->last = newnode;
+				buf[h] = newnode;
+				count++;
+				if (count > hashsize)
+				{
+					resizeTableSize(hashsize << 1);
+				}
+				return newnode;
+			}
+		}
+		
+		bool clearlock;
 
 public:
 	typedef _Iterator iterator;
@@ -310,7 +574,9 @@ public:
 		while (s != &stop)
 		{
 			auto s2 = s->next;
-			al.op_delete(s);
+			//al.op_delete(s);
+			al.destroy(s);
+			al.deallocate(s);
 			s = s2;
 		}
 		memset(buf, 0, sizeof(void*) * hashsize);
@@ -318,6 +584,7 @@ public:
 		stop.last = &start;
 		count = 0;
 		clearlock = false;
+		deletetick++;
 	}
 
 	template<typename T>
@@ -326,7 +593,7 @@ public:
 		iterator it = end();
 		if (count == 0)
 			return it;
-		bkplong h = BKE_hash(key) & (hashsize - 1);
+		int32_t h = BKE_hash(key) & (hashsize - 1);
 		BKE_HashNode *node = buf[h];
 		while (node && node->index == h)
 		{
@@ -343,8 +610,8 @@ public:
 	template<typename T, typename TT,
 		typename = typename std::enable_if<std::is_constructible<_Key_t, T>::value>::type,
 		typename = typename std::enable_if<std::is_constructible<_Val_t, TT>::value>::type
-		>
-	typename std::remove_cv<typename std::remove_reference<TT>::type>::type& insert(T &&key, TT &&val)
+	>
+		typename std::remove_cv<typename std::remove_reference<TT>::type>::type& insert(T &&key, TT &&val)
 	{
 		auto node = _getNode(std::forward<T>(key));
 		node->ct.second = std::forward<TT>(val);
@@ -355,7 +622,7 @@ public:
 		typename = typename std::enable_if<std::is_constructible<_Key_t, T>::value>::type,
 		typename = typename std::enable_if<std::is_constructible<_Val_t, TT>::value>::type
 	>
-	iterator insert(const std::pair<T, TT> &p)
+		iterator insert(const std::pair<T, TT> &p)
 	{
 		auto node = _getNode(p.first);
 		node->ct.second = p.second;
@@ -366,7 +633,7 @@ public:
 	{
 		if (count == 0)
 			return false;
-		bkplong h = BKE_hash(key) & (hashsize - 1);
+		int32_t h = BKE_hash(key) & (hashsize - 1);
 		BKE_HashNode *node = buf[h];
 		while (node && node->index == h)
 		{
@@ -384,7 +651,7 @@ public:
 	{
 		if (count == 0)
 			return false;
-		bkplong h = BKE_hash(key) & (hashsize - 1);
+		int32_t h = BKE_hash(key) & (hashsize - 1);
 		BKE_HashNode *node = buf[h];
 		while (node && node->index == h)
 		{
@@ -402,7 +669,7 @@ public:
 	{
 		if (count == 0)
 			return false;
-		bkplong h = BKE_hash(key) & (hashsize - 1);
+		int32_t h = BKE_hash(key) & (hashsize - 1);
 		BKE_HashNode *node = buf[h];
 		while (node && node->index == h)
 		{
@@ -429,8 +696,11 @@ public:
 				if (it.node->next->index != it.node->index)
 					buf[it.node->index] = NULL;
 			}
-			al.op_delete(it.node);
+			//al.op_delete(it.node);
+			al.destroy(it.node);
+			al.deallocate(it.node);
 			count--;
+			deletetick++;
 			return it2;
 		}
 		return it;
@@ -441,34 +711,39 @@ public:
 		erase(find(key));
 	}
 
-	inline bkplong getCount() const
+	inline int32_t getCount() const
 	{
 		return count;
 	};
 
 	//hashlevel根据hash表中元素的大约个数来选取，hash表的大小为2的hashlevel次方
-	BKE_hashmap(int initsize = HASH_LEVEL) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end)), clearlock(false)
+	BKE_hashmap(int initsize = HASH_LEVEL) :start(*reinterpret_cast<BKE_HashNode*>(_dummy)), stop(*reinterpret_cast<BKE_HashNode*>(_dummy + 2)), clearlock(false)
 	{
 		//static_assert(hashlevel >= 4, "hashlevel必须不小于4");
 		this->hashsize = 1 << initsize;
 		count = 0;
-		buf = (BKE_HashNode **)malloc(sizeof(void*) * hashsize);
+		//buf = (BKE_HashNode **)malloc(sizeof(void*) * hashsize);
+		buf = (BKE_HashNode **)memal.allocate(hashsize);
 		memset(buf, 0, sizeof(void*) * hashsize);
-		start.index = stop.index = -1;
+		//start.index = stop.index = -1;
 		start.last = NULL;
 		start.next = &stop;
 		stop.last = &start;
 		stop.next = NULL;
+		deletetick = 1;
+		inserttick = 1;
 	}
 
 	struct KeyValuePair
 	{
 		const _Key_t key;
 		const _Val_t value;
-		KeyValuePair(const _Key_t &k, const _Val_t &v) :key(k), value(v){}
+		KeyValuePair(const _Key_t &k, const _Val_t &v) :key(k), value(v)
+		{
+		}
 	};
 
-    BKE_hashmap(std::initializer_list<KeyValuePair> l) :BKE_hashmap(l.size() < 16 ? 4 : HASH_LEVEL)
+	BKE_hashmap(std::initializer_list<KeyValuePair> l) :BKE_hashmap(l.size() < 16 ? 4 : HASH_LEVEL)
 	{
 		for (auto it = l.begin(); it != l.end(); it++)
 			insert(it->key, it->value);
@@ -482,37 +757,50 @@ public:
 		while (s != &stop)
 		{
 			auto s2 = s->next;
-			al.op_delete(s);
+			//al.op_delete(s);
+			al.destroy(s);
+			al.deallocate(s);
 			s = s2;
 		}
-		free(buf);
+		//free(buf);
+		memal.deallocate((void**)buf, hashsize);
 	}
 
-	template<typename T,
-		typename = typename std::enable_if<std::is_constructible<_Key_t, T>::value>::type
-		>
+	template<typename T, typename = typename std::enable_if<std::is_constructible<_Key_t, T>::value>::type>
 	inline _Val_t& operator [](T &&key)
 	{
 		return _getNode(std::forward<T>(key))->ct.second;
 	}
 
-	template<typename T,
-		typename = typename std::enable_if<std::is_constructible<_Key_t, T>::value>::type
-	>
-	inline _Key_t& insertKey(T &&key)
+	inline _Val_t& operator [](const _Key_t &key)
+	{
+		return _getNode(key)->ct.second;
+	}
+
+	template<typename T, typename = typename std::enable_if<std::is_constructible<_Key_t, T>::value>::type>
+	inline const _Key_t& insertKey(T key)
 	{
 		return _getNode(std::forward<T>(key))->ct.first;
 	}
 
+	template <typename T, typename = typename std::enable_if<std::is_constructible<_Key_t, T>::value>::type>
+	inline iterator getIterator(T &&key)
+	{
+		return iterator(_getNode(std::forward<T>(key)));
+	}
+
 	//copy constructor
 	//notice: the sequence of Nodes in same leaf may not same
-	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end)), clearlock(false)
+	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h) :start(*reinterpret_cast<BKE_HashNode*>(_dummy)), stop(*reinterpret_cast<BKE_HashNode*>(_dummy + 2)), clearlock(false)
 	{
 		hashsize = h.hashsize;
-		buf = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
+		//buf = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
+		buf = (BKE_HashNode **)memal.allocate(hashsize);
 		memset(buf, 0, sizeof(void*)* hashsize);
 		count = h.count;
-		start.index = stop.index = -1;
+		deletetick = 1;
+		inserttick = 1;
+		//start.index = stop.index = -1;
 		start.last = NULL;
 		start.next = &stop;
 		stop.last = &start;
@@ -520,7 +808,9 @@ public:
 		auto node = h.start.next;
 		while (node != &h.stop)
 		{
-			auto s = al.op_new(*node);
+			//auto s = al.op_new(*node);
+			auto s = al.allocate();
+			new(s) BKE_HashNode(*node);
 			s->last = stop.last;
 			s->next = &stop;
 			stop.last->next = s;
@@ -532,13 +822,16 @@ public:
 	}
 
 	template<class T>
-	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h, const T &func) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end)), clearlock(false)
+	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h, const T &func) :start(*reinterpret_cast<BKE_HashNode*>(_dummy)), stop(*reinterpret_cast<BKE_HashNode*>(_dummy + 2)), clearlock(false)
 	{
 		hashsize = h.hashsize;
-		buf = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
+		//buf = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
+		buf = (BKE_HashNode **)memal.allocate(hashsize);
 		memset(buf, 0, sizeof(void*)* hashsize);
 		count = h.count;
-		start.index = stop.index = -1;
+		deletetick = 1;
+		inserttick = 1;
+		//start.index = stop.index = -1;
 		start.last = NULL;
 		start.next = &stop;
 		stop.last = &start;
@@ -546,7 +839,9 @@ public:
 		auto node = h.start.next;
 		while (node != &h.stop)
 		{
-			auto s = al.op_new(node->ct.first);
+			//auto s = al.op_new(node->ct.first);
+			auto s = al.allocate();
+			new(s) BKE_HashNode(node->ct.first);
 			s->val = func(node->ct.second);
 			s->hashvalue = node->hashvalue;
 			s->index = node->index;
@@ -560,14 +855,16 @@ public:
 		}
 	}
 
-	BKE_hashmap(BKE_hashmap<_Key_t, _Val_t> &&h) :start(*reinterpret_cast<BKE_HashNode*>(_head)), stop(*reinterpret_cast<BKE_HashNode*>(_end)), clearlock(false)
+	BKE_hashmap(BKE_hashmap<_Key_t, _Val_t> &&h) :start(*reinterpret_cast<BKE_HashNode*>(_dummy)), stop(*reinterpret_cast<BKE_HashNode*>(_dummy + 2)), clearlock(false)
 	{
 		hashsize = h.hashsize;
 		buf = h.buf;
 		h.buf = NULL;
 		count = h.count;
 		h.count = 0;
-		start.index = stop.index = -1;
+		deletetick = 1;
+		inserttick = 1;
+		//start.index = stop.index = -1;
 		start.last = NULL;
 		start.next = h.start.next;
 		start.next->last = &start;
@@ -586,11 +883,14 @@ public:
 			while (s != &stop)
 			{
 				auto s2 = s->next;
-				al.op_delete(s);
+				//al.op_delete(s);
+				al.destroy(s);
+				al.deallocate(s);
 				s = s2;
 			}
 		}
-		free(buf);
+		//free(buf);
+		memal.deallocate((void**)buf, hashsize);
 		hashsize = h.hashsize;
 		buf = h.buf;
 		h.buf = NULL;
@@ -602,6 +902,8 @@ public:
 		stop.last->next = &stop;
 		h.stop.last = &h.start;
 		h.start.next = &h.stop;
+		deletetick++;
+		inserttick++;
 		return *this;
 	}
 
@@ -613,15 +915,19 @@ public:
 			while (s != &stop)
 			{
 				auto s2 = s->next;
-				al.op_delete(s);
+				//al.op_delete(s);
+				al.destroy(s);
+				al.deallocate(s);
 				s = s2;
 			}
 		}
 		if (h.hashsize != hashsize)
 		{
-			free(buf);
-			buf = (BKE_HashNode **)malloc(sizeof(void*)* h.hashsize);
+			//free(buf);
+			memal.deallocate((void**)buf, hashsize);
 			hashsize = h.hashsize;
+			//buf = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
+			buf = (BKE_HashNode **)memal.allocate(hashsize);
 		}
 		memset(buf, 0, sizeof(void*)* hashsize);
 		count = h.count;
@@ -630,7 +936,9 @@ public:
 		auto node = h.start.next;
 		while (node != &h.stop)
 		{
-			auto s = al.op_new(*node);
+			//auto s = al.op_new(*node);
+			auto s = al.allocate();
+			new(s) BKE_HashNode(*node);
 			s->last = stop.last;
 			s->next = &stop;
 			stop.last->next = s;
@@ -639,21 +947,28 @@ public:
 				buf[s->index] = s;
 			node = node->next;
 		}
+		deletetick++;
+		inserttick++;
 		return *this;
 	}
 
-	inline bool empty() const { return count == 0; }
+	inline bool empty() const
+	{
+		return count == 0;
+	}
 
 	void Union(const BKE_hashmap<_Key_t, _Val_t> &h, bool Override = false)
 	{
 		if (h.empty())
 			return;
+		deletetick++;
+		inserttick++;
 		if (empty())
 		{
 			*this = h;
 			return;
 		}
-		if (h.hashsize != hashsize || h.count + count < hashsize)
+		//if (h.hashsize != hashsize || h.count + count < hashsize)
 		{
 			for (auto it = h.begin(); it != h.end(); ++it)
 			{
@@ -665,88 +980,108 @@ public:
 			}
 			return;
 		}
-		for (int i = 0; i < hashsize; i++)
-		{
-			BKE_HashNode *hnode = h.buf[i];
-			if (hnode == NULL)
-				continue;
-			BKE_HashNode *nodelist = NULL;
-			BKE_HashNode *nodelistend = NULL;
-			while (hnode->index == i)
-			{
-				BKE_HashNode *node = buf[i];
-				bool append = false;
-				while (node && node->index == i)
-				{
-					if (node->ct.first == hnode->ct.first)
-					{
-						if (Override)
-						{
-							node->last->next = node->next;
-							node->next->last = node->last;
-							al.op_delete(node);
-							append = true;
-						}
-						break;
-					}
-					node = node->next;
-				}
-				if (append)
-				{
-					if (!nodelist)
-						nodelist = nodelistend = al.op_new(*hnode);
-					else
-					{
-						BKE_HashNode *n = al.op_new(*hnode);
-						if (nodelistend != nodelist)
-						{
-							n->next = nodelistend;
-							n->last = nodelistend->last;
-							nodelistend->last->next = n;
-							nodelistend->last = n;
-						}
-						else
-						{
-							n->last = nodelist;
-							nodelist->next = n;
-						}
-					}
-				}
-				hnode = hnode->next;
-			}
-			if (nodelist)
-			{
-				if (!buf[i])
-				{
-					nodelist->last = &start;
-					nodelistend->next = start.next;
-					start.next->last = nodelistend;
-					start.next = nodelist;
-					buf[i] = start.next;
-				}
-				else
-				{
-					nodelist->last = buf[i]->last;
-					nodelistend->next = buf[i];
-					buf[i]->last->next = nodelist;
-					buf[i]->last = nodelistend;
-					buf[i] = nodelist;
-				}
-			}
-		}
+		//下面一堆乱七八糟还有错的代码就不用了
+
+		//for (int i = 0; i < hashsize; i++)
+		//{
+		//	BKE_HashNode *hnode = h.buf[i];
+		//	if (hnode == NULL)
+		//		continue;
+		//	BKE_HashNode *nodelist = NULL;
+		//	BKE_HashNode *nodelistend = NULL;
+		//	while (hnode->index == i)
+		//	{
+		//		BKE_HashNode *node = buf[i];
+		//		bool append = false;
+		//		while (node && node->index == i)
+		//		{
+		//			if (node->ct.first == hnode->ct.first)
+		//			{
+		//				if (Override)
+		//				{
+		//					node->last->next = node->next;
+		//					node->next->last = node->last;
+		//					//al.op_delete(node);
+		//					al.destroy(node);
+		//					al.deallocate(node);
+		//					if (buf[i] == node)
+		//					{
+		//						if (buf[i]->next->index == i)
+		//							buf[i] = buf[i]->next;
+		//						else
+		//							buf[i] = NULL;
+		//					}
+		//					append = true;
+		//				}
+		//				break;
+		//			}
+		//			node = node->next;
+		//		}
+		//		if (append)
+		//		{
+		//			if (!nodelist)
+		//			{
+		//				//nodelist = nodelistend = al.op_new(*hnode);
+		//				nodelist = nodelistend = al.allocate();
+		//				new (nodelistend) BKE_HashNode(*hnode);
+		//			}
+		//			else
+		//			{
+		//				//BKE_HashNode *n = al.op_new(*hnode);
+		//				BKE_HashNode *n = al.allocate();
+		//				new (n) BKE_HashNode(*hnode);
+		//				if (nodelistend != nodelist)
+		//				{
+		//					n->next = nodelistend;
+		//					n->last = nodelistend->last;
+		//					nodelistend->last->next = n;
+		//					nodelistend->last = n;
+		//				}
+		//				else
+		//				{
+		//					n->last = nodelist;
+		//					nodelist->next = n;
+		//				}
+		//			}
+		//		}
+		//		hnode = hnode->next;
+		//	}
+		//	if (nodelist)
+		//	{
+		//		if (!buf[i])
+		//		{
+		//			nodelist->last = &start;
+		//			nodelistend->next = start.next;
+		//			start.next->last = nodelistend;
+		//			start.next = nodelist;
+		//			buf[i] = start.next;
+		//		}
+		//		else
+		//		{
+		//			nodelist->last = buf[i]->last;
+		//			nodelistend->next = buf[i];
+		//			buf[i]->last->next = nodelist;
+		//			buf[i]->last = nodelistend;
+		//			buf[i] = nodelist;
+		//		}
+		//	}
+		//}
 	}
 
-	void resizeTableSize(int newsize)
+	void resizeTableSize(int newhashsize)
 	{
-		assert(newsize >= 4);
-		if ((1L << newsize) == hashsize)
+		assert(newhashsize >= 4 && log2(newhashsize) == (int)log2(newhashsize));
+		if (newhashsize == hashsize)
 			return;
-		hashsize = 1 << newsize;
-		auto buf2 = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
+		int rawsize = hashsize;
+		hashsize = newhashsize;
+		//auto buf2 = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
+		auto buf2 = (BKE_HashNode **)memal.allocate(hashsize);
 		memset(buf2, 0, sizeof(void*)* hashsize);
 		if (count == 0)
 		{
-			free(buf);
+			//free(buf);
+			memal.deallocate((void**)buf, rawsize);
 			buf = buf2;
 			return;
 		}
@@ -773,12 +1108,17 @@ public:
 				raws->last = buf[raws->index]->last;
 				buf[raws->index]->last->next = raws;
 				buf[raws->index]->last = raws;
+				buf[raws->index] = raws;
 			}
 			raws = nexts;
 		}
-		free(buf2);
+		//free(buf2);
+		memal.deallocate((void**)buf2, rawsize);
 	}
 };
+
+template<class _Key_t, class _Val_t>
+BKE_allocator<void*> BKE_hashmap<_Key_t, _Val_t>::memal;
 
 //dummy class used in GlobalStringMap, to make the map actually a set
 struct _dummy_class
@@ -809,9 +1149,13 @@ protected:
 	private:
 		mutable T *node;
 	public:
-		_Iterator() :node(NULL) {};
+		_Iterator() :node(NULL)
+		{
+		};
 
-		_Iterator(T *n) :node(n) {};
+		_Iterator(T *n) :node(n)
+		{
+		};
 
 		_Iterator& operator =(const _Iterator &it)
 		{
@@ -966,3 +1310,5 @@ public:
 		_stop[1] = NULL;
 	}
 };
+
+#pragma pop_macro("new")

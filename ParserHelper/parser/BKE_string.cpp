@@ -3,6 +3,8 @@
 
 //GlobalStringMap StringMap;
 
+#undef new
+
 BKE_String::BKE_String(const BKE_Number &num)
 {
 	var = StringMap().allocString(num.tostring());
@@ -32,7 +34,55 @@ StringType *GlobalStringMap::allocHashString(const wchar_t *str)
 #if PARSER_MULTITHREAD
 	mu.lock();
 #endif
-	auto t = _getNode(str);
+	int32_t ha = BKE_hash(str);
+	int32_t h = ha & (hashsize - 1);
+	if (buf[h] == NULL)
+	{
+		//buf[h] = al.op_new(std::forward<T>(key));
+		inserttick++;
+		buf[h] = al.allocate();
+		new (buf[h]) BKE_HashNode(str);
+		buf[h]->index = h;
+		buf[h]->hashvalue = ha;
+		buf[h]->next = start.next;
+		buf[h]->last = &start;
+		start.next->last = buf[h];
+		start.next = buf[h];
+		count++;
+		if (count > hashsize)
+		{
+			auto res = buf[h];
+			resizeTableSize(hashsize << 1);
+		}
+	}
+	else
+	{
+		auto node = buf[h];
+		while (node && node->index == h)
+		{
+			if (node->ct.first == str)
+				return const_cast<StringType*>(&node->ct.first);
+			node = node->next;
+		}
+		//insert before buf[h]
+		//auto newnode = al.op_new(std::forward<T>(key));
+		inserttick++;
+		auto newnode = al.allocate();
+		new (newnode) BKE_HashNode(str);
+		newnode->index = h;
+		newnode->hashvalue = ha;
+		newnode->last = buf[h]->last;
+		newnode->next = buf[h];
+		buf[h]->last->next = newnode;
+		buf[h]->last = newnode;
+		buf[h] = newnode;
+		count++;
+		if (count > hashsize)
+		{
+			resizeTableSize(hashsize << 1);
+		}
+	}
+	auto t = buf[h];
 	t->ct.first.hashed = true;
 	t->ct.first.hash = t->hashvalue;
 	t->ct.first.ref++;
@@ -65,7 +115,55 @@ StringType *GlobalStringMap::allocHashString(wstring &&str)
 #if PARSER_MULTITHREAD
 	mu.lock();
 #endif
-	auto t = _getNode(StringType(std::move(str)));
+	int32_t ha = BKE_hash(str);
+	int32_t h = ha & (hashsize - 1);
+	if (buf[h] == NULL)
+	{
+		//buf[h] = al.op_new(std::forward<T>(key));
+		inserttick++;
+		buf[h] = al.allocate();
+		new (buf[h]) BKE_HashNode(std::move(str));
+		buf[h]->index = h;
+		buf[h]->hashvalue = ha;
+		buf[h]->next = start.next;
+		buf[h]->last = &start;
+		start.next->last = buf[h];
+		start.next = buf[h];
+		count++;
+		if (count > hashsize)
+		{
+			auto res = buf[h];
+			resizeTableSize(hashsize << 1);
+		}
+	}
+	else
+	{
+		auto node = buf[h];
+		while (node && node->index == h)
+		{
+			if (node->ct.first == str)
+				return const_cast<StringType*>(&node->ct.first);
+			node = node->next;
+		}
+		//insert before buf[h]
+		//auto newnode = al.op_new(std::forward<T>(key));
+		inserttick++;
+		auto newnode = al.allocate();
+		new (newnode) BKE_HashNode(std::move(str));
+		newnode->index = h;
+		newnode->hashvalue = ha;
+		newnode->last = buf[h]->last;
+		newnode->next = buf[h];
+		buf[h]->last->next = newnode;
+		buf[h]->last = newnode;
+		buf[h] = newnode;
+		count++;
+		if (count > hashsize)
+		{
+			resizeTableSize(hashsize << 1);
+		}
+	}
+	auto t = buf[h];
 	t->ct.first.hashed = true;
 	t->ct.first.hash = t->hashvalue;
 	t->ct.first.ref++;
@@ -136,7 +234,7 @@ const wstring& BKE_String::printStr() const
 	const wchar_t *c = getConstStr().c_str();
 	while (*c)
 	{
-		if (*c<32)
+		if (*c<32 || *c=='\"')
 		{
 			sim = false;
 			break;

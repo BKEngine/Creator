@@ -36,7 +36,7 @@
 #undef new
 
 #define SMALL 32
-#define MEMORY_UNIT 8
+#define MEMORY_UNIT 16
 
 template <int T>
 class _BKE_allocator;
@@ -106,18 +106,18 @@ private:
 private:
 	inline bool alloc_array()
 	{
-		//assert(tail->next==NULL);
+		//assert(tail->next==nullptr);
 		tail->next = (__helper_array*)malloc(BLOCKMEMSIZE);
 		if (!tail->next)
 			return false;
 		capacity += blocksize;
 		tail->next->last = tail;
-		tail->next->next = NULL;
+		tail->next->next = nullptr;
 		tail = tail->next;
 		tail->count = 0;
 		tail->curpos = tail->ptr;
 		tail->endpos = tail->ptr + blocksize;
-		tail->freeList = NULL;
+		tail->freeList = nullptr;
 #ifdef _DEBUG
 		for (bkpulong i = 0; i < blocksize; i++)
 			tail->ptr[i].valid = 1;
@@ -128,19 +128,19 @@ private:
 
 	inline bool dynamic_alloc_array()
 	{
-		//assert(tail->next == NULL);
+		//assert(tail->next == nullptr);
 		tail->next = (__helper_array*)malloc(BLOCKMEMSIZE);
 		if (!tail->next)
 			return false;
 		capacity += blocksize;
 		tail->next->last = tail;
-		tail->next->next = NULL;
+		tail->next->next = nullptr;
 		tail = tail->next;
 		tail->count = 0;
 		bkpchar *ptrpos = (bkpchar*)tail + sizeof(bkpulong) + sizeof(__helper*) * 3 + sizeof(__helper_array*) * 2;
 		tail->curpos = (__helper*)ptrpos;
 		tail->endpos = (__helper*)(ptrpos + blocksize * sizehelper);
-		tail->freeList = NULL;
+		tail->freeList = nullptr;
 #ifdef _DEBUG
 		for (bkpulong i = 0; i < blocksize; i++)
 			*(bkplong*)(ptrpos + i * sizehelper + unit + sizeof(__helper*) + sizeof(__helper_array*)) = 1;
@@ -170,9 +170,9 @@ public:
 			//预留一个已分配且禁止释放的位置，防止第一个block被free
 			cur->curpos = cur->ptr + 1;
 			cur->endpos = cur->ptr + blocksize;
-			cur->freeList = NULL;
-			cur->last = NULL;
-			cur->next = NULL;
+			cur->freeList = nullptr;
+			cur->last = nullptr;
+			cur->next = nullptr;
 			tail = head;
 		}
 	}
@@ -217,7 +217,7 @@ public:
 					if (!cur->next)
 					{
 						cur = head;
-						break;
+						continue;
 					}
 					else
 					{
@@ -236,7 +236,7 @@ public:
 				else
 				{
 					if(!alloc_array())
-						return NULL;
+						return nullptr;
 					res = cur->curpos++;
 				}
 			}
@@ -271,7 +271,7 @@ public:
 
 	void* dynamic_allocate()
 	{
-		if (unit <= SMALL)
+		if (unit / MEMORY_UNIT <= SMALL)
 		{
 			void *res;
 			if (cur->freeList)
@@ -291,7 +291,7 @@ public:
 					if (!cur->next)
 					{
 						cur = head;
-						break;
+						continue;
 					}
 					else
 					{
@@ -310,7 +310,7 @@ public:
 				else
 				{
 					if (!dynamic_alloc_array())
-						return NULL;
+						return nullptr;
 					/*res = cur->curpos++;*/res = cur->curpos; cur->curpos = (__helper*)((bkpchar*)(cur->curpos) + sizehelper);
 				}
 			}
@@ -330,7 +330,7 @@ public:
 	{
 		if (!p)
 			return;
-		if (unit <= SMALL)
+		if (unit / MEMORY_UNIT <= SMALL)
 		{
 #ifdef _DEBUG
 			//assert(((__helper*)p)->magic == UNIT && ((__helper*)p)->valid == 0);
@@ -378,7 +378,7 @@ public:
 				free(head);
 				head = cur;
 			}
-			allocator_array()[T] = NULL;
+			allocator_array()[T] = nullptr;
 		}
 	}
 };
@@ -537,6 +537,12 @@ public:
 	typedef int32_t size_type;
 
 	BKE_allocator()
+	{
+		al = get_allocator<(sizeof(T) + MEMORY_UNIT - 1) / MEMORY_UNIT>();
+	}
+
+	template <class T2>
+	BKE_allocator(const BKE_allocator<T2> &alloc)
 	{
 		al = get_allocator<(sizeof(T) + MEMORY_UNIT - 1) / MEMORY_UNIT>();
 	}

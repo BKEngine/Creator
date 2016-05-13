@@ -143,4 +143,4 @@ public:
 };
 
 //convert from wchar_t*
-BKE_Number str2num(const wchar_t *src, wchar_t **end = NULL);
+BKE_Number str2num(const wchar_t *src, wchar_t **end = nullptr);

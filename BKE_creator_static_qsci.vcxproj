@@ -283,7 +283,6 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ParseData.cpp" />
-    <ClCompile Include="ParserHelper\parser\BKE_hash.cpp" />
     <ClCompile Include="ParserHelper\parser\BKE_number.cpp" />
     <ClCompile Include="ParserHelper\parser\BKE_string.cpp" />
     <ClCompile Include="ParserHelper\parser\BKE_variable.cpp" />

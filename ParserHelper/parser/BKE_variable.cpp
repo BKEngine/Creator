@@ -47,7 +47,7 @@ BKE_bytree::~BKE_bytree()
 		{
 			if (parent->childs[i] == this)
 			{
-				parent->childs[i] = NULL;
+				parent->childs[i] = nullptr;
 				return;
 			}
 		}
@@ -287,7 +287,7 @@ void BKE_Variable::save(wstring &result, bool format, bkplong indent) const
 			it++;
 			for (; it != vmap.end(); it++)
 			{
-				if (it->second.isVoid() || it->second.getType() == VAR_FUNC || it->second.getType() == VAR_PROP)
+				if (it->second.getType() == VAR_FUNC || it->second.getType() == VAR_PROP)
 					continue;
 				result += L",";
 				if (format)
@@ -463,7 +463,7 @@ wstring BKE_Variable::asString() const
 	switch (vt)
 	{
 	case VAR_NONE:
-		return L"";
+		return wstring();
 	case VAR_NUM:
 		return num.tostring();
 	case VAR_STR:
@@ -546,7 +546,7 @@ BKE_VarClosure *BKE_Variable::forceAsClosure() const
 	case VAR_CLASS:
 		return static_cast<BKE_VarClosure*>(obj);
 	default:
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -588,9 +588,9 @@ BKE_VarThis *BKE_Variable::asThisClosure() const
 		if (static_cast<BKE_VarProp*>(obj)->hasGet())
 			return static_cast<BKE_VarProp*>(obj)->get().asThisClosure();
 		else
-			return NULL;
+			return nullptr;
 	default:
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -1132,7 +1132,7 @@ BKE_Variable& BKE_Variable::operator = (BKE_Variable &&v)
 	num = std::move(v.num);
 	str = std::move(v.str);
 	obj = v.obj;
-	v.obj = NULL;
+	v.obj = nullptr;
 	vt = v.vt;
 	//clear rawobj
 	if (!MemoryPool().clearflag && rawobj)
@@ -1970,7 +1970,7 @@ bool BKE_Variable::dotFunc(const BKE_String &funcname, BKE_Variable &out)
 			}
 			if (vv->getType() == VAR_PROP)
 			{
-				out = new BKE_VarProp(*static_cast<BKE_VarProp*>(vv->obj), NULL, *this);
+				out = new BKE_VarProp(*static_cast<BKE_VarProp*>(vv->obj), nullptr, *this);
 				return true;
 			}
 		}
@@ -2025,7 +2025,7 @@ BKE_Variable& BKE_Variable::dot(const BKE_String &funcname)
 			//if (vv->getType() == VAR_FUNC)
 			//	return new BKE_VarFunction(*static_cast<BKE_VarFunction*>(vv->obj), BKE_VarClosure::global(), this);
 			//if (vv->getType() == VAR_PROP)
-			//	return new BKE_VarProp(*static_cast<BKE_VarProp*>(vv->obj), NULL, this);
+			//	return new BKE_VarProp(*static_cast<BKE_VarProp*>(vv->obj), nullptr, this);
 			//return BKE_Variable();
 		}
 	}
@@ -2199,8 +2199,8 @@ void BKE_VarClass::assignStructure(BKE_VarClass *cla, BKE_hashmap<void*, void*> 
 		parents.resize(cla->parents.size());
 		for (int i = 0; i < cla->parents.size(); i++)
 		{
-			if (cla->parents[i] == NULL)
-				parents[i] = NULL;
+			if (cla->parents[i] == nullptr)
+				parents[i] = nullptr;
 			else
 			{
 				if (pMap.contains(cla->parents[i]))

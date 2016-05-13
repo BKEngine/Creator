@@ -48,7 +48,7 @@ bkplong bkpwcstoxl(const wchar_t *nptr, const wchar_t **endptr, int ibase, int f
 	bkpulong maxval;
 
 	/* validation section */
-	if (endptr != NULL)
+	if (endptr != nullptr)
 	{
 		/* store beginning of string in endptr */
 		*endptr = nptr;
@@ -120,7 +120,7 @@ bkplong bkpwcstoxl(const wchar_t *nptr, const wchar_t **endptr, int ibase, int f
 		else {
 			/* we would have overflowed -- set the overflow flag */
 			flags |= FL_OVERFLOW;
-			if (endptr == NULL) {
+			if (endptr == nullptr) {
 				/* no need to keep on parsing if we
 				   don't have to return the endptr. */
 				break;
@@ -156,7 +156,7 @@ bkplong bkpwcstoxl(const wchar_t *nptr, const wchar_t **endptr, int ibase, int f
 			number = BKPULONG_MAX;
 	}
 
-	if (endptr != NULL)
+	if (endptr != nullptr)
 		/* store pointer to char that stopped the scan */
 		*endptr = p;
 
@@ -173,10 +173,10 @@ bkplong bkpStr2Int(const wstring &src)
 	if(!src.compare(L"false"))return 0;
 	if(!src.compare(L"void"))return 0;
 	if (src[0] == '-')
-		return -(bkplong)bkpwcstoxl(&src[1], NULL, 0);
+		return -(bkplong)bkpwcstoxl(&src[1], nullptr, 0);
 	if (src[0] == L'#')
 		return bkpColor2Int(src);
-	return bkpwcstoxl(src.c_str(), NULL, 0);
+	return bkpwcstoxl(src.c_str(), nullptr, 0);
 }
 
 //src don't include #
@@ -285,10 +285,10 @@ double str2num(const wstring &src)
 	if(!src.compare(L"false"))return 0;
 	if(!src.compare(L"void"))return 0;
 	if (src[0] == '-')
-		return -bkpwcstonum(&src[1], NULL);
+		return -bkpwcstonum(&src[1], nullptr);
 	if (src[0] == L'#')
 		return bkpColor2Int(src);
-	return bkpwcstonum(src.c_str(), NULL);
+	return bkpwcstonum(src.c_str(), nullptr);
 }
 
 double bkpwcstonum(const wchar_t *nptr, const wchar_t **endptr)
@@ -467,14 +467,14 @@ double getutime()
 	return liTime.QuadPart * 1000000.0 / liFreq.QuadPart;
 #else
 	struct timeval tv_begin;
-	gettimeofday(&tv_begin, NULL);
+	gettimeofday(&tv_begin, nullptr);
 	return tv_begin.tv_sec * 1000000 + tv_begin.tv_usec;
 #endif
 }
 
 #include <random>
 
-std::mt19937 random_pool((unsigned int)std::time(NULL));
+std::random_device random_pool;
 
 bkplong bkpRandomInt()
 {
@@ -502,7 +502,7 @@ void GlobalStructures::init()
 	this->globalStringMap = &m;
 	this->globalMemoryPool = &p;
 	this->globalClosure = &g;
-	g.varmap.resizeTableSize(12);
+	g.varmap.resizeTableSize(1<<12);
 }
 
 GlobalStructures _globalStructures;

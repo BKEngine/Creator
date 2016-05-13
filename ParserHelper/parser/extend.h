@@ -65,15 +65,15 @@ void _bkpCheckClassInstance(BKE_VarObject *__obj, T && __classname)
 {
 	if (!dynamic_cast<BKE_VarClass*>(__obj) || !((BKE_VarClass*)__obj)->isInstanceof(__classname))
 		throw Var_Except(wstring(L"传入的类需要") + __classname + wstring(L"类或其派生类。"));
+	if (((BKE_VarClass*)__obj)->isdef)
+		throw Var_Except(L"调用该方法的不是对象实例");
 }
 
 template < class T, class T2 >
 T *_bkpGetClassInstance(BKE_VarObject *__obj, T2 && __classname)
 {
 	_bkpCheckClassInstance(__obj, __classname); 
-	if (((BKE_VarClass*)__obj)->isdef)
-		throw Var_Except(L"调用该方法的不是对象实例"); 
-	T *__name = dynamic_cast<T*>(((BKE_VarClass*)__obj)->native);
+	T *__name = static_cast<T*>(((BKE_VarClass*)__obj)->native);
 	return __name;
 }
 
@@ -144,7 +144,7 @@ namespace ParserUtils
 
 		Date() :BKE_NativeClass(L"Date")
 		{
-			auto t = time(NULL);
+			auto t = time(nullptr);
 			_tm = localtime(&t);
 		};
 
@@ -263,7 +263,7 @@ namespace ParserUtils
 
 		NATIVE_INIT();
 
-		NATIVE_CREATENEW(){ return NULL; }
+		NATIVE_CREATENEW(){ return nullptr; }
 
 		/**
 		 *  @static

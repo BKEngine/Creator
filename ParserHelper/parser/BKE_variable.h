@@ -45,6 +45,7 @@ public:
 	{
 		__init_memorypool();
 		clearflag = false;
+		count = 0;
 #if PARSER_DEBUG==2
 		c=0;
 #endif
@@ -61,11 +62,13 @@ public:
 		m->size = size;
 		m->magic = PARSER_MAGIC;
 		buffer.push_back(m);
+		count++;
 	}
 
 	void erase(MemoryPoolHeader *p)
 	{
 		buffer.erase(p);
+		count--;
 	}
 
 	void finalize();
@@ -76,6 +79,8 @@ public:
 	{
 		purge();
 	};
+public:
+	int count;
 };
 
 inline GlobalMemoryPool& MemoryPool()
@@ -197,7 +202,7 @@ T BKE_VarObjectSafeReferencer(T o)
 	static_assert(std::is_convertible<T, BKE_VarObject *>::value, "");
 	if (o)
 		return (T)o->addRef();
-	return NULL;
+	return nullptr;
 }
 
 template<class T>
@@ -236,7 +241,7 @@ private:
 		//注意三个等号重载那copy了这里代码
 		if (!MemoryPool().clearflag && obj)
 		{
-			obj->release(); obj = NULL; 
+			obj->release(); obj = nullptr; 
 		}
 	};
 
@@ -254,22 +259,22 @@ public:
 	inline ~BKE_Variable();
 
 	//construct functions
-	inline BKE_Variable():vt(VAR_NONE), obj(NULL), is_var(VARIABLE_VAR){}
+	inline BKE_Variable():vt(VAR_NONE), obj(nullptr), is_var(VARIABLE_VAR){}
 
-	inline BKE_Variable(bkpshort i) : vt(VAR_NUM), num(i), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(bkpushort i) : vt(VAR_NUM), num(i), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(float i) : vt(VAR_NUM), num(i), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(double i) : vt(VAR_NUM), num(i), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(bkplonglong i) : vt(VAR_NUM), num(i), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(bkplong i) : vt(VAR_NUM), num(i), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(bkpulong i) : vt(VAR_NUM), num(i), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(const BKE_Number &i) : vt(VAR_NUM), num(i), obj(NULL), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(bkpshort i) : vt(VAR_NUM), num(i), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(bkpushort i) : vt(VAR_NUM), num(i), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(float i) : vt(VAR_NUM), num(i), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(double i) : vt(VAR_NUM), num(i), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(bkplonglong i) : vt(VAR_NUM), num(i), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(bkplong i) : vt(VAR_NUM), num(i), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(bkpulong i) : vt(VAR_NUM), num(i), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(const BKE_Number &i) : vt(VAR_NUM), num(i), obj(nullptr), is_var(VARIABLE_VAR){}
 
-	inline BKE_Variable(const wchar_t *s) : vt(VAR_STR), str(s, false), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(const wchar_t &s) : vt(VAR_STR), str(wstring(1, s), false), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(const wstring &s) : vt(VAR_STR), str(s, false), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(const BKE_String &s) : vt(VAR_STR), str(s), obj(NULL), is_var(VARIABLE_VAR){}
-	inline BKE_Variable(BKE_String && s) : vt(VAR_STR), str(std::move(s)), obj(NULL), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(const wchar_t *s) : vt(VAR_STR), str(s, false), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(const wchar_t &s) : vt(VAR_STR), str(wstring(1, s), false), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(const wstring &s) : vt(VAR_STR), str(s, false), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(const BKE_String &s) : vt(VAR_STR), str(s), obj(nullptr), is_var(VARIABLE_VAR){}
+	inline BKE_Variable(BKE_String && s) : vt(VAR_STR), str(std::move(s)), obj(nullptr), is_var(VARIABLE_VAR){}
 
 	inline BKE_Variable(BKE_VarObject *o){ obj = o;  if (!o)vt = VAR_NONE; else vt = o->vt; is_var = VARIABLE_VAR; }
 
@@ -282,7 +287,7 @@ public:
 		num = std::move(v.num);
 		str = std::move(v.str);
 		obj = v.obj;
-		v.obj = NULL;
+		v.obj = nullptr;
 		is_var = VARIABLE_VAR;
 	}
 
@@ -405,19 +410,19 @@ public:
 	bkplonglong getInteger(bkplonglong defaultValue = 0) const;
 	wstring getString(const wstring &defaultValue = wstring()) const;
 	bool getBoolean(bool defaultValue = false) const;
-	BKE_VarArray *getArray(BKE_VarArray *defaultValue = NULL) const;
-	BKE_VarDic *getDic(BKE_VarDic *BKE_VarDic = NULL) const;
-	BKE_VarFunction *getFunc(BKE_VarFunction *defaultValue = NULL) const;
-	BKE_VarClass *getClass(BKE_VarClass *defaultValue = NULL) const;
-	BKE_VarClosure *getClosure(BKE_VarClosure *defaultValue = NULL) const;
-	BKE_VarProp *getProp(BKE_VarProp *defaultValue = NULL) const;
+	BKE_VarArray *getArray(BKE_VarArray *defaultValue = nullptr) const;
+	BKE_VarDic *getDic(BKE_VarDic *BKE_VarDic = nullptr) const;
+	BKE_VarFunction *getFunc(BKE_VarFunction *defaultValue = nullptr) const;
+	BKE_VarClass *getClass(BKE_VarClass *defaultValue = nullptr) const;
+	BKE_VarClosure *getClosure(BKE_VarClosure *defaultValue = nullptr) const;
+	BKE_VarProp *getProp(BKE_VarProp *defaultValue = nullptr) const;
 
 	template<class T, class... Args>
 	struct ConventerDelegate
 	{
 		static T convertTo(const BKE_Variable &_this, Args&&...args)
 		{
-            return (T)(_this);
+			return _this.operator T();
 		}
 
 		static BKE_Variable convertFrom(const T& v)
@@ -663,11 +668,11 @@ private:
 
 	void invalid()
 	{
-		var = NULL;
+		var = nullptr;
 	}
 
 public:
-	BKE_VariablePointer() :var(NULL){};
+	BKE_VariablePointer() :var(nullptr){};
 	BKE_VariablePointer(const BKE_Variable &v)
 	{
 		var = const_cast<BKE_Variable *>(&v);
@@ -683,7 +688,7 @@ public:
 	{
 		if (var)
 			var->reflection.erase(this);
-		var = NULL;
+		var = nullptr;
 	}
 
 	void pointTo(const BKE_Variable &v)
@@ -1134,7 +1139,7 @@ public:
 			)
 			delete this;
 	};
-	inline BKE_VarClosure(BKE_VarClosure *p = NULL) :BKE_VarObject(VAR_CLO), extraref(0){ parent = BKE_VarObjectSafeReferencer(p); withvar = p ? BKE_VarObjectSafeReferencer(p->withvar) : NULL; };
+	inline BKE_VarClosure(BKE_VarClosure *p = nullptr) :BKE_VarObject(VAR_CLO), extraref(0){ parent = BKE_VarObjectSafeReferencer(p); withvar = p ? BKE_VarObjectSafeReferencer(p->withvar) : nullptr; };
 	inline void clear()
 	{
 		varmap.clear();
@@ -1145,7 +1150,7 @@ public:
 			return withvar;
 		if (parent)
 			return parent->withvar;
-		return NULL;
+		return nullptr;
 	}
 	virtual bool hasMember(const BKE_String &key) const
 	{
@@ -1292,8 +1297,8 @@ public:
 	BKE_Variable returnvar;
 #endif
 
-	inline BKE_FunctionCode():BKE_VarObject(VAR_FUNCCODE_P), native(NULL), code(NULL){};
-	inline BKE_FunctionCode(BKE_NativeFunction func) :BKE_VarObject(VAR_FUNCCODE_P), native(func), code(NULL){};
+	inline BKE_FunctionCode():BKE_VarObject(VAR_FUNCCODE_P), native(nullptr), code(nullptr){};
+	inline BKE_FunctionCode(BKE_NativeFunction func) :BKE_VarObject(VAR_FUNCCODE_P), native(func), code(nullptr){};
 	BKE_FunctionCode(BKE_bytree *code);
 	BKE_Variable run(BKE_Variable *self, BKE_VarArray *paramarray, BKE_VarClosure *_this) const;
 	//inline void release(){ ref--; if (ref <= 0)delete this; };
@@ -1370,7 +1375,7 @@ public:
 		initials = f.initials; 
 		name = f.name;
 		paramnames = f.paramnames;
-		if (_self)
+		if (!_self.isVoid())
 			self = _self; 
 		else 
 			self = f.self; 
@@ -1458,7 +1463,7 @@ public:
 	}
 	inline bool isNativeFunction()
 	{
-		return func->native != NULL;
+		return func->native != nullptr;
 	};
 	wstring functionSimpleInfo() const
 	{
@@ -1531,9 +1536,9 @@ private:
 public:
 
 	BKE_String name;
-	//BKE_VarProp(BKE_Variable *_self/* = NULL*/, BKE_NativeFunction get = NULL, BKE_NativeFunction set = NULL)
+	//BKE_VarProp(BKE_Variable *_self/* = nullptr*/, BKE_NativeFunction get = nullptr, BKE_NativeFunction set = nullptr)
 	//{
-	//	funcget = funcset = NULL;
+	//	funcget = funcset = nullptr;
 	//	if (get)
 	//		funcget = new BKE_FunctionCode(get);
 	//	if (set)
@@ -1541,17 +1546,17 @@ public:
 	//	vt = VAR_PROP;
 	//	self = _self;
 	//}
-	BKE_VarProp(BKE_VarClosure *clo = NULL, BKE_NativeFunction get = NULL, BKE_NativeFunction set = NULL)
+	BKE_VarProp(BKE_VarClosure *clo = nullptr, BKE_NativeFunction get = nullptr, BKE_NativeFunction set = nullptr)
 		:BKE_VarObject(VAR_PROP)
 	{
-		funcget = funcset = NULL;
+		funcget = funcset = nullptr;
 		if (get)
 			funcget = new BKE_FunctionCode(get);
 		if (set)
 			funcset = new BKE_FunctionCode(set);
 		closure = clo;
 	}
-	BKE_VarProp(const BKE_VarProp &p, BKE_VarClosure *c = NULL, const BKE_Variable &_self = BKE_Variable())
+	BKE_VarProp(const BKE_VarProp &p, BKE_VarClosure *c = nullptr, const BKE_Variable &_self = BKE_Variable())
 		:BKE_VarObject(VAR_PROP)
 	{
 		funcget = p.funcget;
@@ -1561,7 +1566,7 @@ public:
 			funcget->addRef();
 		if (funcset)
 			funcset->addRef();
-		if (_self)
+		if (!_self.isVoid())
 			self = _self;
 		else
 			self = p.self;
@@ -1610,7 +1615,7 @@ public:
 	{
 		if (funcget)
 		{
-			BKE_Variable v = funcget->run(&self, NULL, getClo());
+			BKE_Variable v = funcget->run(&self, nullptr, getClo());
 			if (v.getType() == VAR_PROP)
 			{
 				if (v.obj == this)
@@ -1666,13 +1671,13 @@ public:
 	BKE_VarClass *_class;
 	BKE_NativeClass() = delete;
 	virtual ~BKE_NativeClass(){}
-	inline BKE_NativeClass(const wchar_t *name) : _class(NULL){ BKE_UNUSED_PARAM(name); }
+	inline BKE_NativeClass(const wchar_t *name) : _class(nullptr){ BKE_UNUSED_PARAM(name); }
 	virtual void nativeInit(const wstring &name) = 0;
 	virtual BKE_Variable nativeSave(){ return BKE_Variable(); }
 	virtual void nativeLoad(const BKE_Variable &var){}
 	//*_class=self
 	virtual BKE_NativeClass* nativeCreateNew(const BKE_VarClass *self, const BKE_VarArray *paramarray) = 0;
-	virtual BKE_NativeClass* nativeCreateNULL(){ return NULL; };
+	virtual BKE_NativeClass* nativeCreateNULL(){ return nullptr; };
 };
 
 class Parser;
@@ -1750,24 +1755,26 @@ public:
 	//def class
 	inline BKE_VarClass(const BKE_String &name, BKE_VarClosure *context = BKE_VarClosure::global()) :BKE_VarClosure(context)
 	{
-		innerCreateInstance = NULL;
-		native = NULL;
-		defclass = NULL;
+		finalized = false;
+		delayrelease = false;
+		innerCreateInstance = nullptr;
+		native = nullptr;
+		defclass = nullptr;
 		classname = name;
 		vt = VAR_CLASS;
 		isdef = true;
 		context->extraref++;
 		//_this = new BKE_VarThis(this);
 		cannotcreate = false;
-		finalized = false;
-		delayrelease = false;
 	}
 	//single inherit class
 	inline BKE_VarClass(const BKE_String &name, BKE_VarClass *parent, BKE_VarClosure *context = BKE_VarClosure::global()) :BKE_VarClosure(context)
 	{
-		innerCreateInstance = NULL;
-		native = NULL;
-		defclass = NULL;
+		finalized = false;
+		delayrelease = false;
+		innerCreateInstance = nullptr;
+		native = nullptr;
+		defclass = nullptr;
 		classname = name;
 		vt = VAR_CLASS;
 		isdef = true;
@@ -1798,16 +1805,16 @@ public:
 			}
 		}
 		if (parent->native)
-			native = parent->native->nativeCreateNew(this, NULL);
-		finalized = false;
-		delayrelease = false;
+			native = parent->native->nativeCreateNew(this, nullptr);
 	}
 	//multi inherit class
 	inline BKE_VarClass(const BKE_String &name, const BKE_array<BKE_VarClass *> &parent, BKE_VarClosure *context = BKE_VarClosure::global()) :BKE_VarClosure(context)
 	{
-		innerCreateInstance = NULL;
-		native = NULL;
-		defclass = NULL;
+		finalized = false;
+		delayrelease = false;
+		innerCreateInstance = nullptr;
+		native = nullptr;
+		defclass = nullptr;
 		classname = name;
 		vt = VAR_CLASS;
 		context->extraref++;
@@ -1838,15 +1845,15 @@ public:
 			//for (auto &&it : parent[i]->staticvar)
 			//	staticvar[it.first] = it.second.clone();
 			if (parents[i]->native)
-				native = parent[i]->native->nativeCreateNew(this, NULL);
+				native = parent[i]->native->nativeCreateNew(this, nullptr);
 		}
-		finalized = false;
-		delayrelease = false;
 	}
 	//instance
-	inline BKE_VarClass(BKE_VarClass *parent, BKE_NativeClass *na = NULL) :BKE_VarClosure(parent)
+	inline BKE_VarClass(BKE_VarClass *parent, BKE_NativeClass *na = nullptr) :BKE_VarClosure(parent)
 	{
-		innerCreateInstance = NULL;
+		finalized = false;
+		delayrelease = false;
+		innerCreateInstance = nullptr;
 		classname = parent->classname;
 		vt = VAR_CLASS;
 		isdef = false;
@@ -1872,8 +1879,6 @@ public:
 			}
 			//not copy static varS
 		}
-		finalized = false;
-		delayrelease = false;
 	};
 	inline BKE_VarClass *cloneFrom(const BKE_VarClass *v)
 	{
@@ -1909,7 +1914,7 @@ public:
 				delayrelease = true;
 				auto clo = static_cast<BKE_VarFunction*>(var->obj)->closure;
 				static_cast<BKE_VarFunction*>(var->obj)->closure = this;
-				static_cast<BKE_VarFunction*>(var->obj)->run(NULL);
+				static_cast<BKE_VarFunction*>(var->obj)->run(nullptr);
 				static_cast<BKE_VarFunction*>(var->obj)->closure = clo;
 				delayrelease = false;
 			}
@@ -2103,9 +2108,9 @@ public:
 		{
 			throw Var_Except(L"该对象已经是实例");
 		}
-		if (innerCreateInstance != NULL)
+		if (innerCreateInstance != nullptr)
 		{
-			return (*innerCreateInstance)(NULL, paramarray, (BKE_VarClosure*)static_cast<const BKE_VarClosure*>(this));
+			return (*innerCreateInstance)(nullptr, paramarray, (BKE_VarClosure*)static_cast<const BKE_VarClosure*>(this));
 		}
 		if (cannotcreate)
 			throw Var_Except(L"不允许创建该类（" + classname.getConstStr() + L"）的实例");
@@ -2157,7 +2162,7 @@ inline BKE_VarClass *BKE_VarClosure::getThisClosure()
 	if (p)
 		return static_cast<BKE_VarClass*>(p);
 	else
-		return NULL;
+		return nullptr;
 }
 
 //functions in BKE_VarThis

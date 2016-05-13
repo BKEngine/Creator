@@ -280,7 +280,7 @@ private:
 
 public:
 	inline GlobalStringMap() :nullString(L""){ 
-		resizeTableSize(12);
+		resizeTableSize(1<<12);
 		nullString.hashed = true; nullString.hash = 0;
 	};
 

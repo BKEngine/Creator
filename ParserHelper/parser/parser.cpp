@@ -2,7 +2,7 @@
 #include <cstdarg>
 
 #define THROW(a,b) throw Var_Except(a,b VAR_EXCEPT_EXT);
-#define CHECKEMPTY(index) if(tree->childs[index]==NULL) {runpos=tree->Node.pos; throw Var_Except(L"未知错误，树不该为空" VAR_EXCEPT_EXT);}
+#define CHECKEMPTY(index) if(tree->childs[index]==nullptr) {runpos=tree->Node.pos; throw Var_Except(L"未知错误，树不该为空" VAR_EXCEPT_EXT);}
 #define GETLEFTVAR BKE_Variable &leftvar=innerRun(tree->childs[0], _this, tmpvars)
 #define GETRIGHTVAR BKE_Variable &rightvar=innerRun(tree->childs[1], _this, tmpvars)
 inline BKE_Variable &getVariableWithoutProp(BKE_Variable &orivar, BKE_array<BKE_Variable> &tmpvars)
@@ -27,9 +27,9 @@ inline BKE_Variable &getVariableWithoutProp(BKE_Variable &orivar, BKE_array<BKE_
 //#define ADDTOTEMP(a) tempvars.push_back(a);a->release();
 
 #define BUILD_TREE BKE_bytree* &tr=*tree;tr=new BKE_bytree(token);
-#define GET_TREE tr->addChild();expression(&tr->childs.back());if(tr->childs.back()==NULL){tr->childs.pop_back(); throw Var_Except(L"此处期待一个输入", static_cast<bkpulong>(curpos - exp) VAR_EXCEPT_EXT);}
+#define GET_TREE tr->addChild();expression(&tr->childs.back());if(tr->childs.back()==nullptr){tr->childs.pop_back(); throw Var_Except(L"此处期待一个输入", static_cast<bkpulong>(curpos - exp) VAR_EXCEPT_EXT);}
 #define GET_TREE_OR_NULL tr->addChild();expression(&tr->childs.back());
-#define GET_TREE2(lbp) tr->addChild();expression(&tr->childs.back(), lbp);if(tr->childs.back()==NULL)throw Var_Except(L"此处期待一个输入", static_cast<bkpulong>(curpos - exp) VAR_EXCEPT_EXT);
+#define GET_TREE2(lbp) tr->addChild();expression(&tr->childs.back(), lbp);if(tr->childs.back()==nullptr)throw Var_Except(L"此处期待一个输入", static_cast<bkpulong>(curpos - exp) VAR_EXCEPT_EXT);
 #define GET_TREE2_OR_NULL(lbp) tr->addChild();expression(&tr->childs.back(), lbp);
 
 #define CHECKPUSH (bc.codes[bc.pos-5]==BC_PUSH && *(bkplong*)(bc.codes+bc.pos-4)==bc.constsize-1)
@@ -179,7 +179,7 @@ BKE_Variable BKE_Variable::run(BKE_Variable &self)
 	auto *v = (BKE_VarFunction*)obj;
 	if (self)
 		v->setSelf(self);
-	return v->run(NULL);
+	return v->run(nullptr);
 }
 
 BKE_Variable readFromFile(const wstring &filename)
@@ -283,12 +283,12 @@ BKE_Variable BKE_VarFunction::run(const BKE_bytree *tr, BKE_VarClosure *_tr)
 
 BKE_FunctionCode::BKE_FunctionCode(BKE_bytree *code)
 	: BKE_VarObject(VAR_FUNCCODE_P)
-	, native(NULL)
+	, native(nullptr)
 {
 	if (code)
 		this->code = (BKE_bytree*)code->addRef();
 	else
-		this->code=NULL;
+		this->code=nullptr;
 };
 
 BKE_Variable BKE_FunctionCode::run(BKE_Variable *self, BKE_VarArray *paramarray, BKE_VarClosure *_this) const
@@ -296,7 +296,7 @@ BKE_Variable BKE_FunctionCode::run(BKE_Variable *self, BKE_VarArray *paramarray,
 	//get run closure
 	if(native)
 		return (*native)(self, paramarray, _this);		//native function uses _this, because they didn't need extra closure
-	BKE_VarClosure *tmp = NULL;
+	BKE_VarClosure *tmp = nullptr;
 	if (!_this)
 	{
 		tmp = new BKE_VarClosure(BKE_VarClosure::global());
@@ -334,7 +334,7 @@ Parser::Parser(bool init) : opmap(8)
 void Parser::init()
 {
 	//init random seed
-	srand((unsigned int)time(NULL));
+	srand((unsigned int)time(nullptr));
 
 	costTime = 0;
 	krmode = false;
@@ -387,12 +387,15 @@ void Parser::init()
 	opmap[L"static"] = OP_STATIC;
 	opmap[L"with"] = OP_WITH;
 	opmap[L"enum"] = OP_ENUM;
+	opmap[L"bitand"] = OP_BITAND;
+	opmap[L"bitor"] = OP_BITOR;
+	opmap[L"bitnot"] = OP_BITNOT;
 
 	//register all functions
 	for (int i = 0; i < OP_COUNT * 2; i++)
 	{
 		funclist[i] = &Parser::reportError;
-		runner[i] = NULL;
+		runner[i] = nullptr;
 	}
 	funclist[OP_END + OP_COUNT] = &Parser::nud_end;
 	funclist[OP_BRACKET + OP_COUNT] = &Parser::nud_bracket;
@@ -401,6 +404,7 @@ void Parser::init()
 	REG_NUD(one, preadd, OP_ADD);
 	REG_NUD(one, presub, OP_SUB);
 	REG_NUD(one, not, OP_NOT);
+	REG_NUD(one, bitnot, OP_BITNOT);
 	//REG_NUD(bracket, bracket, OP_BRACKET);
 	REG_NUD(array, array, OP_ARRAY);
 	REG_NUD(dic, dic, OP_DIC);
@@ -464,6 +468,8 @@ void Parser::init()
 	REG_LED(two, or, OP_OR);
 	REG_LED(two, fastand, OP_FASTAND);
 	REG_LED(two, fastor, OP_FASTOR);
+	REG_LED(two, bitand, OP_BITAND);
+	REG_LED(two, bitor, OP_BITOR);
 	REG_LED(set, set, OP_SET);
 	REG_LED(set, setadd, OP_SETADD);
 	REG_LED(set, setsub, OP_SETSUB);
@@ -488,7 +494,7 @@ void Parser::init()
 //	for (int i = 0; i<OP_COUNT; i++)
 //	{
 //		nudlist[i] = &Parser::reportError;
-//		nud[i] = NULL;
+//		nud[i] = nullptr;
 //	}
 //	nudlist[OP_BRACKET] = &Parser::nud_bracket;
 //	nudlist[OP_MUL]=&Parser::nud_label;
@@ -530,7 +536,7 @@ void Parser::init()
 //	for(int i=0;i<OP_COUNT;i++)
 //	{
 //		ledlist[i]=&Parser::reportError;
-//		led[i]=NULL;
+//		led[i]=nullptr;
 //	}
 //	ledlist[OP_END]=&Parser::led_none;
 //	ledlist[OP_LITERAL]=&Parser::led_literal;
@@ -619,6 +625,8 @@ void Parser::init()
 	PRE(PROPSET);
 	PRE(ENUM);
 	INC;
+	LBP(IF);
+	INC;
 	LBP(SET);
 	LBP(SETADD);
 	LBP(SETSUB);
@@ -628,7 +636,6 @@ void Parser::init()
 	LBP(SETPOW);
 	LBP(SETSET);
 	INC;
-	LBP(IF);
 	LBP(INSTANCE);
 	LBP(INCONTEXTOF);
 	INC;
@@ -638,6 +645,8 @@ void Parser::init()
 	LBP(OR);
 	LBP(FASTAND);
 	LBP(FASTOR);
+	LBP(BITAND);
+	LBP(BITOR);
 	INC;
 	LBP(EQUAL);
 	LBP(NEQUAL);
@@ -659,6 +668,7 @@ void Parser::init()
 	LBP(POW);
 	INC;
 	PRE(NOT);
+	PRE(BITNOT);
 	INC;
 	PRE(ADD);
 	PRE(SUB);
@@ -1117,7 +1127,7 @@ void Parser::expression(BKE_bytree** tree, int rbp)
 BKE_Variable& Parser::getVar(const wchar_t *exp, BKE_VarClosure *_this)
 {
 	init2(exp, _this);
-	BKE_bytree *tr=NULL;
+	BKE_bytree *tr=nullptr;
 	try 
 	{
 		readToken();
@@ -1166,8 +1176,8 @@ BKE_Variable& Parser::getVar(const wchar_t *exp, BKE_VarClosure *_this)
 
 BKE_bytree *Parser::parse(const wstring &exp, bkplong startpos, bkplong startline)
 {
-	init2(exp, NULL);
-	BKE_bytree *tr=NULL;
+	init2(exp, nullptr);
+	BKE_bytree *tr=nullptr;
 	curpos += startpos;
 #if PARSER_DEBUG
 	if (startline > 0)
@@ -1177,12 +1187,12 @@ BKE_bytree *Parser::parse(const wstring &exp, bkplong startpos, bkplong startlin
 	{
 		readToken();
 		if (next.opcode == OP_END)
-			return NULL;
+			return nullptr;
 		expression(&tr);
 		//if (tr && tr->Node.opcode == OP_CONSTVAR + OP_COUNT)
 		//{
 		//	tr->release();
-		//	tr = NULL;
+		//	tr = nullptr;
 		//};
 		if(next.opcode != OP_END)
 		{
@@ -1209,7 +1219,7 @@ BKE_bytree *Parser::parse(const wstring &exp, bkplong startpos, bkplong startlin
 		if (tr && tr->Node.opcode == OP_RESERVE + OP_COUNT && tr->childs.size() == 1)
 		{
 			auto tr2=tr->childs.back();
-			tr->childs.back()=NULL;
+			tr->childs.back()=nullptr;
 			tr->release();
 			return tr2;
 		}
@@ -1247,7 +1257,7 @@ BKE_Variable Parser::evalMultiLineStr(const wstring &exp, BKE_VarClosure *_this,
 		return none;
 	init2(exp, _this);
 	errorstack.clear();
-	BKE_bytree *tr = NULL;
+	BKE_bytree *tr = nullptr;
 	BKE_Variable res;
 	try
 	{
@@ -1307,7 +1317,7 @@ BKE_Variable Parser::eval(const wchar_t *exp, BKE_VarClosure *_this, int line)
 	double t1 = getutime();
 #endif
 	init2(exp, _this);
-	BKE_bytree *tr=NULL;
+	BKE_bytree *tr=nullptr;
 	BKE_Variable res;
 	try
 	{
@@ -1404,7 +1414,7 @@ void Parser::nud_one(BKE_bytree** tree)
 			THROW(L"等号左边必须是变量", token.pos);
 		}
 	}
-	else if (tr->childs[0]->Node.opcode == OP_CONSTVAR + OP_COUNT && runner[tr->Node.opcode] != NULL)
+	else if (tr->childs[0]->Node.opcode == OP_CONSTVAR + OP_COUNT && runner[tr->Node.opcode] != nullptr)
 	{
 		BKE_array<BKE_Variable> tmpvars;
 		tr->Node.var.forceSet(innerRun(tr, this->p, tmpvars));
@@ -1477,14 +1487,14 @@ void Parser::nud_if(BKE_bytree** tree)
 		if((bool)tr->childs[0]->Node.var)
 		{
 			BKE_bytree *res=tr->childs[1];
-			tr->childs[1]=NULL;
+			tr->childs[1]=nullptr;
 			tr->release();
 			(*tree)=res;
 		}
 		else
 		{
 			BKE_bytree *res=tr->childs[2];
-			tr->childs[2]=NULL;
+			tr->childs[2]=nullptr;
 			tr->release();
 			(*tree)=res;
 		}
@@ -1527,7 +1537,7 @@ void Parser::nud_try(BKE_bytree** tree)
 	{
 		//常量不会抛出异常
 		tr->release();
-		tr = NULL;
+		tr = nullptr;
 	}
 }
 
@@ -1610,7 +1620,7 @@ void Parser::nud_dic(BKE_bytree** tree)
 		if (next.opcode != OP_COMMA)
 		{
 			expression(&tr->childs.back(), pre[OP_DIC] - 1);
-			if (tr->childs.back() == NULL)
+			if (tr->childs.back() == nullptr)
 				continue;
 			if (next.opcode == OP_MAOHAO)
 			{
@@ -1712,15 +1722,15 @@ void Parser::nud_block(BKE_bytree** tree)
 		THROW(getPos(p) + L"{需要}结尾。", next.pos);
 	}
 	tr->Node.pos2 = next.pos;
-	//override optimization introduce many NULL error
+	//override optimization introduce many nullptr error
 
 	//if(cancal)
 	//{
-	//	if(tr->childs.empty() || tr->childs.back()==NULL)
+	//	if(tr->childs.empty() || tr->childs.back()==nullptr)
 	//	{
 	//		//end with ;
 	//		tr->release();
-	//		tr=NULL;
+	//		tr=nullptr;
 	//		readToken();
 	//		forcequit=true;
 	//		return;
@@ -1861,6 +1871,12 @@ void Parser::nud_for(BKE_bytree** tree)
 void Parser::nud_foreach(BKE_bytree** tree)
 {
 	BUILD_TREE;
+	bool bracket = false;
+	if (next.opcode == OP_BRACKET)
+	{
+		bracket = true;
+		readToken();
+	}
 	if (next.opcode == OP_LITERAL)
 	{
 		next.opcode += OP_COUNT;
@@ -1885,7 +1901,7 @@ void Parser::nud_foreach(BKE_bytree** tree)
 	}
 	else
 	{
-		if (tr->childs[0] == NULL)
+		if (tr->childs[0] == nullptr)
 		{
 			THROW(L"此处需要变量或逗号", next.pos);
 		}
@@ -1900,6 +1916,13 @@ void Parser::nud_foreach(BKE_bytree** tree)
 	}
 	readToken();
 	GET_TREE;
+	if (bracket)
+	{
+		if (next.opcode != OP_BRACKET2)
+		{
+			THROW(L"语法错误，需要)", next.pos);
+		};
+	}
 	if (next.opcode != OP_BLOCK)
 	{
 		THROW(L"语法错误，需要{", next.pos);
@@ -1943,7 +1966,7 @@ void Parser::nud_while(BKE_bytree** tree)
 	if(tr->childs[0]->Node.opcode != OP_CONSTVAR + OP_COUNT && (bool)tr->childs[0]->Node.var==false)
 	{
 		tr->release();
-		*tree=NULL;
+		*tree=nullptr;
 	}
 	forcequit = true;
 }
@@ -1998,7 +2021,7 @@ void Parser::nud_var(BKE_bytree** tree)
 		{
 			readToken();
 			expression(&tr->childs.back());
-			if (tr->childs.back() == NULL)
+			if (tr->childs.back() == nullptr)
 			{
 				THROW(L"=后不能接空语句", next.pos);
 			}
@@ -2107,7 +2130,7 @@ void Parser::nud_function(BKE_bytree** tree)
 			if (next.opcode == OP_SET)
 			{
 				readToken();
-				BKE_bytree *_tr = NULL;
+				BKE_bytree *_tr = nullptr;
 				try
 				{
 					expression(&_tr);
@@ -2139,7 +2162,7 @@ void Parser::nud_function(BKE_bytree** tree)
 	{
 		THROW(L"语法错误，需要{", next.pos);
 	}
-	BKE_bytree *tr2 = NULL;
+	BKE_bytree *tr2 = nullptr;
 #if PARSER_DEBUG
 	bkplong startpos = next.pos;
 #endif
@@ -2410,14 +2433,14 @@ void Parser::led_choose(BKE_bytree** tree)
 		if (cond)
 		{
 			res = tr->childs[1];
-			tr->childs[1] = NULL;
+			tr->childs[1] = nullptr;
 			tr->release();
 			(*tree) = res;
 		}
 		else
 		{
 			res = tr->childs[2];
-			tr->childs[2] = NULL;
+			tr->childs[2] = nullptr;
 			tr->release();
 			(*tree) = res;
 		}
@@ -2444,7 +2467,7 @@ void Parser::led_two(BKE_bytree** tree)
 	(*tree)=(*tree)->addParent(token);
 	BKE_bytree* &tr=*tree;
 	GET_TREE2(lbp[op]);
-	if(tr->childs[1]->Node.opcode == OP_CONSTVAR + OP_COUNT && tr->childs[0]->Node.opcode == OP_CONSTVAR + OP_COUNT && runner[op]!=NULL)
+	if(tr->childs[1]->Node.opcode == OP_CONSTVAR + OP_COUNT && tr->childs[0]->Node.opcode == OP_CONSTVAR + OP_COUNT && runner[op]!=nullptr)
 	{
 		BKE_array<BKE_Variable> tmpvars;
 		tr->Node.var.forceSet(innerRun(tr, this->p, tmpvars));
@@ -2465,7 +2488,7 @@ void Parser::led_mul(BKE_bytree** tree)
 			next.opcode = it->second;
 	}
 	GET_TREE2(lbp[op]);
-	if (tr->childs[1]->Node.opcode == OP_CONSTVAR + OP_COUNT && tr->childs[0]->Node.opcode == OP_CONSTVAR + OP_COUNT && runner[op] != NULL)
+	if (tr->childs[1]->Node.opcode == OP_CONSTVAR + OP_COUNT && tr->childs[0]->Node.opcode == OP_CONSTVAR + OP_COUNT && runner[op] != nullptr)
 	{
 		BKE_array<BKE_Variable> tmpvars;
 		tr->Node.var.forceSet(innerRun(tr, this->p, tmpvars));
@@ -2480,7 +2503,7 @@ void Parser::led_pow(BKE_bytree** tree)
 	(*tree)=(*tree)->addParent(token);
 	BKE_bytree* &tr=*tree;
 	GET_TREE2(lbp[op]-1);
-	if(tr->childs[1]->Node.opcode == OP_CONSTVAR + OP_COUNT && tr->childs[0]->Node.opcode == OP_CONSTVAR + OP_COUNT && led[op]!=NULL)
+	if(tr->childs[1]->Node.opcode == OP_CONSTVAR + OP_COUNT && tr->childs[0]->Node.opcode == OP_CONSTVAR + OP_COUNT && led[op]!=nullptr)
 	{
 		BKE_array<BKE_Variable> tmpvars;
 		tr->Node.var.forceSet(innerRun(tr, this->p, tmpvars));
@@ -2537,7 +2560,7 @@ void Parser::led_ele(BKE_bytree** tree)
 	{
 		THROW(L"中括号不匹配", next.pos);
 	}
-	if (tr->childs[1] == NULL && tr->childs.size() == 2)
+	if (tr->childs[1] == nullptr && tr->childs.size() == 2)
 	{
 		THROW(L"中括号里不能为空", next.pos);
 	}
@@ -2619,7 +2642,7 @@ NUD_FUNC(dic)
 	RECORDPOS;
 	BKE_VarDic *vardic = new BKE_VarDic();
 	int i = 0;
-	while(tree->childs[i]!=NULL)
+	while(tree->childs[i]!=nullptr)
 	{
 		vardic->setMember(innerRun(tree->childs[i], _this, tmpvars), run(tree->childs[i+1], _this));
 		i+=2;
@@ -2697,7 +2720,7 @@ NUD_FUNC(forin)
 {
 	BKE_Number start = innerRun(tree->childs[1], _this, tmpvars).asBKENum();
 	BKE_Number stop = innerRun(tree->childs[2], _this, tmpvars).asBKENum();
-	BKE_Number step = tree->childs[3] == NULL ? BKE_Number(start > stop ? -1 : 1) : innerRun(tree->childs[3], _this, tmpvars).asBKENum();
+	BKE_Number step = tree->childs[3] == nullptr ? BKE_Number(start > stop ? -1 : 1) : innerRun(tree->childs[3], _this, tmpvars).asBKENum();
 	if (step.zero())
 		throw Var_Except(L"for的步长不能为0。");
 	BKE_VarClosure *tmp = new BKE_VarClosure(_this);
@@ -2746,7 +2769,7 @@ NUD_FUNC(foreach)
 	//the variable after "foreach" is seen as a local variable
 	BKE_VarObjectAutoReleaser ar(tmp);
 	//tmp->release();
-	BKE_Variable clo = run(tree->childs[2], _this).clone();
+	BKE_Variable clo = run(tree->childs[2], _this);
 	if (!tree->childs[3])
 		RETURNNULL;
 	tree->childs[3]->Node.opcode = OP_RESERVE + OP_COUNT;
@@ -2754,13 +2777,45 @@ NUD_FUNC(foreach)
 	{
 		case VAR_ARRAY:
 		{
-			auto s = ((BKE_VarArray*)clo.obj)->getCount();
-			for(int i=0;i<s;i++)
+			for (int i = 0; i < ((BKE_VarArray*)clo.obj)->getCount(); i++)
 			{
 				if (!n1.isVoid())
 					tmp->forceSetMember(n1, i);
 				if (!n2.isVoid())
 					tmp->forceSetMember(n2, ((BKE_VarArray*)clo.obj)->vararray[i]);
+				try
+				{
+					BKE_array<BKE_Variable> _tmpvars;
+					innerRun(tree->childs[3], tmp, _tmpvars);
+				}
+				catch (Special_Except &e)
+				{
+					if (e.type == Special_Except::BREAK)
+						break;
+					else if (e.type == Special_Except::CONTINUE)
+						continue;
+					else
+						throw e;
+				}
+			}
+		}
+		break;
+		case VAR_DIC:
+		{
+			auto arr = new BKE_VarArray();
+			auto &&varmap = ((BKE_VarDic*)clo.obj)->varmap;
+			for (auto &it : varmap)
+			{
+				arr->pushMember(it.first);
+			}
+			auto s = arr->getCount();
+			BKE_Variable tmpvar(arr);
+			for(int i=0;i<s;i++)
+			{
+				if (!n1.isVoid())
+					tmp->forceSetMember(n1, arr->quickGetMember(i));
+				if (!n2.isVoid())
+					tmp->forceSetMember(n2, varmap[arr->quickGetMember(i)]);
 				try
 				{
 					BKE_array<BKE_Variable> _tmpvars;
@@ -2778,25 +2833,26 @@ NUD_FUNC(foreach)
 			}
 		}
 		break;
-		case VAR_DIC:
+		case VAR_STR:
 		{
-			auto it=((BKE_VarDic*)clo.obj)->varmap.begin();
-			for(;it!=((BKE_VarDic*)clo.obj)->varmap.end();it++)
+			auto str = clo.forceAsString();
+			int len = str.length();
+			for (int i = 0;i < len;i++)
 			{
 				if (!n1.isVoid())
-					tmp->forceSetMember(n1, it->first);
+					tmp->forceSetMember(n1, i);
 				if (!n2.isVoid())
-					tmp->forceSetMember(n2, it->second);
+					tmp->forceSetMember(n2, str[i]);
 				try
 				{
 					BKE_array<BKE_Variable> _tmpvars;
 					innerRun(tree->childs[3], tmp, _tmpvars);
 				}
-				catch(Special_Except &e)
+				catch (Special_Except &e)
 				{
-					if(e.type==Special_Except::BREAK)
+					if (e.type == Special_Except::BREAK)
 						break;
-					else if(e.type==Special_Except::CONTINUE)
+					else if (e.type == Special_Except::CONTINUE)
 						continue;
 					else
 						throw e;
@@ -2904,7 +2960,7 @@ NUD_FUNC(propget)
 	MUSTBEVAR(var);
 	if (var.getType() != VAR_PROP)
 	{
-		var = new BKE_VarProp(NULL);
+		var = new BKE_VarProp(nullptr);
 		static_cast<BKE_VarProp*>(var.obj)->name = tree->childs[0]->Node.var.asBKEStr();
 	}
 	static_cast<BKE_VarProp*>(var.obj)->addPropGet(tree->childs[1]);
@@ -2918,7 +2974,7 @@ NUD_FUNC(propset)
 	MUSTBEVAR(var);
 	if (var.getType() != VAR_PROP)
 	{
-		var = new BKE_VarProp(NULL);
+		var = new BKE_VarProp(nullptr);
 		static_cast<BKE_VarProp*>(var.obj)->name = tree->childs[0]->Node.var.asBKEStr();
 	}
 	static_cast<BKE_VarProp*>(var.obj)->addPropSet(tree->childs[1]->Node.var.asBKEStr(), tree->childs[2]);
@@ -3288,6 +3344,12 @@ NUD_FUNC(typeof)
 NUD_FUNC(const)
 {
 	return innerRun(tree->childs[0], _this, tmpvars);
+}
+
+NUD_FUNC(bitnot)
+{
+	GETLEFTVAR;
+	QUICKRETURNCONST(!leftvar.asInteger());
 }
 
 LED_FUNC(add)
@@ -3692,15 +3754,15 @@ LED_FUNC(ele)
 	else
 	{
 		bkplong start, stop, step = 1;
-		if (tree->childs[1] != NULL)
+		if (tree->childs[1] != nullptr)
 			start = innerRun(tree->childs[1], _this, tmpvars);
-		if (tree->childs[2] != NULL)
+		if (tree->childs[2] != nullptr)
 			stop = innerRun(tree->childs[2], _this, tmpvars);
-		if (tree->childs.size() > 3 && tree->childs[3] != NULL)
+		if (tree->childs.size() > 3 && tree->childs[3] != nullptr)
 			step = innerRun(tree->childs[3], _this, tmpvars);
 		if (step == 0)
 			throw Var_Except(L"步长不能为0");
-		QUICKRETURNCONST(leftvar.getMid(tree->childs[1] ? &start : NULL, tree->childs[2] ? &stop : NULL, step));
+		QUICKRETURNCONST(leftvar.getMid(tree->childs[1] ? &start : nullptr, tree->childs[2] ? &stop : nullptr, step));
 	}
 }
 
@@ -3734,6 +3796,20 @@ LED_FUNC(if)
 	RETURNNULL;
 }
 
+LED_FUNC(bitand)
+{
+	GETLEFTVAR;
+	GETRIGHTVAR;
+	QUICKRETURNCONST(leftvar.asInteger() & rightvar.asInteger());
+}
+
+LED_FUNC(bitor)
+{
+	GETLEFTVAR;
+	GETRIGHTVAR;
+	QUICKRETURNCONST(leftvar.asInteger() | rightvar.asInteger());
+}
+
 void Parser::unParse(BKE_bytree *tree, wstring &res)
 {
 	if (!tree)
@@ -3749,7 +3825,7 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 	for (int i = 0; i<tree->childs.size(); i++)
 		if (tree->childs[i])
 			tree->childs[i]->parent = tree;
-	if (tree->parent != NULL)
+	if (tree->parent != nullptr)
 	{
 		if (tree->parent->Node.opcode >= OP_COUNT)
 			bp = pre[tree->parent->Node.opcode - OP_COUNT];
@@ -3761,7 +3837,7 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 	bool addbracket = false;
 	if (tree->Node.opcode<OP_COUNT && lbp[tree->Node.opcode]<bp)
 		addbracket = true;
-	if (tree->Node.opcode == OP_POW && tree->parent != NULL && tree->parent->Node.opcode == OP_POW)
+	if (tree->Node.opcode == OP_POW && tree->parent != nullptr && tree->parent->Node.opcode == OP_POW)
 		addbracket = true;
 	//if(tree->Node.opcode==OP_BRACKET)
 	//	addbracket=false;
@@ -3781,12 +3857,12 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 		res += L"if(";
 		unParse(tree->childs[0], res);
 		res += L')';
-		if (tree->childs[1] != NULL)
+		if (tree->childs[1] != nullptr)
 		{
 			unParse(tree->childs[1], res);
 		}
 		res += L';';
-		if (tree->childs[2] != NULL)
+		if (tree->childs[2] != nullptr)
 		{
 			res += L"else ";
 			unParse(tree->childs[2], res);
@@ -3808,7 +3884,7 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 		unParse(tree->childs[1], res);
 		res += L',';
 		unParse(tree->childs[2], res);
-		if (tree->childs[3] != NULL)
+		if (tree->childs[3] != nullptr)
 		{
 			res += L',';
 			unParse(tree->childs[3], res);
@@ -3829,9 +3905,9 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 		break;
 	case OP_FOREACH + OP_COUNT:
 		res += L"foreach ";
-		if (tree->childs[0]!=NULL)
+		if (tree->childs[0]!=nullptr)
 			unParse(tree->childs[0], res);
-		if (tree->childs[1] != NULL)
+		if (tree->childs[1] != nullptr)
 		{
 			res += L',';
 			unParse(tree->childs[1], res);
@@ -3970,6 +4046,14 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 		res += L"!";
 		unParse(tree->childs[0], res);
 		break;
+	case OP_BITAND:
+		MAKE_TWO(" bitand ");
+	case OP_BITOR:
+		MAKE_TWO(" bitor ");
+	case OP_BITNOT + OP_COUNT:
+		res += L"bitnot ";
+		unParse(tree->childs[0], res);
+		break;
 	case OP_SET:
 		MAKE_TWO("=");
 	case OP_SETADD:
@@ -4060,7 +4144,7 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 			res += L"=>";
 			unParse(tree->childs[1], res);
 		}
-		for (int i = 2; tree->childs[i] != NULL; i += 2)
+		for (int i = 2; tree->childs[i] != nullptr; i += 2)
 		{
 			res += L",";
 			unParse(tree->childs[i], res);
@@ -4094,7 +4178,7 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 		break;
 	case OP_RETURN + OP_COUNT:
 		res += L"return";
-		if (tree->childs[0] != NULL)
+		if (tree->childs[0] != nullptr)
 			res += L' ';
 		unParse(tree->childs[0], res);
 		res += L';';
@@ -4106,7 +4190,7 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 			if (i>0)
 				res += L",";
 			res += tree->childs[i]->Node.var.asBKEStr().getConstStr();
-			if (tree->childs[i + 1] != NULL)
+			if (tree->childs[i + 1] != nullptr)
 			{
 				res += L"=";
 				unParse(tree->childs[i + 1], res);
@@ -4146,24 +4230,29 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 		res += L"global";
 		break;
 	case OP_TOINT + OP_COUNT:
-		res += L"int ";
+		res += L"int(";
 		unParse(tree->childs[0], res);
+		res += ')';
 		break;
 	case OP_TOSTRING + OP_COUNT:
-		res += L"string ";
+		res += L"string(";
 		unParse(tree->childs[0], res);
+		res += ')';
 		break;
 	case OP_TONUMBER + OP_COUNT:
-		res += L"number ";
+		res += L"number(";
 		unParse(tree->childs[0], res);
+		res += ')';
 		break;
 	case OP_CONST + OP_COUNT:
-		res += L"const ";
+		res += L"const(";
 		unParse(tree->childs[0], res);
+		res += ')';
 		break;
 	case OP_TYPE + OP_COUNT:
-		res += L"typeof ";
+		res += L"typeof(";
 		unParse(tree->childs[0], res);
+		res += ')';
 		break;
 	case OP_INSTANCE:
 		unParse(tree->childs[0], res); res += L" instanceof "; unParse(tree->childs[1], res); break;

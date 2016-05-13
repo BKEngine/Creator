@@ -16,3 +16,9 @@ typedef uint64_t bkpulonglong;
 #define BKPULONG_MAX ((0x7fffffffUL) * 2UL + 1UL)
 #define BKPLONG_MAX 0x7fffffffL
 #define BKPLONG_MIN (-BKPLONG_MAX-1L)
+
+//to avoid ambiguity of NULL
+#ifdef NULL
+#undef NULL
+#define NULL nullptr
+#endif

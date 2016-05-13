@@ -4,6 +4,7 @@
 #include <math.h>
 #include <random>
 #include <functional>
+#include <algorithm>
 #if BKE_CREATOR
 #include "bkutf8.h"
 #else
@@ -233,23 +234,34 @@ namespace ParserUtils
 
 	NATIVE_FUNC(char)
 	{
-		if(!PARAMEXIST(0))
+		if (!PARAMEXIST(0))
 			return 0;
-		const wstring &ss = PARAM(0).asBKEStr().getConstStr();
-		if(ss.empty())
+		if (PARAM(0).getType() == VAR_NUM)
+		{
+			StringVal ss;
+			uint32_t num = (uint32_t)PARAM(0).asInteger();
+			if (num < 0x10000)
+				ss.push_back((char16_t)num);
+			else
+			{
+				num -= 0x10000;
+				int b = num & 0x3FF;
+				int a = num >> 10;
+				ss.push_back((char16_t)(a + 0xD800));
+				ss.push_back((char16_t)(b + 0xDC00));
+			}
+			return ss;
+		}
+		auto &ss = PARAM(0).asBKEStr().getConstStr();
+		if (ss.empty())
 			return 0;
-#if WCHAR_MAX==0xFFFFFFFF
-		wchar_t s = ss[0];
-		return (bkplong)s;
-#else
-		bkplong a = ss[0];
+		int32_t a = ss[0];
 		if (a >= 0xD800 && a <= 0xDFFF)
 		{
-			bkplong b = ss[1];
+			int32_t b = ss[1];
 			return ((a - 0xD800) << 10) + (b - 0xDC00) + 0x10000;
 		}
 		return a;
-#endif
 	}
 
 	NATIVE_FUNC(hash)
@@ -438,7 +450,7 @@ namespace ParserUtils
 			throw Var_Except(L"传入的第二个参数必须是字典。");
 		}
 		//TODO:有些系统类需要传入参数数组而不是NULL
-		auto cla = static_cast<BKE_VarClass*>(var.obj)->createInstance(NULL, true);
+		auto cla = static_cast<BKE_VarClass*>(var.obj)->createInstance(nullptr, true);
 		auto obj = static_cast<BKE_VarClass*>(cla.obj);
 		obj->varmap.Union(static_cast<BKE_VarDic*>(PARAM(1).obj)->varmap, true);
 		if (obj->native)
@@ -586,7 +598,7 @@ namespace ParserUtils
 				if(!std::regex_search(tmp, m, r->reg))
 					return -1;
 				else
-					return (bkplong)m.position();
+					return (bkplong)m.position() + start;
 			}
 			throw Var_Except(L"参数1必须是Regex的子类或字符串");
 		}
@@ -600,9 +612,7 @@ namespace ParserUtils
 	NATIVE_FUNC(lastIndexOf)
 	{
 		MINIMUMPARAMNUM(1);
-		bkplong endpos = (bkplong)PARAM(1);
-		if (endpos < 0)
-			return -1;
+		bkplong endpos = (bkplong)PARAMDEFAULT(1, -1);
 #ifdef HAS_REGEX
 		if (PARAM(0).getType() == VAR_CLASS)
 		{
@@ -927,6 +937,27 @@ namespace ParserUtils
 		return v[((bkpulong)bkpRandomInt()) % v.size()];
 	}
 
+	NATIVE_FUNC(take)
+	{
+		auto &&v = ((BKE_VarArray *)self->obj)->vararray;
+		if (v.size() == 0)
+			RETURNDEFAULT;
+		bkplong index = PARAM(0);
+		if (index >= v.size())
+		{
+			RETURNDEFAULT;
+		}
+		return v.take(index);
+	}
+
+	NATIVE_FUNC(takeRandom)
+	{
+		auto &&v = ((BKE_VarArray *)self->obj)->vararray;
+		if (v.size() == 0)
+			RETURNDEFAULT;
+		return v.take(((bkpulong)bkpRandomInt()) % v.size());
+	}
+
 //quicksort
 	//when a<b, CompareFunc(a,b) return true
 	template<class T, class CompareFunc>
@@ -1007,13 +1038,24 @@ namespace ParserUtils
 	//default mode is +
 	NATIVE_FUNC(sort)
 	{
+		typedef BKE_array<BKE_Variable>::raw_iterator raw_t;
 		auto &&arr = ((BKE_VarArray *)self->obj)->vararray;
 		bkplong s = (bkplong)arr.size();
 		BKE_Variable ss = L"+";
 		if (PARAMEXIST(0))
 			ss = PARAM(0);
 		if (ss.getType() == VAR_FUNC)
-			quickSortByFun(arr, 0, s - 1, (BKE_VarFunction*)PARAM(0).obj);
+		{
+			auto param = new BKE_VarArray();
+			auto func = static_cast<BKE_VarFunction*>(ss.obj);
+			sort(arr.addrs.begin(), arr.addrs.end(), [param, func](const raw_t &a, const raw_t &b)
+			{
+				param->clear();
+				param->pushMember(*a);
+				param->pushMember(*b);
+				return (bool)func->run(param);
+			});
+		}
 		else if (ss.getType() == VAR_STR)
 		{
 			wchar_t mode = L'+';
@@ -1022,22 +1064,40 @@ namespace ParserUtils
 			switch (mode)
 			{
 			case '-':
-				quickSort(arr, 0, s - 1, [](const BKE_Variable &a, const BKE_Variable &b){return a > b; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [](const raw_t &a, const raw_t &b)
+				{
+					return *a > *b;
+				});
 				break;
 			case '0':
-				quickSort(arr, 0, s - 1, [](const BKE_Variable &a, const BKE_Variable &b){return (double)a < (double)b; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [](const raw_t &a, const raw_t &b)
+				{
+					return (double)*a < (double)*b;
+				});
 				break;
 			case '9':
-				quickSort(arr, 0, s - 1, [](const BKE_Variable &a, const BKE_Variable &b){return (double)a >(double)b; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [](const raw_t &a, const raw_t &b)
+				{
+					return (double)*a >(double)*b;
+				});
 				break;
 			case 'a':
-				quickSort(arr, 0, s - 1, [](const BKE_Variable &a, const BKE_Variable &b){return (wstring)a < (wstring)b; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [](const raw_t &a, const raw_t &b)
+				{
+					return (wstring)*a < (wstring)*b;
+				});
 				break;
 			case 'z':
-				quickSort(arr, 0, s - 1, [](const BKE_Variable &a, const BKE_Variable &b){return (wstring)a >(wstring)b; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [](const raw_t &a, const raw_t &b)
+				{
+					return (wstring)*a >(wstring)*b;
+				});
 				break;
 			default:
-				quickSort(arr, 0, s - 1, [](const BKE_Variable &a, const BKE_Variable &b){return a < b; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [](const raw_t &a, const raw_t &b)
+				{
+					return *a < *b;
+				});
 				break;
 			}
 		}
@@ -1156,17 +1216,18 @@ namespace ParserUtils
 		BKE_Variable ss = L"+";
 		if (PARAMEXIST(0))
 			ss = PARAM(0);
+		typedef BKE_array<BKE_Variable>::raw_iterator raw_t;
 		if (ss.getType() == VAR_FUNC)
 		{
-			BKE_Variable tmp = BKE_Variable::array();
-			quickSort(v->vararray, 0, varmap.getCount() - 1, [&](const BKE_Variable &a, const BKE_Variable &b)
-				{
-					auto arr = (BKE_VarArray*)tmp.obj;
-					arr->clear();
-					arr->pushMember(varmap[a.str]);
-					arr->pushMember(varmap[b.str]);
-					return (bool)((BKE_VarFunction*)PARAM(0).obj)->run(arr);
-				}
+			auto param = new BKE_VarArray();
+			auto func = static_cast<BKE_VarFunction*>(ss.obj);
+			sort(v->vararray.addrs.begin(), v->vararray.addrs.end(), [param, &varmap, func](const raw_t &a, const raw_t &b)
+			{
+				param->clear();
+				param->pushMember(varmap[(*a).str]);
+				param->pushMember(varmap[(*b).str]);
+				return (bool)func->run(param);
+			}
 			);
 		}
 		else if (ss.getType() == VAR_STR)
@@ -1174,25 +1235,44 @@ namespace ParserUtils
 			wchar_t mode = L'+';
 			if (paramarray && PARAM(0).asBKEStr().getConstStr().size() > 0)
 				mode = PARAM(0).asBKEStr().getConstStr()[0];
+			auto &arr = v->vararray;
 			switch (mode)
 			{
 			case '-':
-				quickSort(v->vararray, 0, varmap.getCount() - 1, [&](const BKE_Variable &a, const BKE_Variable &b){return varmap[a.str] > varmap[b.str]; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [&varmap](const raw_t &a, const raw_t &b)
+				{
+					return varmap[(*a).str] > varmap[(*b).str];
+				});
 				break;
 			case '0':
-				quickSort(v->vararray, 0, varmap.getCount() - 1, [&](const BKE_Variable &a, const BKE_Variable &b){return (double)varmap[a.str] < (double)varmap[b.str]; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [&varmap](const raw_t &a, const raw_t &b)
+				{
+					return (double)varmap[(*a).str] < (double)varmap[(*b).str];
+				});
 				break;
 			case '9':
-				quickSort(v->vararray, 0, varmap.getCount() - 1, [&](const BKE_Variable &a, const BKE_Variable &b){return (double)varmap[a.str] > (double)varmap[b.str]; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [&varmap](const raw_t &a, const raw_t &b)
+				{
+					return (double)varmap[(*a).str] >(double)varmap[(*b).str];
+				});
 				break;
 			case 'a':
-				quickSort(v->vararray, 0, varmap.getCount() - 1, [&](const BKE_Variable &a, const BKE_Variable &b){return (wstring)varmap[a.str] < (wstring)varmap[b.str]; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [&varmap](const raw_t &a, const raw_t &b)
+				{
+					return (wstring)varmap[(*a).str] < (wstring)varmap[(*b).str];
+				});
 				break;
 			case 'z':
-				quickSort(v->vararray, 0, varmap.getCount() - 1, [&](const BKE_Variable &a, const BKE_Variable &b){return (wstring)varmap[a.str] > (wstring)varmap[b.str]; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [&varmap](const raw_t &a, const raw_t &b)
+				{
+					return (wstring)varmap[(*a).str] >(wstring)varmap[(*b).str];
+				});
 				break;
 			default:
-				quickSort(v->vararray, 0, varmap.getCount() - 1, [&](const BKE_Variable &a, const BKE_Variable &b){return varmap[a.str] < varmap[b.str]; });
+				sort(arr.addrs.begin(), arr.addrs.end(), [&varmap](const raw_t &a, const raw_t &b)
+				{
+					return varmap[(*a).str] < varmap[(*b).str];
+				});
 				break;
 			}
 		}
@@ -1730,7 +1810,7 @@ namespace ParserUtils
 
 	NATIVECLASS_CREATENEW()
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	NATIVECLASS_FUNC(contains)
@@ -1986,7 +2066,7 @@ namespace ParserUtils
 		*	@prototype string str(, ignorenull = false)
 		*	@prototype Regex regexp(, ignorenull = false)
 		*   @return array
-		*   @brief  第一个参数为字符串或正则表达式类。用第一个参数分割原字符串得到一串数组，ignorenull表示是否忽略结果数组中的空串，如果为真，结果数组中的空串将被抹去
+		*   @brief  第一个参数为字符串或正则表达式类。用第一个参数作为整体分割原字符串得到一串数组，ignorenull表示是否忽略结果数组中的空串，如果为真，结果数组中的空串将被抹去
 		*   @example 以下将演示用","来分割"1,2,,3"的结果
 		*   @example_code "1,2,,3".split(",")
 		*   @example_result ["1", "2", "", "3"]
@@ -2207,6 +2287,19 @@ namespace ParserUtils
 		*   @brief  随机返回数组中一个元素。
 		*/
 		{ L"random", &ParserUtils::nativeFunc_array_random },
+		/**
+		*	@class array（内部保留类）
+		*	@param integer index
+		*	@return anytype
+		*   @brief  取出数组中一个元素，即取值并且清除（erase）。
+		*/
+		{ QUICKFUNC(take) },
+		/**
+		*	@class array（内部保留类）
+		*	@return anytype
+		*   @brief  取出数组中一个随机元素，即取值并且清除（erase）。
+		*/
+		{ QUICKFUNC(takeRandom) },
 #ifdef ENABLE_FILE
 		/**
 		*	@class array（内部保留类）

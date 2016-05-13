@@ -70,7 +70,7 @@ public:
 		for (auto &&i : val)
 		{
 			eles.emplace_front(i);
-			*it = eles.begin();
+			*it++ = eles.begin();
 		}
 	}
 
@@ -175,6 +175,13 @@ public:
 	{
 		res = back();
 		pop_back();
+	}
+
+	T take(bkplong index)
+	{
+		T value = this->operator[](index);
+		this->erase(index);
+		return value;
 	}
 
 	void erase(bkplong index)

@@ -98,6 +98,10 @@ enum BKE_opcode : bkplong
 	OP_STATIC,
 	OP_ENUM,
 
+	OP_BITAND,
+	OP_BITOR,
+	OP_BITNOT,
+
 	OP_INVALID,
 
 	OP_COUNT,
@@ -134,8 +138,8 @@ public:
 
 	BKE_Node Node;
 
-	BKE_bytree():BKE_VarObject(VAR_BYTREE_P), parent(NULL){}
-	BKE_bytree(const BKE_Node &node) :BKE_VarObject(VAR_BYTREE_P), parent(NULL), Node(node){};
+	BKE_bytree():BKE_VarObject(VAR_BYTREE_P), parent(nullptr){}
+	BKE_bytree(const BKE_Node &node) :BKE_VarObject(VAR_BYTREE_P), parent(nullptr), Node(node){};
 	inline void init(const BKE_Node &node){ Node = node; };
 	void clearChilds()
 	{
@@ -144,8 +148,8 @@ public:
 			childs[i]->release();
 		childs.clear();
 	}
-	inline void addChild(){ childs.push_back(NULL); };
-	//warning! this function don't check if parent==NULL
+	inline void addChild(){ childs.push_back(nullptr); };
+	//warning! this function don't check if parent==nullptr
 	inline BKE_bytree *addParent(const BKE_Node &node){ BKE_bytree *p = new BKE_bytree(node); p->childs.push_back(this); return p; };
 	BKE_bytree *clone()
 	{

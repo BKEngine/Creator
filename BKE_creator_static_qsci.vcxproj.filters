@@ -76,9 +76,6 @@
     <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParserHelper\parser\BKE_hash.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ParserHelper\parser\BKE_number.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

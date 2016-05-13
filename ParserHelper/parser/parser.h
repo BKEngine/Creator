@@ -174,14 +174,14 @@ protected:
 	void nud_with(BKE_bytree **tree);
 	void nud_stop(BKE_bytree **tree)
 	{
-		*tree = NULL;
+		*tree = nullptr;
 		forcequit = true;
 		return;
 	}
 	//void nud_other(BKE_bytree **tree);
 	void nud_end(BKE_bytree **tree)
 	{
-		if (*tree == NULL)
+		if (*tree == nullptr)
 		{
 			forcequit = true;
 			return;
@@ -246,6 +246,7 @@ protected:
 	NUD_FUNCTION(dot2, ".");
 	NUD_FUNCTION(with, "with");
 	NUD_FUNCTION(enum, "enum");
+	NUD_FUNCTION(bitnot, "bitnot");
 
 	NUD_FUNCTION(unknown, "未实现"){ runpos = tree->Node.pos; throw Var_Except(L"该功能尚未实现"); };
 
@@ -284,6 +285,8 @@ protected:
 	LED_FUNCTION(choose, "?:");	//for ?: expression
 	LED_FUNCTION(instanceof, "instanceof");	//xx instanceof str
 	LED_FUNCTION(if, "if");	//后置if
+	LED_FUNCTION(bitand, "bitand,");	//bitand
+	LED_FUNCTION(bitor, "bitor");	//bitor
 
 	LED_FUNCTION(unknown, "未实现"){ runpos = tree->Node.pos; throw Var_Except(L"该功能尚未实现"); };
 

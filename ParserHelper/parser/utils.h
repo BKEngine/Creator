@@ -112,12 +112,6 @@ enum VarType
 	VAR_FUNCCODE_P,
 };
 
-//to avoid ambiguity of NULL
-#ifdef NULL
-#undef NULL
-#define NULL nullptr
-#endif
-
 #define WSTRNUM(x) L###x
 #define WSTR(x) L##x
 #define WSTR2(x) WSTR(x)
