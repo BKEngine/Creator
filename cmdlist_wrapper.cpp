@@ -13,21 +13,36 @@
 #define ADD_LIST(a) _v.argAutoList.back()=a;
 #define PROPERTY(a, b, c) 
 #define REG_SPE_CMD(a, b, c, d) { auto &_p = SpecialCmdList[#a].modes[#b]; _p.first = c; auto &_v = _p.second; _v.name=#b;_v.detail = d; /*_v.argNames.push_back("mode"); _v.argFlags.push_back(ptString);*/
+#define REG_SPE_CMD_VERSION(a, b, v, c, d) REG_SPE_CMD(a, b, c, d)
 #else
-#define REG_CMD(a, b) do{ auto &_v = CmdList[L###a]; _v.name=L###a; _v.detail = L#b;
+#define REG_CMD(a, b) do{ auto &_v = CmdList[L###a]; _v.name=L###a;
 #define REG_CMD_VERSION(a, v, b) REG_CMD(a, b); _v.version = v;
 #define REG_END() }while(0)
 #define ADD_PARAM(b, c, ...) _v.addArg(L###b, c, ##__VA_ARGS__ )
 #define ADD_LIST(a) 
-#define PROPERTY(a, b, c) _v.properties.push_back(make_tuple(L###a,L###b,c))
-#define REG_SPE_CMD(a, b, c, d) { auto &_p = SpecialCmdList[L###a].modes[L###b]; _p.first = c; auto &_v = _p.second; _v.name=L###b; _v.addArg(L"mode", ptString); _v.detail = L#d;
+#define PROPERTY(a, b, c) _v.properties.emplace_back(L###a,L###b,c)
+#define REG_SPE_CMD(a, b, c, d) { auto &_p = SpecialCmdList[L###a].modes[L###b]; _p.first = c; auto &_v = _p.second; _v.name=L###b; _v.addArg(L"mode", ptString);
+#define REG_SPE_CMD_VERSION(a, b, v, c, d) REG_SPE_CMD(a, b, c, d) _v.version = v;
 #endif
 
 #define AVALIABLE_AFTER(a) DynamicVersionInfo::availableAfter(a)
 #define AVALIABLE_BEFORE(a) DynamicVersionInfo::availableBefore(a)
 
+#if BKE_CREATOR
 QHash<QString, BKECmdInfo> CmdList;
 QHash<QString, BKESpecialCmdInfo> SpecialCmdList;
+#else
+unordered_map<wstring, CmdInfo> CmdList;
+unordered_map<wstring, SpecialCmdInfo> SpecialCmdList;
+
+static const pair<function<bool(bool, bool)>, const wchar_t *> atmostOne = make_pair(
+	[](bool e1, bool e2)->bool {return !(e1 & e2); }, L"最多只能存在一个。"
+	);
+
+static const pair<function<bool(bool, bool)>, const wchar_t *>  onlyOne = make_pair(
+	[](bool e1, bool e2)->bool {return e1 != e2; }, L"必须、且只能存在一个。"
+	);
+#endif
 
 #if BKE_CREATOR
 bool cmd_inited = false;
@@ -104,6 +119,16 @@ void initCmd()
 	// 		ADD_PARAM(file, VT_STRING);
 	// 	REG_END();
 
+#if BKE_CREATOR
+	REG_CMD(macro, "声明一个宏");
+	ADD_PARAM(name, ptString);
+	REG_END();
+
+	REG_CMD(import, "声明一个宏");
+	ADD_PARAM(file, ptScript);
+	REG_END();
+#endif
+
 	//用户信息相关
 	REG_CMD(check, "检查指定的章节是否已购买");
 	ADD_PARAM(chapter, ptString | ptStringArray);
@@ -159,6 +184,7 @@ void initCmd()
 	REG_END();
 
 	REG_CMD(click, "等待鼠标左键点击后继续");
+		ADD_PARAM(time, ptTime | ptOptional, AVALIABLE_AFTER(2542));
 	REG_END();
 
 	REG_CMD(remove, "从一个精灵的parent上取下自己，该精灵变为不可见");
@@ -540,7 +566,7 @@ void initCmd()
 	ADD_PARAM(type, ptString | ptInteger | ptOptional);
 	ADD_PARAM(exp, ptString | ptOptional);
 	ADD_PARAM(param, ptDictionary | ptOptional);
-	ADD_PARAM(ignore, ptBool | ptOptional);
+	ADD_PARAM(stable, ptBool | ptOptional);
 	ADD_PARAM(enable, ptBool | ptOptional);
 	ADD_PARAM(condition, ptString | ptOptional);
 	REG_END();
@@ -762,12 +788,34 @@ void initCmd()
 	ADD_PARAM(file, ptString);
 	REG_END();
 
-	//20150518
-	// 	REG_CMD_VERSION(modallayer, AVALIABLE_AFTER(2020));
-	// 		ADD_PARAM(index, ptInteger);
-	// 		ADD_PARAM(width, ptInteger);
-	// 		ADD_PARAM(height, ptInteger);
-	// 	REG_END();
+	//???
+	REG_CMD_VERSION(mirror, AVALIABLE_AFTER(2447), "新建一个镜像精灵，显示的内容等同于目标精灵的内容。");
+	ADD_PARAM(index, ptInteger);
+	ADD_PARAM(target, ptInteger);
+	ADD_PARAM(rect, ptRect | ptOptional);
+	REG_END();
+
+	//20151231
+	REG_CMD_VERSION(watcher, AVALIABLE_AFTER(2447), "新建一个监视器附加到精灵上，如果监视变量改动则触发事件。");
+		ADD_PARAM(exp, ptString);
+		ADD_PARAM(target, ptInteger);
+		ADD_PARAM(onchanged, ptEvent | ptOptional);
+		ADD_PARAM(interval, ptInteger | ptOptional);
+		ADD_PARAM(updatevalue, ptBool | ptOptional);
+		ADD_PARAM(once, ptBool | ptOptional);
+		ADD_PARAM(tag, ptInteger | ptOptional);
+	REG_END();
+
+	REG_CMD_VERSION(stopwatcher, AVALIABLE_AFTER(2447), "停止一个精灵上的监视器。");
+		ADD_PARAM(index, ptInteger);
+		ADD_PARAM(tag, ptInteger | ptOptional);
+	REG_END();
+
+	//20160208
+	REG_CMD_VERSION(waituntil, AVALIABLE_AFTER(2492), "等待直到条件完成（返回结果为true）");
+		ADD_PARAM(exp, ptString);
+		ADD_PARAM(canskip, ptBool | ptOptional);
+	REG_END();
 
 	//special cmd
 	//animate
@@ -813,57 +861,58 @@ void initCmd()
 	REG_SPE_CMD(action, start, ACTION_START, "若在创建queue或parallel的过程中，立刻结束所有层动作的创建（相当于执行若干个end），并立刻开始创建好的动作。");
 	ADD_PARAM(target, ptInteger);
 	ADD_PARAM(times, ptInteger | ptOptional);
+		ADD_PARAM(speed, ptNumber | ptString | ptOptional, AVALIABLE_AFTER(2443));
 	REG_END();
 	REG_SPE_CMD(action, queue, ACTION_QUEUE, "创建一个命令队列，用于按顺序执行命令");
 	REG_END();
 	REG_SPE_CMD(action, moveby, ACTION_MOVEBY, "控制精灵相对移动的动作");
 	ADD_PARAM(pos, ptPos);
 	ADD_PARAM(time, ptTime | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, moveto, ACTION_MOVETO, "控制精灵绝对移动的动作");
 	ADD_PARAM(pos, ptPos);
 	ADD_PARAM(time, ptTime | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, fadeto, ACTION_FADETO, "控制精灵透明度渐变的动作");
 	ADD_PARAM(opacity, ptByte);
 	ADD_PARAM(time, ptTime | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, scaleto, ACTION_SCALETO, "控制精灵绝对缩放到某一倍数的动作");
 	ADD_PARAM(time, ptTime | ptOptional);
 	ADD_PARAM(x, ptNumber | ptOptional);
 	ADD_PARAM(y, ptNumber | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, scaleby, ACTION_SCALEBY, "控制精灵相对缩放某一倍数的动作");
 	ADD_PARAM(time, ptTime | ptOptional);
 	ADD_PARAM(x, ptNumber | ptOptional);
 	ADD_PARAM(y, ptNumber | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, rotateto, ACTION_ROTATETO, "控制精灵绝对旋转至某一角度的动作");
 	ADD_PARAM(rotate, ptNumber);
 	ADD_PARAM(time, ptTime | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, rotateby, ACTION_ROTATEBY, "控制精灵相对旋转某一角度的动作");
 	ADD_PARAM(rotate, ptNumber);
 	ADD_PARAM(time, ptTime | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, tintto, ACTION_TINTTO, "控制精灵色调变至某一颜色的动作");
 	ADD_PARAM(color, ptInteger);
 	ADD_PARAM(time, ptTime | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, tintby, ACTION_TINTBY, "控制精灵色调改变某一颜色的动作");
@@ -871,14 +920,14 @@ void initCmd()
 	ADD_PARAM(g, ptInteger);
 	ADD_PARAM(b, ptInteger);
 	ADD_PARAM(time, ptTime | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, jump, ACTION_JUMP, "精灵执行向上跳动的动作");
 	ADD_PARAM(time, ptTime);
 	ADD_PARAM(height, ptInteger);
 	ADD_PARAM(x, ptInteger | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(times, ptInteger | ptOptional);
 	ADD_PARAM(ease, ptString | ptNumber | ptOptional);
 	REG_END();
@@ -886,7 +935,7 @@ void initCmd()
 	ADD_PARAM(time, ptTime);
 	ADD_PARAM(range, ptInteger);
 	ADD_PARAM(vertical, ptBool | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(times, ptInteger | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, quake, ACTION_QUAKE, "震动");
@@ -894,34 +943,34 @@ void initCmd()
 	ADD_PARAM(rangex, ptInteger | ptOptional);
 	ADD_PARAM(rangey, ptInteger | ptOptional);
 	ADD_PARAM(speed, ptInteger | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, visible, ACTION_VISIBLE, "调整精灵是否可见（但不移除）");
 	ADD_PARAM(visible, ptBool);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, remove, ACTION_REMOVE, "从该精灵的父精灵上移除它");
 	ADD_PARAM(delete, ptBool | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, flipx, ACTION_FLIPX, "水平翻转");
 	ADD_PARAM(force, ptBool | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, flipy, ACTION_FLIPY, "垂直翻转");
 	ADD_PARAM(force, ptBool | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, scissorby, ACTION_SCISSORBY, "相对改变某个精灵显示图像的范围");
 	ADD_PARAM(rect, ptRect);
 	ADD_PARAM(time, ptTime | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptInteger | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, scissorto, ACTION_SCISSORTO, "绝对改变某个精灵显示图像的范围");
 	ADD_PARAM(rect, ptRect);
 	ADD_PARAM(time, ptTime | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptInteger | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, shaky3d, ACTION_SHAKY3D, "网格的震动效果");
@@ -930,27 +979,27 @@ void initCmd()
 	ADD_PARAM(vnum, ptTime | ptOptional);
 	ADD_PARAM(offset, ptTime | ptOptional);
 	ADD_PARAM(speed, ptInteger | ptOptional);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, catmullromby, ACTION_CATMULLROMBY, "");
 	ADD_PARAM(time, ptTime);
 	ADD_PARAM(points, ptArray);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, catmullromto, ACTION_CATMULLROMTO, "");
 	ADD_PARAM(time, ptTime);
 	ADD_PARAM(points, ptArray);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	REG_END();
 	REG_SPE_CMD(action, scissorcatmullromby, ACTION_SCISSORBY, "");
 	ADD_PARAM(rect, ptRect);
 	ADD_PARAM(points, ptArray);
 	ADD_PARAM(time, ptTime);
-	ADD_PARAM(target, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(ease, ptString | ptInteger | ptOptional);
 	REG_END();
 
-	REG_SPE_CMD(action, delay, ACTION_DELAY, "只能用于queue或者parallel中，用于两个动作间的时间间隔");
+	REG_SPE_CMD(action, delay, ACTION_DELAY, "只能用于queue或者parallel中，规定时间内暂停动作队列，用于两个动作间的时间间隔。");
 	ADD_PARAM(time, ptTime);
 	REG_END();
 	REG_SPE_CMD(action, callback, ACTION_CALLBACK, "只能用于queue或者parallel中，用于某个时间点访问指定脚本");
@@ -966,6 +1015,16 @@ void initCmd()
 	REG_END();
 	REG_SPE_CMD(action, parallel, ACTION_PARALLEL, "创建一个并行命令集合，用于同时执行命令。结束时间按照最长的动作时间计算。");
 	REG_END();
+	REG_SPE_CMD_VERSION(action, timer, AVALIABLE_AFTER(2464), ACTION_TIMER, "创建一个timer，在一定时间段内每隔一段时间执行一次表达式");
+	ADD_PARAM(exp, ptString);
+	ADD_PARAM(interval, ptInteger | ptOptional);
+	ADD_PARAM(time, ptInteger | ptOptional);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
+	REG_END();
+	REG_SPE_CMD_VERSION(action, delayuntil, AVALIABLE_AFTER(2464), ACTION_DELAYUNTIL, "只能用于queue或者parallel中，暂停动作队列直到表达式计算结果为true，用于两个动作间的时间间隔。");
+	ADD_PARAM(exp, ptString);
+	REG_END();
+
 	//trans
 	REG_SPE_CMD(trans, normal, TRANS_NORMAL, "瞬间切换到目标状态（即无渐变）");
 	ADD_PARAM(index, ptInteger | ptOptional);
@@ -1088,14 +1147,14 @@ void initCmd()
 	ADD_PARAM(mask, ptString | ptOptional);
 	ADD_PARAM(masksp, ptInteger | ptOptional);
 	PROPERTY(mask, masksp, onlyOne);
-	ADD_PARAM(stretch, ptBool | ptOptional);
+		ADD_PARAM(stretch, ptBool | ptOptional);
 	REG_END();
 	REG_SPE_CMD(effect, multiply, EFFECT_MULTIPLY, "指定一个精灵或图片，和目标精灵的混合方式为正片叠底，而非普通的透明度叠加。mask和masksp为二选一的选项。\nmask的alpha通道会被用于原图片和正片叠底后图片的alpha混合。\n正片叠底不改变原图片的透明度。");
 	ADD_PARAM(target, ptInteger);
 	ADD_PARAM(mask, ptString | ptOptional);
 	ADD_PARAM(masksp, ptInteger | ptOptional);
 	PROPERTY(mask, masksp, onlyOne);
-	ADD_PARAM(stretch, ptBool | ptOptional);
+		ADD_PARAM(stretch, ptBool | ptOptional);
 	REG_END();
 	REG_SPE_CMD(effect, blur, EFFECT_BLUR, "使目标精灵模糊");
 	ADD_PARAM(target, ptInteger);
@@ -1110,25 +1169,34 @@ void initCmd()
 	ADD_PARAM(radius, ptInteger | ptOptional);
 	REG_END();
 
-#define EFFECT_TWO(X, x, info) 	REG_SPE_CMD(effect, x, EFFECT_##X, info);ADD_PARAM(target, ptInteger);ADD_PARAM(mask, ptString | ptOptional);ADD_PARAM(masksp, ptInteger | ptOptional);PROPERTY(mask, masksp, onlyOne);REG_END();
+	//20160222
+	REG_SPE_CMD(effect, normal, EFFECT_NORMAL, "正常显示一个精灵");
+	ADD_PARAM(target, ptInteger);
+	ADD_PARAM(mask, ptString | ptOptional);
+	ADD_PARAM(masksp, ptInteger | ptOptional);
+	PROPERTY(mask, masksp, onlyOne);
+	REG_END();
 
-	EFFECT_TWO(DARKEN, Darken, "PS的变暗");
-	EFFECT_TWO(COLORBURN, ColorBurn, "PS的颜色加深");
-	EFFECT_TWO(LINEARBURN, LinearBurn, "PS的线性加深");
-	EFFECT_TWO(LIGHTEN, Lighten, "PS的变亮");
-	EFFECT_TWO(SCREEN, Screen, "PS的滤色");
-	EFFECT_TWO(COLORDODGE, ColorDodge, "PS的颜色减淡");
-	EFFECT_TWO(OVERLAY, Overlay, "PS的叠加");
-	EFFECT_TWO(SOFTLIGHT, SoftLight, "PS的柔光");
-	EFFECT_TWO(HARDLIGHT, HardLight, "PS的强光");
-	EFFECT_TWO(VIVIDLIGHT, VividLight, "PS的亮光");
-	EFFECT_TWO(LINEARLIGHT, LinearLight, "PS的线性光");
-	EFFECT_TWO(PINLIGHT, PinLight, "PS的点光");
-	EFFECT_TWO(HARDMIX, HardMix, "PS的实色混合");
-	EFFECT_TWO(DIFFERENCE, Difference, "PS的差值");
-	EFFECT_TWO(EXCLUSION, Exclusion, "PS的排除");
+#define EFFECT_BLEND(X, x, info) 	REG_SPE_CMD(effect, x, EFFECT_##X, info);ADD_PARAM(target, ptInteger);ADD_PARAM(mask, ptString | ptOptional);ADD_PARAM(masksp, ptInteger | ptOptional);PROPERTY(mask, masksp, onlyOne);REG_END();
 
-#undef EFFECT_TWO
+	EFFECT_BLEND(DARKEN, darken, "PS的变暗");
+	EFFECT_BLEND(COLORBURN, colorburn, "PS的颜色加深");
+	EFFECT_BLEND(LINEARBURN, linearburn, "PS的线性加深");
+	EFFECT_BLEND(LIGHTEN, lighten, "PS的变亮");
+	EFFECT_BLEND(SCREEN, screen, "PS的滤色");
+	EFFECT_BLEND(COLORDODGE, colordodge, "PS的颜色减淡");
+	EFFECT_BLEND(LINEARDODGE, colordodge, "PS的线性减淡");
+	EFFECT_BLEND(OVERLAY, overlay, "PS的叠加");
+	EFFECT_BLEND(SOFTLIGHT, softlight, "PS的柔光");
+	EFFECT_BLEND(HARDLIGHT, hardlight, "PS的强光");
+	EFFECT_BLEND(VIVIDLIGHT, vividlight, "PS的亮光");
+	EFFECT_BLEND(LINEARLIGHT, linearlight, "PS的线性光");
+	EFFECT_BLEND(PINLIGHT, pinlight, "PS的点光");
+	EFFECT_BLEND(HARDMIX, hardmix, "PS的实色混合");
+	EFFECT_BLEND(DIFFERENCE, difference, "PS的差值");
+	EFFECT_BLEND(EXCLUSION, exclusion, "PS的排除");
+
+#undef EFFECT_BLEND
 
 #if BKE_CREATOR
 	cmd_inited = true;

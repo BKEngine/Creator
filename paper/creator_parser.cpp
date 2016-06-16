@@ -13,9 +13,10 @@ BkeParser::BkeParser(QObject *parent)
     ErrorFlag = false ;
     IndentLayer = 0 ;
 
+/*
 #ifndef PARSER_PRO
     ParserText(BKE_API_FILE);  //载入默认的api列表
-#endif
+#endif*/
 
     SetVarList("..");
     SetCommandList("..");

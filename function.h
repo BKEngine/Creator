@@ -9,10 +9,10 @@
 extern QString BKE_CURRENT_DIR ;
 extern QString BKE_PROJECT_NAME ;
 extern QString BKE_USE_NAME ;
-extern QString BKE_API_FILE ;
+//extern QString BKE_API_FILE ;
 extern QString BKE_CREATOR_VERTION ;
 extern QStringList BKE_Recently_Project ;
-extern QStringList BKE_Recently_Files ;
+//extern QStringList BKE_Recently_Files ;
 extern QJsonObject BKE_MARKS_OBJECT ;
 extern QSettings *BKE_CLOSE_SETTING ;
 extern QSettings *BKE_USER_SETTING ;
@@ -33,9 +33,9 @@ QStringList ListDirsCopy(QStringList &list,const QString &dir,const QString &new
 
 namespace BkeCreator {
 	 void AddRecentProject(const QString &file) ;
-	 void AddRecentFile(const QString &file) ;
-	 void ReNameRecentFile(const QString &old, const QString &now);
-	 void ReadApiList(QStringList *ls, const QString &name, int type);
+	 //void AddRecentFile(const QString &file) ;
+	 //void ReNameRecentFile(const QString &old, const QString &now);
+	 //void ReadApiList(QStringList *ls, const QString &name, int type);
 	 QStringList CopyStencil(const QString &dir,const QStringList &ls) ;
 	 QString IntToRgbString(unsigned int rgb) ;
 }

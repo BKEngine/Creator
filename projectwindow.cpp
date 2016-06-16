@@ -11,6 +11,7 @@
 #include <Windows.h>
 #endif
 #include <stdint.h>
+#include "dia/ParserEditor.h"
 
 //QList<BkeProject*> projectlist ;
 
@@ -27,7 +28,7 @@ ProjectWindow::ProjectWindow(QWidget *parent)
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(ShowRmenu(QPoint)));
 	connect(this, SIGNAL(CurrentProChange(BkeProject *)), (MainWindow*)parent, SLOT(CurrentProChange(BkeProject *)));
 
-	QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭项目 重命名").split(" ");
+	QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭工程 重命名").split(" ");
 	for (int i = 0; i < BTN_COUNT; i++){
 		btns[i] = new QAction(ls.at(i), this);
 		connect(btns[i], SIGNAL(triggered()), this, SLOT(ActionAdmin()));
@@ -45,6 +46,10 @@ void ProjectWindow::NewProject()
 {
 	NewProDia use(this);
 	use.WaitUser();
+	if (use.type<0)
+	{
+		return;
+	}
 	if (workpro)
 	{
 		global_bke_info.save();
@@ -57,12 +62,6 @@ void ProjectWindow::NewProject()
 	else if (use.type == 1){
 
 	}
-	else
-	{
-		delete workpro;
-		workpro = NULL;
-		return;
-	}
 
 	//projectlist << pro ;
 	addTopLevelItem(workpro->Root);
@@ -72,7 +71,7 @@ void ProjectWindow::NewProject()
 
 void ProjectWindow::OpenProject()
 {
-	QString name = QFileDialog::getOpenFileName(this, "打开项目", "", "Bke项目(*.bkp)");
+	QString name = QFileDialog::getOpenFileName(this, "打开工程", "", "BKE Creator工程(*.bkp)");
 	OpenProject(name);
 }
 
@@ -95,7 +94,7 @@ void ProjectWindow::OpenProject(const QString &file)
 	workpro = new BkeProject;
 	if (!workpro->OpenProject(file))
 	{
-		QMessageBox::information(this, "错误", "文件不存在，项目打开失败", QMessageBox::Ok);
+		QMessageBox::information(this, "错误", "文件不存在，工程打开失败", QMessageBox::Ok);
 		delete workpro;
 		workpro = NULL;
 		return;
@@ -123,7 +122,7 @@ void ProjectWindow::OpenProject(const QString &file)
 	emit onProjectOpen(workpro);
 }
 
-//读取项目，并发送
+//读取工程，并发送
 bool ProjectWindow::ReadItemInfo(QTreeWidgetItem *dest, ItemInfo &f)
 {
 	if (dest == NULL) return false;
@@ -131,7 +130,7 @@ bool ProjectWindow::ReadItemInfo(QTreeWidgetItem *dest, ItemInfo &f)
 	return true;
 }
 
-//项目被双击
+//工程被双击
 void ProjectWindow::ItemDoubleClick(QTreeWidgetItem * item, int column)
 {
 	if (!ReadItemInfo(item, info)) return;
@@ -144,8 +143,22 @@ void ProjectWindow::ItemDoubleClick(QTreeWidgetItem * item, int column)
 		return;
 	}
 
-	if (name.endsWith(".bkscr") || name.endsWith(".bkpsr")){
+	if (name.endsWith(".bkscr")){
 		emit OpenThisFile(name, p->FileDir());
+	}
+
+	if (name.endsWith(".bkpsr")) {
+		ParserEditor *edit = new ParserEditor(name);
+		edit->load();
+		QString error = edit->error();
+		if (!error.isEmpty())
+		{
+			emit OpenThisFile(name, p->FileDir());
+			edit->setParent(NULL);
+			delete edit;
+		}
+		else 
+			edit->show();
 	}
 
 
@@ -274,7 +287,7 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
 }
 
 
-//寻找项目
+//寻找工程
 BkeProject *ProjectWindow::FindPro(const QString &proname)
 {
 	if (workpro && workpro->ProjectName() == proname)
@@ -291,7 +304,7 @@ BkeProject *ProjectWindow::FindPro(const QString &proname)
 
 QTreeWidgetItem *ProjectWindow::findFileInProject(const QString &name)
 {
-	//没有项目返回0
+	//没有工程返回0
 	if (!workpro) return 0;
 	return workpro->FindItemAll(name);
 	//temppro = workpro ;
@@ -311,7 +324,7 @@ void ProjectWindow::DeleteFile(const ItemInfo &f)
 {
 	//是文件的话将询问是否移除文件
 	BkeProject *p = FindPro(f.ProName);
-	QString sk = p->FileDir() + "/" + f.FullName;
+	QString sk = p->FileDir() + f.FullName;
 	LableSureDialog msg;
 	msg.SetLable("要移除文件" + sk + "吗？");
 	msg.SetCheckbox(QStringList() << "彻底删除");
@@ -324,10 +337,10 @@ void ProjectWindow::DeleteFile(const ItemInfo &f)
 	}
 	//移除文件
 	if (!p->RemoveItem(f)){
-		QMessageBox::information(this, "错误", "移除项目过程中出了一个错误", QMessageBox::Ok);
+		QMessageBox::information(this, "错误", "移除工程过程中出了一个错误", QMessageBox::Ok);
 		return;
 	}
-
+	p->files.remove(f.Name);
 	//写出结果
 	p->WriteBkpFile();
 }
@@ -342,6 +355,12 @@ void ProjectWindow::Addfiles(const ItemInfo &f)
 	else ls = QFileDialog::getOpenFileNames(this, "添加文件", p->FileDir() + f.getDir(), "所有文件(*.*)");
 
 	if (ls.isEmpty()) return;
+
+	if (f.Layer > 1 && !p->checkIsDir(f))
+	{
+		ReadItemInfo(f.Root->parent(), info);
+	}
+
 	QStringList errors;
 	QStringList errors2;
 	auto it = ls.begin();
@@ -573,6 +592,8 @@ void ProjectWindow::CloseProject()
 	emit onProjectClose();
 	delete workpro;
 	workpro = NULL;
+	QString t = "BKE Creator";
+	MainWindow::getInstance()->setWindowTitle(t);
 }
 
 void ProjectWindow::CloseProject(const ItemInfo &f)

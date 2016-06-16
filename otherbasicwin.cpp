@@ -16,7 +16,7 @@ OtherBasicWin::OtherBasicWin(QWidget *parent)
     winlist = new QComboBox(this) ;
 
     winlist->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-    winlist->addItems(QStringList()<<" 项目"<<" 打开文档"<<" 书签"<<" 标记"<<" 标签区段");
+    winlist->addItems(QStringList()<<" 工程"<<" 打开文档"<<" 书签"<<" 标记"<<" 标签区段");
 
     winlist->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectcombox").toString());
     winlist->setView(new QListView());
@@ -25,7 +25,7 @@ OtherBasicWin::OtherBasicWin(QWidget *parent)
 
     bar->addWidget(winlist) ;
     QToolButton *llm = new QToolButton(this) ;
-    llm->setIcon(QIcon(":/left/source/column.png"));
+    llm->setIcon(QIcon(":/pedit/source/column.png"));
     llm->setText("分栏");
 
     llm->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectbtn").toString());
@@ -33,7 +33,7 @@ OtherBasicWin::OtherBasicWin(QWidget *parent)
     connect(llm,SIGNAL(clicked()),this,SLOT(AddWindow())) ;
 
     llm = new QToolButton(this) ;
-    llm->setIcon(QIcon(":/left/source/close2.png"));
+    llm->setIcon(QIcon(":/pedit/source/close2.png"));
     llm->setText("关闭");
     llm->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectbtn").toString());
     bar->addWidget(llm) ;
@@ -67,7 +67,7 @@ void OtherBasicWin::ChangeShow(const QString &base)
         return ;
     }
 
-    if( base == " 项目") SetCurrentWidget(projectedit);
+    if( base == " 工程" || base == " 项目") SetCurrentWidget(projectedit);
     else if( base == " 打开文档") SetCurrentWidget(fileListWidget);
     else if( base == " 书签") SetCurrentWidget(0);
     else if( base == " 标记") SetCurrentWidget(0);

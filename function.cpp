@@ -5,11 +5,11 @@ QString BKE_CURRENT_DIR ;
 QString BKE_PROJECT_NAME("BkeProject.bkp") ;
 QString BKE_USE_NAME("BkeUse.bkpuse") ;
 QString BKE_PROJECT_WORKPRO ;
-QString BKE_API_FILE ;
+//QString BKE_API_FILE ;
 QString BKE_PROJECT_DIR ;
-QString BKE_CREATOR_VERTION("2015_12_25\t") ;
+QString BKE_CREATOR_VERTION("20160518\t") ;
 QStringList BKE_Recently_Project ;
-QStringList BKE_Recently_Files ;
+//QStringList BKE_Recently_Files ;
 QJsonObject BKE_MARKS_OBJECT ;
 QSettings *BKE_CLOSE_SETTING ;
 QSettings *BKE_USER_SETTING ;
@@ -204,6 +204,7 @@ void BkeCreator::AddRecentProject(const QString &file)
     LOLI::AutoWrite(BKE_CURRENT_DIR+"/projects.txt",BKE_Recently_Project.join("\r\n")) ;
 }
 
+/*
 void BkeCreator::AddRecentFile(const QString &file)
 {
     if( file == "##" ){
@@ -218,14 +219,15 @@ void BkeCreator::AddRecentFile(const QString &file)
     BKE_Recently_Files.prepend( file );
     while( BKE_Recently_Files.size() > 10 )BKE_Recently_Files.takeLast() ;
     LOLI::AutoWrite(BKE_CURRENT_DIR+"/files.txt",BKE_Recently_Files.join("\r\n")) ;
-}
+}*/
 
+/*
 void BkeCreator::ReNameRecentFile(const QString &old, const QString &now)
 {
 	int i = BKE_Recently_Files.indexOf(old);
 	if (i >= 0)
 		BKE_Recently_Files[i] = now;
-}
+}*/
 
 QStringList BkeCreator::CopyStencil(const QString &dir,const QStringList &ls)
 {
@@ -239,6 +241,7 @@ QStringList BkeCreator::CopyStencil(const QString &dir,const QStringList &ls)
 }
 
 //读取api列表
+/*
 void BkeCreator::ReadApiList(QStringList *ls,const QString &name,int type)
 {
     ls->clear();
@@ -252,6 +255,7 @@ void BkeCreator::ReadApiList(QStringList *ls,const QString &name,int type)
     ls->sort(Qt::CaseInsensitive);
     return ;
 }
+*/
 
 
 QString BkeCreator::IntToRgbString(unsigned int rgb)

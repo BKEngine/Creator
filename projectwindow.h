@@ -10,7 +10,7 @@
 //extern QList<BkeProject*> projectlist ;
 
 
-// 项目树窗口
+// 工程树窗口
 class ProjectWindow : public QTreeWidget
 {
 	Q_OBJECT
@@ -66,6 +66,7 @@ public slots:
 	//void ReName() ;
 	void OpenFile();
 	void ActionAdmin();
+	void CloseProject();
 
 private:
 	//QList<BKEproject*> projectlist ;
@@ -83,7 +84,6 @@ private:
 	void Addfiles(const ItemInfo &f);
 	void AddDir(const ItemInfo &f);
 	void PreviewFile(const ItemInfo &f);
-	void CloseProject();
 	void CloseProject(const ItemInfo &f);
 	void RenameFile(const ItemInfo &f);
 	//void Active(const ItemInfo &f);

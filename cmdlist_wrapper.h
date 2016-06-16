@@ -3,7 +3,7 @@
 #include <weh.h>
 #include <unordered_map>
 
-enum TransEnum{
+enum TransEnum : int {
 	TRANS_CROSSFADE,
 	TRANS_UNIVERSAL,
 	TRANS_SCROLL,
@@ -16,10 +16,11 @@ enum TransEnum{
 	TRANS_TURN,
 	TRANS_MOSAIC,
 	TRANS_NORMAL,
+	TRANS_LINE,
 	TRANS_MAX
 };
 
-enum ActionEnum{
+enum ActionEnum : int {
 	ACTION_QUEUE,
 	ACTION_PARALLEL,
 	ACTION_MOVEBY,
@@ -50,11 +51,12 @@ enum ActionEnum{
 	ACTION_CATMULLROMTO,
 	ACTION_SCISSORCATMULLROMBY,
 	ACTION_TIMER,
+	ACTION_DELAYUNTIL,
 
 	ACTION_MAX
 };
 
-enum AnimateLoopEnum{
+enum AnimateLoopEnum : int {
 	ANIMATE_LOOP_NONE,
 	ANIMATE_LOOP_FORWARD,
 	ANIMATE_LOOP_BOUNCING,
@@ -62,7 +64,7 @@ enum AnimateLoopEnum{
 	ANIMATE_LOOP_MAX
 };
 
-enum EffectEnum{
+enum EffectEnum : int {
 	EFFECT_DELETE,
 	EFFECT_CLEAR,
 
@@ -77,6 +79,8 @@ enum EffectEnum{
 	EFFECT_ADD,
 	EFFECT_MULTIPLY,
 	EFFECT_BLUR,
+	EFFECT_BLURX,
+	EFFECT_BLURY,
 	EFFECT_SHARPEN,
 	EFFECT_EDGE,
 
@@ -95,11 +99,13 @@ enum EffectEnum{
 	EFFECT_HARDMIX,
 	EFFECT_DIFFERENCE,
 	EFFECT_EXCLUSION,
+	EFFECT_LINEARDODGE,
+	EFFECT_NORMAL,
 
 	EFFECT_MAX
 };
 
-enum AnimateEnum{
+enum AnimateEnum : int {
 	ANIMATE_START,
 	ANIMATE_HORIZONTAL,
 	ANIMATE_VERTICAL,

@@ -1,10 +1,16 @@
 <RCC>
-    <qresource prefix="/left">
+    <qresource prefix="/pedit">
         <file>source/bianji.png</file>
         <file>source/hiddenleft.png</file>
         <file>source/close2.png</file>
         <file>source/column.png</file>
         <file>source/search1.png</file>
+        <file>source/+.png</file>
+        <file>source/edit.png</file>
+        <file>source/x.png</file>
+        <file>source/close2@2x.png</file>
+        <file>source/column@2x.png</file>
+        <file>source/hiddenleft@2x.png</file>
     </qresource>
     <qresource prefix="/cedit">
         <file>source/btnnext.png</file>
@@ -28,6 +34,20 @@
         <file>source/clear.png</file>
         <file>source/code.png</file>
         <file>source/flay.png</file>
+        <file>source/btnlast@2x.png</file>
+        <file>source/btnnext@2x.png</file>
+        <file>source/clear@2x.png</file>
+        <file>source/compile@2x.png</file>
+        <file>source/compile_run@2x.png</file>
+        <file>source/debug@2x.png</file>
+        <file>source/replace(2)@2x.png</file>
+        <file>source/run@2x.png</file>
+        <file>source/save@2x.png</file>
+        <file>source/saveas@2x.png</file>
+        <file>source/code@2x.png</file>
+        <file>source/redo@2x.png</file>
+        <file>source/undo@2x.png</file>
+        <file>source/edit_cut@2x.png</file>
     </qresource>
     <qresource prefix="/project">
         <file>source/newproject.png</file>

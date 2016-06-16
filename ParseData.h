@@ -261,8 +261,10 @@ public:
 		else if (ch == '/' && ch2 == '*')
 		{
 			int rawidx = idx + 2;
-			skipBlockComment();
-			lastComment = QString::fromStdString(string(textbuf + rawidx, idx - 2 - rawidx));
+			if (skipBlockComment())
+			{
+				lastComment = QString::fromStdString(string(textbuf + rawidx, idx - 2 - rawidx));
+			}
 			return textbuf[idx];
 		}
 		return ch;
@@ -279,9 +281,9 @@ public:
 		while (ch && ch!='\n' && ch!= '\r')
 			ch = textbuf[++idx];
 	}
-	void skipBlockComment()
+	bool skipBlockComment()
 	{
-		char ch = textbuf[++idx];
+		char ch = textbuf[idx+=2];
 		bool s = false;
 		while (ch)
 		{
@@ -303,9 +305,11 @@ public:
 		}
 		if (!s)
 		{
-			infos.emplace_back(3, 9, idx - 1, 1);
+			infos.emplace_back(3, 9, idx - 2, 1);
 		}
-		idx++;
+		else
+			idx++;
+		return s;
 	}
 	void skipText()
 	{

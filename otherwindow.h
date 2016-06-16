@@ -23,6 +23,7 @@ public:
     QPushButton *btncompiletext ;
     QPushButton *btnbookmark ;
     QPushButton *btnmark ;
+	QLineEdit *lewords;
 
     QStackedWidget *stackw ;
     QListWidget *ProblemList ;

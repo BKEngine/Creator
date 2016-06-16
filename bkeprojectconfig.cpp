@@ -7,7 +7,7 @@ BkeProjectConfig::BkeProjectConfig()
 	resolutionSize[0] = 800;
 	resolutionSize[1] = 600;
 	maxSaveDataNum = 10000;
-	saveDir = "savedata";
+	saveDir = "SaveData"; 
 	defaultFontSize = 24;
 	defaultFontColor = QBkeVariable(0xFFFFFF);
 	debugLevel = 3;

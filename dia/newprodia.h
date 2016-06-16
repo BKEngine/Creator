@@ -1,7 +1,7 @@
 ﻿#ifndef NEWPRODIA_H
 #define NEWPRODIA_H
 
-//新建项目对话框
+//新建工程对话框
 #include <QWidget>
 #include "weh.h"
 

@@ -815,6 +815,12 @@ void BKE_Lexer::DoAtCommand()
 		{
 			if (isspace(styler->ch))
 				break;
+			else if (atComment())
+			{
+				removeMask(CMD_MASK);
+				styler->SetState(SCE_BKE_DEFAULT | cur_mask);
+				return;
+			}
 			else
 				styler->Forward();
 		}

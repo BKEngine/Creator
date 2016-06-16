@@ -22,7 +22,7 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 	}
 	info.Layer = list.size();
 	info.Root = dest;
-	if (list.size() == 0){  //项目文件本身
+	if (list.size() == 0){  //工程文件本身
 		info.ProName = info.Name;
 		info.RootName = "";
 	}
@@ -39,7 +39,7 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 	else info.FullName = info.Dirs + "/" + info.Name;
 }
 
-//新建一个项目
+//新建一个工程
 BkeProject::BkeProject(QObject *parent)
 	:QObject(parent)
 {
@@ -82,7 +82,7 @@ BkeProject::~BkeProject()
 }
 
 
-//初始化项目
+//初始化工程
 void BkeProject::BuildItem(const QString &name)
 {
 	Root = new QTreeWidgetItem(QStringList() << name);
@@ -108,7 +108,7 @@ bool BkeProject::NewProject(const QString &dir, const QString &name)
 	pdir = dir;
 	pname = name;
 
-	//初始化项目
+	//初始化工程
 	BuildItem(pname);
 	MakeImport();
 
@@ -236,6 +236,8 @@ bool BkeProject::OpenProject(const QString &name)
 	config = new BkeProjectConfig(pdir, pdir + "/config.bkpsr");
 	config->readFile();
 
+	SortTree(Root);
+
 	if (version < SAVE_VERSION)
 		WriteBkpFile();
 
@@ -259,7 +261,6 @@ void BkeProject::MakeImport()
 	//新建工程设置
 	delete config;
 	config = new BkeProjectConfig(dirs, dirs + "/config.bkpsr");
-	config->readFile();
 	config->projectName = ProjectName();
 	config->writeFile();
 
@@ -268,7 +269,7 @@ void BkeProject::MakeImport()
 	//OutFilelist.append(lex->GetImportFiles()); //导入的脚本，将在脚本中属于例外
 
 	//config.bkpsr单独放
-	//main.bkscr放到脚本项目底下，其余放宏
+	//main.bkscr放到脚本工程底下，其余放宏
 
 	{
 		FindItem(Script, OutFilelist[1], true);
@@ -285,7 +286,7 @@ void BkeProject::MakeImport()
 	return;
 }
 
-//从qstring列表中创建项目
+//从qstring列表中创建工程
 void BkeProject::MakeItems(QTreeWidgetItem *dest, const QStringList &list)
 {
 	QString temp;
@@ -296,7 +297,7 @@ void BkeProject::MakeItems(QTreeWidgetItem *dest, const QStringList &list)
 	}
 }
 
-//从hash列表中创建项目
+//从hash列表中创建工程
 void BkeProject::MakeItems(QTreeWidgetItem *dest, BkeFilesHash &hash)
 {
 	QTreeWidgetItem *le;
@@ -351,11 +352,10 @@ QTreeWidgetItem *BkeProject::FindItem(QTreeWidgetItem *dest, const QString &dir,
 			SetIconFromSuffix(le, tk.at(i));
 			root->addChild(le);
 			root = le;
+			SortTree(root);
 		}
 		else return 0;
 	}
-
-	SortTree(dest);
 
 	return root;
 }
@@ -641,7 +641,7 @@ bool BkeProject::removeFromHash(BkeFilesHash *hash, const ItemInfo &f)
 }
 
 
-//从hash中创建项目
+//从hash中创建工程
 void BkeProject::ItemFromHash(QTreeWidgetItem *dest, QHash<QString, QStringList*> &hash)
 {
 	QStringList *list;
@@ -665,6 +665,7 @@ void BkeProject::ItemFromHash(QTreeWidgetItem *dest, QHash<QString, QStringList*
 //排序,文件夹优先，大小写不敏感
 void BkeProject::SortItem(QTreeWidgetItem *dest)
 {
+	bool isExpanded = dest->isExpanded();
 	QList<QTreeWidgetItem *> root = dest->takeChildren();
 	QStringList dirlist, filelist;
 	QHash<QString, QTreeWidgetItem *> temp;
@@ -686,6 +687,8 @@ void BkeProject::SortItem(QTreeWidgetItem *dest)
 	for (int i = 0; i < filelist.size(); i++){
 		dest->addChild(temp.value(filelist.at(i)));
 	}
+	if (isExpanded)
+		dest->setExpanded(true);
 }
 
 //排序整个目录
@@ -938,7 +941,7 @@ void BkeProject::AddDir(const QString &dir, const QString &relativeName, const I
 	//fixme
 	la = Script;
 	h1 = &ScriptHash;
-	//项目上右键，扫描所有文件
+	//工程上右键，扫描所有文件
 	// 	if (f.Layer < 1)
 	// 	{
 	// 		if (!(f.Layer < 1)){

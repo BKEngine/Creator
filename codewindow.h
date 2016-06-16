@@ -206,7 +206,6 @@ public slots:
 
 public:
 	void backupAll();
-	BkeScintilla *getCurrentEdit(){ return currentedit; };
 
 private:
 	OtherWindow *othwin;
@@ -219,7 +218,6 @@ private:
 
 	BkeScintilla *currentedit;
 	BkeDocBase* currentbase;
-	QList<BkeScintilla*> EditList;  //最终释放用
 
 	QHash<QString, BkeDocBase*> docStrHash;
 	QHash<QWidget*, BkeDocBase*> docWidgetHash;

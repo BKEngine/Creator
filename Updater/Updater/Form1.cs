@@ -35,7 +35,7 @@ namespace Updater
 
         private static string HTTP_ADDRESS = "http://creator.up.bakery.moe/windows/";
         private static string INFO_FILE = "version";
-        private WebClient _client = new WebClient();
+        private WebClient _client = new MyWebClient();
         private string _version = "";
         private string _remoteVersion = "";
         private string _exeDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -130,7 +130,12 @@ namespace Updater
                 return;
             }
             textBox1.Text += "成功。" + Environment.NewLine;
-            ParseInfoFile(e.Result);
+            if(!ParseInfoFile(e.Result))
+            {
+                textBox1.Text += "从服务器下载了一个错误的文件，请检查运营商是否被劫持，或者向我们报告。" + Environment.NewLine + Environment.NewLine;
+                textBox1.Text += "以下是文件内容：" + Environment.NewLine + e.Result;
+                return;
+            }
             if (!ForceUseSelf && _remoteVersion.Equals(_version))
             {
                 textBox1.Text += "应用程序是最新版本，无需更新。将启动BKE_Creator。" + Environment.NewLine;
@@ -158,20 +163,28 @@ namespace Updater
 
         private Dictionary<string, string> _remoteFiles = new Dictionary<string, string>();
 
-        private void ParseInfoFile(string content)
+        private bool ParseInfoFile(string content)
         {
-            XmlDocument document = new XmlDocument();
-            document.LoadXml(content);
-            XmlElement root = document.DocumentElement;
-            XmlElement ele = root.FirstChild as XmlElement;
-            _remoteVersion = ele.InnerText;
-            while ((ele = ele.NextSibling as XmlElement) != null)
+            try
             {
-                string filename = ele.InnerText;
-                ele = ele.NextSibling as XmlElement;
-                string md5 = ele.InnerText;
-                _remoteFiles.Add(filename, md5);
+                XmlDocument document = new XmlDocument();
+                document.LoadXml(content);
+                XmlElement root = document.DocumentElement;
+                XmlElement ele = root.FirstChild as XmlElement;
+                _remoteVersion = ele.InnerText;
+                while ((ele = ele.NextSibling as XmlElement) != null)
+                {
+                    string filename = ele.InnerText;
+                    ele = ele.NextSibling as XmlElement;
+                    string md5 = ele.InnerText;
+                    _remoteFiles.Add(filename, md5);
+                }
             }
+            catch(Exception)
+            {
+                return false;
+            }
+            return true;
         }
 
         static private List<string> GetDirectoryFileList(string strDirectory)
@@ -322,7 +335,7 @@ namespace Updater
                     }
                 }
                 textBox1.Text += "删除过期备份：" + min + Environment.NewLine;
-                Directory.Delete(backupPath + min, true);
+                Directory.Delete(min, true);
             }
             UpdateCore();
         }
@@ -398,13 +411,21 @@ namespace Updater
             if(e.Error != null)
             {
                 textBox1.Text += "错误：" + Environment.NewLine + e.Error.Message + Environment.NewLine;
-                textBox1.Text += "重试中……" + Environment.NewLine;
-                if(ShouldUpdateSelf)
+                textBox1.Text += "3秒后重试……" + Environment.NewLine;
+                System.Windows.Forms.Timer t = new System.Windows.Forms.Timer();
+                t.Interval = 3000;
+                t.Tick += (_, __) =>
                 {
-                    DownloadFile("update.exe");
-                    return;
-                }
-                DownloadThisFile();
+                    t.Enabled = false;
+                    t.Dispose();
+                    if (ShouldUpdateSelf)
+                    {
+                        DownloadFile("update.exe");
+                        return;
+                    }
+                    DownloadThisFile();
+                };
+                t.Enabled = true;
                 return;
             }
             textBox1.Text += "成功。" + Environment.NewLine;
@@ -430,16 +451,11 @@ namespace Updater
             Process p = new Process();
             p.StartInfo.FileName = @"cmd.exe";
             p.StartInfo.UseShellExecute = false;
-            p.StartInfo.RedirectStandardInput = true;
-            p.StartInfo.RedirectStandardOutput = false;
-            p.StartInfo.RedirectStandardError = false;
             p.StartInfo.WorkingDirectory = _exeDir;
+            p.StartInfo.Arguments = "/C ping /n 2 127.1>nul&del /f /a /q update.exe&mv update.exe.tmp update.exe&update.exe&exit";
+            p.StartInfo.CreateNoWindow = true;
             p.Start();
-            p.StandardInput.WriteLine("ping /n 2 127.1>nul");
-            p.StandardInput.WriteLine("del /f /a /q update.exe");
-            p.StandardInput.WriteLine("mv update.exe.tmp update.exe");
-            p.StandardInput.WriteLine("update.exe");
-            p.StandardInput.Flush();
+            p.Close();
             Close();
         }
 
@@ -631,7 +647,7 @@ namespace Updater
         {
             WriteVersionFile();
             textBox1.Text += "更新完成，将启动BKE_Creator。" + Environment.NewLine;
-            Process.Start("BKE_Creator.exe");
+            Process.Start(_exeDir + "BKE_Creator.exe");
             CloseAfter3Seconds();
         }
 

@@ -664,6 +664,7 @@ void BG_Analysis::run()
 					QString en;
 					if (!LOLI::AutoRead(en, pdir + cur))
 					{
+						curfile.clear();
 						msgmutex.unlock();
 						continue;
 					}

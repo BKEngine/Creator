@@ -92,8 +92,8 @@ uint32_t BKE_hash(const wchar_t *str)
 void CheckOpenAL32() ;
 void CheckFileAssociation();
 
-//检查上次是否正常关闭，返回true表示非正常
-bool checkLastClose(QString &pro, QStringList &files)
+//检查上次是否正常关闭，返回false表示非正常
+bool checkLastClose(QString &pro)
 {
 	auto userdir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/.BKE_Creator/";
 	QFile p(userdir + "pro");
@@ -101,22 +101,6 @@ bool checkLastClose(QString &pro, QStringList &files)
 		return false;
 	if (!p.isOpen() && !p.open(QFile::ReadOnly))
 		return false;
-	QJsonDocument kk = QJsonDocument::fromJson(p.readAll());
-	if (kk.isNull() || !kk.isObject())
-		return false;
-	auto bkpAdmin = new QJsonObject(kk.object());
-	if (bkpAdmin->isEmpty())
-	{
-		delete bkpAdmin;
-		return false;
-	}
-	pro = bkpAdmin->value("project").toString();
-	auto arr = bkpAdmin->value("files").toArray();
-	files.clear();
-    for (auto &&it : arr)
-	{
-		files.push_back(it.toString());
-	}
 	return true;
 }
 
@@ -166,12 +150,12 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-/*
+
 #ifdef QT_DEBUG
 #ifdef WIN32
-	BKE_CURRENT_DIR = QString("G:/BKE_creator/file") ;
+	BKE_CURRENT_DIR = QDir::currentPath() ;
 #endif
-#endif*/
+#endif
 
    QApplication a(argc, argv);
 
@@ -254,8 +238,8 @@ int main(int argc, char *argv[])
 	QString ks ;
 	LOLI::AutoRead(ks,BKE_CURRENT_DIR+"/projects.txt") ;
 	BKE_Recently_Project = ks.split("\r\n") ;
-	LOLI::AutoRead(ks,BKE_CURRENT_DIR+"/files.txt") ;
-	BKE_Recently_Files = ks.split("\r\n") ;
+	//LOLI::AutoRead(ks,BKE_CURRENT_DIR+"/files.txt") ;
+	//BKE_Recently_Files = ks.split("\r\n") ;
 
 	//读取默认方法api列表
 	//BkeCreator::ReadApiList(&SYSlist,BKE_CURRENT_DIR+"/class.api",8) ;
@@ -284,7 +268,7 @@ int main(int argc, char *argv[])
 	test.show();
 #endif
 
-	QString pro;
+	/*QString pro;
 	QStringList files;
 
 	bool notclose = checkLastClose(pro, files);
@@ -309,7 +293,7 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	else if( argc > 1){
+	else */if( argc > 1){
 		projectedit->OpenProject(xcodec->toUnicode(QByteArray(argv[1])) );
 	}
 
@@ -318,9 +302,9 @@ int main(int argc, char *argv[])
 	//        projectedit->OpenProject(args);}
 	//);
 
-#ifndef QT_DEBUG
-	if( !BKE_CLOSE_SETTING->value("update/close").toBool() ) QTimer::singleShot(3000,&test,SLOT(CheckUpdate()) ) ;
-#endif
+	if( !BKE_CLOSE_SETTING->value("update/close").toBool() ) 
+		QTimer::singleShot(500,&test,&MainWindow::CheckUpdate) ;
+
 //#ifdef QT_DEBUG
 //    if( !BKE_CLOSE_SETTING->value("update/close").toBool() ) QTimer::singleShot(3000,&test,SLOT(CheckUpdate()) ) ;
 //#endif
@@ -370,6 +354,8 @@ void CheckOpenAL32()
 void CheckFileAssociation()
 {
 #ifdef Q_OS_WIN
+	if (!QFile::exists(BKE_CURRENT_DIR + "/FileAssociation.exe"))
+		return;
 	QSettings *ukenvFileReg = new QSettings("HKEY_CLASSES_ROOT\\.bkp", QSettings::NativeFormat);   //
 
 	//判断UKEnv类型是否已在注册表中，并关联了正确的打开方式（程序打开方式），没有则写入

@@ -45,10 +45,6 @@ public slots :
 	void Bedestroy();
 	void CurrentFileChange(const QString &name, const QString &prodir);
 	void HelpCreator();
-	void CheckUpdate();
-	void CheckConnect();
-	void upfileFinish(QNetworkReply *netf);
-	void startUp();
 	void OCupdate();
 	void Config();
 	void GameConfig();
@@ -73,19 +69,18 @@ private:
 
 	QMenu *wmenu;
 	QMenu *rpmenu;
-	QMenu *rfmenu;
 	QAction *btnhiddenleftact;
 	QAction *btnnewprojectact;
 	QAction *btnopenprojectact;
 	QAction *btnopenfileact;
 	QAction *btnnewfileact;
 	QAction *btnReleaseGame;
+	QAction *btncloseprojectact;
 	QToolBar *btnbar;
 
 	QAction *option_prop;
 
 	QSearchLineEdit *editsearch;
-	QNetworkAccessManager *netAdimin;
 
 	QVector<QFile*> FilePtrList;
 	QStringList OpenNameList;
@@ -97,20 +92,21 @@ private:
 	QTreeWidget *BookMarkBasic;
 	QTreeWidget *MarkBasic;
 
-	bool isConnetct;
-
 	void CreateMenu();
 	void CreateDownBar();
 	void BtnChangeStyle(QWidget *btn);
 	QList<QAction*> SetMenuList(QMenu *mn, const QStringList &list);
-	void isUpdate(QJsonObject &newJSON);
 
 	void test();
-	bool hasFileUp(QJsonObject fi);
 protected:
 	void closeEvent(QCloseEvent *e);
 	bool eventFilter(QObject * watched, QEvent * event);
 
+public:
+	void CheckUpdate();
+
+private:
+	QProcess *checkUpdate = NULL;
 };
 
 #endif // MAINWINDOW_H

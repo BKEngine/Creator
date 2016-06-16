@@ -32,6 +32,10 @@ OtherWindow::OtherWindow(QWidget *parent)
 	btncompiletext = new QPushButton("编译输出", this);
 	btnbookmark = new QPushButton("书签", this);
 	btnmark = new QPushButton("标记", this);
+	lewords = new QLineEdit(this);
+	lewords->setReadOnly(true);
+	lewords->setFixedWidth(150);
+	lewords->setAlignment(Qt::AlignHCenter);
 
 	connect(btnproblem, SIGNAL(clicked()), this, SLOT(WINproblem()));
 	connect(btnsearch, SIGNAL(clicked()), this, SLOT(WINsearch()));

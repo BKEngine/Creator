@@ -2,16 +2,15 @@
 #include "mainwindow.h"
 #include "BKS_info.h"
 
-QSplitter *ras[3] ;
-CodeWindow *codeedit ;
-OtherWindow *otheredit ;
-ProjectWindow *projectedit ;
-BkeLeftFileWidget *fileListWidget ;
+QSplitter *ras[3];
+CodeWindow *codeedit;
+OtherWindow *otheredit;
+ProjectWindow *projectedit;
+BkeLeftFileWidget *fileListWidget;
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent)
 {
-	isConnetct = false ;
 
 	//this->setWindowFlags(Qt::FramelessWindowHint); //隐藏标题栏
 	setWindowTitle("BKE Creator");
@@ -35,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ys = BKE_CLOSE_SETTING->value("window/height").toInt() ;
 	if( xs > 0 && ys > 0) resize(xs,ys);
 
-	//项目树与文件框
+	//工程树与文件框
 	ras[0]->setOrientation(Qt::Vertical);
 	//btnbar->hide();
 	ras[0]->addWidget( btnbar ) ;
@@ -43,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	int leftcount = BKE_CLOSE_SETTING->value("window/leftcount").toInt() ;
 	if( leftcount < 1){
 		OtherBasicWin *oth1 = new OtherBasicWin ;
-		oth1->ChangeShow(" 项目");
+		oth1->ChangeShow(" 工程");
 		OtherBasicWin *oth2 = new OtherBasicWin ;
 		oth2->ChangeShow(" 打开文档");
 		ras[0]->addWidget(oth1);
@@ -117,10 +116,11 @@ void MainWindow::CreateMenu()
 	this->menuBar()->setFont(tff);
 	this->menuBar()->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menubar",QString()).toString());
 
-	btnnewprojectact = new QAction(QIcon(":/project/source/newproject.png"), "新建项目", this);
-	btnopenprojectact = new QAction(QIcon(":/project/source/open_file.png"), "打开项目", this);
+	btnnewprojectact = new QAction(QIcon(":/project/source/newproject.png"), "新建工程", this);
+	btnopenprojectact = new QAction(QIcon(":/project/source/open_file.png"), "打开工程", this);
 	btnopenfileact = new QAction(QIcon(":/project/source/openfile.png"), "打开文件", this);
 	btnnewfileact = new QAction(QIcon(":/project/source/newfile.png"), "新建脚本", this);
+	btncloseprojectact = new QAction("关闭工程", this);
 
 	wmenu = this->menuBar()->addMenu("&文件");
 	wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
@@ -129,10 +129,11 @@ void MainWindow::CreateMenu()
 	wmenu->addAction(btnnewprojectact) ;
 	wmenu->addAction(btnopenfileact) ;
 	wmenu->addAction(btnnewfileact) ;
+	wmenu->addAction(btncloseprojectact);
 	wmenu->addSeparator() ;
-	rfmenu = wmenu->addMenu("最近访问的文件") ;
-	connect(rfmenu,SIGNAL(aboutToShow()),this,SLOT(ReflashMenu())) ;
-	rpmenu = wmenu->addMenu("最近使用的项目") ;
+	//rfmenu = wmenu->addMenu("最近访问的文件") ;
+	//connect(rfmenu,SIGNAL(aboutToShow()),this,SLOT(ReflashMenu())) ;
+	rpmenu = wmenu->addMenu("最近使用的工程") ;
 	connect(rpmenu,SIGNAL(aboutToShow()),this,SLOT(ReflashMenu())) ;
 	wmenu->addSeparator() ;
 	connect(wmenu->addAction("保存所有文件"),SIGNAL(triggered()),codeedit,SLOT(SaveALL())) ;
@@ -183,6 +184,7 @@ void MainWindow::CreateMenu()
 	connect(btnopenprojectact,SIGNAL(triggered()),projectedit,SLOT(OpenProject())) ;
 	connect(btnopenfileact,SIGNAL(triggered()),projectedit ,SLOT(OpenFile())) ;
 	connect(btnnewfileact,SIGNAL(triggered()),codeedit,SLOT(NewEmptyFile())) ;
+	connect(btncloseprojectact, SIGNAL(triggered()), projectedit, SLOT(CloseProject()));
 
 	connect(projectedit, SIGNAL(onProjectOpen(BkeProject *)), this, SLOT(ProjectOpen(BkeProject *)));
 	connect(projectedit, SIGNAL(onProjectClose()), this, SLOT(ProjectClose()));
@@ -196,7 +198,7 @@ void MainWindow::CreateDownBar()
 	downbar->setMovable(false);
 
 	//下边栏按钮
-	btnhiddenleftact = new QAction(QIcon(":/left/source/hiddenleft.png"),"隐藏侧边栏",this) ;
+	btnhiddenleftact = new QAction(QIcon(":/pedit/source/hiddenleft.png"),"隐藏侧边栏",this) ;
 	connect(btnhiddenleftact,SIGNAL(triggered()),this,SLOT(HiddenLeft())) ;
 	downbar->addAction(btnhiddenleftact) ;
 
@@ -210,6 +212,8 @@ void MainWindow::CreateDownBar()
 	downbar->addWidget(otheredit->btncompiletext) ;
 	downbar->addWidget(otheredit->btnbookmark) ;
 	downbar->addWidget(otheredit->btnmark) ;
+	downbar->addSeparator();
+	downbar->addWidget(otheredit->lewords);
 
 	btnbar = new QToolBar(this) ;
 	btnbar->setFixedHeight(24);
@@ -300,14 +304,14 @@ void MainWindow::ClearMenu()
 	QMenu *mn = dynamic_cast<QMenu*>( p->parentWidget()) ;
 	if( mn == 0 ) return ;
 	else if( mn == rpmenu ) BkeCreator::AddRecentProject("##") ;
-	else if( mn == rfmenu ) BkeCreator::AddRecentFile("##") ;
+	//else if( mn == rfmenu ) BkeCreator::AddRecentFile("##") ;
 }
 
 void MainWindow::ReflashMenu()
 {
 	QMenu *mn = dynamic_cast<QMenu*>(sender()) ;
 	if( mn == NULL ) return ;
-	else if( mn == rfmenu ) SetMenuList(mn,BKE_Recently_Files) ;
+	//else if( mn == rfmenu ) SetMenuList(mn,BKE_Recently_Files) ;
 	else if( mn == rpmenu ) SetMenuList(mn,BKE_Recently_Project) ;
 }
 
@@ -348,91 +352,37 @@ void MainWindow::HelpCreator()
 //检查更新
 void MainWindow::CheckUpdate()
 {
-	QString platform;
+	checkUpdate = new QProcess(this);
+	typedef void(QProcess::*func)(int);
+	func func1 = &QProcess::finished;
+	connect(checkUpdate, func1, [this](int) {
+		QByteArray arr = checkUpdate->readAll();
+		QString s = QTextCodec::codecForLocale()->toUnicode(arr).trimmed();
+		if (s == "True")
+		{
+			LableSureDialog msg;
+			msg.setWindowTitle("发现更新");
+			msg.SetLable("BKE Creator已经有了新版本，是否更新？");
+			msg.SetCheckbox(QStringList() << "不再提示自动更新");
+			msg.SetBtn(QStringList() << "【立即更新】" << "下次再说");
 
+			int ks = msg.WaitUser();
+			if (msg.IsCheckboxChoise(0)) {  //关闭自动更新
+				BKE_CLOSE_SETTING->setValue("update/close", true);
+			}
+			if (ks != 0) return;
 #ifdef Q_OS_WIN
-	platform = "win/";
-#endif
-#ifdef Q_OS_LINUX
-	platform = "linux/";
-#endif
-#ifdef Q_OS_MAC
-	platform = "mac/";
-#endif
-	netAdimin = new QNetworkAccessManager(this) ;
-	connect(netAdimin,SIGNAL(finished(QNetworkReply*)),this,SLOT(upfileFinish(QNetworkReply*))) ;
-	isConnetct = true ;
-	netAdimin->get(QNetworkRequest(QUrl("http://bke.bakery.moe/update/"+platform+"bkecreator"))) ;
-}
-
-//检查升级数据包
-void MainWindow::upfileFinish(QNetworkReply *netf)
-{
-	isConnetct = false ;
-	QJsonDocument dc = QJsonDocument::fromJson(netf->readAll()) ;
-	if( !dc.isEmpty() ){
-		QJsonObject llm = dc.object() ;
-		if( hasFileUp( llm.value("files").toObject()) ) isUpdate( llm );
-	}
-
-	netf->deleteLater();
-}
-
-//检查是否还在连接，如果是，终止，需要？
-void MainWindow::CheckConnect()
-{
-}
-
-//询问用户是否更新
-void MainWindow::isUpdate(QJsonObject &newJSON)
-{
-	LableSureDialog msg ;
-	msg.setWindowTitle("自动更新");
-	QString temp = "版本：" + newJSON.value("version").toString() ;
-	temp.append("\n更新日志：\n") ;
-	temp.append(newJSON.value("info").toString() ) ;
-	temp.append("\n以下文件需要更新:\n"+upList.join("\n")) ;
-	msg.SetLable("BKE Creator已经有了新版本，是否更新？\n\n"+temp);
-	msg.SetCheckbox(QStringList()<<"不再提示自动更新");
-	msg.SetBtn(QStringList()<<"【立即更新】"<<"下次再说");
-
-	int ks =  msg.WaitUser() ;
-	if( msg.IsCheckboxChoise(0) ){  //关闭自动更新
-		BKE_CLOSE_SETTING->setValue("update/close",true);
-	}
-	if( ks != 0 ) return ;
-
-	startUp();
-}
-
-void MainWindow::startUp()
-{
-#ifdef Q_OS_WIN
-	QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/update.exe")) ;
+			QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR + "/update.exe"));
 #elif defined(Q_OS_MAC)
-	QDesktopServices::openUrl(QUrl::fromLocalFile(qApp->applicationDirPath()+"/update"));
+			QDesktopServices::openUrl(QUrl::fromLocalFile(qApp->applicationDirPath() + "/update"));
 #else
-	QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/update")) ;
+			QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR + "/update"));
 #endif
-	close() ;
+			close();
+		}
+	});
+	checkUpdate->start(BKE_CURRENT_DIR + "/update.exe", QStringList("-output"));
 }
-
-bool MainWindow::hasFileUp(QJsonObject fi)
-{
-	QByteArray temp ;
-	LOLI::AutoRead(temp,BKE_CURRENT_DIR+"/version.txt") ;
-	QJsonDocument dc = QJsonDocument::fromJson( temp ) ;
-	QJsonObject oldfiles ;
-	if( !dc.isNull() ) oldfiles = dc.object().value("files").toObject() ;
-
-	upList.clear();
-	QStringList ls = fi.keys() ;
-	for( int i = 0 ; i < ls.size() ; i++){
-		if( oldfiles.value(ls.at(i)).toString() != fi.value(ls.at(i)).toString()) upList.append( ls.at(i) );
-	}
-	return upList.size() > 0 ;
-}
-
 
 //事件过滤器
 bool MainWindow::eventFilter ( QObject * watched, QEvent * event )
@@ -473,15 +423,13 @@ void MainWindow::ProjectClose()
 {
 	option_prop->setEnabled(false);
 	btnReleaseGame->setEnabled(false);
+	codeedit->ChangeProject(NULL);
 	codeedit->CloseAll();
 }
 
-//配置项目
+//配置工程
 void MainWindow::Config()
 {
-//    CConfigdia *ctk = new CConfigdia ;
-//    ctk->exec();
-//	delete ctk;
 	SetOptionDia *optiondia = new SetOptionDia() ;
 	optiondia->exec() ;
 

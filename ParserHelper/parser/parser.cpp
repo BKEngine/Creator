@@ -2134,6 +2134,10 @@ void Parser::nud_function(BKE_bytree** tree)
 				try
 				{
 					expression(&_tr);
+					if (_tr == NULL)
+					{
+						THROW(L"'='后需要一个表达式", next.pos);
+					}
 					if (_tr->Node.opcode != OP_CONSTVAR + OP_COUNT)
 					{
 						THROW(L"缺省值只能是常数", next.pos);

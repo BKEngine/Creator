@@ -128,7 +128,7 @@ void CodeWindow::CreateBtn()
 	btnmarkact = new QAction(QIcon(":/cedit/source/pin.png"), "添加标记", this);
 	btnredoact = new QAction(QIcon(":/cedit/source/redo.png"), "重做", this);
 	btnundoact = new QAction(QIcon(":/cedit/source/undo.png"), "撤销", this);
-	btnclearact = new QAction(QIcon(":/cedit/source/clear.png"), "清理编译项目", this);
+	btnclearact = new QAction(QIcon(":/cedit/source/clear.png"), "清理编译工程", this);
 	pannote = new QAction("选中部分注释/反注释", this);
 	btnselectall = new QAction("全选", this);
 	btnfly = new QAction(QIcon(":/cedit/source/flay.png"), "转到行...", this);
@@ -233,11 +233,11 @@ void CodeWindow::OtherWinProject(ProjectWindow *p)
 	connect(p, SIGNAL(DirWillBeInsert(QString)), this, SLOT(TextInsert(QString)));
 	//编译脚本
 	connect(p, SIGNAL(Compile()), this, SLOT(CompileAll()));
-	//当前项目被改变
+	//当前工程被改变
 	connect(p, SIGNAL(CurrentProChange(BkeProject*)), this, SLOT(ChangeProject(BkeProject*)));
 	//改变当前文件
 	connect(this, SIGNAL(CurrentFileChange(QString)), p, SLOT(SetCurrentItem(QString)));
-	//打开项目时读取书签以及标记
+	//打开工程时读取书签以及标记
 	connect(p, SIGNAL(TextToMarks(QString, QString, int)), this, SLOT(TextToMarks(QString, QString, int)));
 	//新建空白文档
 	//connect(p->btnnewfileact,SIGNAL(triggered()),this,SLOT(NewEmptyFile())) ;
@@ -254,7 +254,7 @@ void CodeWindow::OtherwinFileList(BkeLeftFileWidget *flist)
 	connect(filewidget->btnCloseAll, SIGNAL(triggered()), this, SLOT(CloseAll()));
 }
 
-//设置正在编辑项目
+//设置正在编辑工程
 void CodeWindow::SetCurrentEdit(int pos)
 {
 	if (ignoreflag) return;
@@ -286,6 +286,15 @@ void CodeWindow::SetCurrentEdit(QWidget *w)
 	SetCurrentEdit(stackwidget->currentIndex());
 }
 
+void calcWords(QString text, QLineEdit *edit)
+{
+	static auto le1 = QRegularExpression("(/\\*.+?\\*/)|(^\t*##.+?^\t*##)", QRegularExpression::MultilineOption | QRegularExpression::DontCaptureOption | QRegularExpression::DotMatchesEverythingOption);
+	static auto le2 = QRegularExpression("(^\t*#.+$)|(^\t*@.+$)|(\\[.+\\])|(//.+$)|(^\\*.+$)", QRegularExpression::MultilineOption | QRegularExpression::DontCaptureOption);
+	static auto le3 = QRegularExpression("[\t\r\n]");
+	text.remove(le1).remove(le2).remove(le3);
+	edit->setText("文本字数：" + QString::number(text.count()));
+}
+
 //改变正在编辑的文档，文件列表选项是同步改变的
 void CodeWindow::ChangeCurrentEdit(int pos)
 {
@@ -306,7 +315,7 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 		return;
 	}
 
-	//改变项目
+	//改变工程
 	ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
 	currentedit = currentbase->edit;
 	//reset lexer
@@ -337,6 +346,7 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 
 	AddMarksToEdit();
 	refreshLabel(currentedit);
+	calcWords(currentedit->text(), this->othwin->lewords);
 	//BackstageSearchLable(currentedit);
 }
 
@@ -353,7 +363,7 @@ void CodeWindow::CurrentConnect(bool c)
 		//        connect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
 		//        connect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
 		//        connect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
-		//项目被改变，需要从下层传递信号
+		//工程被改变，需要从下层传递信号
 		connect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		connect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
 		connect(currentedit, SIGNAL(refreshLabel(set<QString> &)), this, SLOT(refreshLabel(set<QString> &)));
@@ -404,7 +414,7 @@ void CodeWindow::Rename(const QString &old, const QString &now)
 	{
 		SetCurrentEdit(loli->edit);
 		loli->SetFileName(now);
-		BkeCreator::ReNameRecentFile(old, now);
+		//BkeCreator::ReNameRecentFile(old, now);
 		int pos = ItemTextList.indexOf(LOLI_OS_QSTRING(chopFileName(old)));
 		filewidget->item(pos)->setText(chopFileName(now));
 		lablelist->setItemText(pos, chopFileName(now));
@@ -521,7 +531,7 @@ void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, c
 		else
 		{
 			//加到各种列表里去
-			BkeCreator::AddRecentFile(loli->FullName());
+			//BkeCreator::AddRecentFile(loli->FullName());
 			//为了恢复当前文档的currentpos
 			QString curopenfile = ItemTextList.at(currentpos);
 			int pos = LOLI_SORT_INSERT(ItemTextList, loli->Name() + "*");
@@ -642,7 +652,7 @@ void CodeWindow::addFile(const QString &file, const QString &prodir)
 		//BkeProject *tpro = prowin->FindProjectFromDir(prodir);
 		//if (prodir != 0) loli->edit->setParser(tpro->lex);
 
-		BkeCreator::AddRecentFile(loli->FullName());
+		//BkeCreator::AddRecentFile(loli->FullName());
 
 		//添加文件监视
 		filewatcher->addPath(loli->FullName());
@@ -650,7 +660,7 @@ void CodeWindow::addFile(const QString &file, const QString &prodir)
 		//        ks = false ;
 	}
 
-	//从当前文档的附近路径中寻找项目，失败返回0
+	//从当前文档的附近路径中寻找工程，失败返回0
 	//ChangeProject(prowin->FindProjectFromDir(loli->ProjectDir()));
 	//改变当前显示项
 	SetCurrentEdit(loli->edit);
@@ -927,14 +937,14 @@ void CodeWindow::Compile()
 void CodeWindow::CompileLang(bool release /*= false*/)
 {
 	LOLI_CLEAR_TEMP(BKE_CURRENT_DIR + "/temp");
-	//当前编辑项不是项目的话，什么也不会发生
+	//当前编辑项不是工程的话，什么也不会发生
 	if (currentproject == 0) return;
 
 	//设置按钮
 	btncompileact->setEnabled(false);
 	btncompilerunact->setEnabled(false);
 	btnrunact->setEnabled(false);
-	////清理上次编译的项目
+	////清理上次编译的工程
 	//deleteCompileFile(ComList, cosdir);
 
 	////拷贝文件
@@ -966,14 +976,14 @@ void CodeWindow::CompileLang(bool release /*= false*/)
 void CodeWindow::CompileAll(bool release /*= false*/)
 {
 	LOLI_CLEAR_TEMP(BKE_CURRENT_DIR + "/temp");
-	//当前编辑项不是项目的话，什么也不会发生
+	//当前编辑项不是工程的话，什么也不会发生
 	if (currentproject == 0) return;
 
 	//设置按钮
 	btncompileact->setEnabled(false);
 	btncompilerunact->setEnabled(false);
 	btnrunact->setEnabled(false);
-	////清理上次编译的项目
+	////清理上次编译的工程
 	//deleteCompileFile(ComList, cosdir);
 
 	////拷贝文件
@@ -1350,7 +1360,7 @@ void CodeWindow::CheckMarks(BkeScintilla *edit, BkeMarkList *list)
 void CodeWindow::RunBKE()
 {
 	QString ndir;
-	if (!currentproject->config->live2DKey.isEmpty())
+	/*if (!currentproject->config->live2DKey.isEmpty())
 #ifdef Q_OS_WIN
 		ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Live2D_Dev.exe";
 #elif defined(Q_OS_MAC)
@@ -1358,7 +1368,7 @@ void CodeWindow::RunBKE()
 #else
 		ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev"; // Linux上没有Live2D
 #endif
-	else
+	else*/
 #ifdef Q_OS_WIN
 		ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev.exe";
 #elif defined(Q_OS_MAC)
@@ -1428,11 +1438,11 @@ void CodeWindow::FileReadyToCompile(int i)
 	kag->setValue(i);
 }
 
-//当前项目被改变
+//当前工程被改变
 void CodeWindow::ChangeProject(BkeProject *p)
 {
 	if (p == 0){
-		btncompileact->setEnabled(false);  //编译按钮只有当项目出现时才可用
+		btncompileact->setEnabled(false);  //编译按钮只有当工程出现时才可用
 		btncompilerunact->setEnabled(false);
 		btnrunact->setEnabled(false);
 		btndebugact->setEnabled(false);
@@ -1441,7 +1451,7 @@ void CodeWindow::ChangeProject(BkeProject *p)
 	}
 
 	currentproject = p;
-	btncompileact->setEnabled(true);  //项目出现后编译按钮都是可用的
+	btncompileact->setEnabled(true);  //工程出现后编译按钮都是可用的
 	btncompilerunact->setEnabled(true);
 }
 
@@ -1651,6 +1661,7 @@ void CodeWindow::ActCurrentChange()
 {
 	btnundoact->setEnabled(currentedit->isUndoAvailable());
 	btnredoact->setEnabled(currentedit->isRedoAvailable());
+	calcWords(currentedit->text(), this->othwin->lewords);
 }
 
 //剪切

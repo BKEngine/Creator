@@ -9,13 +9,14 @@ NewProDia::NewProDia(QWidget *parent) :
 	yes = new QPushButton("确定",prodialog);
 	no = new QPushButton("取消",prodialog);
 	s1 = new QLineEdit(prodialog);
+	s1->setValidator(new QRegExpValidator(QRegExp("[^/\\\\\":<>?*|]")));
 	s2 = new QLineEdit(prodialog) ;
-	QLabel *k1 = new QLabel("创建一个Bke项目，Bke项目能有效的帮你维护文件关系，方便编译脚本，测试与发布游戏。\r\n"
+	QLabel *k1 = new QLabel("创建一个BKE Creator工程。BKE Creator工程能有效的帮您维护文件关系，方便编译脚本，测试与发布游戏。\r\n"
 					"存储位置不存在时，将自动创建",prodialog) ;
 	QLabel *k2 = new QLabel("名    称", prodialog);
 	QLabel *k3 = new QLabel("存储位置", prodialog);
 
-	cb = new QCheckBox("为该项目创建一个文件夹", prodialog);
+	cb = new QCheckBox("为该工程创建一个文件夹", prodialog);
 	cb->setChecked(true);
 
 	k1->setWordWrap(true);
@@ -30,7 +31,7 @@ NewProDia::NewProDia(QWidget *parent) :
 	cb->setGeometry(42, 160, 290, 20);
 
 	resize(400,300);
-	prodialog->setWindowTitle("新建项目");
+	prodialog->setWindowTitle("新建工程");
 
 	type = -1 ;
 
@@ -57,7 +58,7 @@ void NewProDia::SureOK()
 {
 	//QString dirs,name ;
 	if( s1->text().isEmpty()){
-		QMessageBox::information(prodialog,"信息","请输入项目名称",QMessageBox::Ok) ;
+		QMessageBox::information(prodialog,"信息","请输入工程名称",QMessageBox::Ok) ;
 		return ;
 	}
 	else if( s2->text().isEmpty()){
@@ -83,7 +84,7 @@ void NewProDia::SureOK()
 	QFile temp(okdir + "/" + BKE_PROJECT_NAME) ;
 	if( temp.exists()){
 		QMessageBox tk(prodialog) ;
-		tk.setText("项目已存在，是否覆盖？");
+		tk.setText("工程已存在，是否覆盖？");
 		tk.setStandardButtons(QMessageBox::Yes|QMessageBox::Cancel|QMessageBox::Open);
 		tk.setDefaultButton(QMessageBox::Open);
 		int i = tk.exec() ;

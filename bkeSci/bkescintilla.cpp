@@ -428,6 +428,11 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 {
 	QString res;
 	auto p = analysis->lockFile(FileName);
+	if (!p)
+	{
+		analysis->unlockFile();
+		return QString();
+	}
 	BKE_Variable v;
 	auto idx = 0;
 	while (idx != ls.size() - 1)
@@ -517,6 +522,11 @@ QString BkeScintilla::getGlobalList(const QString &ls, const QString &alltext)
 {
 	QString res;
 	auto p = analysis->lockFile(FileName);
+	if (!p)
+	{
+		analysis->unlockFile();
+		return QString();
+	}
 	std::set<QString> params;
 	getAllMembers(p->fileclo, params);
 	analysis->unlockFile();
@@ -549,8 +559,6 @@ void BkeScintilla::showComplete()
 	QString lastContext;
 	int beginPos = pos;
 	unsigned int lastStyle = 0;
-	completeType = SHOW_NULL;
-
 	unsigned char st = style & 63;
 
 	if (st == SCE_BKE_STRING || st == SCE_BKE_STRING2 || st == SCE_BKE_TRANS || st == SCE_BKE_ANNOTATE || st == SCE_BKE_COMMENT || st == SCE_BKE_LABEL || st == SCE_BKE_TEXT)
@@ -559,6 +567,7 @@ void BkeScintilla::showComplete()
 	bool l = SendScintilla(SCI_AUTOCACTIVE);
 	if (l != 0)
 		return;
+	completeType = SHOW_NULL;
 
 	if (style & 64 /*BEGAL_MASK*/)
 	{
@@ -696,7 +705,7 @@ void BkeScintilla::showComplete()
 		break;
 	default:
 		break;
-	}
+	} 
 }
 
 //文字或样式被改变后
@@ -1130,14 +1139,45 @@ void BkeScintilla::ChooseComplete(const char *text, int pos)
 	removeSelectedText();
 	InsertAndMove(temp);
 
-	//if (completeType == SHOW_ATTR)
-	//{
-	//	modfieddata.pos = SendScintilla(SCI_GETCURRENTPOS) - 1;
-	//	SendScintilla(SCI_COLOURISE, modfieddata.pos - 1 - strlen(text), modfieddata.pos + 1);
-	//	modfieddata.text = '=';
-	//	//showComplete();
-	//	SendScintilla(SCI_AUTOCSHOW, 0UL, "\"crossfade\" \"turn\"");
-	//}
+	switch (completeType)
+	{
+	case BkeScintilla::SHOW_USECOMMANDLIST:
+		break;
+	case BkeScintilla::SHOW_AUTOCOMMANDLIST:
+		QTimer::singleShot(0, [this]() {
+			InsertAndMove(" ");
+		});
+		break;
+	case BkeScintilla::SHOW_AUTOVALLIST:
+		break;
+	case BkeScintilla::SHOW_ENUMLIST:
+		{
+			int pos = SendScintilla(SCI_GETCURRENTPOS);
+			unsigned char a = GetByte(pos - 1);
+			unsigned char b = GetByte(pos);
+			if (a == b && a == '"')
+			{
+				SendScintilla(SCI_DELETERANGE, pos, 1);
+			}
+			QTimer::singleShot(0, [this]() {
+				InsertAndMove(" ");
+			});
+		}
+		break;
+	case BkeScintilla::SHOW_USEVALLIST:
+		break;
+	case BkeScintilla::SHOW_LABEL:
+		break;
+	case BkeScintilla::SHOW_ATTR:
+		QTimer::singleShot(0, [this]() {
+			InsertAndMove("=");
+		});
+		break;
+	case BkeScintilla::SHOW_SYS:
+		break;
+	default:
+		break;
+	}
 
 	//如果最后是(),光标回移一格
 	if (temp.endsWith("()"))

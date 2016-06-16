@@ -49,6 +49,7 @@ QBkeConfigDialog::QBkeConfigDialog(QWidget *parent) :
     ui(new Ui::bkeconfigdialog)
 {
     ui->setupUi(this);
+	ui->gameName->setValidator(new QRegExpValidator(QRegExp("[^/\\\\\":<>?*|]")));
 }
 
 QBkeConfigDialog::~QBkeConfigDialog()
@@ -252,7 +253,7 @@ void QBkeConfigDialog::on_savebtn_clicked()
 
     //是否有名称
     if( ui->gameName->text().isEmpty() ) {
-        callText(ui->gameName,pt,"项目名称必须存在");
+        callText(ui->gameName,pt,"工程名称必须存在");
         return ;
     }
 
@@ -294,7 +295,7 @@ void QBkeConfigDialog::on_savebtn_clicked()
     tmp.live2DKey = ui->live2DKey->text();
 
     QFile ks;
-    ks.setFileName(config->projDir+"/settings.bkpsr");
+    ks.setFileName(config->projDir+"/"+tmp.saveDir+"/settings.bkpsr");
     ks.remove() ;
     *config = tmp;
     config->writeFile();

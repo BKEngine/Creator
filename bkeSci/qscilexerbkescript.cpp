@@ -221,6 +221,7 @@ void QsciLexerBkeScript::ReadConfig(QString hname)
 		hlb[i].bc = v[2 * i + 1].toUInt();
 	}
 
-	Lfont.setFamily(BKE_USER_SETTING->value(hname+"/font", "微软雅黑").toString());
+	Lfont.setFamily(BKE_USER_SETTING->value(hname+"/font", "Consolas").toString());
+	Lfont.insertSubstitution("Consolas","微软雅黑");
 	Lfont.setPointSize(BKE_USER_SETTING->value(hname+"/size", "13").toInt());
 }
