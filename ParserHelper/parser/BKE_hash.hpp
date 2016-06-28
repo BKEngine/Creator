@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <map>
 #include <stdint.h>
+#include <cmath>
 
 #include "memorypool.h"
 

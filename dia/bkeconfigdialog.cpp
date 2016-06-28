@@ -49,7 +49,7 @@ QBkeConfigDialog::QBkeConfigDialog(QWidget *parent) :
     ui(new Ui::bkeconfigdialog)
 {
     ui->setupUi(this);
-	ui->gameName->setValidator(new QRegExpValidator(QRegExp("[^/\\\\\":<>?*|]")));
+    ui->gameName->setValidator(new QRegExpValidator(QRegExp("[^/\\\\\":<>?*|]+")));
 }
 
 QBkeConfigDialog::~QBkeConfigDialog()

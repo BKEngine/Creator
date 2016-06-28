@@ -109,7 +109,6 @@ SOURCES += ./main.cpp \
     BKS_info.cpp \
     BKEscintilla/lexers/BKE_Lexer.cpp \
     ParserHelper/ParserHelper.cpp \
-    ParserHelper/parser/BKE_hash.cpp \
     ParserHelper/parser/BKE_number.cpp \
     ParserHelper/parser/BKE_string.cpp \
     ParserHelper/parser/BKE_variable.cpp \
@@ -136,7 +135,11 @@ SOURCES += ./main.cpp \
     BKEscintilla/src/CaseFolder.cpp \
     BKEscintilla/src/EditModel.cpp \
     BKEscintilla/src/EditView.cpp \
-    BKEscintilla/src/MarginView.cpp
+    BKEscintilla/src/MarginView.cpp \
+    BKEscintilla/Qt4Qt5/MacPasteboardMime.cpp \
+    dia/ParserEditor.cpp \
+    dia/ParserEditorTreeItem.cpp \
+    dia/ParserEditorTreeModel.cpp \
 
 HEADERS  += \
     topbarwindow.h \
@@ -257,7 +260,10 @@ HEADERS  += \
     BKEscintilla/src/EditModel.h \
     BKEscintilla/src/EditView.h \
     BKEscintilla/src/MarginView.h \
-    BKEscintilla/src/UnicodeFromUTF8.h
+    BKEscintilla/src/UnicodeFromUTF8.h \
+    dia/ParserEditor.h \
+    dia/ParserEditorTreeItem.h \
+    dia/ParserEditorTreeModel.h \
 
 RESOURCES += \
     source.qrc
@@ -275,9 +281,11 @@ FORMS += \
     dia/bkeconfigdialog.ui \
     dia/LangOpt.ui \
     dia/GameProperty.ui \
-    dia/doubleinput.ui
+    dia/doubleinput.ui \
+    dia/ParserEditor.ui
 
 mac{
+    QT += macextras
     LIBS += -L$$PWD/quazip -lquazip
 }
 

@@ -9,7 +9,7 @@ NewProDia::NewProDia(QWidget *parent) :
 	yes = new QPushButton("确定",prodialog);
 	no = new QPushButton("取消",prodialog);
 	s1 = new QLineEdit(prodialog);
-	s1->setValidator(new QRegExpValidator(QRegExp("[^/\\\\\":<>?*|]")));
+    s1->setValidator(new QRegExpValidator(QRegExp("[^/\\\\\":<>?*|]+")));
 	s2 = new QLineEdit(prodialog) ;
 	QLabel *k1 = new QLabel("创建一个BKE Creator工程。BKE Creator工程能有效的帮您维护文件关系，方便编译脚本，测试与发布游戏。\r\n"
 					"存储位置不存在时，将自动创建",prodialog) ;
