@@ -152,7 +152,7 @@ namespace Updater
         {
             try
             {
-                DllLoader loader = new DllLoader("msvcp140.dll");
+                DllLoader loader = new DllLoader("msvcp120.dll");
                 NeedVCRuntime = !loader.IsLoaded;
             }
             catch
@@ -288,7 +288,7 @@ namespace Updater
             }
             if(NeedVCRuntime)
             {
-                _filesToDownload.Add("vc_redist.x86.exe");
+                _filesToDownload.Add("vcredist_x86.exe");
             }
             MakeBackup();
         }
