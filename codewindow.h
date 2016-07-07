@@ -206,6 +206,7 @@ public slots:
 
 public:
 	void backupAll();
+	static QString getScenarioTextFromCode(QString text);
 
 private:
 	OtherWindow *othwin;

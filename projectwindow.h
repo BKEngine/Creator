@@ -25,6 +25,7 @@ public:
 		btn_newimport,
 		btn_addfile,
 		btn_adddir,
+		btn_exportscenario,
 		btn_showindir,
 		btn_search,
 		btn_remove,
@@ -89,6 +90,7 @@ private:
 	//void Active(const ItemInfo &f);
 	void ShowInDir(const ItemInfo &f);
 	void ReleaseGame(const ItemInfo &f);
+	void ExportScenario(const ItemInfo &f);
 	QTreeWidgetItem *findFileInProject(const QString &name);
 
 public:

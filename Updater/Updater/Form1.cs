@@ -19,6 +19,7 @@ namespace Updater
         {
             InitializeComponent();
             this.FormClosing += Form1_FormClosing1;
+            this.FixUp = false;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -26,9 +27,13 @@ namespace Updater
             BeginUpdate();
         }
 
+        private bool _canClose = false;
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Cancel();
+            if (!_canClose)
+                e.Cancel = true;
+            else
+                Cancel();
         }
 
         public bool ForceUseSelf { get; set; }
@@ -46,15 +51,24 @@ namespace Updater
             return uri;
         }
 
+        public bool FixUp { get; set; }
+
         private void ReadVersionFile()
         {
-            try
+            if(FixUp)
             {
-                _version = File.ReadAllText(_exeDir + "version");
+                _version = "";
             }
-            catch(Exception)
+            else
             {
-
+                try
+                {
+                    _version = File.ReadAllText(_exeDir + "version");
+                }
+                catch (Exception)
+                {
+                    _version = "";
+                }
             }
         }
 
@@ -88,6 +102,12 @@ namespace Updater
         public void Cancel()
         {
             _client.CancelAsync();
+        }
+
+        private new void Close()
+        {
+            this._canClose = true;
+            base.Close();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -180,7 +200,7 @@ namespace Updater
                     _remoteFiles.Add(filename, md5);
                 }
             }
-            catch(Exception)
+            catch
             {
                 return false;
             }
@@ -452,7 +472,13 @@ namespace Updater
             p.StartInfo.FileName = @"cmd.exe";
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.WorkingDirectory = _exeDir;
-            p.StartInfo.Arguments = "/C ping /n 2 127.1>nul&del /f /a /q update.exe&mv update.exe.tmp update.exe&update.exe&exit";
+            string arg = "/C ping /n 2 127.1>nul&del /f /a /q update.exe&mv update.exe.tmp update.exe&update.exe";
+            if(FixUp)
+            {
+                arg += " -fixup";
+            }
+            arg += "&exit";
+            p.StartInfo.Arguments = arg;
             p.StartInfo.CreateNoWindow = true;
             p.Start();
             p.Close();

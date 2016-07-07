@@ -11,7 +11,6 @@ BkeLeftFileWidget *fileListWidget;
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent)
 {
-
 	//this->setWindowFlags(Qt::FramelessWindowHint); //隐藏标题栏
 	setWindowTitle("BKE Creator");
 	codeedit = new CodeWindow(this) ;
@@ -175,9 +174,9 @@ void MainWindow::CreateMenu()
 	wmenu = this->menuBar()->addMenu("&帮助");
 	wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
 	wmenu->addAction("帮助文件") ;
-	connect(wmenu->addAction("检查更新"),SIGNAL(triggered()),this,SLOT(startUp())) ;
+	connect(wmenu->addAction("检查更新"),SIGNAL(triggered()),this,SLOT(CheckUpdate())) ;
 	connect(wmenu->addAction("(开启/关闭)自动更新"),SIGNAL(triggered()),this,SLOT(OCupdate())) ;
-	connect(wmenu->addAction("Creator教程"),SIGNAL(triggered()),this,SLOT(HelpCreator())) ;
+	connect(wmenu->addAction("API列表"),SIGNAL(triggered()),this,SLOT(OpenAPIList())) ;
 	connect(wmenu->addAction("关于..."),SIGNAL(triggered()),this,SLOT(AboutBkeCreator())) ;
 
 	connect(btnnewprojectact,SIGNAL(triggered()),projectedit,SLOT(NewProject())) ;
@@ -343,20 +342,26 @@ void MainWindow::CurrentFileChange(const QString &name,const QString &prodir)
 }
 
 
-void MainWindow::HelpCreator()
+void MainWindow::OpenAPIList()
 {
-	QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/tool/简介.html")) ;
+	QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"API_List.xlsx")) ;
 }
 
 
 //检查更新
 void MainWindow::CheckUpdate()
 {
+	if (checkUpdate)
+	{
+		return;
+	}
 	checkUpdate = new QProcess(this);
 	typedef void(QProcess::*func)(int);
 	func func1 = &QProcess::finished;
 	connect(checkUpdate, func1, [this](int) {
 		QByteArray arr = checkUpdate->readAll();
+		checkUpdate->deleteLater();
+		checkUpdate = nullptr;
 		QString s = QTextCodec::codecForLocale()->toUnicode(arr).trimmed();
 		if (s == "True")
 		{

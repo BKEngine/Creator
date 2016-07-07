@@ -28,7 +28,7 @@ ProjectWindow::ProjectWindow(QWidget *parent)
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(ShowRmenu(QPoint)));
 	connect(this, SIGNAL(CurrentProChange(BkeProject *)), (MainWindow*)parent, SLOT(CurrentProChange(BkeProject *)));
 
-	QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建脚本 添加文件 添加目录 在文件夹中显示 在这里搜索 移除 关闭工程 重命名").split(" ");
+	QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建脚本 添加文件 添加目录 导出剧本 在文件夹中显示 在这里搜索 移除 关闭工程 重命名").split(" ");
 	for (int i = 0; i < BTN_COUNT; i++){
 		btns[i] = new QAction(ls.at(i), this);
 		connect(btns[i], SIGNAL(triggered()), this, SLOT(ActionAdmin()));
@@ -197,6 +197,7 @@ void ProjectWindow::ShowRmenu(const QPoint & pos)
 	}
 
 	for (int i = btn_addfile; i <= btn_search; i++){
+		if(i == btn_exportscenario && (info.getLayer1ItemInfo().Name != "脚本" || !info.Name.endsWith(".bkscr"))) continue;
 		mn.addAction(btns[i]);
 		if (i == btn_adddir) mn.addSeparator();
 		else if (i == btn_newimport) mn.addSeparator();
@@ -504,6 +505,7 @@ void ProjectWindow::ActionAdmin()
 	else if (p == btns[btn_newimport]) NewFile(info, 1);
 	else if (p == btns[btn_addfile]) Addfiles(info);
 	else if (p == btns[btn_adddir]) AddDir(info);
+	else if (p == btns[btn_exportscenario]) ExportScenario(info);
 	else if (p == btns[btn_showindir]) ShowInDir(info);
 	else if (p == btns[btn_search]);
 	else if (p == btns[btn_remove]) DeleteFile(info);
@@ -651,6 +653,29 @@ void ProjectWindow::ReleaseGame(const ItemInfo &f)
 {
 	BkeProject *p = FindPro(f.ProName);
 	p->ReleaseGame();
+}
+
+void ProjectWindow::ExportScenario(const ItemInfo &f)
+{
+	if (workpro)
+	{
+		QString text;
+		QString path = workpro->FileDir() + f.FullName;
+		if (LOLI::AutoRead(text, path))
+		{
+			text = CodeWindow::getScenarioTextFromCode(text).replace("\n\n","\n");
+			path.truncate(path.lastIndexOf('.'));
+			if (LOLI::AutoWrite(path + ".scenario.txt", text))
+			{
+				if (QMessageBox::question(NULL, "导出文本", "文本导出成功！是否打开导出目录？") == QMessageBox::Yes)
+				{
+					ShowInDir(f.getParentInfo());
+				}
+				return;
+			}
+		}
+		QMessageBox::warning(NULL, "导出文本", "导出失败！");
+	}
 }
 
 void ProjectWindow::ReleaseCurrentGame()

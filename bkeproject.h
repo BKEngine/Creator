@@ -57,6 +57,13 @@ public:
 			return QString();
 		return FullName;
 	}
+
+	ItemInfo getParentInfo() const
+	{
+		ItemInfo p;
+		BKE_PROJECT_READITEM(Root->parent(), p);
+		return p;
+	}
 };
 
 

@@ -286,13 +286,16 @@ void CodeWindow::SetCurrentEdit(QWidget *w)
 	SetCurrentEdit(stackwidget->currentIndex());
 }
 
-void calcWords(QString text, QLineEdit *edit)
+QString CodeWindow::getScenarioTextFromCode(QString text)
 {
 	static auto le1 = QRegularExpression("(/\\*.+?\\*/)|(^\t*##.+?^\t*##)", QRegularExpression::MultilineOption | QRegularExpression::DontCaptureOption | QRegularExpression::DotMatchesEverythingOption);
 	static auto le2 = QRegularExpression("(^\t*#.+$)|(^\t*@.+$)|(\\[.+\\])|(//.+$)|(^\\*.+$)", QRegularExpression::MultilineOption | QRegularExpression::DontCaptureOption);
-	static auto le3 = QRegularExpression("[\t\r\n]");
-	text.remove(le1).remove(le2).remove(le3);
-	edit->setText("文本字数：" + QString::number(text.count()));
+	return text.remove(le1).remove(le2);
+}
+
+void calcWords(QString text, QLineEdit *edit)
+{
+	edit->setText("文本字数：" + QString::number(CodeWindow::getScenarioTextFromCode(text).remove(QRegExp("[\r\n]")).count()));
 }
 
 //改变正在编辑的文档，文件列表选项是同步改变的
@@ -1147,7 +1150,7 @@ void CodeWindow::CompileError(QString s)
 	btnrunact->setEnabled(true);
 	QTimer::singleShot(8 * 1000, kag, SLOT(reset())); //8秒之后隐藏
 	isRun = false;
-	QMessageBox::warning(this, "编译失败", "bkc打开失败，错误：" + s);
+	QMessageBox::warning(this, "编译失败", "BKCompiler执行失败，错误：" + s + "\n\n1.请检查creator目录下tool/BKCompiler_Dev.exe是否存在，如不存在请重新下载本程序或者运行update.exe -fixup进行修复。\n2.请关闭关闭所有“杀毒软件”或者“安全卫士”。");
 }
 
 //编译完成

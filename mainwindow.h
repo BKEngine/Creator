@@ -44,12 +44,13 @@ public slots :
 	void NormalAction();
 	void Bedestroy();
 	void CurrentFileChange(const QString &name, const QString &prodir);
-	void HelpCreator();
+	void OpenAPIList();
 	void OCupdate();
 	void Config();
 	void GameConfig();
 	void ProjectOpen(BkeProject *p);
 	void ProjectClose();
+	void CheckUpdate();
 
 
 	//发布游戏
@@ -101,9 +102,6 @@ private:
 protected:
 	void closeEvent(QCloseEvent *e);
 	bool eventFilter(QObject * watched, QEvent * event);
-
-public:
-	void CheckUpdate();
 
 private:
 	QProcess *checkUpdate = NULL;

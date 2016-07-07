@@ -37,6 +37,10 @@ namespace Updater
                 {
                     form.ForceUseSelf = true;
                 }
+                else if(args[0] == "-fixup")
+                {
+                    form.FixUp = true;
+                }
             }
             
             Application.Run(form);
