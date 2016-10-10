@@ -15,13 +15,13 @@
 #define REG_SPE_CMD(a, b, c, d) { auto &_p = SpecialCmdList[#a].modes[#b]; _p.first = c; auto &_v = _p.second; _v.name=#b;_v.detail = d; /*_v.argNames.push_back("mode"); _v.argFlags.push_back(ptString);*/
 #define REG_SPE_CMD_VERSION(a, b, v, c, d) REG_SPE_CMD(a, b, c, d)
 #else
-#define REG_CMD(a, b) do{ auto &_v = CmdList[L###a]; _v.name=L###a;
+#define REG_CMD(a, b) do{ auto &_v = CmdList[W(#a)]; _v.name=W(#a);
 #define REG_CMD_VERSION(a, v, b) REG_CMD(a, b); _v.version = v;
 #define REG_END() }while(0)
-#define ADD_PARAM(b, c, ...) _v.addArg(L###b, c, ##__VA_ARGS__ )
+#define ADD_PARAM(b, c, ...) _v.addArg(W(#b), c, ##__VA_ARGS__ )
 #define ADD_LIST(a) 
-#define PROPERTY(a, b, c) _v.properties.emplace_back(L###a,L###b,c)
-#define REG_SPE_CMD(a, b, c, d) { auto &_p = SpecialCmdList[L###a].modes[L###b]; _p.first = c; auto &_v = _p.second; _v.name=L###b; _v.addArg(L"mode", ptString);
+#define PROPERTY(a, b, c) _v.properties.emplace_back(W(#a),W(#b),c)
+#define REG_SPE_CMD(a, b, c, d) do { auto &_p = SpecialCmdList[W(#a)].modes[W(#b)]; _p.first = c; auto &_v = _p.second; _v.name=W(#b); _v.addArg(W("mode"), ptString);
 #define REG_SPE_CMD_VERSION(a, b, v, c, d) REG_SPE_CMD(a, b, c, d) _v.version = v;
 #endif
 
@@ -32,15 +32,15 @@
 QHash<QString, BKECmdInfo> CmdList;
 QHash<QString, BKESpecialCmdInfo> SpecialCmdList;
 #else
-unordered_map<wstring, CmdInfo> CmdList;
-unordered_map<wstring, SpecialCmdInfo> SpecialCmdList;
+unordered_map<u16string, CmdInfo> CmdList;
+unordered_map<u16string, SpecialCmdInfo> SpecialCmdList;
 
-static const pair<function<bool(bool, bool)>, const wchar_t *> atmostOne = make_pair(
-	[](bool e1, bool e2)->bool {return !(e1 & e2); }, L"最多只能存在一个。"
+static const pair<function<bool(bool, bool)>, const char16_t *> atmostOne = make_pair(
+	[](bool e1, bool e2)->bool {return !(e1 & e2); }, W("最多只能存在一个。")
 	);
 
-static const pair<function<bool(bool, bool)>, const wchar_t *>  onlyOne = make_pair(
-	[](bool e1, bool e2)->bool {return e1 != e2; }, L"必须、且只能存在一个。"
+static const pair<function<bool(bool, bool)>, const char16_t *>  onlyOne = make_pair(
+	[](bool e1, bool e2)->bool {return e1 != e2; }, W("必须、且只能存在一个。")
 	);
 #endif
 
@@ -152,7 +152,7 @@ void initCmd()
 	REG_CMD(cursor, "设置鼠标指针\nfile和index参数最多存在一个，若两个都为空则将鼠标指针设回系统默认");
 	ADD_PARAM(file, ptString | ptOptional);
 	ADD_PARAM(index, ptInteger | ptOptional);
-	PROPERTY(image, index, atmostOne);
+	PROPERTY(file, index, atmostOne);
 	REG_END();
 
 	REG_CMD(l2dsprite, "载入一个live2d模型（需要有live2d key）");
@@ -184,7 +184,7 @@ void initCmd()
 	REG_END();
 
 	REG_CMD(click, "等待鼠标左键点击后继续");
-		ADD_PARAM(time, ptTime | ptOptional, AVALIABLE_AFTER(2542));
+	ADD_PARAM(time, ptTime | ptOptional, AVALIABLE_AFTER(2542));
 	REG_END();
 
 	REG_CMD(remove, "从一个精灵的parent上取下自己，该精灵变为不可见");
@@ -326,8 +326,33 @@ void initCmd()
 	ADD_PARAM(under, ptBool | ptOptional);
 	ADD_PARAM(shadow, ptBool | ptOptional);
 	ADD_PARAM(shadowcolor, ptColor | ptOptional);
+	ADD_PARAM(shadowsize, ptInteger | ptOptional, AVALIABLE_AFTER(2761));
 	ADD_PARAM(stroke, ptBool | ptOptional);
 	ADD_PARAM(strokecolor, ptColor | ptOptional);
+	ADD_PARAM(strokesize, ptInteger | ptOptional, AVALIABLE_AFTER(2761));
+	REG_END();
+
+	REG_CMD(richtextsprite, "创建一个文字精灵，text为bke的富文本字符串。若可选参数没有设定且没有特殊说明的，将默认使用当前的字体设置。\n设置都是临时的，只对该文字精灵有效。");
+	ADD_PARAM(index, ptInteger);
+	ADD_PARAM(text, ptString);
+	ADD_PARAM(color, ptColor | ptColorArray | ptOptional);
+	ADD_PARAM(size, ptInteger | ptOptional);
+	ADD_PARAM(font, ptString | ptOptional);
+	ADD_PARAM(width, ptInteger | ptOptional);
+	ADD_PARAM(height, ptInteger | ptOptional);
+	ADD_PARAM(xinterval, ptInteger | ptOptional);
+	ADD_PARAM(yinterval, ptInteger | ptOptional);
+	ADD_PARAM(extrachar, ptString | ptOptional);
+	ADD_PARAM(bold, ptBool | ptOptional);
+	ADD_PARAM(italic, ptBool | ptOptional);
+	ADD_PARAM(strike, ptBool | ptOptional);
+	ADD_PARAM(under, ptBool | ptOptional);
+	ADD_PARAM(shadow, ptBool | ptOptional);
+	ADD_PARAM(shadowcolor, ptColor | ptOptional);
+	ADD_PARAM(shadowsize, ptInteger | ptOptional, AVALIABLE_AFTER(2761));
+	ADD_PARAM(stroke, ptBool | ptOptional);
+	ADD_PARAM(strokecolor, ptColor | ptOptional);
+	ADD_PARAM(strokesize, ptInteger | ptOptional, AVALIABLE_AFTER(2761));
 	REG_END();
 
 	REG_CMD(textstyle, "设置当前文字大小，颜色等属性。若可选参数没有设定且没有特殊说明的，将默认使用当前的文本风格设置。\n其中字体默认使用系统字体，size初始化为24，color初始化为0xFFFFFF，斜体等初始化为false，\nenableshadow和enablestroke初始化为false，shadow和stroke初始化为0x000000");
@@ -340,8 +365,10 @@ void initCmd()
 	ADD_PARAM(under, ptBool | ptOptional);
 	ADD_PARAM(shadow, ptBool | ptOptional);
 	ADD_PARAM(shadowcolor, ptColor | ptOptional);
+	ADD_PARAM(shadowsize, ptInteger | ptOptional, AVALIABLE_AFTER(2761));
 	ADD_PARAM(stroke, ptBool | ptOptional);
 	ADD_PARAM(strokecolor, ptColor | ptOptional);
+	ADD_PARAM(strokesize, ptInteger | ptOptional, AVALIABLE_AFTER(2761));
 	REG_END();
 
 	REG_CMD(storefont, "暂存字体信息，如果多次storefont，只会保存最后一次的结果。\n用restorefont命令可以将字体设为最后一次storefont时的状态。");
@@ -420,7 +447,7 @@ void initCmd()
 	REG_END();
 
 	REG_CMD(tablegoto, "计算表达式，根据返回的值跳转到标签数组对应的元素指示的标签，只能同一文件中跳转。");
-	ADD_PARAM(exp, ptTime);
+	ADD_PARAM(exp, ptVariable);
 	ADD_PARAM(target, ptLabelArray);
 	REG_END();
 
@@ -723,6 +750,7 @@ void initCmd()
 	REG_CMD(spriteopt, "设置一个精灵的某些属性。如果一个参数不存在，将不改变原有的状态。");
 	ADD_PARAM(index, ptInteger);
 	ADD_PARAM(disable, ptBool | ptOptional);
+	ADD_PARAM(effectwithchild, ptBool | ptOptional);
 	ADD_PARAM(recursive, ptBool | ptOptional);
 	REG_END();
 
@@ -797,24 +825,31 @@ void initCmd()
 
 	//20151231
 	REG_CMD_VERSION(watcher, AVALIABLE_AFTER(2447), "新建一个监视器附加到精灵上，如果监视变量改动则触发事件。");
-		ADD_PARAM(exp, ptString);
-		ADD_PARAM(target, ptInteger);
-		ADD_PARAM(onchanged, ptEvent | ptOptional);
-		ADD_PARAM(interval, ptInteger | ptOptional);
-		ADD_PARAM(updatevalue, ptBool | ptOptional);
-		ADD_PARAM(once, ptBool | ptOptional);
-		ADD_PARAM(tag, ptInteger | ptOptional);
+	ADD_PARAM(exp, ptString);
+	ADD_PARAM(target, ptInteger);
+	ADD_PARAM(onchanged, ptEvent | ptOptional);
+	ADD_PARAM(interval, ptInteger | ptOptional);
+	ADD_PARAM(updatevalue, ptBool | ptOptional);
+	ADD_PARAM(once, ptBool | ptOptional);
+	ADD_PARAM(tag, ptInteger | ptOptional);
+	ADD_PARAM(trigger, ptBool | ptOptional);
 	REG_END();
 
 	REG_CMD_VERSION(stopwatcher, AVALIABLE_AFTER(2447), "停止一个精灵上的监视器。");
-		ADD_PARAM(index, ptInteger);
-		ADD_PARAM(tag, ptInteger | ptOptional);
+	ADD_PARAM(index, ptInteger);
+	ADD_PARAM(tag, ptInteger | ptOptional);
 	REG_END();
 
 	//20160208
 	REG_CMD_VERSION(waituntil, AVALIABLE_AFTER(2492), "等待直到条件完成（返回结果为true）");
-		ADD_PARAM(exp, ptString);
-		ADD_PARAM(canskip, ptBool | ptOptional);
+	ADD_PARAM(exp, ptString);
+	ADD_PARAM(canskip, ptBool | ptOptional);
+	REG_END();
+
+	//20160815
+	REG_CMD_VERSION(waitanimate, AVALIABLE_AFTER(2777), "等待动画完成");
+	ADD_PARAM(index, ptInteger);
+	ADD_PARAM(canskip, ptBool | ptOptional);
 	REG_END();
 
 	//special cmd
@@ -827,6 +862,7 @@ void initCmd()
 	ADD_PARAM(interval, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(delay, ptInteger | ptOptional);
 	ADD_PARAM(loop, ptInteger | ptString | ptOptional);
+	ADD_LIST("\"none\" \"forward\" \"bouncing\"");
 	REG_END();
 
 	REG_SPE_CMD(animate, vertical, ANIMATE_VERTICAL, "从一个图片中创建一个动画，垂直模式（动画帧垂直排列），即：\n一个frame为3，column为2的动画的帧播放顺序为：\n\t\t1 4\n\t\t2 5\n\t\t3 6");
@@ -837,6 +873,7 @@ void initCmd()
 	ADD_PARAM(interval, ptInteger | ptIntegerArray | ptOptional);
 	ADD_PARAM(delay, ptInteger | ptOptional);
 	ADD_PARAM(loop, ptInteger | ptString | ptOptional);
+	ADD_LIST("\"none\" \"forward\" \"bouncing\"");
 	REG_END();
 
 	REG_SPE_CMD(animate, multifiles, ANIMATE_MULTIFILES, "从多个文件创建一个动画");
@@ -857,11 +894,19 @@ void initCmd()
 	REG_SPE_CMD(animate, stop, ANIMATE_STOP, "停止一个动画");
 	ADD_PARAM(index, ptInteger);
 	REG_END();
+
+	//20160629
+	REG_SPE_CMD(animate, video, ANIMATE_VIDEO, "创建一个Video动画");
+	ADD_PARAM(index, ptInteger);
+	ADD_PARAM(file, ptString);
+	ADD_PARAM(loop, ptInteger | ptString | ptOptional);
+	REG_END();
+
 	//action
 	REG_SPE_CMD(action, start, ACTION_START, "若在创建queue或parallel的过程中，立刻结束所有层动作的创建（相当于执行若干个end），并立刻开始创建好的动作。");
 	ADD_PARAM(target, ptInteger);
 	ADD_PARAM(times, ptInteger | ptOptional);
-		ADD_PARAM(speed, ptNumber | ptString | ptOptional, AVALIABLE_AFTER(2443));
+	ADD_PARAM(speed, ptNumber | ptString | ptOptional, AVALIABLE_AFTER(2443));
 	REG_END();
 	REG_SPE_CMD(action, queue, ACTION_QUEUE, "创建一个命令队列，用于按顺序执行命令");
 	REG_END();
@@ -981,6 +1026,7 @@ void initCmd()
 	ADD_PARAM(speed, ptInteger | ptOptional);
 	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	REG_END();
+
 	REG_SPE_CMD(action, catmullromby, ACTION_CATMULLROMBY, "");
 	ADD_PARAM(time, ptTime);
 	ADD_PARAM(points, ptArray);
@@ -1017,12 +1063,33 @@ void initCmd()
 	REG_END();
 	REG_SPE_CMD_VERSION(action, timer, AVALIABLE_AFTER(2464), ACTION_TIMER, "创建一个timer，在一定时间段内每隔一段时间执行一次表达式");
 	ADD_PARAM(exp, ptString);
-	ADD_PARAM(interval, ptInteger | ptOptional);
-	ADD_PARAM(time, ptInteger | ptOptional);
+	ADD_PARAM(interval, ptTime | ptOptional);
+	ADD_PARAM(time, ptTime | ptOptional);
 	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
 	REG_END();
 	REG_SPE_CMD_VERSION(action, delayuntil, AVALIABLE_AFTER(2464), ACTION_DELAYUNTIL, "只能用于queue或者parallel中，暂停动作队列直到表达式计算结果为true，用于两个动作间的时间间隔。");
 	ADD_PARAM(exp, ptString);
+	REG_END();
+	REG_SPE_CMD_VERSION(action, stretch, AVALIABLE_AFTER(2777), ACTION_STRETCH, "将精灵变形，重新指定四个顶点的位置。");
+	ADD_PARAM(lt, ptPos);
+	ADD_PARAM(rt, ptPos);
+	ADD_PARAM(rb, ptPos);
+	ADD_PARAM(lb, ptPos);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
+	ADD_PARAM(ease, ptString | ptInteger | ptOptional);
+	ADD_PARAM(time, ptInteger | ptOptional);
+	REG_END();
+	REG_SPE_CMD_VERSION(action, rotatezby, AVALIABLE_AFTER(2777), ACTION_ROTATEZBY, "绕anchor点在的z轴顺时针（从上往下）旋转");
+	ADD_PARAM(rotate, ptNumber);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
+	ADD_PARAM(ease, ptString | ptInteger | ptOptional);
+	ADD_PARAM(time, ptInteger | ptOptional);
+	REG_END();
+	REG_SPE_CMD_VERSION(action, rotatezto, AVALIABLE_AFTER(2777), ACTION_ROTATEZTO, "绕anchor点在的z轴顺时针（从上往下）旋转");
+	ADD_PARAM(rotate, ptNumber);
+	ADD_PARAM(target, ptInteger | ptIntegerArray | ptOptional);
+	ADD_PARAM(ease, ptString | ptInteger | ptOptional);
+	ADD_PARAM(time, ptInteger | ptOptional);
 	REG_END();
 
 	//trans
@@ -1099,6 +1166,27 @@ void initCmd()
 	ADD_PARAM(step, ptNumber | ptOptional);
 	ADD_PARAM(bgcolor, ptColor | ptOptional);
 	REG_END();
+
+	//20160827
+	REG_SPE_CMD(trans, line, TRANS_LINE, "按照一定方向沿一条直线出现");
+	ADD_PARAM(time, ptTime);
+	ADD_PARAM(index, ptInteger | ptOptional);
+	ADD_PARAM(k, ptNumber | ptOptional);
+	ADD_PARAM(d, ptNumber | ptOptional);
+	ADD_PARAM(from, ptString | ptOptional);
+	REG_END();
+
+	REG_SPE_CMD(trans, burn, TRANS_BURN, "原图燃烧状消失，新图从下方出现");
+	ADD_PARAM(time, ptTime);
+	ADD_PARAM(index, ptInteger | ptOptional);
+	REG_END();
+
+	REG_SPE_CMD(trans, pageturn, TRANS_PAGETURN, "翻页");
+	ADD_PARAM(time, ptTime);
+	ADD_PARAM(index, ptInteger | ptOptional);
+	ADD_PARAM(from, ptString | ptOptional);
+	ADD_LIST("\"topleft\" \"topright\" \"bottomleft\" \"bottomright\"");
+	REG_END();
 	//effect
 	REG_SPE_CMD(effect, delete, EFFECT_DELETE, "删除目标精灵上的特定效果。name和index为二选一的选项。\n如果使用name，那么所有同名的效果都被移除，\n如果使用index，则指定次序的效果被移除。效果的次序为默认递增1，即最先加的effect的次序为0，下一个为1，以此类推。");
 	ADD_PARAM(target, ptInteger);
@@ -1147,14 +1235,14 @@ void initCmd()
 	ADD_PARAM(mask, ptString | ptOptional);
 	ADD_PARAM(masksp, ptInteger | ptOptional);
 	PROPERTY(mask, masksp, onlyOne);
-		ADD_PARAM(stretch, ptBool | ptOptional);
+	ADD_PARAM(stretch, ptBool | ptOptional);
 	REG_END();
 	REG_SPE_CMD(effect, multiply, EFFECT_MULTIPLY, "指定一个精灵或图片，和目标精灵的混合方式为正片叠底，而非普通的透明度叠加。mask和masksp为二选一的选项。\nmask的alpha通道会被用于原图片和正片叠底后图片的alpha混合。\n正片叠底不改变原图片的透明度。");
 	ADD_PARAM(target, ptInteger);
 	ADD_PARAM(mask, ptString | ptOptional);
 	ADD_PARAM(masksp, ptInteger | ptOptional);
 	PROPERTY(mask, masksp, onlyOne);
-		ADD_PARAM(stretch, ptBool | ptOptional);
+	ADD_PARAM(stretch, ptBool | ptOptional);
 	REG_END();
 	REG_SPE_CMD(effect, blur, EFFECT_BLUR, "使目标精灵模糊");
 	ADD_PARAM(target, ptInteger);
@@ -1170,11 +1258,29 @@ void initCmd()
 	REG_END();
 
 	//20160222
-	REG_SPE_CMD(effect, normal, EFFECT_NORMAL, "正常显示一个精灵");
+	REG_SPE_CMD(effect, normal, EFFECT_NORMAL, "将mask或masksp代表的精灵按正常的叠加模式加到目标精灵上。");
 	ADD_PARAM(target, ptInteger);
 	ADD_PARAM(mask, ptString | ptOptional);
 	ADD_PARAM(masksp, ptInteger | ptOptional);
 	PROPERTY(mask, masksp, onlyOne);
+	REG_END();
+
+	//20160824
+	REG_SPE_CMD(effect, fill, EFFECT_FILL, "用指定颜色填充图像");
+	ADD_PARAM(target, ptInteger);
+	ADD_PARAM(color, ptColor);
+	REG_END();
+
+	//20160828
+	REG_SPE_CMD(effect, oldfilm, EFFECT_OLDFILM, "旧电影");
+	ADD_PARAM(target, ptInteger);
+	ADD_PARAM(sepia, ptBool | ptOptional);
+	ADD_PARAM(lines, ptBool | ptOptional);
+	ADD_PARAM(blotches, ptBool | ptOptional);
+	ADD_PARAM(grain, ptBool | ptOptional);
+	ADD_PARAM(movement, ptBool | ptOptional);
+	ADD_PARAM(blackborder, ptBool | ptOptional);
+	ADD_PARAM(frequency, ptNumber | ptOptional);
 	REG_END();
 
 #define EFFECT_BLEND(X, x, info) 	REG_SPE_CMD(effect, x, EFFECT_##X, info);ADD_PARAM(target, ptInteger);ADD_PARAM(mask, ptString | ptOptional);ADD_PARAM(masksp, ptInteger | ptOptional);PROPERTY(mask, masksp, onlyOne);REG_END();
@@ -1185,7 +1291,7 @@ void initCmd()
 	EFFECT_BLEND(LIGHTEN, lighten, "PS的变亮");
 	EFFECT_BLEND(SCREEN, screen, "PS的滤色");
 	EFFECT_BLEND(COLORDODGE, colordodge, "PS的颜色减淡");
-	EFFECT_BLEND(LINEARDODGE, colordodge, "PS的线性减淡");
+	EFFECT_BLEND(LINEARDODGE, lineardodge, "PS的线性减淡");
 	EFFECT_BLEND(OVERLAY, overlay, "PS的叠加");
 	EFFECT_BLEND(SOFTLIGHT, softlight, "PS的柔光");
 	EFFECT_BLEND(HARDLIGHT, hardlight, "PS的强光");
