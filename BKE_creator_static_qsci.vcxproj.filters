@@ -65,14 +65,11 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="Scintilla">
+      <UniqueIdentifier>{e575b85b-845a-4a94-a1d7-239711af231d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BKEscintilla\lexlib\Accessor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\AutoComplete.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -88,115 +85,13 @@
     <ClCompile Include="BKS_info.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BKEscintilla\src\CallTip.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\Catalogue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\CellBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\CharClassify.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\lexlib\CharacterSet.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\ContractionState.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\Decoration.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\Document.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\Editor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\ExternalLexer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\Indicator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\KeyMap.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\lexlib\LexerBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\lexlib\LexerModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\lexlib\LexerNoExceptions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\lexlib\LexerSimple.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\LineMarker.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\Qt4Qt5\ListBoxQt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ParserHelper\ParserHelper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\PerLine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\Qt4Qt5\PlatQt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\PositionCache.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\lexlib\PropSetSimple.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\RESearch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\RunStyles.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\Qt4Qt5\SciClasses.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\ScintillaBase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\Qt4Qt5\ScintillaQt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\Selection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dia\Setoptiondia.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BKEscintilla\src\Style.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\lexlib\StyleContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\UniConversion.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\ViewStyle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dia\WaitWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\lexlib\WordList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\XPM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="bkeSci\bkecompile.cpp">
@@ -347,30 +242,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cmdlist_wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\CaseConvert.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\CaseFolder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\EditModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\EditView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\src\MarginView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\Qt4Qt5\InputMethod.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\Qt4Qt5\MacPasteboardMime.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BKEscintilla\lexlib\CharacterCategory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ParserHelper\parser\extend.cpp">
@@ -630,6 +501,138 @@
     </ClCompile>
     <ClCompile Include="weh.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\Accessor.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\AutoComplete.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\CallTip.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\CaseConvert.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\CaseFolder.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Catalogue.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\CellBuffer.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\CharacterCategory.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\CharacterSet.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\CharClassify.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\ContractionState.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Decoration.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Document.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\EditModel.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Editor.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\EditView.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\ExternalLexer.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Indicator.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\InputMethod.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\KeyMap.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\LexerBase.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\LexerNoExceptions.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\LexerModule.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\LexerSimple.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\LineMarker.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\ListBoxQt.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\MacPasteboardMime.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\MarginView.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\PerLine.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\PlatQt.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\PositionCache.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\PropSetSimple.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\RESearch.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\RunStyles.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\SciClasses.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\ScintillaBase.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\Qt4Qt5\ScintillaQt.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Style.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\Selection.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\StyleContext.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\UniConversion.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\ViewStyle.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\lexlib\WordList.cpp">
+      <Filter>Scintilla</Filter>
+    </ClCompile>
+    <ClCompile Include="BKEscintilla\src\XPM.cpp">
+      <Filter>Scintilla</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
