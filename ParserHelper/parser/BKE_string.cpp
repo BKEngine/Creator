@@ -61,7 +61,12 @@ StringType *GlobalStringMap::allocHashString(const wchar_t *str)
 		while (node && node->index == h)
 		{
 			if (node->ct.first == str)
+			{
+			#if PARSER_MULTITHREAD
+				mu.unlock();
+			#endif
 				return const_cast<StringType*>(&node->ct.first);
+			}
 			node = node->next;
 		}
 		//insert before buf[h]
@@ -142,7 +147,12 @@ StringType *GlobalStringMap::allocHashString(wstring &&str)
 		while (node && node->index == h)
 		{
 			if (node->ct.first == str)
+			{
+			#if PARSER_MULTITHREAD
+				mu.unlock();
+			#endif
 				return const_cast<StringType*>(&node->ct.first);
+			}
 			node = node->next;
 		}
 		//insert before buf[h]

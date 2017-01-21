@@ -1175,6 +1175,7 @@ void CodeWindow::CompileFinish()
 	}
 
 	othwin->compileedit->setText(ComText);
+	othwin->compileedit->setReadOnly(true);
 	othwin->ShowProblem(problemslist, currentproject->FileDir());
 
 	//按钮可用

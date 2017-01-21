@@ -80,7 +80,7 @@ void BkeCompile::Compile(const QString &dir, bool release/* = false*/)
 void BkeCompile::StandardOutput()
 {
 	QByteArray temp = cmd->readAll();
-	QString name = codec->toUnicode(temp);
+	QString name = QString::fromStdWString(std::wstring((wchar_t*)temp.data(), temp.size() / 2));
 	result.append(temp);
 	if (name.endsWith(".bkscr") && list.indexOf(name) < 0) {
 		list.append(name);
@@ -99,7 +99,7 @@ void BkeCompile::finished(int exitCode)
 
 QString BkeCompile::Result()
 {
-	return codec->toUnicode(result);
+	return QString::fromStdWString(std::wstring((wchar_t*)result.data(), result.size() / 2));
 }
 
 void BkeCompile::error(QProcess::ProcessError e)

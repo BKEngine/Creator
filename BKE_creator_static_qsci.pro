@@ -140,6 +140,7 @@ SOURCES += ./main.cpp \
     dia/ParserEditor.cpp \
     dia/ParserEditorTreeItem.cpp \
     dia/ParserEditorTreeModel.cpp \
+    EnumsComponent.cpp \
 
 HEADERS  += \
     topbarwindow.h \
@@ -264,6 +265,8 @@ HEADERS  += \
     dia/ParserEditor.h \
     dia/ParserEditorTreeItem.h \
     dia/ParserEditorTreeModel.h \
+    EnumsComponent.h \
+    ScriptEnums.h \
 
 RESOURCES += \
     source.qrc
