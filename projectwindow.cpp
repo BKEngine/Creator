@@ -553,7 +553,7 @@ void ProjectWindow::RenameFile(const ItemInfo &f)
 		if (!change)
 			return;
 		QString ext = chopFileExt(f.Name);
-		name = chopFileNameWithoutExt(name) + '.' + ext;
+		name = chopFileNameWithoutExt(name) + ext;
 		if (name == ".bkscr")
 			return;
 		QString rawname = p->FileDir() + f.FullName;

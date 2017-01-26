@@ -40,7 +40,7 @@ namespace Updater
 
         private static string HTTP_ADDRESS = "http://creator.up.bakery.moe/windows/";
         private static string INFO_FILE = "version";
-        private WebClient _client = new MyWebClient();
+        private WebClient _client = new WebClient();
         private string _version = "";
         private string _remoteVersion = "";
         private string _exeDir = AppDomain.CurrentDomain.BaseDirectory;
