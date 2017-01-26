@@ -101,6 +101,7 @@ void BkeProject::BuildItem(const QString &name)
 	Root->addChild(Import);
 	Root->addChild(Script);
 	Root->addChild(Source);
+	Root->setExpanded(true);
 }
 
 bool BkeProject::NewProject(const QString &dir, const QString &name)
@@ -112,24 +113,19 @@ bool BkeProject::NewProject(const QString &dir, const QString &name)
 	BuildItem(pname);
 	MakeImport();
 
-	//SearchTree(ImportHash, Import, "");
-
-	SearchDir(ScriptHash, FileDir(), ".bkscr");
-	//SearchDir(SourceHash,FileDir(),".jpg.jpeg.png.bmp.ogg.wav.mp3.aac.mp4.avi.mpg") ;
-	//MakeItems(Script, ScriptHash);
-	//MakeItems(Source, SourceHash);
-	for (auto it = files.begin(); it != files.end(); it++)
+	/*QStringList ls = SearchDir(FileDir(), "", ".bkscr");
+	for (auto &&file : ls)
 	{
-		ForceAddScript(it.key(), Script);
-	}
-
+		ForceAddScript(file, Script);
+	}*/
 
 	delete analysis;
 	analysis = new BG_Analysis(FileDir() + '/');
 	return WriteBkpFile();
 }
 
-QTreeWidgetItem* BkeProject::findItemIn(QTreeWidgetItem *p, const QString &name, bool createnew, QIcon *icon)
+/*
+QTreeWidgetItem* BkeProject::FindItemIn(QTreeWidgetItem *p, const QString &name, bool createnew, QIcon *icon)
 {
 	for (int i = 0; i < p->childCount(); i++)
 	{
@@ -145,22 +141,23 @@ QTreeWidgetItem* BkeProject::findItemIn(QTreeWidgetItem *p, const QString &name,
 		return res;
 	}
 	return NULL;
-}
+}*/
 
 void BkeProject::ForceAddScript(const QString &f, QTreeWidgetItem* p)
 {
-	int pos = f.indexOf(QRegExp("[/\\]"));
+	FindItem(p, f, true);
+	/*int pos = f.indexOf(QRegExp("[/\\]"));
 	if (pos >= 0)
 	{
 		QString f1 = f.left(pos);
 		QString f2 = f.mid(pos + 1);
-		QTreeWidgetItem *sub = findItemIn(p, f1, true, bksdocico);
+		QTreeWidgetItem *sub = FindItemIn(p, f1, true, bksdocico);
 		ForceAddScript(f2, sub);
 	}
 	else
 	{
-		findItemIn(p, f, true, bksfileico);
-	}
+		In(p, f, true, bksfileico);
+	}*/
 }
 
 //读取文件
@@ -187,28 +184,19 @@ bool BkeProject::OpenProject(const QString &name)
 	pname = bkpAdmin->value("name").toString();
 	//if( bkpAdmin->value("version").toString().isEmpty() ) pdir = pdir + "/" + pname ;
 
+	delete config;
+	config = new BkeProjectConfig(pdir, pdir + "/config.bkpsr");
+	config->readFile();
+	SetupConfig();
+
 	BuildItem(pname);
-	bool lowVersion = false;
-	if (version < 11)
-		lowVersion = true;
-	if (version == 11)
-	{
-		JsonToHash(ImportHash, bkpAdmin->value("import").toObject(), lowVersion);
-		JsonToHash(ScriptHash, bkpAdmin->value("script").toObject(), lowVersion);
-		JsonToHash(SourceHash, bkpAdmin->value("source").toObject(), lowVersion);
-		ImportHash[""]->removeOne("config.bkpsr");
-		MakeItems(Import, ImportHash);
-		MakeItems(Script, ScriptHash);
-		MakeItems(Source, SourceHash);
-	}
-	else
 	{
 		JsonToTree(Import, bkpAdmin->value("import").toObject(), version);
 		JsonToTree(Script, bkpAdmin->value("script").toObject(), version);
 		JsonToTree(Source, bkpAdmin->value("source").toObject(), version);
 	}
 	//remove config.bkpsr from Import
-	auto it = findItemIn(Import, "config.bkpsr");
+	auto it = FindItem(Import, "config.bkpsr", false);
 	if (it)
 	{
 		Import->removeChild(it);
@@ -232,10 +220,6 @@ bool BkeProject::OpenProject(const QString &name)
 	WriteBkpFile() ;
 	}*/
 
-	delete config;
-	config = new BkeProjectConfig(pdir, pdir + "/config.bkpsr");
-	config->readFile();
-
 	SortTree(Root);
 
 	if (version < SAVE_VERSION)
@@ -245,12 +229,20 @@ bool BkeProject::OpenProject(const QString &name)
 	return true;
 }
 
+void BkeProject::SetupConfig()
+{
+	
+
+	//connect(config, &BkeProjectConfig::onScriptAutoSearchPathChanged, nullptr, Qt::QueuedConnection);
+
+}
+
 //寻找输入输出文件
 void BkeProject::MakeImport()
 {
-	OutFilelist.clear();
 	QString dirs = FileDir();
 
+	QStringList OutFilelist;
 	OutFilelist << "config.bkpsr" << "main.bkscr" << "macro.bkscr";
 
 	//从模版中复制文件，如果没有则创建
@@ -261,8 +253,11 @@ void BkeProject::MakeImport()
 	//新建工程设置
 	delete config;
 	config = new BkeProjectConfig(dirs, dirs + "/config.bkpsr");
+	config->readFile();
 	config->projectName = ProjectName();
 	config->writeFile();
+
+	SetupConfig();
 
 	//语法分析
 	//lex->ParserFile("macro.bkscr", dirs);
@@ -273,13 +268,11 @@ void BkeProject::MakeImport()
 
 	{
 		FindItem(Script, OutFilelist[1], true);
-		OutFilelist[1] = LOLI_OS_QSTRING(FileDir() + "/" + OutFilelist[1]);
 	}
 
 	for (int i = 2; i < OutFilelist.size(); i++){
 		if (OutFilelist.at(i).trimmed().isEmpty()) continue;
 		FindItem(Import, OutFilelist.at(i), true);
-		OutFilelist[i] = LOLI_OS_QSTRING(FileDir() + "/" + OutFilelist[i]);
 	}
 
 	SortItem(Import);
@@ -297,18 +290,6 @@ void BkeProject::MakeItems(QTreeWidgetItem *dest, const QStringList &list)
 	}
 }
 
-//从hash列表中创建工程
-void BkeProject::MakeItems(QTreeWidgetItem *dest, BkeFilesHash &hash)
-{
-	QTreeWidgetItem *le;
-	for (auto ptr = hash.begin(); ptr != hash.end(); ptr++){
-		le = FindItem(dest, ptr.key(), true);
-		MakeItems(le, *(ptr.value()));
-		SortItem(le);
-	}
-	SortItem(dest);
-}
-
 //带排序的创建
 QTreeWidgetItem *BkeProject::MakeItem(QTreeWidgetItem *dest, const QString &dir)
 {
@@ -322,7 +303,6 @@ QTreeWidgetItem *BkeProject::MakeItem(QTreeWidgetItem *dest, const QString &dir)
 	if (le->parent() != 0) SortItem(le->parent());
 	return le;
 }
-
 
 //寻找文件，失败返回0，创建空路径时将创建不存在的节点
 QTreeWidgetItem *BkeProject::FindItem(QTreeWidgetItem *dest, const QString &dir, bool mkempty)
@@ -380,16 +360,16 @@ QString BkeProject::ProjectLangFile() const
 	return pdir + "/" + pfile + ".user";
 }
 
-//寻找指定的文件，并把文件加入到hash中
-bool BkeProject::SearchDir(BkeFilesHash &hash, const QString &dir, const QString &suffix)
+//寻找指定的文件
+QStringList BkeProject::SearchDir(const	QString &root, const QString &dir, const QStringList &suffix)
 {
-	QDir d(dir);
-	if (!d.exists()) return false;
+	QStringList list;
+	QDir d(root + "/" + dir);
+	if (!d.exists()) return list;
 
 	d.setFilter(QDir::Dirs | QDir::Files | QDir::NoSymLinks);
 	d.setSorting(QDir::DirsFirst);
 
-	//QStringList *ls = new QStringList;
 	QFileInfoList infols = d.entryInfoList();
 	QFileInfo fff;
 	for (int i = 0; i < infols.size(); i++){
@@ -398,70 +378,48 @@ bool BkeProject::SearchDir(BkeFilesHash &hash, const QString &dir, const QString
 		if (fff.fileName() == "." || fff.fileName() == "..")
 			continue;
 		else if (fff.isDir())
-			SearchDir(hash, dir + "/" + fff.fileName(), suffix);
-		else if (suffix.indexOf(fff.suffix().toLower()) < 0)
+			list.append(SearchDir(root, dir + "/" + fff.fileName(), suffix));
+		else if (suffix.indexOf(chopFileExt(fff.fileName()).toLower()) < 0)
 			continue; //不是已指定后缀结尾
-		else if (OutFilelist.indexOf(LOLI_OS_QSTRING(dir + "/" + fff.fileName())) >= 0)
-			continue;
 		else
 		{
-			files.insert(LOLI_OS_QSTRING(d.relativeFilePath(fff.absoluteFilePath())), 1);
+			list << QDir(root).relativeFilePath(fff.absoluteFilePath());
 		}
-		//ls->append(fff.fileName());
 	}
-	return infols.size() > 2;
-	//if (!ls->isEmpty()){
-	//	//QString kkk = AllNameToName(dir) ;
-	//	hash[AllNameToName(dir)] = ls;
-	//	return true;
-	//}
-	//else return false;
+	return list;
 }
 
-//从树结构中生成hash
-void BkeProject::SearchTree(BkeFilesHash &hash, QTreeWidgetItem *dest, const QString &dir)
+void BkeProject::SetIconFromType(QTreeWidgetItem *dest, ItemType type)
 {
-	QTreeWidgetItem *le;
-	QStringList *ls = new QStringList;
-	for (int i = 0; i < dest->childCount(); i++){
-		le = dest->child(i);
-		if (le->childCount() > 0){
-			if (dir.isEmpty()) SearchTree(hash, le, le->text(0));
-			else SearchTree(hash, le, dir + "/" + le->text(0));
-		}
-		else ls->append(le->text(0));
-		//要检测文件夹图标？
-	}
-
-	if (!ls->isEmpty()){
-		QStringList *ts = hash.value(LOLI_OS_QSTRING(dir));
-		hash[LOLI_OS_QSTRING(dir)] = ls;
-		if (ts != 0) delete ts;  //删除旧的对象
+	switch (type)
+	{
+	case ITEM_FILE:
+		dest->setIcon(0, *fileico);
+		break;
+	case ITEM_SCRIPT:
+		dest->setIcon(0, *bksfileico);
+		break;
+	case ITEM_AUDIO:
+		dest->setIcon(0, *volfileico);
+		break;
+	case ITEM_IMAGE:
+		dest->setIcon(0, *imgfileico);
+		break;
+	case ITEM_VIDEO:
+		dest->setIcon(0, *movfileico);
+		break;
+	case ITEM_DIR:
+		dest->setIcon(0, *dirsico);
+		break;
+	default:
+		break;
 	}
 }
 
 //设置图标
 void BkeProject::SetIconFromSuffix(QTreeWidgetItem *dest, const QString &suffix)
 {
-	QString temp = suffix.toLower();
-	if (!temp.startsWith('.') && temp.lastIndexOf('.') > 0) temp = temp.right(temp.length() - temp.lastIndexOf('.'));
-	if (QString(".jpg.jpeg.png.bmp").indexOf(temp) >= 0){
-		dest->setIcon(0, *imgfileico);
-		return;
-	}
-	else if (QString(".ogg.wav.mp3.aac").indexOf(temp) >= 0){
-		dest->setIcon(0, *volfileico);
-		return;
-	}
-	else if (QString(".mp4.avi.mpg").indexOf(temp) >= 0){
-		dest->setIcon(0, *movfileico);
-		return;
-	}
-	else if (!temp.startsWith('.')) dest->setIcon(0, *dirsico);
-	else{
-		dest->setIcon(0, *fileico);
-		return;
-	}
+	SetIconFromType(dest, GetTypeFromSuffix(suffix));
 }
 
 bool BkeProject::WriteBkpFile()
@@ -482,17 +440,6 @@ bool BkeProject::WriteBkpFile()
 	return LOLI::AutoWrite(FileDir() + "/" + BKE_PROJECT_NAME, llm.toJson());
 }
 
-QJsonObject BkeProject::HashToJson(BkeFilesHash &hash)
-{
-	QJsonObject llm;
-	QStringList *ls;
-	for (auto ptr = hash.begin(); ptr != hash.end(); ptr++){
-		ls = ptr.value();
-		if (ls->isEmpty()) continue;
-		llm.insert(ptr.key(), QJsonArray::fromStringList(*ls));
-	}
-	return llm;
-}
 QJsonObject BkeProject::TreeToJson(QTreeWidgetItem *tree)
 {
 	QJsonObject llm;
@@ -507,26 +454,6 @@ QJsonObject BkeProject::TreeToJson(QTreeWidgetItem *tree)
 			llm.insert(ch->text(0), 0);
 	}
 	return llm;
-}
-
-void BkeProject::JsonToHash(BkeFilesHash &hash, QJsonObject llm, bool lowVersion)
-{
-	QVariantMap bugs = llm.toVariantMap();
-	for (auto ptr = bugs.begin(); ptr != bugs.end(); ptr++){
-
-		QString orname = ptr.key();
-		if (!files.contains(orname))
-			files.insert(orname, 1);
-		else
-			files[orname]++;
-		QStringList *ls = new QStringList;
-		*ls = ptr.value().toStringList();
-		if (lowVersion){
-			orname = BkeFullnameToName(orname, FileDir());
-		}
-
-		hash[orname] = ls;
-	}
 }
 
 void BkeProject::JsonToTree(QTreeWidgetItem *tree, QJsonObject llm, int version)
@@ -551,10 +478,7 @@ void BkeProject::JsonToTree(QTreeWidgetItem *tree, QJsonObject llm, int version)
 				//file
 				auto tr = new QTreeWidgetItem();
 				tr->setText(0, it.key());
-				if (!files.contains(it.key()))
-					files.insert(it.key(), 1);
-				else
-					files[it.key()]++;
+				ItemType type = GetTypeFromSuffix(it.key());
 				SetIconFromSuffix(tr, it.key());
 				tree->addChild(tr);
 				JsonToTree(tr, it.value().toObject(), version);
@@ -564,103 +488,52 @@ void BkeProject::JsonToTree(QTreeWidgetItem *tree, QJsonObject llm, int version)
 	}
 }
 
-QString BkeProject::IconKey(qint64 key)
+static QStringList scriptSuffixes = {
+	".bkscr"
+};
+
+static QStringList imageSuffixes = {
+	".png",
+	".jpg",
+	".bmp",
+	".webp",
+	".apng",
+	".gif",
+};
+
+static QStringList audioSuffixes = {
+	".mp3",
+	".ogg",
+	".wav",
+	".opus",
+};
+
+static QStringList videoSuffixes = {
+	".mp4"
+};
+
+ItemType BkeProject::GetTypeFromSuffix(const QString &filename)
 {
-	if (key == baseico->cacheKey()) return QString("@root");
-	else if (key == importico->cacheKey()) return QString("@import");
-	else if (key == fileico->cacheKey()) return QString("@file");
-	else if (key == dirsico->cacheKey()) return QString("@dir");
-	else if (key == bksdocico->cacheKey()) return QString("@script");
-	else if (key == sourcedocico->cacheKey()) return QString("@source");
-	else if (key == bksfileico->cacheKey()) return QString("@bksfile");
-	else if (key == imgfileico->cacheKey()) return QString("@imgfile");
-	else if (key == volfileico->cacheKey()) return QString("@volfile");
-	else if (key == movfileico->cacheKey()) return QString("@movfile");
-	else return QString("@file");
-}
-
-
-
-
-//从完整的文件路径插入文件
-void BkeProject::AddFileToHash(BkeFilesHash *hash, const QString &filename)
-{
-	QString path = filename;
-	QString name;
-	int i = path.lastIndexOf("/");
-	if (i < 0){
-		name = filename;
-		path.clear();  //相对路径的目录
+	QString suffix = chopFileExt(filename).toLower();
+	if (suffix.isEmpty()) {
+		return ITEM_DIR;
 	}
-	else{
-		name = path.right(path.length() - i - 1);
-		path = path.left(i);
+	else if (imageSuffixes.contains(suffix)) {
+		return ITEM_IMAGE;
 	}
-
-	QStringList *list = hash->value(path, &emptylist);  //绝对路径是否已经在列表中
-	if (list->isEmpty()){       //不存在则创建
-		list = new QStringList;
-		list->append(name);
-		(*hash)[path] = list;
+	else if (audioSuffixes.contains(suffix)) {
+		return ITEM_AUDIO;
 	}
-	else{
-		if (list->indexOf(name) < 0) list->append(name);   //存在则添加，避免重复添加
+	else if (videoSuffixes.contains(suffix)) {
+		return ITEM_VIDEO;
+	}
+	else if (scriptSuffixes.contains(suffix)) {
+		return ITEM_SCRIPT;
+	}
+	else {
+		return ITEM_FILE;
 	}
 }
-
-bool BkeProject::removeFromHash(BkeFilesHash *hash, const ItemInfo &f)
-{
-	//如果是目录，则删除目录
-	if (IconKey(f.IconKey) == "@dir"){
-
-		//寻找所有的子目录
-		QStringList ks = hash->keys();
-		QRegExp exp;
-		exp.setPattern("^" + f.FullName);
-		if (isSYSTEMP_LOWDER) exp.setCaseSensitivity(Qt::CaseInsensitive);
-		else exp.setCaseSensitivity(Qt::CaseSensitive);
-		ks = ks.filter(exp);
-
-		//移除所有的子目录
-		if (ks.size() < 0) return false;
-		for (int i = 0; i < ks.size(); i++){
-			hash->remove(ks.at(i));
-		}
-	}
-	else{
-		QFileName temp(f.FullName);
-		QStringList *ls;
-
-		ls = hash->value(LOLI_OS_QSTRING(temp.Path()));
-		if (ls == 0) return false;
-		ls->removeOne(temp.fileName());
-		if (ls->isEmpty() && f.Layer > 1) hash->remove(LOLI_OS_QSTRING(temp.Path()));
-	}
-
-	return true;
-}
-
-
-//从hash中创建工程
-void BkeProject::ItemFromHash(QTreeWidgetItem *dest, QHash<QString, QStringList*> &hash)
-{
-	QStringList *list;
-	QTreeWidgetItem *root;
-
-	for (auto ptr = hash.begin(); ptr != hash.end(); ptr++){
-		list = ptr.value();
-		if (list->size() < 1) continue;
-
-		root = FindItem(dest, ptr.key());
-		for (int i = 0; i < list->size(); i++){
-			QTreeWidgetItem *le = FindItem(root, list->at(i));
-			SetIconFromSuffix(le, list->at(i));
-			root->addChild(le);
-		}
-	}
-	SortTree(dest);
-}
-
 
 //排序,文件夹优先，大小写不敏感
 void BkeProject::SortItem(QTreeWidgetItem *dest)
@@ -734,15 +607,6 @@ bool BkeProject::RemoveItem(const QString &file)
 	return true;
 }
 
-
-
-QHash<QString, QStringList*> *BkeProject::ItemToHashptr(const QTreeWidgetItem *root)
-{
-	if (root->text(0) == "宏") return &ImportHash;
-	else if (root->text(0) == "脚本") return &ScriptHash;
-	else return &SourceHash;
-}
-
 QStringList BkeProject::ListFiles(int type)
 {
 	QString path;
@@ -784,11 +648,6 @@ QStringList BkeProject::AllSourceFiles()
 	return temp;
 }
 
-void BkeProject::copyStencil(const QString &file)
-{
-
-}
-
 QTreeWidgetItem *BkeProject::FindItemAll(const QString &name)
 {
 	QTreeWidgetItem *le;
@@ -824,11 +683,10 @@ void BkeProject::SetTopLeveBold(bool t)
 	Root->setFont(0, a);
 }
 
-
 bool BkeProject::WriteMarkFile(BkeMarkSupport *m)
 {
 	QString akb;
-	QStringList list = AllScriptFiles();
+	QStringList list/* = AllScriptFiles()*/;
 	BkeMarkList *mks;
 	for (int i = 0; i < list.size(); i++){
 		mks = m->GetBookMark(list.at(i), false);
@@ -855,20 +713,6 @@ QString BkeProject::MarksToString(BkeMarkList *mk)
 	return result;
 }
 
-BkeFilesHash *BkeProject::typeHash(int type)
-{
-	if (type == 1) return &ImportHash;
-	else if (type == 2) return &ScriptHash;
-	else return &SourceHash;
-}
-
-BkeFilesHash *BkeProject::typeHash(const QString &n)
-{
-	if (n == "宏") return &ImportHash;
-	else if (n == "脚本") return &ScriptHash;
-	else return &SourceHash;
-}
-
 //返回dest所有的子目录，不包括自身
 QStringList BkeProject::ItemDirs(QTreeWidgetItem *dest)
 {
@@ -879,112 +723,27 @@ QStringList BkeProject::ItemDirs(QTreeWidgetItem *dest)
 	return ls;
 }
 
-void BkeProject::Addfiles(const QStringList &ls, const ItemInfo &f, bool autochange)
+void BkeProject::AddFiles(const QStringList &ls, const ItemInfo &f)
 {
-	auto la = f.getLayer1ItemInfo().Root;
-	ItemInfo lb = f;
-	QHash<QString, QString> change;
-	for (auto it : ls)
+	for (auto &&s : ls)
 	{
-		change[it] = it;
+		FindItem(f.Root, s);
 	}
-	while (autochange && lb.Layer > 1)
-	{
-		bool c = true;
-		for (auto it : change)
-		{
-			if (checkFileExist(chopFileName(it)))
-			{
-				c = false;
-				break;
-			}
-		}
-		if (!c)
-		{
-			for (auto&& it : change)
-			{
-				it = lb.Name + '_' + it;
-			}
-			lb = lb.getLastItemInfo();
-		}
-		else
-			break;
-	}
-
-	for (auto it = change.begin(); it != change.end(); it++)
-	{
-		QString itt = chopFileName(it.value());
-		if (!checkFileExist(itt))
-		{
-			if (itt != it.key())
-			{
-				QFile(pdir + f.getDir() + '/' + it.key()).rename(pdir + f.getDir() + '/' + itt);
-			}
-			FindItem(f.Root, itt, true);
-			files[itt] = 1;
-		}
-	}
-
-
-	if (ls.size() > 0)  WriteBkpFile();
-}
-
-void BkeProject::AddDir(const QString &dir, const QString &relativeName, const ItemInfo &f)
-{
-	BkeFilesHash k1, k2;
-	SearchDir(k1, dir, ".bkscr");
-	SearchDir(k2, dir, ".jpg.jpeg.png.bmp.ogg.wav.mp3.aac.mp4.avi.mpg");
-
-	QTreeWidgetItem *la;
-	BkeFilesHash *h1;
-
-	//fixme
-	la = Script;
-	h1 = &ScriptHash;
-	//工程上右键，扫描所有文件
-	// 	if (f.Layer < 1)
-	// 	{
-	// 		if (!(f.Layer < 1)){
-	// 		}
-	// 		else{
-	// 			la = f.Root;
-	// 			h1 = typeHash(f.RootName);
-	// 		}
-	// 	}
-
-	auto ff = f.getLayer1ItemInfo();
-	if (ff.Name == "脚本" || ff.Name == "宏")
-	{
-		config->addScriptDir(relativeName);
-		config->writeFile();
-	}
-	FindItem(ff.Root, relativeName);
-	//if (!k2.isEmpty()){
-	//	ItemFromHash(Source, k2);
-	//	QTreeWidgetItem *le = FindItem(Source, relativeName);
-	//	//SearchTree(SourceHash, le, relativeName);
-	//}
 	WriteBkpFile();
 }
 
-bool BkeProject::checkIsDir(const ItemInfo &f)
+void BkeProject::AddDir(const QString &dir, const ItemInfo &f)
 {
-	return f.IconKey == dirsico->cacheKey();
+	auto ff = f.getLayer1ItemInfo();
+	FindItem(f.Root, dir);
+	
+	QStringList ls = SearchDir(FileDir()+f.getDir(), dir, (ff.Name == "脚本" || ff.Name == "宏") ? scriptSuffixes : (audioSuffixes + imageSuffixes));
+	AddFiles(ls, f);
 }
 
-void BkeProject::CheckDir(BkeFilesHash *hash, const QString dirnow)
+bool BkeProject::CheckIsDir(const ItemInfo &f)
 {
-	QStringList ls = hash->keys();
-	QString kdir = FileDir();
-
-	BkeFilesHash th;
-	for (int i = 0; i < ls.size(); i++){
-		QString dd = BkeFullnameToName(kdir, ls.at(i));
-		th[dirnow + "/" + dd] = hash->value(ls.at(i));
-	}
-
-	hash->clear();
-	*hash = th;
+	return f.IconKey == dirsico->cacheKey();
 }
 
 int BkeProject::addVersionData(QWidget *parent)
@@ -1013,6 +772,5 @@ QString BkeProject::AllNameToName(const QString &allname)
 
 void BkeProject::ReleaseGame()
 {
-	//ersionInfo info(this);
-	//info.exec();
+	
 }

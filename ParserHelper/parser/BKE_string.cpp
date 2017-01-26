@@ -32,7 +32,7 @@ StringType *GlobalStringMap::allocHashString(const wchar_t *str)
 		return &nullString;
 	}
 #if PARSER_MULTITHREAD
-	mu.lock();
+	BKE_WrapperMutexLocker ml(mu);
 #endif
 	int32_t ha = BKE_hash(str);
 	int32_t h = ha & (hashsize - 1);
@@ -86,9 +86,6 @@ StringType *GlobalStringMap::allocHashString(const wchar_t *str)
 	t->ct.first.hashed = true;
 	t->ct.first.hash = t->hashvalue;
 	t->ct.first.ref++;
-#if PARSER_MULTITHREAD
-	mu.unlock();
-#endif
 	return const_cast<StringType*>(&t->ct.first);
 }
 
@@ -113,7 +110,7 @@ StringType *GlobalStringMap::allocHashString(wstring &&str)
 		return &nullString;
 	}
 #if PARSER_MULTITHREAD
-	mu.lock();
+	BKE_WrapperMutexLocker ml(mu);
 #endif
 	int32_t ha = BKE_hash(str);
 	int32_t h = ha & (hashsize - 1);
@@ -167,9 +164,6 @@ StringType *GlobalStringMap::allocHashString(wstring &&str)
 	t->ct.first.hashed = true;
 	t->ct.first.hash = t->hashvalue;
 	t->ct.first.ref++;
-#if PARSER_MULTITHREAD
-	mu.unlock();
-#endif
 	return const_cast<StringType*>(&t->ct.first);
 }
 
@@ -183,15 +177,12 @@ StringType *GlobalStringMap::hashString(StringType &&s)
 	if(s.hashed)
 		return &s;
 #if PARSER_MULTITHREAD
-	mu.lock();
+	BKE_WrapperMutexLocker ml(mu);
 #endif
 	auto t = _getNode(std::move(s));
 	t->ct.first.hashed = true;
 	t->ct.first.hash = t->hashvalue;
 	t->ct.first.ref++;
-#if PARSER_MULTITHREAD
-	mu.unlock();
-#endif
 	return const_cast<StringType*>(&t->ct.first);
 }
 
@@ -210,7 +201,7 @@ bool GlobalStringMap::stripStr(const wstring &s)
 void GlobalStringMap::forceGC()
 {
 #if PARSER_MULTITHREAD
-	mu.lock();
+	BKE_WrapperMutexLocker ml(mu);
 #endif
 	auto it = begin();
 	while (it != end())
@@ -220,9 +211,6 @@ void GlobalStringMap::forceGC()
 		else
 			++it;
 	}
-#if PARSER_MULTITHREAD
-	mu.unlock();
-#endif
 }
 
 const wstring& BKE_String::printStr() const

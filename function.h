@@ -42,30 +42,21 @@ namespace BkeCreator {
 
 inline QString chopFileExt(const QString &filename)
 {
-	int a1 = filename.lastIndexOf('.');
-	int a2 = filename.lastIndexOf('/');
-	int a3 = filename.lastIndexOf('\\');
-	if (a1 < a2 || a1 < a3)
-		return QString();
-	return filename.right(filename.length() - a1 - 1);
+	QString ext = QFileInfo(filename).suffix();
+	return ext.isEmpty() ? QString() : '.'+ext;
 }
 
 inline QString chopFileName(const QString &fullname)
 {
-	int a2 = fullname.lastIndexOf('/');
-	int a3 = fullname.lastIndexOf('\\');
-	if (a2 < a3)
-		a2 = a3;
-	return fullname.right(fullname.length() - a2 - 1);
+	return QFileInfo(fullname).fileName();
 }
 
 inline QString chopFileNameWithoutExt(const QString &fullname)
 {
 	auto f = chopFileName(fullname);
-	int a1 = f.lastIndexOf('.');
-	if (a1 < 0)
-		return f;
-	return f.left(a1);
+	return f.left(f.size() - chopFileExt(f).size());
 }
+
+bool BkeCopyDirRecursively(QString fromDir, QString toDir, bool replaceOnConflict);
 
 #endif // FUNCTION_H

@@ -270,21 +270,7 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
 		LOLI_MAKE_NULL_FILE(sk.filePath(), (ismacro ? "macro.bkscr" : ""));
 	}
 
-	//if( type == 1){
-	//    p->FindItem(p->Import,name) ;
-	//}
-	//else if( type == 2){
-	//    p->FindItem(info.Root,name) ;
-	//}
-	//else{
-	//    p->FindItem(p->Source,name) ;
-	//}
-	p->Addfiles(QStringList() << name, info, true);
-	//p->FindItem(info.Root, name);
-
-	//p->AddFileToHash(p->typeHash(type), info.getDir().right(info.getDir().length() - 1) + '/' + name);
-	p->WriteBkpFile();
-
+	p->AddFiles(QStringList() << name, info);
 }
 
 
@@ -329,49 +315,45 @@ void ProjectWindow::DeleteFile(const ItemInfo &f)
 	LableSureDialog msg;
 	msg.SetLable("要移除文件" + sk + "吗？");
 	msg.SetCheckbox(QStringList() << "彻底删除");
-	if (p->IconKey(f.IconKey) == "@dir") msg.SetCheckboxAble(0, false);
 	msg.SetBtn(QStringList() << "移除" << "取消");
 	if (msg.WaitUser(240, 130) == 1) return;
 
 	if (msg.IsCheckboxChoise(0)){
-		QFile(sk).remove();
+		if (p->CheckIsDir(f))
+			QDir(sk).removeRecursively();
+		else
+			QFile(sk).remove();
 	}
 	//移除文件
 	if (!p->RemoveItem(f)){
 		QMessageBox::information(this, "错误", "移除工程过程中出了一个错误", QMessageBox::Ok);
 		return;
 	}
-	p->files.remove(f.Name);
 	//写出结果
 	p->WriteBkpFile();
 }
 
-void ProjectWindow::Addfiles(const ItemInfo &f)
+void ProjectWindow::AddFiles(const ItemInfo &f)
 {
 	BkeProject *p = FindPro(f.ProName);
 	QStringList ls;
-	if (f.RootName == "初始化" || f.RootName == "脚本"){
-		ls = QFileDialog::getOpenFileNames(this, "添加文件", p->FileDir() + f.getDir(), "bkscr脚本(*.bkscr)");
-	}
-	else ls = QFileDialog::getOpenFileNames(this, "添加文件", p->FileDir() + f.getDir(), "所有文件(*.*)");
-
-	if (ls.isEmpty()) return;
-
-	if (f.Layer > 1 && !p->checkIsDir(f))
+	if (f.Layer > 1 && !p->CheckIsDir(f))
 	{
 		ReadItemInfo(f.Root->parent(), info);
 	}
+	QString path = p->FileDir() + f.getDir();
+	if (f.RootName == "宏" || f.RootName == "脚本"){
+		ls = QFileDialog::getOpenFileNames(this, "添加文件", path, "bkscr脚本(*.bkscr)");
+	}
+	else ls = QFileDialog::getOpenFileNames(this, "添加文件", path, "所有文件(*.*)");
+
+	if (ls.isEmpty()) return;	
 
 	QStringList errors;
-	QStringList errors2;
 	auto it = ls.begin();
 	while (it != ls.end())
 	{
-		QString rfile = BkeFullnameToName(*it, p->FileDir() + f.getDir());
-		if (p->checkFileExist(chopFileName(*it)))
-		{
-			errors2.append(*it);
-		}
+		QString rfile = BkeFullnameToName(*it, path);
 		if (rfile.isEmpty())
 		{
 			errors.append(*it);
@@ -385,30 +367,75 @@ void ProjectWindow::Addfiles(const ItemInfo &f)
 	}
 	if (!errors.isEmpty())
 	{
-		QMessageBox::warning(this, "警告", "不允许添加选中目录之外的文件：\n" + errors.join('\n'));
+		if (QMessageBox::information(this, "警告", "选中了选定目录以外的文件：\n" + errors.join('\n') + "是否拷贝到" + f.getFullName() + "下？", QMessageBox::Yes | QMessageBox::No) == QDialogButtonBox::Yes)
+		{
+			for (auto &&file : errors)
+			{
+				QString filename = QFileInfo(file).fileName();
+				QString dest = path + "/" + filename;
+				if (QFile::exists(dest))
+				{
+					if (QMessageBox::warning(this, "警告", "该文件夹下已存在文件：" + filename + "，是否覆盖？", QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+					{
+						continue;
+					}
+					else
+					{
+						if (!QFile::remove(dest))
+						{
+							QMessageBox::warning(this, "警告", "文件覆盖失败，该文件正在被使用：" + filename + "。");
+							continue;
+						}
+					}
+					if (!QFile::copy(file, dest))
+					{
+						QMessageBox::warning(this, "警告", "文件覆盖失败，该文件正在被使用：" + filename + "。");
+						continue;
+					}
+					ls.append(filename);
+				}
+			}
+		}
 	}
-	int res = 0;
-	if (!errors2.isEmpty())
-	{
-		QMessageBox::warning(this, "警告", "以下文件由于工程里有同名文件故无法添加：\n" + errors2.join('\n'));
-		res = QMessageBox::warning(this, "警告", "是否自动加上文件夹作为前缀？", QMessageBox::Yes, QMessageBox::No);
-	}
-	p->Addfiles(ls, f, res == QMessageBox::Yes);
+	p->AddFiles(ls, f);
 }
 
 //
 void ProjectWindow::AddDir(const ItemInfo &f)
 {
 	BkeProject *p = FindPro(f.ProName);
-	QString d = QFileDialog::getExistingDirectory(this, "添加目录", p->FileDir() + f.getDir());
+	if (f.Layer > 1 && !p->CheckIsDir(f))
+	{
+		ReadItemInfo(f.Root->parent(), info);
+	}
+	QString path = p->FileDir() + f.getDir();
+	QString d = QFileDialog::getExistingDirectory(this, "添加目录", path);
 	if (d.isEmpty())
 		return;
-	QString tmp = BkeFullnameToName(d, p->FileDir());
+	QString tmp = BkeFullnameToName(d, path);
 	if (tmp.isEmpty()){
-		QMessageBox::information(this, "", "工作目录之外的文件不能添加", QMessageBox::Ok);
-		return;
+		if (QMessageBox::information(this, "警告", "选中了选定目录以外的文件夹：\n" + tmp + "是否拷贝到" + f.getFullName() + "下？", QMessageBox::Yes | QMessageBox::No) == QDialogButtonBox::Yes)
+		{
+			QString dir = QDir(d).dirName();
+			QString dest = path + "/" + dir;
+			if (QDir(dest).exists())
+			{
+				if (QMessageBox::warning(this, "警告", "该文件夹下已存在文件夹：" + dir + "，是否覆盖？", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
+				{
+					BkeCopyDirRecursively(d, dest, true);
+					tmp = dir;
+				}
+			}
+			else
+			{
+				BkeCopyDirRecursively(d, dest, true);
+				tmp = dir;
+			}
+		}
 	}
-	p->AddDir(d, tmp, f);
+	if (!tmp.isEmpty()) {
+		p->AddDir(tmp, f);
+	}
 }
 
 //void ProjectWindow::ReName()
@@ -503,7 +530,7 @@ void ProjectWindow::ActionAdmin()
 	else if (p == btns[btn_preview]) PreviewFile(info);
 	else if (p == btns[btn_newscript]) NewFile(info, 2);
 	else if (p == btns[btn_newimport]) NewFile(info, 1);
-	else if (p == btns[btn_addfile]) Addfiles(info);
+	else if (p == btns[btn_addfile]) AddFiles(info);
 	else if (p == btns[btn_adddir]) AddDir(info);
 	else if (p == btns[btn_exportscenario]) ExportScenario(info);
 	else if (p == btns[btn_showindir]) ShowInDir(info);
@@ -518,7 +545,7 @@ void ProjectWindow::RenameFile(const ItemInfo &f)
 	BkeProject *p = FindPro(f.ProName);
 	if (f.Layer <= 1)
 		return;
-	if (!p->checkIsDir(f))
+	if (!p->CheckIsDir(f))
 	{
 		//file
 		bool change;
@@ -543,8 +570,6 @@ void ProjectWindow::RenameFile(const ItemInfo &f)
 			return;
 		}
 		f.Root->setText(0, name);
-		p->files.remove(f.Name);
-		p->files.insert(name, 1);
 		if (newname.endsWith(".bkscr"))
 		{
 			emit FileNameChange(rawname, newname);

@@ -90,7 +90,7 @@ void LableSureDialog::BtnIsClick()
     close() ;
 }
 
-void LableSureDialog::SetCheckboxAble(int index,bool is)
+void LableSureDialog::SetCheckboxEnabled(int index,bool is)
 {
     qchklist.at(index)->setEnabled(is);
 }

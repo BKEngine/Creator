@@ -14,6 +14,7 @@ using System.IO.Compression;
 using Tamir.SharpSsh.jsch;
 using System.Threading;
 using System.Text;
+using System.Diagnostics;
 
 namespace UpdateReleaser
 {
@@ -33,6 +34,11 @@ namespace UpdateReleaser
             get { return textBox3.Text; }
             set { textBox3.Text = value; }
         }
+        private string ThemidaPath
+        {
+            get { return textBox4.Text; }
+            set { textBox4.Text = value; }
+        }
         private string Version
         {
             get { return textBox1.Text; }
@@ -43,7 +49,10 @@ namespace UpdateReleaser
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            if (!_exeDir.EndsWith("\\") && _exeDir.EndsWith("/"))
+                _exeDir += "\\";
             PrivateKeyPath = AppSettings.GetValue("PrivateKeyPath");
+            ThemidaPath = AppSettings.GetValue("ThemidaPath");
             ReadRemoteVersionFile();
         }
         private Uri UriForFile(string path)
@@ -130,7 +139,66 @@ namespace UpdateReleaser
             else
             {
                 button1.Enabled = false;
-                ScanLocalFile();
+                AddPacker(ScanLocalFile);
+            }
+        }
+
+
+        private void AddPacker(Action action)
+        {
+            if (string.IsNullOrEmpty(ThemidaPath))
+            {
+                action();
+            }
+            else
+            {
+                textBox2.Text += "正在加壳……" + Environment.NewLine;
+                string path = Path.Combine(_exeDir, "tool");
+                string tmdbkefile = Path.Combine(ThemidaPath, "bke.tmd");
+                List<string> bkefiles = GetDirectoryFileList(path);
+                int size = 0;
+                int finish = 0;
+                foreach (string file in bkefiles)
+                {
+                    string ext = Path.GetExtension(file).ToLower();
+                    string filename = Path.GetFileName(file);
+                    if (filename.StartsWith("BK", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        size++;
+                        Process p = new Process();
+                        p.StartInfo.FileName = Path.Combine(ThemidaPath, "Themida.exe");
+                        p.StartInfo.UseShellExecute = false;
+                        p.StartInfo.WorkingDirectory = path;
+                        p.StartInfo.Arguments = "/protect \"" + tmdbkefile + "\" /inputfile \"" + file + "\"";
+                        p.StartInfo.CreateNoWindow = true;
+                        p.EnableRaisingEvents = true;
+                        p.Exited += (_, e) =>
+                        {
+                            Invoke(new MethodInvoker(() =>
+                            {
+                                if(p.ExitCode != 0)
+                                {
+                                    if (p.ExitCode == 3)
+                                        textBox2.Text += "文件：" + filename + "已经加壳。" + Environment.NewLine;
+                                    else
+                                        textBox2.Text += "文件：" + filename + "加壳失败。" + Environment.NewLine;
+                                }
+                                else
+                                {
+                                    textBox2.Text += "文件：" + filename + "加壳成功。" + Environment.NewLine;
+                                    File.Delete(Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file) + ".bak"));
+                                    File.Delete(file + ".log");
+                                }
+                                finish++;
+                                if(finish == size)
+                                {
+                                    action();
+                                }
+                            }));
+                        };
+                        p.Start();
+                    }
+                }
             }
         }
 
@@ -139,12 +207,13 @@ namespace UpdateReleaser
         private void ScanLocalFile()
         {
             List<string> files = GetDirectoryFileList(_exeDir);
+            MD5 md5 = new MD5CryptoServiceProvider();
             foreach (string file in files)
             {
                 string ext = Path.GetExtension(file).ToLower();
                 string filename = Path.GetFileName(file);
                 string relativepath = file.Substring(_exeDir.Length).Replace('\\', '/');
-                if (ext == ".ini" || ext == ".zip" || ext == ".rar" || ext == ".config" || ext == ".tmp")
+                if (ext == ".ini" || ext == ".tmd" || ext == ".bat" || ext == ".zip" || ext == ".rar" || ext == ".config" || ext == ".tmp")
                     continue;
                 if (filename == "files.txt" || filename == "projects.txt")
                     continue;
@@ -154,7 +223,6 @@ namespace UpdateReleaser
                     continue;
                 if (relativepath.StartsWith("Backup/"))
                     continue;
-                MD5 md5 = new MD5CryptoServiceProvider();
                 try
                 {
                     using (FileStream fs = File.OpenRead(file))
@@ -166,7 +234,7 @@ namespace UpdateReleaser
                 }
                 catch
                 {
-                    textBox1.Text += "文件：" + file + "打开或读取失败。" + Environment.NewLine;
+                    textBox2.Text += "文件：" + file + "打开或读取失败。" + Environment.NewLine;
                     continue;
                 }
             }
@@ -294,7 +362,7 @@ namespace UpdateReleaser
             helper.Close();
             helper = null;
 
-            this.Invoke(new MethodInvoker(() =>
+            Invoke(new MethodInvoker(() =>
             {
                 textBox2.Text += "上传完成。" + Environment.NewLine;
                 WriteVersionFile();
@@ -377,6 +445,7 @@ namespace UpdateReleaser
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             AppSettings.SetValue("PrivateKeyPath", PrivateKeyPath);
+            AppSettings.SetValue("ThemidaPath", ThemidaPath);
             if(helper != null)
             {
                 helper.Cancel();
@@ -393,6 +462,16 @@ namespace UpdateReleaser
                 PrivateKeyPath = dialog.FileName;
             }
         }
+        
+        private void button3_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog dialog = new FolderBrowserDialog();
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                ThemidaPath = dialog.SelectedPath;
+            }
+        }
+
         private void WriteVersionFile()
         {
             try
@@ -421,5 +500,6 @@ namespace UpdateReleaser
             textBox2.Select(textBox2.Text.Length, 0);
             textBox2.ScrollToCaret();
         }
+
     }
 }

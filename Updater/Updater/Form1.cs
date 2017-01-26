@@ -156,6 +156,7 @@ namespace Updater
                 textBox1.Text += "以下是文件内容：" + Environment.NewLine + e.Result;
                 return;
             }
+            textBox1.Text += "服务器端版本：" + _remoteVersion + Environment.NewLine;
             if (!ForceUseSelf && _remoteVersion.Equals(_version))
             {
                 textBox1.Text += "应用程序是最新版本，无需更新。将启动BKE_Creator。" + Environment.NewLine;
@@ -163,7 +164,6 @@ namespace Updater
                 CloseAfter3Seconds();
                 return;
             }
-            textBox1.Text += "服务器端版本：" + _remoteVersion + Environment.NewLine;
             JudgeNeedVCRuntime();
             ScanLocalFile();
         }
@@ -238,7 +238,7 @@ namespace Updater
                 string ext = Path.GetExtension(file).ToLower();
                 string filename = Path.GetFileName(file);
                 string relativepath = file.Substring(_exeDir.Length).Replace('\\', '/');
-                if (ext == ".ini" || ext == ".zip" || ext == ".rar" || ext == ".config" || ext == ".tmp")
+                if (ext == ".ini" || ext == ".bat" || ext == ".zip" || ext == ".rar" || ext == ".config" || ext == ".tmp")
                     continue;
                 if (filename == "files.txt" || filename == "projects.txt")
                     continue;
@@ -279,7 +279,7 @@ namespace Updater
                 if(!_remoteFiles.ContainsKey(e.Key))
                 {
                     string ext = Path.GetExtension(e.Key).ToLower();
-                    if(ext == ".exe" || ext == ".dll" || ext == ".api" || ext == ".bat" || ext == ".txt")
+                    if(ext == ".exe" || ext == ".dll" || ext == ".api" || ext == ".txt")
                         _filesToDelete.Add(e.Key);
                 }
             }
@@ -472,7 +472,7 @@ namespace Updater
             p.StartInfo.FileName = @"cmd.exe";
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.WorkingDirectory = _exeDir;
-            string arg = "/C ping /n 2 127.1>nul&del /f /a /q update.exe&mv update.exe.tmp update.exe&update.exe";
+            string arg = "/C ping /n 2 127.1>nul&del /f /a /q update.exe&ping /n 1 127.1>nul&mv update.exe.tmp update.exe&update.exe";
             if(FixUp)
             {
                 arg += " -fixup";
@@ -481,7 +481,6 @@ namespace Updater
             p.StartInfo.Arguments = arg;
             p.StartInfo.CreateNoWindow = true;
             p.Start();
-            p.Close();
             Close();
         }
 

@@ -149,10 +149,10 @@ QString BkeFullnameToName(const QString &fullname,const QString &dir)
 {
     QString name = LOLI_OS_QSTRING( fullname ).replace(QRegExp("\\"),"/") ; //把 \ 替换为 /
     QString ed = LOLI_OS_QSTRING( dir ).replace(QRegExp("\\"),"/") ;
-     if( !name.startsWith( ed ) ) return QString() ;
+     if( !name.startsWith( ed ) ) return QString();
 
      name = fullname.right( name.length() - ed.length() ) ;
-     while( name.startsWith("/") ) name = name.right(name.length()-1) ;  //开头不带/
+     while( name.startsWith("/") || name.startsWith("\\")) name = name.right(name.length()-1) ;  //开头不带/
      return name ;
 }
 
@@ -265,4 +265,57 @@ QString BkeCreator::IntToRgbString(unsigned int rgb)
     while( temp.length() < 6) temp.prepend("0" ) ;
     while( temp.length() > 6) return temp.right(6) ;
     return temp ;
+}
+
+bool BkeCopyDirRecursively(QString fromDir, QString toDir, bool replaceOnConflict)
+{
+	QDir dir;
+	dir.setPath(fromDir);
+
+	fromDir += QDir::separator();
+	toDir += QDir::separator();
+
+	foreach(QString copy_file, dir.entryList(QDir::Files))
+	{
+		QString from = fromDir + copy_file;
+		QString to = toDir + copy_file;
+
+		if (QFile::exists(to))
+		{
+			if (replaceOnConflict)
+			{
+				if (QFile::remove(to) == false)
+				{
+					return false;
+				}
+			}
+			else
+			{
+				continue;
+			}
+		}
+
+		if (QFile::copy(from, to) == false)
+		{
+			return false;
+		}
+	}
+
+	foreach(QString copy_dir, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
+	{
+		QString from = fromDir + copy_dir;
+		QString to = toDir + copy_dir;
+
+		if (dir.mkpath(to) == false)
+		{
+			return false;
+		}
+
+		if (BkeCopyDirRecursively(from, to, replaceOnConflict) == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }

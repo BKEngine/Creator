@@ -12,7 +12,7 @@ public:
     void SetLable(const QString &text) ;
     void SetCheckbox(const QStringList &list) ;
     void SetBtn(const QStringList &list) ;
-    void SetCheckboxAble(int index,bool is) ;
+    void SetCheckboxEnabled(int index,bool is) ;
     void SetDefaultBtn(int i){ defbtn = i ;  }
     void SetCenterWidget(QWidget *w){ cwidget = w ; }
     bool IsCheckboxChoise(int index) ;
