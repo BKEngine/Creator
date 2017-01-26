@@ -6,6 +6,7 @@
 
 #include <mutex>
 typedef std::recursive_mutex BKE_WrapperMutex;
+typedef std::lock_guard<std::recursive_mutex> BKE_WrapperMutexLocker;
 
 #ifndef WCHAR_MAX
 #include <wchar.h>

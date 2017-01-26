@@ -21,8 +21,6 @@ public:
     int resolutionSize[2];
     QString gameTitle;
     QString saveDir;
-    QStringList imageAutoSearchPath;
-    QStringList audioAutoSearchPath;
     int maxSaveDataNum;
     int defaultFontSize;
     QBkeVariable defaultFontColor;
@@ -32,8 +30,10 @@ public:
     QBkeVariable metaData;
 
     BkeProjectConfig &operator = (const BkeProjectConfig &r);
-private:
+
     QStringList scriptAutoSearchPath;
+	QStringList imageAutoSearchPath;
+	QStringList audioAutoSearchPath;
 
 public slots:
     void readFile();
@@ -47,5 +47,4 @@ signals:
     void onFileChanged();
     void onConfigChanged();
 };
-
 #endif // BKEPROJECTCONFIG_H

@@ -82,7 +82,7 @@ private:
 	void ConfigProject(BkeProjectConfig *config);
 	void NewFile(const ItemInfo &f, int type);
 	void DeleteFile(const ItemInfo &f);
-	void Addfiles(const ItemInfo &f);
+	void AddFiles(const ItemInfo &f);
 	void AddDir(const ItemInfo &f);
 	void PreviewFile(const ItemInfo &f);
 	void CloseProject(const ItemInfo &f);

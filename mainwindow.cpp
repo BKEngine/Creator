@@ -247,7 +247,7 @@ void MainWindow::AboutBkeCreator()
 	msg.SetLable(temp);
 	msg.SetBtn(QStringList()<<"查看源代码(git)"<<"确认(OK)");
 	msg.SetDefaultBtn(1);
-	if( msg.WaitUser() == 0 ) QDesktopServices::openUrl( QUrl("https://git.coding.net/taigacon/BKE_Creator.git"));
+	if( msg.WaitUser() == 0 ) QDesktopServices::openUrl( QUrl("https://git.coding.net/taigacon/BKE_Creator_public.git"));
 }
 
 

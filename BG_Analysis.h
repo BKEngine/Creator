@@ -62,12 +62,12 @@ private:
 	/// <summary>
 	/// The macrofiles.
 	/// </summary>
-	list<QString> macrofiles;
+	QStringList macrofiles;
 
 	/// <summary>
 	/// The backup_macrofiles.
 	/// </summary>
-	list<QString> backup_macrofiles;
+	QStringList backup_macrofiles;
 
 	/// <summary>
 	/// Whether macro has changed.
@@ -188,6 +188,16 @@ public:
 		listfile.append(files);
 		newmacrofile = true;
 		msgmutex.unlock();
+	}
+
+	/// <summary>
+	/// Check given file 
+	/// </summary>
+	/// <param name="file">File.</param>
+	bool isMacroFile(const QString &file)
+	{
+		QMutexLocker ml(&msgmutex);
+		return macrofiles.contains(file);
 	}
 
 	/// <summary>

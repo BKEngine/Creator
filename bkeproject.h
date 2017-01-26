@@ -11,7 +11,7 @@
 
 class ItemInfo;
 
-void BKE_PROJECT_READITEM( QTreeWidgetItem *dest,ItemInfo &info) ;
+void BKE_PROJECT_READITEM( QTreeWidgetItem *dest,ItemInfo &info);
 
 class ItemInfo
 {
@@ -58,6 +58,15 @@ public:
 		return FullName;
 	}
 
+	QString getFullName() const
+	{
+		if (FullName.startsWith("/") || FullName.startsWith("\\"))
+		{
+			return FullName.right(FullName.length() - 1);  //开头不带/
+		}
+		return FullName;
+	}
+
 	ItemInfo getParentInfo() const
 	{
 		ItemInfo p;
@@ -66,8 +75,15 @@ public:
 	}
 };
 
-
-typedef QHash<QString,QStringList*> BkeFilesHash ;
+enum ItemType
+{
+	ITEM_FILE = 0,
+	ITEM_SCRIPT = 1,
+	ITEM_IMAGE = 2,
+	ITEM_AUDIO = 3,
+	ITEM_VIDEO = 4,
+	ITEM_DIR = 5,
+};
 
 class CodeWindow;
 
@@ -81,7 +97,6 @@ public:
 	QString ProjectLangFile() const;
 	QString FileDir() const;
 	QString ProjectName() const ;
-	QString IconKey(qint64 key) ;
 	QString absName(const QString &name){ return FileDir()+"/"+name ; }
 	QString AllNameToName(const QString &allname) ;
 	bool NewProject(const QString &dir,const QString &name) ;
@@ -94,18 +109,22 @@ public:
 	bool RemoveItem(const ItemInfo &f) ;
 	void SetTopLeveBold(bool t) ;
 	void MakeItems(QTreeWidgetItem *dest,const QStringList &list) ;
-	void MakeItems(QTreeWidgetItem *dest,BkeFilesHash &hash) ;
 	QStringList ListFiles(int type) ;
 	void ListFiles(QStringList &ls, QTreeWidgetItem *root, const QString &parentdir);
 	QStringList ItemDirs(QTreeWidgetItem *dest) ;
-	void AddFileToHash(BkeFilesHash *hash,const QString &filename) ;
-	bool removeFromHash(BkeFilesHash *hash, const ItemInfo &f ) ;
-	bool SearchDir(BkeFilesHash &hash,const QString &dir,const QString &suffix) ;
-	void ItemFromHash(QTreeWidgetItem *dest,BkeFilesHash &hash) ;
-	void Addfiles(const QStringList &ls , const ItemInfo &f, bool autochange) ;
-	void AddDir(const QString &dir ,const QString &relativeName, const ItemInfo &f) ;
-	bool checkFileExist(const QString &f){ return files.contains(f); }
-	bool checkIsDir(const ItemInfo &f);
+	void AddFiles(const QStringList &ls , const ItemInfo &f);
+	void AddDir(const QString &dir, const ItemInfo &f) ;
+	bool CheckIsDir(const ItemInfo &f);
+	/**
+	 *	在dir中搜索指定后缀名的文件
+	 *	@param dir 相对于FileDir()的路径
+	 *	@param suffixes 一个指定后缀名的字符串列表
+	 *	@return 返回相对于FileDir()的文件路径
+	 */
+	QStringList SearchDir(const	QString &root, const QString &dir, const QStringList &suffixes);
+	QStringList SearchDir(const	QString &root, const QString &dir, const QString suffix){
+		return SearchDir(root, dir, QStringList()<<suffix);
+	}
 
 	//发布游戏
 	void ReleaseGame();
@@ -115,22 +134,23 @@ public:
 	QTreeWidgetItem *FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty = true) ;
 	QTreeWidgetItem *FindItemAll(const QString &name) ;
 	QTreeWidgetItem *MakeItem(QTreeWidgetItem *dest,const QString &dir) ;
-	BkeFilesHash *typeHash(int type) ;
-	BkeFilesHash *typeHash(const QString &n) ;
 
 	QTreeWidgetItem *ConfigFile;
 	QTreeWidgetItem *Import;
-	QTreeWidgetItem *Script ;
-	QTreeWidgetItem *Source ;
-	QTreeWidgetItem *BKAfile ;
-	QTreeWidgetItem *ImageFile ;
-	QTreeWidgetItem *VoiceFile ;
-	QTreeWidgetItem *Root ;
-	BkeParser *lex ;
+	QTreeWidgetItem *Script;
+	QTreeWidgetItem *Source;
+	QTreeWidgetItem *BKAfile;
+	QTreeWidgetItem *ImageFile;
+	QTreeWidgetItem *VoiceFile;
+	QTreeWidgetItem *Root;
+	BkeParser *lex;
+
+private:
+	void SetupConfig();
+
+public:
 	BkeProjectConfig *config;
 	BG_Analysis *analysis;
-
-	QMap<QString, long> files;
 
 	QIcon *fileico ;
 	QIcon *dirsico ;
@@ -149,35 +169,35 @@ private:
 	QString pfile;
 	QString ErrorInfo ;
 	QString Time ;
-	QStringList OutFilelist ;
 	QStringList emptylist ;
-	BkeFilesHash ImportHash ;
-	BkeFilesHash ScriptHash ;
-	BkeFilesHash SourceHash ;
 	QJsonObject *bkpAdmin ;
 	bool isnull ;
 	int  currentptr ;
 
-	QTreeWidgetItem* findItemIn(QTreeWidgetItem *p, const QString &name, bool createnew = false, QIcon *icon = NULL);
+	/**
+	 *	在QTreeWidgetItem节点中寻找一个节点，名称是{name}。若不存在，由{createnew}参数指定是否创建一个新的节点，图标为{icon}
+	 */
+	//QTreeWidgetItem* FindItemIn(QTreeWidgetItem *p, const QString &name, bool createnew = false, QIcon *icon = NULL);
 	void ForceAddScript(const QString &f, QTreeWidgetItem* p);
 	void MakeImport() ;
 	void ListToIni(QSettings *bkp,QStringList list) ;
 	void BuildItem(const QString &name) ;
-	void SetIconFromSuffix(QTreeWidgetItem *dest,const QString &suffix) ;
 	void SortItem(QTreeWidgetItem *dest) ;
 	void SortTree(QTreeWidgetItem *tree) ;
-	void SearchTree(BkeFilesHash &hash, QTreeWidgetItem *dest,const QString &dir) ;
-	QJsonObject HashToJson(BkeFilesHash &hash) ;
 	QJsonObject TreeToJson(QTreeWidgetItem *tree);
-	void JsonToHash(BkeFilesHash &hash,QJsonObject llm, bool lowVersion) ;
 	void JsonToTree(QTreeWidgetItem *tree, QJsonObject llm, int version);
-	QHash<QString,QStringList*> *ItemToHashptr(const QTreeWidgetItem *root) ;
+
+	/**
+	 *	从文件名的Suffix判断ItemType
+	 */
+	ItemType GetTypeFromSuffix(const QString &filename);
+	void SetIconFromType(QTreeWidgetItem *dest, ItemType type);
+	void SetIconFromSuffix(QTreeWidgetItem *dest, const QString &suffix);
 
 	void FindSection(const QString &section , int &from , int &end) ;
 
 	void copyStencil(const QString &file) ;
 	QString MarksToString(BkeMarkList *mk) ;
-	void CheckDir(BkeFilesHash *hash, const QString dirnow) ;
 
 public:
 	struct VersionData
