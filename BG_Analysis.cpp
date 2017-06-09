@@ -3,6 +3,7 @@
 #include "bkeSci/bkescintilla.h"
 #include "loli/loli_island.h"
 #include "BKS_info.h"
+#include "CmdListLoader.h"
 
 #if WIN32
 #include <Windows.h>
@@ -226,6 +227,43 @@ void BG_Analysis::notifyExit()
 	MessageBox(NULL, L"分析线程崩溃，请尽快保存工程后重启Creator", L"BKE_Creator", 0);
 #endif
 	this->exit(0);
+}
+
+QString BG_Analysis::getCmdList()
+{
+	QStringList ls;
+	{
+		QStringList tmp;
+		for (auto &it : CmdList)
+		{
+			tmp.push_back(it.name);
+		}
+		std::sort(tmp.begin(), tmp.end(), [](const QString &l, const QString &r) {
+			QBkeCmdInfo &linfo = CmdList[l];
+			QBkeCmdInfo &rinfo = CmdList[r];
+			if (linfo.priority > rinfo.priority)
+				return true;
+			else if (linfo.priority == rinfo.priority)
+				return l > r;
+			return false;
+		});
+		for (auto &it : tmp)
+		{
+			ls.push_back(it + "?0");
+		}
+	}
+	
+	for (auto &it : SpecialCmdList.keys())
+	{
+		ls.push_back(it + "?0");
+	}
+	msgmutex.lock();
+	for (auto it = macrodata.begin(); it != macrodata.end(); it++)
+	{
+		ls.push_back(it.key() + "?3");
+	}
+	msgmutex.unlock();
+	return ls.join(' ');
 }
 
 BG_Analysis::BG_Analysis(const QString &p)

@@ -227,6 +227,8 @@ public:
 
 	void getLabels(set<QString> &l);
 
+	QStringList getLabels();
+
 	//void insertChars(Pos p, Pos offset);
 
 	//void deleteChars(Pos p, Pos offset);

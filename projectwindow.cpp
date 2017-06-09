@@ -12,6 +12,7 @@
 #endif
 #include <stdint.h>
 #include "dia/ParserEditor.h"
+#include "CmdListLoader.h"
 
 //QList<BkeProject*> projectlist ;
 
@@ -480,19 +481,11 @@ void ProjectWindow::BkeChangeCurrentProject(/*BkeProject *p*/)
 {
 	workpro->SetTopLeveBold(true);
 	emit CurrentProChange(workpro);
-	//if( workpro != 0){
-	//    workpro->SetTopLeveBold(false);
-	//}
-
-	//if( p != 0){
-	//    workpro = p ;
-	//    workpro->SetTopLeveBold(true);
-	//    emit CurrentProChange(workpro);
-	//}
-	//else{
-	//    workpro = 0 ;
-	//    emit CurrentProChange(workpro);
-	//}
+	
+	if (!CmdListLoader::load())
+	{
+		QMessageBox::warning(0, "警告", "BKECmdList.dll不存在，智能提示和自动补全功能将禁用。");
+	}
 }
 
 BkeProject *ProjectWindow::FindFileProject(const QString &file)

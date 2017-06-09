@@ -101,7 +101,8 @@ void BkeProjectConfig::readFile()
 		}
 		maxSaveDataNum = v["MaxSaveDataNum"].isNull() ? 10000 : v["MaxSaveDataNum"].value().toInt();
 		defaultFontSize = v["DefaultFontSize"].isNull() ? 24 : v["DefaultFontSize"].value().toInt();
-		defaultFontColor = v["DefaultFontColor"];
+		if(!v["DefaultFontColor"].isNull())
+			defaultFontColor = v["DefaultFontColor"];
 		defaultFontName = v["DefaultFontName"].value().toString();
 		debugLevel = v["DebugLevel"].isNull() ? 3 : v["DebugLevel"].value().toInt();
 		live2DKey = v["Live2DKey"].value().toString();

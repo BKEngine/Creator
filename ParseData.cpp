@@ -80,6 +80,16 @@ void ParseData::getLabels(set<QString> &l)
 	}
 }
 
+QStringList ParseData::getLabels()
+{
+	QStringList ls;
+	for (auto &it : labels)
+	{
+		ls << (*it)->name;
+	}
+	return ls;
+}
+
 /*
 void ParseData::insertChars(Pos p, Pos offset)
 {

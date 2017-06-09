@@ -2,7 +2,8 @@
 #include "bkescintilla.h"
 #include "../BKS_info.h"
 #include "../codewindow.h"
-#include "../cmdlist_wrapper.h"
+#include "CmdListLoader.h"
+#include "loli/loli_island.h"
 
 QImage BKE_AUTOIMAGE_KEY(":/auto/source/auto_key.png");
 QImage BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_funcotin.png");
@@ -60,7 +61,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	SendScintilla(SCI_AUTOCSTOPS, "", " ~,./!@#$%^&*()+-=\\;'[]{}|:?<>");
 	SendScintilla(SCI_SETUSETABS, true);
 	SendScintilla(SCI_SETINDENT, 0);
-	SendScintilla(SCI_AUTOCSETORDER, SC_ORDER_PERFORMSORT);
+	SendScintilla(SCI_AUTOCSETORDER, SC_ORDER_CUSTOM);
 
 	//setIndentationGuides(true) ;
 	Separate = QString(" ~!@#$%^&*()-+/|{}[]:;/=.,?><\\\n\r");
@@ -222,26 +223,41 @@ void BkeScintilla::CharHandle(int cc)
 {
 }
 
-QString BkeScintilla::getAttrs(const QString &name, const QString &alltext)
+QString BkeScintilla::getAttrs(const QString &name, const QStringList &attrs, const QString &alltext)
 {
-	std::set<QString> params;
-	QString res;
+	QStringList params;
+	//test macro first
+	{
+		BKEMacros macro;
+		bool r = analysis->findMacro(name, &macro);
+		if (r && !macro.paramqueue.empty())
+		{
+			for (int i = 0; i < macro.paramqueue.size(); i++)
+			{
+				QString &attr = macro.paramqueue[i].first;
+				if (!attrs.contains(attr) && !attrs.contains(QString::number(i)))
+				{
+					params.push_back(attr);
+				}
+			}
+			return params.join(' ');
+		}
+	}
 	{
 		auto it = CmdList.find(name);
 		if (it != CmdList.end())
 		{
 			if (it->argNames.empty())
-				return res;
-			for (auto &it2 : it->argNames)
-				params.insert(it2);
-			auto it2 = params.begin();
-			res += *it2;
-			for (it2++; it2 != params.end(); it2++)
+				return QString();
+			for (int i = 0; i < it->argNames.size(); i++)
 			{
-				res += ' ';
-				res += *it2;
+				QString &attr = it->argNames[i];
+				if (!attrs.contains(attr) && !attrs.contains(QString::number(i)))
+				{
+					params.push_back(attr);
+				}
 			}
-			return res;
+			return params.join(' ');
 		}
 	}
 	//test specialcmd
@@ -251,80 +267,84 @@ QString BkeScintilla::getAttrs(const QString &name, const QString &alltext)
 		{
 			QRegExp reg("\\smode=([^ ]*)");
 			auto modeidx = alltext.indexOf(reg);
+			QBkeCmdInfo *info = nullptr;
 			if (modeidx >= 0)
 			{
 				QString modename = reg.cap(1);
 				PAModule pa(modename);
 				bool f;
-				BKECmdInfo *info = NULL;
 				int idx = pa.getIntValue(&f);
 				if (f)
 				{
-					for (auto &it3 : it->modes)
+					/*auto &&m = it.value();
+					for (auto it3 = m.begin(); it3!=m.end(); it3++)
 					{
-						if (it3.second.first == idx)
+						if (it3.key() == idx)
 						{
 							info = &it3.second.second;
 							modename = it3.first;
 						}
-					}
+					}*/
 				}
 				else
 				{
 					modename = pa.getStringValue(&f);
 					if (f)
 					{
-						auto it3 = it->modes.find(modename);
-						if (it3 != it->modes.end())
-							info = &it3->second.second;
+						auto it3 = it->find(modename);
+						if (it3 != it->end())
+							info = &it3.value();
 					}
 				}
 
 				if (info)
 				{
 					if (info->argNames.isEmpty())
-						return res;
-					for (auto &it2 : info->argNames)
-						params.insert(it2);
-					auto it2 = params.begin();
-					res += *it2;
-					for (it2++; it2 != params.end(); it2++)
+						return QString();
+					for (int i = 0; i < info->argNames.size(); i++)
 					{
-						res += ' ';
-						res += *it2;
+						QString &attr = info->argNames[i];
+						if (!attrs.contains(attr) && !attrs.contains(QString::number(i)))
+						{
+							params.push_back(attr);
+						}
 					}
-					return res;
+					return params.join(' ');
 				}
 			}
 			else
 				return "mode";
-			return res;
+			return QString();
 		}
 	}
-	//test macro
+	return QString();
+}
+
+static struct  
+{
+	QString cmd;
+	QString param;
+	QHash<QString, uint32_t> *map;
+} argEnumAutoLists[] = {
+	{"animate", "loop", &CmdAnimateLoopModeEnumList},
+};
+
+QStringList BkeScintilla::getScriptList()
+{
+	auto ls = workpro->AllScriptFiles();
+	QStringList list;
+	for (QString &s : ls)
 	{
-		BKEMacros macro;
-		bool r = analysis->findMacro(name, &macro);
-		if (r && !macro.paramqueue.empty())
-		{
-			for (auto &it2 : macro.paramqueue)
-				params.insert(it2.first);
-			auto it2 = params.begin();
-			res += *it2;
-			for (it2++; it2 != params.end(); it2++)
-			{
-				res += ' ';
-				res += *it2;
-			}
-			return res;
-		}
+		list << '\"' + s + '\"';
+		list << '\"' + QFileInfo(s).fileName() + '\"';
+		list << '\"' + QFileInfo(s).baseName() + '\"';
 	}
-	return res;
+	ls.removeDuplicates();
+	return list;
 }
 
 QString BkeScintilla::getEnums(const QString &name, const QString &attr, const QString &alltext)
 {
-	std::set<QString> params;
 	QString res;
 	{
 		auto it = CmdList.find(name);
@@ -333,16 +353,31 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 			auto it2 = it->argNames.indexOf(attr);
 			if (it2 >= 0)
 			{
-				if (!it->argAutoList[it2].isEmpty())
-					return it->argAutoList[it2];
-				else if (it->argFlags[it2] & ptBool)
-					return "false true";
-				else if (it->argFlags[it2] & ptScript)
+				for (auto &&s : argEnumAutoLists)
 				{
-					auto ls = workpro->AllScriptFiles();
-					ls.pop_front();
-					for (auto &ff : ls)
-						ff = '\"' + ff + '\"';
+					if (name == s.cmd && attr == s.param)
+					{
+						QHash<QString, uint32_t> *map = s.map;
+						auto ls = map->keys();
+						for (auto &it3 : ls)
+						{
+							it3 = '\"' + it3 + '\"';
+						}
+						return ls.join(' ');
+					}
+				}
+				if (it->argFlags[it2] & PT_BOOL)
+					return "false true";
+				else if (it->argFlags[it2] & PT_SCRIPT)
+				{
+					auto ls = getScriptList();
+					return ls.join(' ');
+				}
+				else if (it->argFlags[it2] & PT_LABEL)
+				{
+					auto p = analysis->lockFile(FileName);
+					auto ls = p->getLabels();
+					analysis->unlockFile();
 					return ls.join(' ');
 				}
 			}
@@ -355,16 +390,21 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 		{
 			if (attr == "mode")
 			{
-				for (auto &it3 : it->modes)
+				QStringList ls = it->keys();
+				std::sort(ls.begin(), ls.end(), [&it](const QString &l, const QString &r) {
+					QBkeCmdInfo &linfo = (*it)[l];
+					QBkeCmdInfo &rinfo = (*it)[r];
+					if (linfo.priority > rinfo.priority)
+						return true;
+					else if (linfo.priority == rinfo.priority)
+						return l > r;
+					return false;
+				});
+				for (auto &it3 : ls)
 				{
-					params.insert(it3.first);
+					it3 = '\"' + it3 + '\"';
 				}
-				for (auto &it3 : params)
-				{
-					res += " \"" + it3 + "\"";
-				}
-				res.remove(0, 1);
-				return res;
+				return ls.join(' ');
 			}
 			QRegExp reg("\\smode=([^ ]*)");
 			auto modeidx = alltext.indexOf(reg);
@@ -373,27 +413,27 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 				QString modename = reg.cap(1);
 				PAModule pa(modename);
 				bool f;
-				BKECmdInfo *info = NULL;
+				QBkeCmdInfo *info = NULL;
 				int idx = pa.getIntValue(&f);
 				if (f)
 				{
-					for (auto &it3 : it->modes)
+					/*for (auto &it3 : it->modes)
 					{
 						if (it3.second.first == idx)
 						{
 							info = &it3.second.second;
 							modename = it3.first;
 						}
-					}
+					}*/
 				}
 				else
 				{
 					modename = pa.getStringValue(&f);
 					if (f)
 					{
-						auto it3 = it->modes.find(modename);
-						if (it3 != it->modes.end())
-							info = &it3->second.second;
+						auto it3 = it->find(modename);
+						if (it3 != it->end())
+							info = &it3.value();
 					}
 				}
 
@@ -402,16 +442,30 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 					auto it2 = info->argNames.indexOf(attr);
 					if (it2 >= 0)
 					{
-						if (!info->argAutoList[it2].isEmpty())
-							return info->argAutoList[it2];
-						else if (info->argFlags[it2] & ptBool)
-							return "false true";
-						else if (info->argFlags[it2] & ptScript)
+						for (auto &&s : argEnumAutoLists)
 						{
-							auto ls = workpro->AllScriptFiles();
-							ls.pop_front();
-							for (auto &ff : ls)
-								ff = '\"' + ff + '\"';
+							if (name == s.cmd && attr == s.param)
+							{
+								QHash<QString, uint32_t> *map = s.map;
+								auto ls = map->keys();
+								for (auto &it3 : ls)
+								{
+									it3 = '\"' + it3 + '\"';
+								}
+								return ls.join(' ');
+							}
+						}
+						if (info->argFlags[it2] & PT_BOOL)
+							return "false true";
+						else if (info->argFlags[it2] & PT_SCRIPT)
+						{
+							auto ls = getScriptList();
+							return ls.join(' ');
+						}
+						else if (info->argFlags[it2] & PT_LABEL)
+						{
+							auto p = analysis->lockFile(FileName);
+							auto ls = p->getLabels();
 							return ls.join(' ');
 						}
 					}
@@ -557,6 +611,7 @@ void BkeScintilla::showComplete()
 	QString cmdname;
 	QString attrContext;
 	QString lastContext;
+	QStringList attrs;
 	int beginPos = pos;
 	unsigned int lastStyle = 0;
 	unsigned char st = style & 63;
@@ -610,10 +665,13 @@ void BkeScintilla::showComplete()
 	{
 		beginPos--;
 		style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+		QByteArray qba;
+		qba.push_front(style);
 		while (beginPos > 0 && (style & 128))
 		{
 			beginPos--;
 			style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+			qba.push_front(style);
 		}
 		//now we find the beginning the @ or [ command
 		char *buf = new char[pos + 2 - beginPos];
@@ -640,6 +698,36 @@ void BkeScintilla::showComplete()
 		else if (isspace(ch) || (isVarName(attrContext) && p3 < 0))
 		{
 			completeType = SHOW_ATTR;
+			bool hasAttr = false;
+			unsigned char oldStyle;
+			int pp = beginPos + p;
+			oldStyle = style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
+			pp++;
+			QString tmp;
+			while (pp < pos)
+			{
+				style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
+				if (style == SCE_BKE_DEFAULT && oldStyle == SCE_BKE_ATTRIBUTE)
+				{
+					attrs << tmp;
+					tmp.clear();
+					hasAttr = true;
+				}
+				else if (style == SCE_BKE_DEFAULT && hasAttr)
+				{
+					hasAttr = false;
+				}
+				else if (oldStyle != SCE_BKE_DEFAULT && oldStyle != SCE_BKE_ATTRIBUTE && style == SCE_BKE_DEFAULT && !hasAttr)
+				{
+					attrs << QString::number(attrs.size());
+				}
+				else if (style == SCE_BKE_ATTRIBUTE)
+				{
+					tmp.push_back(SendScintilla(SCI_GETCHARAT, pp));
+				}
+				oldStyle = style;
+				pp++;
+			}
 		}
 		else
 		{
@@ -689,7 +777,7 @@ void BkeScintilla::showComplete()
 			SendScintilla(SCI_AUTOCSHOW, cmdname.length(), completeList.toUtf8().data());
 		break;
 	case SHOW_ATTR:
-		completeList = getAttrs(cmdname, context);
+		completeList = getAttrs(cmdname, attrs, context);
 		if (!completeList.isEmpty())
 			SendScintilla(SCI_AUTOCSHOW, attrContext.length(), completeList.toUtf8().data());
 		break;
@@ -1792,7 +1880,7 @@ void BkeScintilla::ShowInfomation(QPoint pos)
 			auto it = CmdList.find(name);
 			if (it != CmdList.end())
 			{
-				QString info = "命令:" + it->name + "\t参数:" + it->argNames.join(' ') + '\n' + it->detail;
+				QString info = "命令:" + it->name + "\t参数:" + it->argNames.join(' ') + '\n' + it->description;
 				QToolTip::showText(QCursor::pos(), info);
 				return;
 			}
@@ -1805,36 +1893,36 @@ void BkeScintilla::ShowInfomation(QPoint pos)
 				auto mode = node->findIndex("mode", 0);
 				if (mode && !mode->name.isEmpty())
 				{
-					BKECmdInfo *info = NULL;
+					QBkeCmdInfo *info = NULL;
 					QString modename = mode->name;
 					PAModule pa(modename);
 					bool f;
 					int idx = pa.getIntValue(&f);
 					if (f)
 					{
-						for (auto &it3 : it->modes)
+						/*for (auto &it3 : it->modes)
 						{
 							if (it3.second.first == idx)
 							{
 								info = &it3.second.second;
 								modename = it3.first;
 							}
-						}
+						}*/
 					}
 					else
 					{
 						modename = pa.getStringValue(&f);
 						if (f)
 						{
-							auto it3 = it->modes.find(modename);
-							if (it3 != it->modes.end())
-								info = &it3->second.second;
+							auto it3 = it->find(modename);
+							if (it3 != it->end())
+								info = &it3.value();
 						}
 					}
 
 					if (info)
 					{
-						QString t = "命令:" + node->name + "模式:" + modename + "\t参数:" + info->argNames.join(' ') + '\n' + info->detail;
+						QString t = "命令:" + node->name + "模式:" + modename + "\t参数:" + info->argNames.join(' ') + '\n' + info->description;
 						QToolTip::showText(QCursor::pos(), t);
 						return;
 					}

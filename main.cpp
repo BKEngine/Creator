@@ -12,8 +12,6 @@
 QString title = "BKE Creator - ";
 uint32_t titlehash = 0;
 
-extern void initCmd();
-
 extern CodeWindow *codeedit;
 
 //register error handling in Windows
@@ -314,7 +312,6 @@ int main(int argc, char *argv[])
 	CheckOpenAL32();
 	CheckFileAssociation();
 #endif
-	initCmd();
 	
 	auto res = a.exec();
 

@@ -187,11 +187,12 @@ protected:
 
 	QString completeList;
 
+	QStringList getScriptList();
 	void showComplete();
-	QString getAttrs(const QString &name, const QString &alltext = "");
-	QString getEnums(const QString &name, const QString &attr, const QString &alltext = "");
-	QString getValList(const QStringList &ls, const QString &alltext = "");
-	QString getGlobalList(const QString &ls, const QString &alltext = "");
+	QString getAttrs(const QString &name, const QStringList &attrs, const QString &alltext);
+	QString getEnums(const QString &name, const QString &attr, const QString &alltext);
+	QString getValList(const QStringList &ls, const QString &alltext);
+	QString getGlobalList(const QString &ls, const QString &alltext);
 };
 
 #endif // BKESCINTILLA_H

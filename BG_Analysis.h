@@ -6,7 +6,6 @@
 #include <atomic>
 #include <list>
 #include <algorithm>
-#include "cmdlist_wrapper.h"
 #include "ParserHelper/parser/parser.h"
 
 using std::atomic_bool;
@@ -299,32 +298,7 @@ public:
 	/// Gets all the commands and macros.
 	/// </summary>
 	/// <returns></returns>
-	QString getCmdList()
-	{
-		std::set<QString> auto_list;
-		for (auto &it : CmdList)
-		{
-			auto_list.insert(it.name + "?0");
-		}
-		for (auto it = SpecialCmdList.begin(); it != SpecialCmdList.end(); it++)
-		{
-			auto_list.insert(it.key() + "?0");
-		}
-		msgmutex.lock();
-		for (auto it = macrodata.begin(); it != macrodata.end(); it++)
-		{
-			auto_list.insert(it.key() + "?3");
-		}
-		msgmutex.unlock();
-		QString cmd;
-		auto it = auto_list.begin();
-		cmd = *it;
-		for (++it; it != auto_list.end(); it++)
-		{
-			cmd += " " + *it;
-		}
-		return cmd;
-	}
+	QString getCmdList();
 
 	bool findMacro(const QString &name, BKEMacros *m)
 	{

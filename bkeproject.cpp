@@ -204,7 +204,6 @@ bool BkeProject::OpenProject(const QString &name)
 
 	delete analysis;
 	auto ls = AllScriptFiles();
-	ls.pop_front();
 
 	analysis = new BG_Analysis(FileDir() + '/');
 	analysis->addFiles(ls);
@@ -635,7 +634,6 @@ void BkeProject::ListFiles(QStringList &ls, QTreeWidgetItem *root, const QString
 QStringList BkeProject::AllScriptFiles()
 {
 	QStringList temp;
-	temp.push_back("config.bkpsr");
 	temp.append(ListFiles(1));
 	temp.append(ListFiles(2));
 	return temp;

@@ -241,9 +241,6 @@
     <ClCompile Include="ParseData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cmdlist_wrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ParserHelper\parser\extend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -634,6 +631,9 @@
     <ClCompile Include="BKEscintilla\src\XPM.cpp">
       <Filter>Scintilla</Filter>
     </ClCompile>
+    <ClCompile Include="CmdListLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -951,9 +951,6 @@
     <ClInclude Include="ParseData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cmdlist_wrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BKEscintilla\lexlib\StringCopy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1036,6 +1033,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScriptEnums.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdListLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

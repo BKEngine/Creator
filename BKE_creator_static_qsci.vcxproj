@@ -162,7 +162,7 @@
     <ClCompile Include="BKEscintilla\src\EditModel.cpp" />
     <ClCompile Include="BKEscintilla\src\EditView.cpp" />
     <ClCompile Include="BKEscintilla\src\MarginView.cpp" />
-    <ClCompile Include="cmdlist_wrapper.cpp" />
+    <ClCompile Include="CmdListLoader.cpp" />
     <ClCompile Include="Debug\moc_BG_Analysis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -546,7 +546,7 @@
     <ClInclude Include="BKEscintilla\src\MarginView.h" />
     <ClInclude Include="BKEscintilla\src\UnicodeFromUTF8.h" />
     <ClInclude Include="BKS_info.h" />
-    <ClInclude Include="cmdlist_wrapper.h" />
+    <ClInclude Include="CmdListLoader.h" />
     <ClInclude Include="dia\CommonSettingDia.h" />
     <CustomBuild Include="dia\doubleinput.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing doubleinput.h...</Message>
