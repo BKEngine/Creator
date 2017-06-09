@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include <list>
-#include <vector>
-#include <set>
+#include <QVector>
+#include <QSet>
 #include "ParserHelper/parser/parser.h"
 
 using namespace std;
@@ -223,9 +222,7 @@ public:
 
 	QMap<int, BaseNode*> fileNodes;
 
-	list<QMap<int, BaseNode*>::iterator> labels;
-
-	void getLabels(set<QString> &l);
+	QList<QMap<int, BaseNode*>::iterator> labels;
 
 	QStringList getLabels();
 
@@ -247,346 +244,17 @@ public:
 
 	QString lastComment;
 
-	char fetchNextOne()
-	{
-		char ch = textbuf[idx];
-		if (!ch)
-			return 0;
-		char ch2 = textbuf[idx + 1];
-		if (ch == '/' && ch2 == '/')
-		{
-			int rawidx = idx + 2;
-			skipLineComment();
-			lastComment = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
-			return textbuf[idx];
-		}
-		else if (ch == '/' && ch2 == '*')
-		{
-			int rawidx = idx + 2;
-			if (skipBlockComment())
-			{
-				lastComment = QString::fromStdString(string(textbuf + rawidx, idx - 2 - rawidx));
-			}
-			return textbuf[idx];
-		}
-		return ch;
-	}
-	char getNextOne()
-	{
-		char ch = fetchNextOne();
-		idx++;
-		return ch;
-	}
-	void skipLineComment()
-	{
-		char ch = textbuf[idx];
-		while (ch && ch!='\n' && ch!= '\r')
-			ch = textbuf[++idx];
-	}
-	bool skipBlockComment()
-	{
-		char ch = textbuf[idx+=2];
-		bool s = false;
-		while (ch)
-		{
-			if (ch != '*')
-			{
-				ch = textbuf[++idx];
-				continue;
-			}
-			else
-			{
-				ch = textbuf[++idx];
-				if (ch != '/')
-				{
-					continue;
-				}
-				s = true;
-				break;
-			}
-		}
-		if (!s)
-		{
-			infos.emplace_back(3, 9, idx - 2, 1);
-		}
-		else
-			idx++;
-		return s;
-	}
-	void skipText()
-	{
-		char ch = fetchNextOne();
-		while (ch && ch != '\n' && ch != '\r' && ch != '[')
-		{
-			idx++;
-			ch = fetchNextOne();
-		}
-	}
-	bool skipLineEnd()
-	{
-		if (!idx)
-			return true;
-		char ch = textbuf[idx];
-		if (ch == '\n')
-		{
-			idx++;
-			return true;
-		}
-		else if (ch == '\r')
-		{
-			idx++;
-			ch = textbuf[idx];
-			if (ch == '\n')
-			{
-				idx++;
-				return true;
-			}
-			return true;
-		}
-		return false;
-	}
-	bool isLineEnd()
-	{
-		char ch = textbuf[idx];
-		return !ch || ch == '\n' || ch == '\r';
-	}
-	QString readCmdName(bool startwithat)
-	{
-		QByteArray ba;
-		char ch = fetchNextOne();
-		while (ch)
-		{
-			if (ISSPACE(ch) || ch == '=')
-				break;
-			if (ch == ']' && !startwithat)
-				break;
-			ba.push_back(ch);
-			idx++;
-			ch = fetchNextOne();
-		}
-		QString tmp;
-		tmp.prepend(ba);
-		return tmp;
-	}
-	QString readName()
-	{
-		QByteArray ba;
-		unsigned char ch = fetchNextOne();
-		if (isalpha(ch) || ch == '_' || ch >= 0x80)
-		{
-			do
-			{
-				ba.push_back(ch);
-				idx++;
-				ch = fetchNextOne();
-			} while (isalnum(ch) || ch == '_' || ch >= 0x80);
-		}
-		QString tmp;
-		tmp.prepend(ba);
-		return tmp;
-	}
-	QString readValue(bool startwithat)
-	{
-		enum BracketType
-		{
-			Bracket_Small,
-			Bracket_Medium,
-			Bracket_Large
-		};
-		vector<BracketType> _stack;
-		vector<int> posstack;
-		posstack.push_back(idx);
-
-		QByteArray ba;
-
-		int yinhao = 0;
-
-		unsigned char ch = (unsigned char)textbuf[idx];
-
-		while (ch)
-		{
-			if (ch == ']' && !startwithat && !yinhao && _stack.empty())
-				break;
-			if (ch == '\r' && ch == '\n' && _stack.empty())
-				break;
-			if (ISSPACE(ch) && !yinhao && _stack.empty())
-				break;
-			if (ch == '/' && textbuf[idx + 1] == '/' && !yinhao)
-			{
-				skipLineComment();
-				continue;
-			}
-			if (ch == '/' && textbuf[idx + 1] == '*' && !yinhao)
-			{
-				skipBlockComment();
-				continue;
-			}
-			ba.push_back(ch);
-			if (ch == '\\')
-			{
-				if (yinhao == 2)
-				{
-					idx++;
-					ba.push_back(textbuf[idx]);
-				}
-			}
-			else if (ch == '\"')
-			{
-				if (!yinhao)
-				{
-					yinhao = 1;
-					posstack.push_back(idx);
-				}
-				else if (yinhao == 1)
-				{
-					if (textbuf[idx + 1] == '\"')
-						ba.push_back(textbuf[++idx]);
-					else
-					{
-						yinhao = 0;
-						posstack.pop_back();
-					}
-				}
-			}
-			else if (ch == '\'')
-			{
-				if (!yinhao)
-				{
-					yinhao = 2;
-					posstack.push_back(idx);
-				}
-				else if (yinhao == 2)
-				{
-					yinhao = 0;
-					posstack.pop_back();
-				}
-			}
-			else if (ch == '(' && !yinhao)
-			{
-				_stack.push_back(BracketType::Bracket_Small);
-				posstack.push_back(idx);
-			}
-			else if (ch == '[' && !yinhao)
-			{
-				_stack.push_back(BracketType::Bracket_Medium);
-				posstack.push_back(idx);
-			}
-			else if (ch == '{' && !yinhao)
-			{
-				_stack.push_back(BracketType::Bracket_Large);
-				posstack.push_back(idx);
-			}
-			else if (ch == ')' && !yinhao)
-			{
-				if (!_stack.empty() && _stack.back() == BracketType::Bracket_Small)
-				{
-					_stack.pop_back();
-					posstack.pop_back();
-				}
-				else
-				{
-					if (_stack.empty())
-					{
-						//缺少对应的(
-						infos.emplace_back(2, 3, idx, 1);
-					}
-					else
-					{
-						//此处应为其它括号
-						infos.emplace_back(2, 6 + _stack.back(), idx, 1);
-					}
-				}
-			}
-			else if (ch == ']' && !yinhao)
-			{
-				if (!_stack.empty() && _stack.back() == BracketType::Bracket_Medium)
-				{
-					_stack.pop_back();
-					posstack.pop_back();
-				}
-				else
-				{
-					if (_stack.empty())
-					{
-						//缺少对应的[
-						infos.emplace_back(2, 4, idx, 1);
-					}
-					else
-					{
-						//此处应为其它括号
-						infos.emplace_back(2, 6 + _stack.back(), idx, 1);
-					}
-				}
-			}
-			else if (ch == '}' && !yinhao)
-			{
-				if (!_stack.empty() && _stack.back() == BracketType::Bracket_Large)
-				{
-					_stack.pop_back();
-					posstack.pop_back();
-				}
-				else
-				{
-					if (_stack.empty())
-					{
-						//缺少对应的{
-						infos.emplace_back(2, 5, idx, 1);
-					}
-					else
-					{
-						//此处应为其它括号
-						infos.emplace_back(2, 6 + _stack.back(), idx, 1);
-					}
-				}
-			}
-			else if (ch == ';' && !yinhao)
-			{
-				if (!_stack.empty())
-				{
-					//此处应为其它括号
-					if (_stack.empty())
-					{
-						//缺少对应的(
-						infos.emplace_back(2, 2, idx, 1);
-					}
-					else
-					{
-						//此处应为其它括号
-						infos.emplace_back(2, 6 + _stack.back(), idx, 1);
-					}
-					_stack.clear();
-				}
-			}
-			ch = textbuf[++idx];
-
-		}
-		if (yinhao)
-		{
-			//字符串未完结
-			infos.emplace_back(2, 9, posstack.back(), idx - posstack.back());
-		}
-		else if (!_stack.empty())
-		{
-			//此处应为其它括号
-			infos.emplace_back(2, 6 + _stack.back(), posstack.back(), idx - posstack.back());
-			_stack.clear();
-		}
-		QString tmp;
-		tmp.prepend(ba);
-		return tmp;
-	}
-	bool skipSpace()
-	{
-		char ch = fetchNextOne();
-		bool res = false;
-		while (ch && ch != '\r' && ch != '\n' && ISSPACE(ch))
-		{
-			res = true;
-			idx++;
-			ch = fetchNextOne();
-		}
-		return res;
-	}
+	char fetchNextOne();
+	char getNextOne();
+	void skipLineComment();
+	bool skipBlockComment();
+	void skipText();
+	bool skipLineEnd();
+	bool isLineEnd();
+	QString readCmdName(bool startwithat);
+	QString readName();
+	QString readValue(bool startwithat);
+	bool skipSpace();
 
 	BKE_VarClosure *fileclo;
 
@@ -598,17 +266,18 @@ public:
 		int len;
 
 		Info(int a, int b, int c, int d) :type(a), value(b), from(c), len(d){};
+		Info() {}
 	};
 	
 	/// <summary>
 	/// Warning and Error infos corresponding to syntax.
 	/// </summary>
-	vector<Info> infos;
+	QVector<Info> infos;
 
 	/// <summary>
 	/// Warning and Error infos corresponding to macros and commands.
 	/// </summary>
-	vector<Info> infos2;
+	QVector<Info> infos2;
 
 	QMutex infos2_mutex;
 

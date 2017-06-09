@@ -318,7 +318,7 @@ void BG_Analysis::parseMacro(const QString &file)
 		if (p->fileNodes.empty())
 		{
 			p->infos2_mutex.lock();
-			p->infos2.emplace_back(2, 14, 0, 1);
+			p->infos2.push_back({ 2, 14, 0, 1 });
 			p->infos2_mutex.unlock();
 			return;
 		}
@@ -335,7 +335,7 @@ void BG_Analysis::parseMacro(const QString &file)
 		if (!(*node)->isLabel() || (*node)->name != "register")
 		{
 			p->infos2_mutex.lock();
-			p->infos2.emplace_back(2, 14, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+			p->infos2.push_back({ 2, 14, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
 			p->infos2_mutex.unlock();
 			return;
 		}
@@ -358,7 +358,7 @@ void BG_Analysis::parseMacro(const QString &file)
 				if (!n || n->name.isEmpty())
 				{
 					p->infos2_mutex.lock();
-					p->infos2.emplace_back(2, 15, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+					p->infos2.push_back({ 2, 15, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
 					p->infos2_mutex.unlock();
 				}
 				else
@@ -372,7 +372,7 @@ void BG_Analysis::parseMacro(const QString &file)
 						if (f.isEmpty())
 						{
 							p->infos2_mutex.lock();
-							p->infos2.emplace_back(2, 16, n->startPos, n->endPos + 1 - n->startPos);
+							p->infos2.push_back({ 2, 16, n->startPos, n->endPos + 1 - n->startPos });
 							p->infos2_mutex.unlock();
 						}
 						else if (std::find(backup_macrofiles.begin(), backup_macrofiles.end(), f) == backup_macrofiles.end())
@@ -397,7 +397,7 @@ void BG_Analysis::parseMacro(const QString &file)
 				if (!n || n->name.isEmpty())
 				{
 					p->infos2_mutex.lock();
-					p->infos2.emplace_back(2, 17, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+					p->infos2.push_back({ 2, 17, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
 					p->infos2_mutex.unlock();
 				}
 				else
@@ -410,7 +410,7 @@ void BG_Analysis::parseMacro(const QString &file)
 						if (CmdList.find(mname) != CmdList.end() || SpecialCmdList.find(mname) != SpecialCmdList.end())
 						{
 							p->infos2_mutex.lock();
-							p->infos2.emplace_back(2, 18, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+							p->infos2.push_back({ 2, 18, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
 							p->infos2_mutex.unlock();
 						}
 						else
@@ -425,16 +425,16 @@ void BG_Analysis::parseMacro(const QString &file)
 								if ((*node)->cmdParam[i] && (*node)->cmdParam[i]->name == "name")
 									continue;
 								if (!(*node)->cmdParam[i] || (*node)->cmdParam[i]->name.isEmpty())
-									m.paramqueue.emplace_back((*node)->cmdValue[i]->name, QString(""));
+									m.paramqueue.push_back({ (*node)->cmdValue[i]->name, QString("") });
 								else
-									m.paramqueue.emplace_back((*node)->cmdParam[i]->name, (*node)->cmdValue[i]->name);
+									m.paramqueue.push_back({ (*node)->cmdParam[i]->name, (*node)->cmdValue[i]->name });
 							}
 						}
 					}
 					else
 					{
 						p->infos2_mutex.lock();
-						p->infos2.emplace_back(2, 19, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+						p->infos2.push_back({ 2, 19, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
 						p->infos2_mutex.unlock();
 					}
 				}
@@ -561,7 +561,7 @@ void BG_Analysis::run()
 					//	if (p->fileNodes.empty())
 					//	{
 					//		p->infos2_mutex.lock();
-					//		p->infos2.emplace_back(2, 14, 0, 1);
+					//		p->infos2.push_back({ 2, 14, 0, 1 });
 					//		p->infos2_mutex.unlock();
 					//		continue;
 					//	}
@@ -569,7 +569,7 @@ void BG_Analysis::run()
 					//	if (!(*node)->isLabel() || (*node)->name != "register")
 					//	{
 					//		p->infos2_mutex.lock();
-					//		p->infos2.emplace_back(2, 14, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+					//		p->infos2.push_back({ 2, 14, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
 					//		p->infos2_mutex.unlock();
 					//		continue;
 					//	}
@@ -584,7 +584,7 @@ void BG_Analysis::run()
 					//			if (!n || n->name.isEmpty())
 					//			{
 					//				p->infos2_mutex.lock();
-					//				p->infos2.emplace_back(2, 15, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+					//				p->infos2.push_back({ 2, 15, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
 					//				p->infos2_mutex.unlock();
 					//			}
 					//			else
@@ -598,7 +598,7 @@ void BG_Analysis::run()
 					//					if (f.isEmpty())
 					//					{
 					//						p->infos2_mutex.lock();
-					//						p->infos2.emplace_back(2, 16, n->startPos, n->endPos + 1 - n->startPos);
+					//						p->infos2.push_back({ 2, 16, n->startPos, n->endPos + 1 - n->startPos });
 					//						p->infos2_mutex.unlock();
 					//					}
 					//					else if (std::find(backup_macrofiles.begin(), backup_macrofiles.end(), f) == backup_macrofiles.end())
@@ -614,7 +614,7 @@ void BG_Analysis::run()
 					//			if (!n || n->name.isEmpty())
 					//			{
 					//				p->infos2_mutex.lock();
-					//				p->infos2.emplace_back(2, 17, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+					//				p->infos2.push_back({ 2, 17, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
 					//				p->infos2_mutex.unlock();
 					//			}
 					//			else
@@ -627,7 +627,7 @@ void BG_Analysis::run()
 					//					if (CmdList.find(mname) != CmdList.end() || SpecialCmdList.find(mname) != SpecialCmdList.end())
 					//					{
 					//						p->infos2_mutex.lock();
-					//						p->infos2.emplace_back(2, 18, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+					//						p->infos2.push_back({ 2, 18, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
 					//						p->infos2_mutex.unlock();
 					//					}
 					//					else
@@ -642,16 +642,16 @@ void BG_Analysis::run()
 					//							if ((*node)->cmdParam[i] && (*node)->cmdParam[i]->name == "name")
 					//								continue;
 					//							if (!(*node)->cmdParam[i] || (*node)->cmdParam[i]->name.isEmpty())
-					//								m.paramqueue.emplace_back((*node)->cmdValue[i]->name, QString(""));
+					//								m.paramqueue.push_back({ (*node)->cmdValue[i]->name, QString("") });
 					//							else
-					//								m.paramqueue.emplace_back((*node)->cmdParam[i]->name, (*node)->cmdValue[i]->name);
+					//								m.paramqueue.push_back({ (*node)->cmdParam[i]->name, (*node)->cmdValue[i]->name });
 					//						}
 					//					}
 					//				}
 					//				else
 					//				{
 					//					p->infos2_mutex.lock();
-					//					p->infos2.emplace_back(2, 19, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos);
+					//					p->infos2.push_back({ 2, 19, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
 					//					p->infos2_mutex.unlock();
 					//				}
 					//			}

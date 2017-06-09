@@ -115,8 +115,7 @@ void BkeScintilla::onTimer()
 		return;
 	}
 	p->refresh = false;
-	set<QString> l;
-	p->getLabels(l);
+	QStringList l = p->getLabels();
 	emit refreshLabel(l);
 	//clear indicator
 	int len = length();

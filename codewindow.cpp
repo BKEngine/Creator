@@ -369,7 +369,7 @@ void CodeWindow::CurrentConnect(bool c)
 		//工程被改变，需要从下层传递信号
 		connect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		connect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
-		connect(currentedit, SIGNAL(refreshLabel(set<QString> &)), this, SLOT(refreshLabel(set<QString> &)));
+		connect(currentedit, SIGNAL(refreshLabel(QStringList &)), this, SLOT(refreshLabel(QStringList &)));
 	}
 	else{
 		disconnect(currentedit, SIGNAL(copyAvailable(bool)), btncopyact, SLOT(setEnabled(bool)));
@@ -383,7 +383,7 @@ void CodeWindow::CurrentConnect(bool c)
 		//        disconnect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
 		disconnect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		disconnect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
-		disconnect(currentedit, SIGNAL(refreshLabel(set<QString> &)), this, SLOT(refreshLabel(set<QString> &)));
+		disconnect(currentedit, SIGNAL(refreshLabel(QStringList &)), this, SLOT(refreshLabel(QStringList &)));
 	}
 }
 
@@ -1421,12 +1421,12 @@ void CodeWindow::ChangeCodec()
 
 void CodeWindow::refreshLabel(BkeScintilla *sci)
 {
-	set<QString> l;
+	QStringList l;
 	sci->analysis->getLabels(sci->FileName, l);
 	refreshLabel(l);
 }
 
-void CodeWindow::refreshLabel(set<QString> &l)
+void CodeWindow::refreshLabel(QStringList &l)
 {
 	slablelist->clear();
 	labelbanned = true;

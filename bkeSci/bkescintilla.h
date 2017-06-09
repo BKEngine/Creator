@@ -102,7 +102,7 @@ signals:
 	void Undoready(bool is) ;
 	void Redoready(bool is) ;
 	void refreshLabel(BkeScintilla *sci);
-	void refreshLabel(set<QString> &l);
+	void refreshLabel(QStringList &l);
 
 public slots:
 //    void undo () ;

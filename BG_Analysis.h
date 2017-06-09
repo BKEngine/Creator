@@ -1,10 +1,9 @@
 ﻿#pragma once
 #include <weh.h>
-#include "qthread.h"
+#include "QThread"
 #include "ParseData.h"
-#include <qmutex.h>
+#include <QMutex>
 #include <atomic>
-#include <list>
 #include <algorithm>
 #include "ParserHelper/parser/parser.h"
 
@@ -259,7 +258,7 @@ public:
 	/// <param name="file">The file.</param>
 	/// <param name="l">Lables.</param>
 	/// <returns>whether success</returns>
-	bool getLabels(const QString &file, set<QString> &l)
+	bool getLabels(const QString &file, QStringList &l)
 	{
 		bool res = false;
 		msgmutex.lock();
@@ -267,7 +266,7 @@ public:
 		if (d)
 		{
 			res = true;
-			d->getLabels(l);
+			l = d->getLabels();
 		}
 		msgmutex.unlock();
 		return res;

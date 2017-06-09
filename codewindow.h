@@ -199,7 +199,7 @@ public slots:
 	void replaceAllFile(const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen);
 	void resetLexer();
 	void refreshLabel(BkeScintilla *sci);
-	void refreshLabel(set<QString> &l);
+	void refreshLabel(QStringList &l);
 	void jumpToDefFunc();
 	void jumpToCodeFunc();
 	void jumpToLabelFunc();

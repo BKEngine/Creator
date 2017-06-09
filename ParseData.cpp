@@ -71,15 +71,6 @@ ParseData::ParseData(QByteArray &file, BKE_VarClosure *clo)
 	fileclo->assignStructure(clo, pMap, true);
 }
 
-void ParseData::getLabels(set<QString> &l)
-{
-	l.clear();
-	for (auto &it : labels)
-	{
-		l.insert((*it)->name);
-	}
-}
-
 QStringList ParseData::getLabels()
 {
 	QStringList ls;
@@ -244,6 +235,357 @@ BaseNode *ParseData::findNode(/*Pos p*/int pos)
 	//if (it != fileNodes.end() && (*it)->startPos <= p)
 	//	return *it;
 	//return NULL;
+}
+
+char ParseData::fetchNextOne()
+{
+	char ch = textbuf[idx];
+	if (!ch)
+		return 0;
+	char ch2 = textbuf[idx + 1];
+	if (ch == '/' && ch2 == '/')
+	{
+		int rawidx = idx + 2;
+		skipLineComment();
+		lastComment = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
+		return textbuf[idx];
+	}
+	else if (ch == '/' && ch2 == '*')
+	{
+		int rawidx = idx + 2;
+		if (skipBlockComment())
+		{
+			lastComment = QString::fromStdString(string(textbuf + rawidx, idx - 2 - rawidx));
+		}
+		return textbuf[idx];
+	}
+	return ch;
+}
+
+char ParseData::getNextOne()
+{
+	char ch = fetchNextOne();
+	idx++;
+	return ch;
+}
+
+void ParseData::skipLineComment()
+{
+	char ch = textbuf[idx];
+	while (ch && ch != '\n' && ch != '\r')
+		ch = textbuf[++idx];
+}
+
+bool ParseData::skipBlockComment()
+{
+	char ch = textbuf[idx += 2];
+	bool s = false;
+	while (ch)
+	{
+		if (ch != '*')
+		{
+			ch = textbuf[++idx];
+			continue;
+		}
+		else
+		{
+			ch = textbuf[++idx];
+			if (ch != '/')
+			{
+				continue;
+			}
+			s = true;
+			break;
+		}
+	}
+	if (!s)
+	{
+		infos.push_back({ 3, 9, idx - 2, 1 });
+	}
+	else
+		idx++;
+	return s;
+}
+
+void ParseData::skipText()
+{
+	char ch = fetchNextOne();
+	while (ch && ch != '\n' && ch != '\r' && ch != '[')
+	{
+		idx++;
+		ch = fetchNextOne();
+	}
+}
+
+bool ParseData::skipLineEnd()
+{
+	if (!idx)
+		return true;
+	char ch = textbuf[idx];
+	if (ch == '\n')
+	{
+		idx++;
+		return true;
+	}
+	else if (ch == '\r')
+	{
+		idx++;
+		ch = textbuf[idx];
+		if (ch == '\n')
+		{
+			idx++;
+			return true;
+		}
+		return true;
+	}
+	return false;
+}
+
+bool ParseData::isLineEnd()
+{
+	char ch = textbuf[idx];
+	return !ch || ch == '\n' || ch == '\r';
+}
+
+QString ParseData::readCmdName(bool startwithat)
+{
+	QByteArray ba;
+	char ch = fetchNextOne();
+	while (ch)
+	{
+		if (ISSPACE(ch) || ch == '=')
+			break;
+		if (ch == ']' && !startwithat)
+			break;
+		ba.push_back(ch);
+		idx++;
+		ch = fetchNextOne();
+	}
+	QString tmp;
+	tmp.prepend(ba);
+	return tmp;
+}
+
+QString ParseData::readName()
+{
+	QByteArray ba;
+	unsigned char ch = fetchNextOne();
+	if (isalpha(ch) || ch == '_' || ch >= 0x80)
+	{
+		do
+		{
+			ba.push_back(ch);
+			idx++;
+			ch = fetchNextOne();
+		} while (isalnum(ch) || ch == '_' || ch >= 0x80);
+	}
+	QString tmp;
+	tmp.prepend(ba);
+	return tmp;
+}
+
+QString ParseData::readValue(bool startwithat)
+{
+	enum BracketType
+	{
+		Bracket_Small,
+		Bracket_Medium,
+		Bracket_Large
+	};
+	QVector<BracketType> _stack;
+	QVector<int> posstack;
+	posstack.push_back(idx);
+
+	QByteArray ba;
+
+	int yinhao = 0;
+
+	unsigned char ch = (unsigned char)textbuf[idx];
+
+	while (ch)
+	{
+		if (ch == ']' && !startwithat && !yinhao && _stack.empty())
+			break;
+		if (ch == '\r' && ch == '\n' && _stack.empty())
+			break;
+		if (ISSPACE(ch) && !yinhao && _stack.empty())
+			break;
+		if (ch == '/' && textbuf[idx + 1] == '/' && !yinhao)
+		{
+			skipLineComment();
+			continue;
+		}
+		if (ch == '/' && textbuf[idx + 1] == '*' && !yinhao)
+		{
+			skipBlockComment();
+			continue;
+		}
+		ba.push_back(ch);
+		if (ch == '\\')
+		{
+			if (yinhao == 2)
+			{
+				idx++;
+				ba.push_back(textbuf[idx]);
+			}
+		}
+		else if (ch == '\"')
+		{
+			if (!yinhao)
+			{
+				yinhao = 1;
+				posstack.push_back(idx);
+			}
+			else if (yinhao == 1)
+			{
+				if (textbuf[idx + 1] == '\"')
+					ba.push_back(textbuf[++idx]);
+				else
+				{
+					yinhao = 0;
+					posstack.pop_back();
+				}
+			}
+		}
+		else if (ch == '\'')
+		{
+			if (!yinhao)
+			{
+				yinhao = 2;
+				posstack.push_back(idx);
+			}
+			else if (yinhao == 2)
+			{
+				yinhao = 0;
+				posstack.pop_back();
+			}
+		}
+		else if (ch == '(' && !yinhao)
+		{
+			_stack.push_back(BracketType::Bracket_Small);
+			posstack.push_back(idx);
+		}
+		else if (ch == '[' && !yinhao)
+		{
+			_stack.push_back(BracketType::Bracket_Medium);
+			posstack.push_back(idx);
+		}
+		else if (ch == '{' && !yinhao)
+		{
+			_stack.push_back(BracketType::Bracket_Large);
+			posstack.push_back(idx);
+		}
+		else if (ch == ')' && !yinhao)
+		{
+			if (!_stack.empty() && _stack.back() == BracketType::Bracket_Small)
+			{
+				_stack.pop_back();
+				posstack.pop_back();
+			}
+			else
+			{
+				if (_stack.empty())
+				{
+					//缺少对应的(
+					infos.push_back({ 2, 3, idx, 1 });
+				}
+				else
+				{
+					//此处应为其它括号
+					infos.push_back({ 2, 6 + _stack.back(), idx, 1 });
+				}
+			}
+		}
+		else if (ch == ']' && !yinhao)
+		{
+			if (!_stack.empty() && _stack.back() == BracketType::Bracket_Medium)
+			{
+				_stack.pop_back();
+				posstack.pop_back();
+			}
+			else
+			{
+				if (_stack.empty())
+				{
+					//缺少对应的[
+					infos.push_back({ 2, 4, idx, 1 });
+				}
+				else
+				{
+					//此处应为其它括号
+					infos.push_back({ 2, 6 + _stack.back(), idx, 1 });
+				}
+			}
+		}
+		else if (ch == '}' && !yinhao)
+		{
+			if (!_stack.empty() && _stack.back() == BracketType::Bracket_Large)
+			{
+				_stack.pop_back();
+				posstack.pop_back();
+			}
+			else
+			{
+				if (_stack.empty())
+				{
+					//缺少对应的{
+					infos.push_back({ 2, 5, idx, 1 });
+				}
+				else
+				{
+					//此处应为其它括号
+					infos.push_back({ 2, 6 + _stack.back(), idx, 1 });
+				}
+			}
+		}
+		else if (ch == ';' && !yinhao)
+		{
+			if (!_stack.empty())
+			{
+				//此处应为其它括号
+				if (_stack.empty())
+				{
+					//缺少对应的(
+					infos.push_back({ 2, 2, idx, 1 });
+				}
+				else
+				{
+					//此处应为其它括号
+					infos.push_back({ 2, 6 + _stack.back(), idx, 1 });
+				}
+				_stack.clear();
+			}
+		}
+		ch = textbuf[++idx];
+
+	}
+	if (yinhao)
+	{
+		//字符串未完结
+		infos.push_back({ 2, 9, posstack.back(), idx - posstack.back() });
+	}
+	else if (!_stack.empty())
+	{
+		//此处应为其它括号
+		infos.push_back({ 2, 6 + _stack.back(), posstack.back(), idx - posstack.back() });
+		_stack.clear();
+	}
+	QString tmp;
+	tmp.prepend(ba);
+	return tmp;
+}
+
+bool ParseData::skipSpace()
+{
+	char ch = fetchNextOne();
+	bool res = false;
+	while (ch && ch != '\r' && ch != '\n' && ISSPACE(ch))
+	{
+		res = true;
+		idx++;
+		ch = fetchNextOne();
+	}
+	return res;
 }
 
 QString readCmdName(unsigned char *buf, int &start, int end, bool startwithat)
@@ -659,7 +1001,7 @@ repos:
 				node->name = readCmdName(true);
 				if (node->name.isEmpty())
 				{
-					infos.emplace_back(3, 11, node->startPos, 1);
+					infos.push_back({ 3, 11, node->startPos, 1 });
 				}
 				skipSpace();
 				if (!isLineEnd())
@@ -667,7 +1009,7 @@ repos:
 					int start = idx;
 					skipLineComment();
 					int len = idx - start;
-					infos.emplace_back(3, 1, start, len);
+					infos.push_back({ 3, 1, start, len });
 				}
 				node->endPos = idx - 1;
 				auto it = fileNodes.insert(node->startPos, node);
@@ -700,7 +1042,7 @@ repos:
 			node->name = readCmdName(startwithat);
 			if (node->name.isEmpty())
 			{
-				infos.emplace_back(3, 2, node->startPos, 1);
+				infos.push_back({ 3, 2, node->startPos, 1 });
 			}
 			skipSpace();
 			ch = fetchNextOne();
@@ -740,7 +1082,7 @@ repos:
 				{
 					int start = idx;
 					skipLineComment();
-					infos.emplace_back(2, 12, start, idx - start);
+					infos.push_back({ 2, 12, start, idx - start });
 				}
 			}
 			node->endPos = idx;
@@ -790,7 +1132,7 @@ repos:
 				node->endPos = ch ? idx + 1 : idx - 1;
 				if (!ch)
 				{
-					infos.emplace_back(2, 13, idx - 1, 1);
+					infos.push_back({ 2, 13, idx - 1, 1 });
 				}
 				else
 					idx += 2;
