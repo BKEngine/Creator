@@ -20,6 +20,9 @@ namespace Updater
             InitializeComponent();
             this.FormClosing += Form1_FormClosing1;
             this.FixUp = false;
+#if DEBUG
+            this.ForceUseSelf = true;
+#endif
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -40,15 +43,24 @@ namespace Updater
 
         private static string HTTP_ADDRESS = "http://creator.up.bakery.moe/windows/";
         private static string INFO_FILE = "version";
-        private WebClient _client = new WebClient();
+        private WebClient _client = new MyWebClient();
         private string _version = "";
         private string _remoteVersion = "";
+#if DEBUG
+        private string _exeDir = Environment.CurrentDirectory + '/';
+#else
         private string _exeDir = AppDomain.CurrentDomain.BaseDirectory;
+#endif
 
         private Uri UriForFile(string path)
         {
             Uri uri = new Uri(HTTP_ADDRESS + path.Replace('\\','/'));
             return uri;
+        }
+
+        void Invoke(MethodInvoker a)
+        {
+            this.Invoke((Delegate)a);
         }
 
         public bool FixUp { get; set; }
@@ -63,7 +75,7 @@ namespace Updater
             {
                 try
                 {
-                    _version = File.ReadAllText(_exeDir + "version");
+                    _version = File.ReadAllText(Path.Combine(_exeDir, "version"));
                 }
                 catch (Exception)
                 {
@@ -228,43 +240,69 @@ namespace Updater
             return copy;
         }
 
+
+        private object _localFilesLocker = new object();
         private Dictionary<string, string> _localFiles = new Dictionary<string, string>();
 
         private void ScanLocalFile()
         {
+            textBox1.Text += "读取本地文件中……" + Environment.NewLine;
             List<string> files = GetDirectoryFileList(_exeDir);
-            foreach (string file in files)
+            int num = 0;
+            int total = 0;
+            object totalLocker = new object();
+            lock(totalLocker)
             {
-                string ext = Path.GetExtension(file).ToLower();
-                string filename = Path.GetFileName(file);
-                string relativepath = file.Substring(_exeDir.Length).Replace('\\', '/');
-                if (ext == ".ini" || ext == ".bat" || ext == ".zip" || ext == ".rar" || ext == ".config" || ext == ".tmp")
-                    continue;
-                if (filename == "files.txt" || filename == "projects.txt")
-                    continue;
-                if (filename == "UpdateReleaser.exe")
-                    continue;
-                if (filename == INFO_FILE)
-                    continue;
-                if (relativepath.StartsWith("Backup/"))
-                    continue;
-                MD5 md5 = new MD5CryptoServiceProvider();
-                try
+                foreach (string file in files)
                 {
-                    using (FileStream fs = File.OpenRead(file))
+                    string ext = Path.GetExtension(file).ToLower();
+                    string filename = Path.GetFileName(file);
+                    string relativepath = file.Substring(_exeDir.Length).Replace('\\', '/');
+                    if (ext == ".ini" || ext == ".bat" || ext == ".zip" || ext == ".rar" || ext == ".config" || ext == ".tmp")
+                        continue;
+                    if (filename == "files.txt" || filename == "projects.txt")
+                        continue;
+                    if (filename == "UpdateReleaser.exe")
+                        continue;
+                    if (filename == INFO_FILE)
+                        continue;
+                    if (relativepath.StartsWith("Backup/"))
+                        continue;
+                    total++;
+                    BeginTask<object>(() =>
                     {
-                        byte[] output = md5.ComputeHash(fs);
-                        string result = BitConverter.ToString(output).Replace("-", "");
-                        _localFiles.Add(relativepath, result);
-                    }
-                }
-                catch
-                {
-                    textBox1.Text += "文件：" + file + "打开或读取失败。" + Environment.NewLine;
-                    continue;
+                        MD5 md5 = new MD5CryptoServiceProvider();
+                        try
+                        {
+                            using (FileStream fs = File.OpenRead(file))
+                            {
+                                byte[] output = md5.ComputeHash(fs);
+                                string result = BitConverter.ToString(output).Replace("-", "");
+                                lock (_localFilesLocker)
+                                {
+                                    _localFiles.Add(relativepath, result);
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            Invoke(() =>
+                            {
+                                textBox1.Text += "文件：" + file + "打开或读取失败。" + Environment.NewLine;
+                            });
+                        }
+                        lock (totalLocker)
+                        {
+                            if(++num == total)
+                            {
+                                Invoke(GenerateWorkList);
+                            }
+                        }
+                        return null;
+                    });
+
                 }
             }
-            GenerateWorkList();
         }
 
         private List<string> _filesToDelete = new List<string>();
@@ -567,7 +605,7 @@ namespace Updater
 
         private void DecompressToFile(string file, byte[] data)
         {
-            string tmpFile = _exeDir + file + ".tmp";
+            string tmpFile = Path.Combine(_exeDir, file + ".tmp");
             Directory.CreateDirectory(Path.GetDirectoryName(tmpFile));
             var s = BeginTask<string>(() =>
             {
@@ -632,7 +670,7 @@ namespace Updater
             {
                 try
                 {
-                    var dstFile = _exeDir + file;
+                    var dstFile = Path.Combine(_exeDir, file);
                     var tmpFile = dstFile + ".tmp";
                     File.Delete(dstFile);
                     File.Move(tmpFile, dstFile);
@@ -653,7 +691,7 @@ namespace Updater
             textBox1.Text += "开始安装Visual C++ Redistributable Package 2015……";
             Process process = new Process();
             process.StartInfo.UseShellExecute = false;
-            process.StartInfo.FileName = _exeDir + "vc_redist.x86.exe";
+            process.StartInfo.FileName = Path.Combine(_exeDir, "vc_redist.x86.exe");
             process.StartInfo.Arguments = "/install /passive /norestart";
             process.EnableRaisingEvents = true;
             process.Exited += (_, e) =>
@@ -661,7 +699,7 @@ namespace Updater
                 this.Invoke(new MethodInvoker(() =>
                 {
                     textBox1.Text += "成功。" + Environment.NewLine;
-                    File.Delete(_exeDir + "vc_redist.x86.exe");
+                    File.Delete(Path.Combine(_exeDir, "vc_redist.x86.exe"));
                     Finish();
                 }));
             };
@@ -672,7 +710,7 @@ namespace Updater
         {
             WriteVersionFile();
             textBox1.Text += "更新完成，将启动BKE_Creator。" + Environment.NewLine;
-            Process.Start(_exeDir + "BKE_Creator.exe");
+            Process.Start(Path.Combine(_exeDir, "BKE_Creator.exe"));
             CloseAfter3Seconds();
         }
 
@@ -680,7 +718,7 @@ namespace Updater
         {
             try
             {
-                File.WriteAllText(_exeDir + "version", _remoteVersion, Encoding.UTF8);
+                File.WriteAllText(Path.Combine(_exeDir, "version"), _remoteVersion, Encoding.UTF8);
             }
             catch (Exception)
             {
