@@ -14,11 +14,9 @@ BkeLeftFileWidget::BkeLeftFileWidget(QWidget *parent) :
     mn->addAction(btnCloseAll) ;
     mn->addAction(btncloseExp) ;
 
-
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(ShowRmenu(QPoint))) ;
 }
-
 
 void BkeLeftFileWidget::SetFileList(const QStringList &ls)
 {

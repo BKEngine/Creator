@@ -89,7 +89,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	//自动完成列表被选择
 	connect(this, SIGNAL(SCN_AUTOCSELECTION(const char*, int)), this, SLOT(AutoListChoose(const char*, int)));
 	//光标位置被改变
-	connect(this, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(CurChange(int, int)));
+	connect(this, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(CurrentPosChanged(int, int)));
 	//输入单个字符
 	connect(this, SIGNAL(SCN_CHARADDED(int)), this, SLOT(CharHandle(int)));
 
@@ -138,6 +138,14 @@ void BkeScintilla::onTimer()
 	}
 	p->infos2_mutex.unlock();
 	analysis->unlockFile();
+}
+
+void BkeScintilla::CurrentPosChanged(int line, int index)
+{
+	int lineChanged = abs(line - LastLine);
+	LastLine = line;
+	if (lineChanged >= 3)
+		emit ShouldAddToNavigation();
 }
 
 void BkeScintilla::EditModified(int pos, int mtype, const char *text,
@@ -1283,37 +1291,6 @@ void BkeScintilla::InsertAndMove(const QString &text)
 	setCursorPosition(line, index + text.length());
 }
 
-
-//光标定位到新行
-void BkeScintilla::CurChange(int line, int index)
-{
-	//改变忽略，行没有改变，文本被选择不会触发语法检查
-	//if (ChangeIgnore || line == LastLine || hasSelectedText()){
-	//	IsNewLine = false;
-	//	return;
-	//}
-
-	//LastKeywordEnd = 2; //关键位置重置为2
-	//if (!hasSelectedText()){
-	//	QString temp = this->text(LastLine);
-	//	//defparser->ParserText(temp);  //非选择状态，词法分析上一行
-	//	//        //CheckLine( line ); //检查行状态
-	//	//        AutoState = AUTO_NULL ;
-	//	//        LastKeywordEnd = 99 ;
-	//	//        ComPleteLeast = 3 ;
-	//	//         //获得缩进
-	//	//        IndentCount = defparser->GetIndentLayer()*8 ;
-
-	//}
-	//markerDelete(LastLine, 5);
-	//markerDelete(LastLine + 1, 5);
-	//LastLine = line;
-	//markerAdd(line, 5);
-	////光标移动是不会触发填充模式的
-	//vautostate = P_AUTO_NULL;
-}
-
-
 //移除前面的;号
 void BkeScintilla::RemoveDou()
 {
@@ -1771,11 +1748,21 @@ void BkeScintilla::BkeEndUndoAction()
 //    //else emit ;
 //}
 
-int BkeScintilla::GetTrueCurrentLine()
+int BkeScintilla::GetCurrentLine()
 {
 	int xl, xi;
 	lineIndexFromPosition(SendScintilla(SCI_GETCURRENTPOS), &xl, &xi);
 	return xl;
+}
+
+int BkeScintilla::GetCurrentPosition()
+{
+	return SendScintilla(SCI_GETCURRENTPOS);
+}
+
+void BkeScintilla::SetCurrentPosition(int pos)
+{
+	SendScintilla(SCI_GOTOPOS, pos);
 }
 
 void BkeScintilla::setLexer(QsciLexer *lex)

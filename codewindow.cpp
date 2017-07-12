@@ -36,8 +36,8 @@ CodeWindow::CodeWindow(QWidget *parent)
 
 	connect(lablelist, SIGNAL(currentIndexChanged(int)), this, SLOT(SetCurrentEdit(int)));
 	connect(stackwidget, SIGNAL(currentChanged(int)), this, SLOT(SetCurrentEdit(int)));
-	connect(btnnextact, SIGNAL(triggered()), this, SLOT(NextEdit()));
-	connect(btnlastact, SIGNAL(triggered()), this, SLOT(LastEdit()));
+	connect(btnnextact, SIGNAL(triggered()), this, SLOT(NextNavigation()));
+	connect(btnlastact, SIGNAL(triggered()), this, SLOT(LastNavigation()));
 	connect(btnsaveact, SIGNAL(triggered()), this, SLOT(SaveFile()));
 	connect(btncloseact, SIGNAL(triggered()), this, SLOT(CloseFile()));
 	connect(btnsaveasact, SIGNAL(triggered()), this, SLOT(SaveAs()));
@@ -108,8 +108,8 @@ void CodeWindow::CreateBtn()
 	toolbar->setFixedHeight(24);
 	toolbar->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT + "/codetoolbar").toString());
 
-	btnlastact = new QAction(QIcon(":/cedit/source/btnlast.png"), "上一个窗口", this);
-	btnnextact = new QAction(QIcon(":/cedit/source/btnnext.png"), "下一个窗口", this);
+	btnlastact = new QAction(QIcon(":/cedit/source/btnlast.png"), "返回", this);
+	btnnextact = new QAction(QIcon(":/cedit/source/btnnext.png"), "前进", this);
 	btnsaveact = new QAction(QIcon(":/cedit/source/save.png"), "保存", this);
 	btnsaveasact = new QAction(QIcon(":/cedit/source/saveas.png"), "另存为...", this);
 	btncodeact = new QAction(QIcon(":/cedit/source/code.png"), "改变源文件的编码", this);
@@ -289,8 +289,9 @@ void CodeWindow::SetCurrentEdit(QWidget *w)
 QString CodeWindow::getScenarioTextFromCode(QString text)
 {
 	static auto le1 = QRegularExpression("(/\\*.+?\\*/)|(^\t*##.+?^\t*##)", QRegularExpression::MultilineOption | QRegularExpression::DontCaptureOption | QRegularExpression::DotMatchesEverythingOption);
-	static auto le2 = QRegularExpression("(^\t*#.+$)|(^\t*@.+$)|(\\[.+\\])|(//.+$)|(^\\*.+$)", QRegularExpression::MultilineOption | QRegularExpression::DontCaptureOption);
-	return text.remove(le1).remove(le2);
+	static auto le2 = QRegularExpression("(^\t*#.+$)|(^\t*@.+$)|(\t*\\[.+\\])|(//.+$)|(^\\*.+$)", QRegularExpression::MultilineOption | QRegularExpression::DontCaptureOption);
+	static auto le3 = QRegularExpression("^ +$", QRegularExpression::MultilineOption | QRegularExpression::DontCaptureOption);
+	return text.remove(le1).remove(le2).remove(le3);
 }
 
 void calcWords(QString text, QLineEdit *edit)
@@ -308,6 +309,7 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 
 	currentpos = pos;  //当前位置
 	btncopyact->setEnabled(false);
+	
 
 	//释放文档改变信号
 	if (currentpos > 0) CurrentConnect(false);
@@ -330,8 +332,6 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 	diasearch->SetSci(currentedit); //查找管理
 	markadmin.SetFile(currentbase->FullName());  //标记管理器
 	btnsaveact->setEnabled(currentedit->isModified());
-	btnnextact->setEnabled(currentpos < stackwidget->count() - 1);
-	btnlastact->setEnabled(currentpos > 0);
 	btnsaveasact->setEnabled(true);
 	btnpasteact->setEnabled(true);
 	btnfindact->setEnabled(true);
@@ -351,6 +351,9 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 	refreshLabel(currentedit);
 	calcWords(currentedit->text(), this->othwin->lewords);
 	//BackstageSearchLable(currentedit);
+
+	// 导航
+	AddNavigation(currentbase->Name(), currentedit->GetCurrentPosition());
 }
 
 //断开、连接当前文档信号
@@ -370,6 +373,7 @@ void CodeWindow::CurrentConnect(bool c)
 		connect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		connect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
 		connect(currentedit, SIGNAL(refreshLabel(QStringList &)), this, SLOT(refreshLabel(QStringList &)));
+		connect(currentedit, SIGNAL(ShouldAddToNavigation()), this, SLOT(ShouldAddToNavigation()));
 	}
 	else{
 		disconnect(currentedit, SIGNAL(copyAvailable(bool)), btncopyact, SLOT(setEnabled(bool)));
@@ -384,6 +388,7 @@ void CodeWindow::CurrentConnect(bool c)
 		disconnect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		disconnect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
 		disconnect(currentedit, SIGNAL(refreshLabel(QStringList &)), this, SLOT(refreshLabel(QStringList &)));
+		disconnect(currentedit, SIGNAL(ShouldAddToNavigation()), this, SLOT(ShouldAddToNavigation()));
 	}
 }
 
@@ -720,16 +725,38 @@ void CodeWindow::DocChange(bool m)
 	}
 }
 
-void CodeWindow::NextEdit()
+void CodeWindow::NavigateTo(const QPair<QString, int> &target)
 {
-	if (currentpos < stackwidget->count() - 1){
-		SetCurrentEdit(currentpos + 1);
+	for (int i = 0; i < ItemTextList.size(); i++)
+	{
+		if (ItemTextList[i] == target.first)
+		{
+			navigationLocker++;
+			SetCurrentEdit(i);
+			currentedit->SetCurrentPosition(target.second);
+			navigationLocker--;
+		}
 	}
 }
 
-void CodeWindow::LastEdit()
+void CodeWindow::NextNavigation()
 {
-	if (currentpos > 0) SetCurrentEdit(currentpos - 1);
+	if (currentNavigation < navigationList.size() - 1)
+	{
+		QPair<QString, int> target = navigationList[++currentNavigation];
+		NavigateTo(target);
+		RefreshNavigation();
+	}
+}
+
+void CodeWindow::LastNavigation()
+{
+	if (currentNavigation > 0)
+	{
+		QPair<QString, int> target = navigationList[--currentNavigation];
+		NavigateTo(target);
+		RefreshNavigation();
+	}
 }
 
 void CodeWindow::SaveALL()
@@ -1281,7 +1308,7 @@ void CodeWindow::AddBookMark()
 	QString info = QInputDialog::getText(this, "新建书签", "输入书签的标记信息，\r\n如果为空，书签不会创建");
 	if (info.isEmpty()) return;
 
-	int line = currentedit->GetTrueCurrentLine();
+	int line = currentedit->GetCurrentLine();
 	if (currentbase != 0){
 		//markadmin.AddBookMark(info, line ,BkeFullnameToName(currentbase->fullname,currentproject->FileDir()) );
 		currentproject->WriteMarkFile(&markadmin);
@@ -1445,18 +1472,24 @@ void CodeWindow::FileReadyToCompile(int i)
 //当前工程被改变
 void CodeWindow::ChangeProject(BkeProject *p)
 {
-	if (p == 0){
-		btncompileact->setEnabled(false);  //编译按钮只有当工程出现时才可用
-		btncompilerunact->setEnabled(false);
-		btnrunact->setEnabled(false);
-		btndebugact->setEnabled(false);
-		currentproject = 0;
-		return;
-	}
+	if (p != currentproject)
+	{
+		navigationList.clear();
+		currentNavigation = -1;
 
-	currentproject = p;
-	btncompileact->setEnabled(true);  //工程出现后编译按钮都是可用的
-	btncompilerunact->setEnabled(true);
+		if (p == 0) {
+			btncompileact->setEnabled(false);  //编译按钮只有当工程出现时才可用
+			btncompilerunact->setEnabled(false);
+			btnrunact->setEnabled(false);
+			btndebugact->setEnabled(false);
+			currentproject = 0;
+			return;
+		}
+
+		currentproject = p;
+		btncompileact->setEnabled(true);  //工程出现后编译按钮都是可用的
+		btncompilerunact->setEnabled(true);
+	}
 }
 
 void CodeWindow::TextToMarks(const QString &text, const QString &dir, int type)
@@ -1548,13 +1581,14 @@ void CodeWindow::simpleClose(BkeDocBase *loli)
 	//移除文件监视
 	filewatcher->removePath(currentbase->FullName()) ;
 
+	RemoveNavigation(loli->Name());
+
 	loli->edit->close();
 	loli->edit->analysis = NULL;
 	loli->edit->deleteLater();
 	lablelist->setCurrentIndex(-1);
 	delete loli;
 	ignoreflag = false;
-
 
 	if (stackwidget->count() < 1){
 		btnDisable();
@@ -1714,4 +1748,57 @@ void CodeWindow::jumpToCodeFunc()
 void CodeWindow::jumpToLabelFunc()
 {
 
+}
+
+void CodeWindow::ShouldAddToNavigation()
+{
+	AddNavigation(currentbase->Name(), currentedit->GetCurrentPosition());
+}
+
+void CodeWindow::AddNavigation(const QString &file, int pos)
+{
+	if (navigationLocker)
+		return;
+	if (navigationList.size() && navigationList[currentNavigation].first == file && navigationList[currentNavigation].second == pos)
+		return;
+	if (currentNavigation != navigationList.size() - 1)
+	{
+		int c = navigationList.size() - currentNavigation - 1;
+		while (c--)
+		{
+			navigationList.removeLast();
+		}
+	}
+	navigationList.push_back({ file, pos });
+	currentNavigation = navigationList.size() - 1;
+	RefreshNavigation();
+}
+
+void CodeWindow::RemoveNavigation(const QString &file)
+{
+	int offset = 0;
+	for (int i = 0; i < navigationList.size(); i++)
+	{
+		if (navigationList[i].first == file)
+		{
+			if (i <= currentNavigation)
+			{
+				offset++;
+			}
+			navigationList.removeAt(i);
+			i--;
+		}
+	}
+	currentNavigation -= offset;
+	/*if (currentNavigation < 0 && navigationList.size())
+	{
+		currentNavigation = 0;
+	}*/
+	RefreshNavigation();
+}
+
+void CodeWindow::RefreshNavigation()
+{
+	btnlastact->setEnabled(currentNavigation > 0);
+	btnnextact->setEnabled(currentNavigation < navigationList.size() - 1);
 }

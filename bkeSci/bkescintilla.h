@@ -73,7 +73,9 @@ public:
 	void SetIndicator(int id, BkeIndicatorBase &p) ;
 	void BkeAnnotateSelect() ;
 	BkeIndicatorBase findIndicator(int id,int postion) ;
-	int GetTrueCurrentLine() ;
+	int GetCurrentLine();
+	int GetCurrentPosition();
+	void SetCurrentPosition(int pos);
 	void setLexer(QsciLexer *lex = 0);
 	void setParser( BkeParser *p){ defparser = p ; }
 	void setSelection(BkeIndicatorBase &p);
@@ -103,6 +105,7 @@ signals:
 	void Redoready(bool is) ;
 	void refreshLabel(BkeScintilla *sci);
 	void refreshLabel(QStringList &l);
+	void ShouldAddToNavigation();
 
 public slots:
 //    void undo () ;
@@ -117,8 +120,8 @@ private slots:
 	void ChooseComplete(const char *text,int pos) ;
 	void CompliteFromApi(int type = 0) ;
 	void CompliteFromApi2(int lest = 3) ;
-	void InsertAndMove(const QString &text) ;
-	void CurChange(int line , int index ) ;
+	void InsertAndMove(const QString &text);
+	void CurrentPosChanged(int line , int index );
 	void CharHandle(int cc) ;
 	void onTimer();
 

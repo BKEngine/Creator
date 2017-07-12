@@ -154,8 +154,8 @@ public slots:
 	void addFile(const QString &file, const QString &prodir);
 	void TextInsert(const QString &text);
 	void DocChange(bool m);
-	void NextEdit();
-	void LastEdit();
+	void NextNavigation();
+	void LastNavigation();
 	void SaveFile();
 	void SaveAs();
 	void SaveALL();
@@ -203,12 +203,22 @@ public slots:
 	void jumpToDefFunc();
 	void jumpToCodeFunc();
 	void jumpToLabelFunc();
+	void AddNavigation(const QString &file, int line);
+	void RemoveNavigation(const QString &file);
+
+private slots:
+	void ShouldAddToNavigation();
+	void RefreshNavigation();
+	void NavigateTo(const QPair<QString, int> &target);
 
 public:
 	void backupAll();
 	static QString getScenarioTextFromCode(QString text);
 
 private:
+	QList<QPair<QString, int>> navigationList;
+	int currentNavigation = -1;
+	int navigationLocker = 0;
 	OtherWindow *othwin;
 	ProjectWindow *prowin;
 	BkeProject *currentproject;
