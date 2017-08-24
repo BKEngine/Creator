@@ -37,7 +37,7 @@ public:
 	void SetProblemText() ;
 	void AddProblem(QString text) ;
 	void AddBookMark(const QString &info,int pos,const QString &dir) ;
-	void ProblemsFromText(const QString &dir,const QString &text) ;
+    void ProblemsFromText(const QString &dir, const QString &text) ;
 	void BookMarksFromText(const QString &text,const QString &dir) ;
 	void MarksFromText(const QString &text) ;
 

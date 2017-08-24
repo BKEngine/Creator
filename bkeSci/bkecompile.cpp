@@ -80,12 +80,27 @@ void BkeCompile::Compile(const QString &dir, bool release/* = false*/)
 void BkeCompile::StandardOutput()
 {
 	QByteArray temp = cmd->readAll();
+#ifdef Q_OS_WIN
 	QString name = QString::fromStdWString(std::wstring((wchar_t*)temp.data(), temp.size() / 2));
-	result.append(temp);
+#else
+    QString name = QString::fromUtf8(temp);
+#endif
+    result.append(temp);
+#ifdef Q_OS_WIN
 	if (name.endsWith(".bkscr") && list.indexOf(name) < 0) {
 		list.append(name);
 		emit NewFileReady(list.size());
 	}
+#else
+    QStringList qs = name.split('\n');
+    for(QString q : qs)
+    {
+        if (q.endsWith(".bkscr") && list.indexOf(q) < 0) {
+            list.append(name);
+            emit NewFileReady(list.size());
+        }
+    }
+#endif
 }
 
 void BkeCompile::finished(int exitCode)
@@ -99,7 +114,11 @@ void BkeCompile::finished(int exitCode)
 
 QString BkeCompile::Result()
 {
-	return QString::fromStdWString(std::wstring((wchar_t*)result.data(), result.size() / 2));
+#ifdef Q_OS_WIN
+    return QString::fromStdWString(std::wstring((wchar_t*)result.data(), result.size() / 2)).remove('\r');
+#else
+    return QString::fromUtf8(result);
+#endif
 }
 
 void BkeCompile::error(QProcess::ProcessError e)

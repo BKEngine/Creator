@@ -484,7 +484,7 @@ void ProjectWindow::BkeChangeCurrentProject(/*BkeProject *p*/)
 	
 	if (!CmdListLoader::load())
 	{
-		QMessageBox::warning(0, "警告", "BKECmdList.dll不存在，智能提示和自动补全功能将禁用。");
+        QMessageBox::warning(0, "警告", "BKECmdList库不存在，智能提示和自动补全功能将禁用。");
 	}
 }
 
@@ -664,6 +664,25 @@ void ProjectWindow::ShowInDir(const ItemInfo &f)
 	n.replace('/', '\\');
 	QByteArray a = ("/select," + n).toLocal8Bit();
 	ShellExecuteA(NULL, "open", "explorer.exe", a.data(), NULL, true);
+#elif defined(Q_OS_MAC)
+    QStringList scriptArgs;
+    scriptArgs << QLatin1String("-e")
+               << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
+                                     .arg(n);
+    QProcess::execute("/usr/bin/osascript", scriptArgs);
+    scriptArgs.clear();
+    scriptArgs << QLatin1String("-e")
+               << QLatin1String("tell application \"Finder\" to activate");
+    QProcess::execute("/usr/bin/osascript", scriptArgs);
+#else
+    const QFileInfo fileInfo(n);
+    const QString folder = fileInfo.absoluteFilePath();
+    const QString app = Utils::UnixUtils::fileBrowser(Core::ICore::instance()->settings());
+    QProcess browserProc;
+    const QString browserArgs = Utils::UnixUtils::substituteFileBrowserParameters(app, folder);
+    bool success = browserProc.startDetached(browserArgs);
+    const QString error = QString::fromLocal8Bit(browserProc.readAllStandardError());
+    success = success && error.isEmpty();
 #endif
 }
 

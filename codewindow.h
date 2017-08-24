@@ -237,8 +237,7 @@ private:
 
 	QToolBar *toolbar2;
 	BkeCompile comtool;
-	BkeMarkSupport markadmin;
-	QString ComText;
+    BkeMarkSupport markadmin;
 	QAction *pdeletebookmark;
 	QAction *pdeletemark;
 	QAction *pannote;

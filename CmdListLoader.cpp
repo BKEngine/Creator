@@ -55,7 +55,11 @@ struct
 
 bool CmdListLoader::load()
 {
+#ifndef Q_OS_MAC
 	QLibrary library(BKE_CURRENT_DIR + "/tool/" + "BKECmdList");
+#else
+    QLibrary library(BKE_CURRENT_DIR + "/" + "BKECmdList");
+#endif
 	if (!library.load())
 	{
 		return false;

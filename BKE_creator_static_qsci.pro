@@ -139,7 +139,6 @@ SOURCES += ./main.cpp \
     dia/ParserEditor.cpp \
     dia/ParserEditorTreeItem.cpp \
     dia/ParserEditorTreeModel.cpp \
-    EnumsComponent.cpp \
     CmdListLoader.cpp
 
 HEADERS  += \
@@ -291,7 +290,9 @@ FORMS += \
 mac{
     QT += macextras
     LIBS += -L$$PWD/quazip -lquazip
-    QMAKE_LFLAGS += -dead_strip
+    CONFIG(release, debug|release){
+        QMAKE_LFLAGS += -dead_strip
+    }
 }
 
 unix:!mac:{
@@ -302,7 +303,7 @@ unix:!mac:{
 linux{
 
 }
-unix{
+unix:CONFIG(release, debug|release):{
     QMAKE_CFLAGS += -fvisibility=hidden
     QMAKE_LFLAGS += -s
 }

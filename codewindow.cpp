@@ -1186,8 +1186,8 @@ void CodeWindow::CompileFinish()
 	btncompileact->setEnabled(true);
 	kag->setValue(kag->maximum());
 
-	ComText = comtool.Result();
-	markadmin.ProblemsFromText(currentproject->FileDir(), ComText);
+    QString comResult = comtool.Result();
+    markadmin.ProblemsFromText(currentproject->FileDir(), comResult);
 
 	BkeMarkList *problemslist;
 	if (stackwidget->count() > 0){
@@ -1201,7 +1201,7 @@ void CodeWindow::CompileFinish()
 		problemslist = markadmin.GetPrombleMark("", true);
 	}
 
-	othwin->compileedit->setText(ComText);
+    othwin->compileedit->setText(comResult);
 	othwin->compileedit->setReadOnly(true);
 	othwin->ShowProblem(problemslist, currentproject->FileDir());
 

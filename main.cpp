@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
 			   QString s;
 			   if(LOLI::AutoRead(s, macvsPath))
 			   {
-				   if(s == QString::number(fi.size()))
+                   if(!fi.exists() || s == QString::number(fi.size()))
 				   {
 					   break;
 				   }

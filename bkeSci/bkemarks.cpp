@@ -12,10 +12,10 @@ void BkeMarkSupport::SetFile(const QString &file)
 }
 
 //从编译输出文本中提取错误信息
-void BkeMarkSupport::ProblemsFromText(const QString &dir,const QString &text)
+void BkeMarkSupport::ProblemsFromText(const QString &dir, const QString &text)
 {
     ClearMarks(BKE_MARK_PROBLEEM);
-    QStringList tk = text.split("\r\n") ;
+    QStringList tk = text.split("\n");
     QString temp ;
 
     errorcount = 0 ;
