@@ -123,7 +123,6 @@ SOURCES += ./main.cpp \
     ParserHelper/parser/extend.cpp \
     ParserHelper/parser/parserextend.cpp \
     BG_Analysis.cpp \
-    cmdlist_wrapper.cpp \
     ParseData.cpp \
     dia/GameProperty.cpp \
     dia/LangOpt.cpp \
@@ -141,6 +140,7 @@ SOURCES += ./main.cpp \
     dia/ParserEditorTreeItem.cpp \
     dia/ParserEditorTreeModel.cpp \
     EnumsComponent.cpp \
+    CmdListLoader.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -252,7 +252,6 @@ HEADERS  += \
     dia/LangOpt.h \
     BG_Analysis.h \
     BKS_info.h \
-    cmdlist_wrapper.h \
     ParseData.h \
     bkeSci/autolex.h \
     BKEscintilla/lexlib/StringCopy.h \
@@ -267,6 +266,8 @@ HEADERS  += \
     dia/ParserEditorTreeModel.h \
     EnumsComponent.h \
     ScriptEnums.h \
+    BKECmdList.h \
+    CmdListLoader.h
 
 RESOURCES += \
     source.qrc
@@ -290,14 +291,20 @@ FORMS += \
 mac{
     QT += macextras
     LIBS += -L$$PWD/quazip -lquazip
+    QMAKE_LFLAGS += -dead_strip
 }
 
 unix:!mac:{
-QMAKE_LFLAGS_RPATH=
-QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib\'"
+    QMAKE_LFLAGS_RPATH=
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../lib\',--gc-sections,--icf=safe"
+    QMAKE_CFLAGS += -fdata-sections -ffunction-sections
 }
 linux{
 
+}
+unix{
+    QMAKE_CFLAGS += -fvisibility=hidden
+    QMAKE_LFLAGS += -s
 }
 
 DISTFILES += \

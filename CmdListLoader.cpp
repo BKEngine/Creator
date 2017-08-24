@@ -26,20 +26,20 @@ static QBkeCmdInfo buildCmdInfo(const CmdEntry *entry)
 	return cmdInfo;
 }
 
-static void _cdecl QueryCmdListF(void *opaque, const CmdEntry *entry)
+static void __cdecl QueryCmdListF(void *opaque, const CmdEntry *entry)
 {
 	QBkeCmdInfo info = buildCmdInfo(entry);
 	CmdList.insert(info.name, info);
 }
 
-static void _cdecl QuerySpeCmdListF(void *opaque, const char16_t *name, uint32_t modeEnum, const CmdEntry *entry)
+static void __cdecl QuerySpeCmdListF(void *opaque, const char16_t *name, uint32_t modeEnum, const CmdEntry *entry)
 {
 	QBkeCmdInfo info = buildCmdInfo(entry);
 	QHash<QString, QBkeCmdInfo> &m = SpecialCmdList[QString::fromUtf16(name)];
 	m.insert(info.name, info);
 }
 
-static void _cdecl QueryEnumListF(void *opaque, const char16_t *name, uint32_t value)
+static void __cdecl QueryEnumListF(void *opaque, const char16_t *name, uint32_t value)
 {
 	QHash<QString, uint32_t> *list = (QHash<QString, uint32_t> *)opaque;
 	list->insert(QString::fromUtf16(name), value);

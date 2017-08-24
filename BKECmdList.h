@@ -88,14 +88,14 @@ struct CmdEntry
 
 #pragma pack(pop)
 
-typedef void _cdecl QueryCmdListFunc(void *opaque, const CmdEntry *entry);
-typedef void _cdecl QuerySpeCmdListFunc(void *opaque, const char16_t *name, uint32_t modeEnum, const CmdEntry *entry);
-typedef void _cdecl QueryEnumListFunc(void *opaque, const char16_t *name, uint32_t value);
+typedef void __cdecl QueryCmdListFunc(void *opaque, const CmdEntry *entry);
+typedef void __cdecl QuerySpeCmdListFunc(void *opaque, const char16_t *name, uint32_t modeEnum, const CmdEntry *entry);
+typedef void __cdecl QueryEnumListFunc(void *opaque, const char16_t *name, uint32_t value);
 
-typedef void(_cdecl *PQUERYCMDLIST)(QueryCmdListFunc func, void *opaque);
-typedef void(_cdecl *PQUERYSPECMDLIST)(QuerySpeCmdListFunc func, void *opaque);
-typedef void(_cdecl *PQUERYENUMLIST)(QueryEnumListFunc func, CmdEnumType type, void *opaque);
+typedef void(__cdecl *PQUERYCMDLIST)(QueryCmdListFunc func, void *opaque);
+typedef void(__cdecl *PQUERYSPECMDLIST)(QuerySpeCmdListFunc func, void *opaque);
+typedef void(__cdecl *PQUERYENUMLIST)(QueryEnumListFunc func, CmdEnumType type, void *opaque);
 
-BKECMDLIST_API void _cdecl QueryCmdList(QueryCmdListFunc func, void *opaque);
-BKECMDLIST_API void _cdecl QuerySpeCmdList(QuerySpeCmdListFunc func, void *opaque);
-BKECMDLIST_API void _cdecl QueryEnumList(QueryEnumListFunc func, CmdEnumType type, void *opaque);
+BKECMDLIST_API void __cdecl QueryCmdList(QueryCmdListFunc func, void *opaque);
+BKECMDLIST_API void __cdecl QuerySpeCmdList(QuerySpeCmdListFunc func, void *opaque);
+BKECMDLIST_API void __cdecl QueryEnumList(QueryEnumListFunc func, CmdEnumType type, void *opaque);

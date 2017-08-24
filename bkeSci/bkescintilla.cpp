@@ -730,7 +730,7 @@ void BkeScintilla::showComplete()
 				}
 				else if (style == SCE_BKE_ATTRIBUTE)
 				{
-					tmp.push_back(SendScintilla(SCI_GETCHARAT, pp));
+                    tmp.push_back((char)SendScintilla(SCI_GETCHARAT, pp));
 				}
 				oldStyle = style;
 				pp++;

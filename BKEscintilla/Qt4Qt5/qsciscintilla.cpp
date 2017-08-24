@@ -41,6 +41,11 @@
 #include "Qsci/qscistyle.h"
 #include "Qsci/qscistyledtext.h"
 
+struct QsciScintilla::Lexer
+{
+    QPointer<QsciLexer> object;
+};
+#define lex lexerStruct->object
 
 // Make sure these match the values in Scintilla.h.  We don't #include that
 // file because it just causes more clashes.
@@ -66,7 +71,8 @@ QsciScintilla::QsciScintilla(QWidget *parent)
       braceMode(NoBraceMatch), acSource(AcsNone), acThresh(-1),
       wchars(defaultWordChars), call_tips_position(CallTipsBelowText),
       call_tips_style(CallTipsNoContext), maxCallTips(-1),
-      use_single(AcusNever), explicit_fillups(""), fillups_enabled(false)
+      use_single(AcusNever), explicit_fillups(""), fillups_enabled(false),
+      lexerStruct(new Lexer())
 {
     connect(this,SIGNAL(SCN_MODIFYATTEMPTRO()),
              SIGNAL(modificationAttempted()));
@@ -146,6 +152,7 @@ QsciScintilla::~QsciScintilla()
 
     doc.undisplay(this);
     delete stdCmds;
+    delete lexerStruct;
 }
 
 
