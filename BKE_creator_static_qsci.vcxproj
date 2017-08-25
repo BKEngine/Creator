@@ -14,7 +14,7 @@
     <ProjectGuid>{5E15C268-65A9-3AD8-887F-7E1741CE0F29}</ProjectGuid>
     <RootNamespace>BKE_Creator</RootNamespace>
     <Keyword>Qt4VSv1.0</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -286,7 +286,6 @@
     <ClCompile Include="dia\ParserEditor.cpp" />
     <ClCompile Include="dia\ParserEditorTreeItem.cpp" />
     <ClCompile Include="dia\ParserEditorTreeModel.cpp" />
-    <ClCompile Include="EnumsComponent.cpp" />
     <ClCompile Include="GeneratedFiles\qrc_source.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
@@ -1719,7 +1718,7 @@ endlocal
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_Win32="$(DefaultQtVersion)" />
+      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_Win32="msvc2015" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

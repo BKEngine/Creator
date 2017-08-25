@@ -385,6 +385,10 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 					auto p = analysis->lockFile(FileName);
 					auto ls = p->getLabels();
 					analysis->unlockFile();
+					for (auto &s : ls)
+					{
+						s = "\"*" + s + "\"";
+					}
 					return ls.join(' ');
 				}
 			}

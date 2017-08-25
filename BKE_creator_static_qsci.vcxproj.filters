@@ -493,9 +493,6 @@
     <ClCompile Include="GeneratedFiles\qrc_source.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="EnumsComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="weh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
