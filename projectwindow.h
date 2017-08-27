@@ -31,6 +31,7 @@ public:
 		btn_remove,
 		btn_close,
 		btn_rename,
+		btn_runfromit,
 		BTN_COUNT
 	};
 
@@ -92,6 +93,7 @@ private:
 	void ReleaseGame(const ItemInfo &f);
 	void ExportScenario(const ItemInfo &f);
 	QTreeWidgetItem *findFileInProject(const QString &name);
+	void RunBKEFromFile(const ItemInfo &f);
 
 public:
 	void ReleaseCurrentGame();

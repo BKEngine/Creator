@@ -253,6 +253,25 @@ public:
 	}
 
 	/// <summary>
+	/// Finds the last label node.
+	/// </summary>
+	/// <param name="file">The file.</param>
+	/// <param name="p">position.</param>
+	/// <returns>Last label nodes finded.</returns>
+	BaseNode *findLastLabelNode(const QString &file, int p)
+	{
+		BaseNode *n = NULL;
+		msgmutex.lock();
+		auto d = data[file];
+		if (d)
+		{
+			n = d->findLastLabelNode(p);
+		}
+		msgmutex.unlock();
+		return n;
+	}
+
+	/// <summary>
 	/// Gets the labels.
 	/// </summary>
 	/// <param name="file">The file.</param>

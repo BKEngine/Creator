@@ -29,7 +29,7 @@ ProjectWindow::ProjectWindow(QWidget *parent)
 	connect(this, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(ShowRmenu(QPoint)));
 	connect(this, SIGNAL(CurrentProChange(BkeProject *)), (MainWindow*)parent, SLOT(CurrentProChange(BkeProject *)));
 
-	QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建脚本 添加文件 添加目录 导出剧本 在文件夹中显示 在这里搜索 移除 关闭工程 重命名").split(" ");
+	QStringList ls = QString("编译脚本 发布游戏 插入路径 预览 新建脚本 新建脚本 添加文件 添加目录 导出剧本 在文件夹中显示 在这里搜索 移除 关闭工程 重命名 从本文件开始运行").split(" ");
 	for (int i = 0; i < BTN_COUNT; i++){
 		btns[i] = new QAction(ls.at(i), this);
 		connect(btns[i], SIGNAL(triggered()), this, SLOT(ActionAdmin()));
@@ -211,6 +211,10 @@ void ProjectWindow::ShowRmenu(const QPoint & pos)
 	else if (info.Layer > 1){
 		mn.addAction(btns[btn_remove]);
 		mn.addAction(btns[btn_rename]);
+
+		auto info2 = info.getLayer1ItemInfo();
+		if (info2.Name == "脚本")
+			mn.addAction(btns[btn_runfromit]);
 	}
 
 	pt.setX(pt.x() + 10);
@@ -305,6 +309,13 @@ QTreeWidgetItem *ProjectWindow::findFileInProject(const QString &name)
 	//    if( le != 0) break ;
 	//}
 	//return le ;
+}
+
+void ProjectWindow::RunBKEFromFile(const ItemInfo & f)
+{
+	QStringList args;
+	args << "-startscript" << f.Name;
+	codeedit->CompileAndRun(args);
 }
 
 #undef DeleteFile
@@ -531,6 +542,7 @@ void ProjectWindow::ActionAdmin()
 	else if (p == btns[btn_remove]) DeleteFile(info);
 	else if (p == btns[btn_close]) CloseProject(info);
 	else if (p == btns[btn_rename]) RenameFile(info);
+	else if (p == btns[btn_runfromit]) RunBKEFromFile(info);
 }
 
 void ProjectWindow::RenameFile(const ItemInfo &f)

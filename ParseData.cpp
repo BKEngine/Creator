@@ -237,6 +237,23 @@ BaseNode *ParseData::findNode(/*Pos p*/int pos)
 	//return NULL;
 }
 
+BaseNode * ParseData::findLastLabelNode(int pos)
+{
+	auto it = fileNodes.upperBound(pos);
+	if (it == fileNodes.begin())
+		return NULL;
+	--it;
+	if ((*it)->endPos < pos)
+		return NULL;
+	while (!(*it)->isLabel())
+	{
+		if(it == fileNodes.begin())
+			return NULL;
+		--it;
+	}
+	return *it;
+}
+
 char ParseData::fetchNextOne()
 {
 	char ch = textbuf[idx];

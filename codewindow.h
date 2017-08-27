@@ -126,6 +126,7 @@ public:
 	QAction *btnreplaceact;
 	QAction *btnbookmarkact;
 	QAction *btnmarkact;
+	QAction *btnrunfromlabel;
 	QAction *btnredoact;
 	QAction *btnundoact;
 	QAction *btnclearact;
@@ -168,12 +169,13 @@ public slots:
 	void CompileLang(bool release = false);
 	void CompileFinish();
 	void CompileError(QString s);
-	void CompileAndRun();
+	void CompileAndRun(const QStringList &extraArgs = QStringList());
 	void FileNameChange(const QString &oldname, const QString &newname, bool &c);
 	void ToLocation(BkeMarkerBase *p, const QString &prodir);
 	void ShowRmenu(const QPoint & pos);
 	void AddBookMark();
 	void RunBKE();
+	void RunBKEWithArgs();
 	void AnnotateSelect();
 	void ClearCompile();
 	void ChangeCodec();
@@ -257,6 +259,8 @@ private:
 	QSize hint;
 	QsciStyle ks1;
 	QsciStyle ks2;
+
+	QStringList BKE_extraArgs;
 
 	enum{
 		_NOTICE_ALWAYS,

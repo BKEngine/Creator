@@ -56,6 +56,7 @@ CodeWindow::CodeWindow(QWidget *parent)
 	connect(&comtool, SIGNAL(CompliteFinish()), this, SLOT(CompileFinish()));
 	connect(&comtool, SIGNAL(CompliteError(QString)), this, SLOT(CompileError(QString)));
 	connect(btnrunact, SIGNAL(triggered()), this, SLOT(RunBKE()));
+	connect(btnrunfromlabel, SIGNAL(triggered()), this, SLOT(RunBKEWithArgs()));
 	connect(pannote, SIGNAL(triggered()), this, SLOT(AnnotateSelect()));
 	connect(btnclearact, SIGNAL(triggered()), this, SLOT(ClearCompile()));
 	//编码转换
@@ -126,6 +127,7 @@ void CodeWindow::CreateBtn()
 	btnreplaceact = new QAction(QIcon(":/cedit/source/replace(2).png"), "替换", this);
 	btnbookmarkact = new QAction(QIcon(":/cedit/source/Bookmark.png"), "添加书签", this);
 	btnmarkact = new QAction(QIcon(":/cedit/source/pin.png"), "添加标记", this);
+	btnrunfromlabel = new QAction("从本标签处运行", this);
 	btnredoact = new QAction(QIcon(":/cedit/source/redo.png"), "重做", this);
 	btnundoact = new QAction(QIcon(":/cedit/source/undo.png"), "撤销", this);
 	btnclearact = new QAction(QIcon(":/cedit/source/clear.png"), "清理编译工程", this);
@@ -1209,15 +1211,18 @@ void CodeWindow::CompileFinish()
 	btncompileact->setEnabled(true);
 	btncompilerunact->setEnabled(true);
 	QTimer::singleShot(8 * 1000, kag, SLOT(reset())); //8秒之后隐藏
-	if (markadmin.errorcount < 1) btnrunact->setEnabled(true);  //编译完成并且没有问题运行按钮才可用
-	if (markadmin.errorcount < 1 && isRun) RunBKE();
+	if (markadmin.errorcount < 1)
+		btnrunact->setEnabled(true);  //编译完成并且没有问题运行按钮才可用
+	if (markadmin.errorcount < 1 && isRun)
+		RunBKEWithArgs();
 	emit CompileFinish(markadmin.errorcount);
 	isRun = false;
 }
 
-void CodeWindow::CompileAndRun()
+void CodeWindow::CompileAndRun(const QStringList &extraArgs)
 {
 	isRun = true;
+	BKE_extraArgs = extraArgs;
 	CompileAll();
 }
 
@@ -1295,6 +1300,15 @@ void CodeWindow::ShowRmenu(const QPoint & pos)
 	menu.addAction(pannote);
 	menu.addAction(btnbookmarkact);
 	menu.addAction(btnmarkact);
+
+	auto labelnode = currentedit->analysis->findLastLabelNode(currentedit->FileName, n_pos);
+
+	if (labelnode)
+	{
+		BKE_extraArgs.clear();
+		BKE_extraArgs << "-startscript" << currentedit->FileName << "-startlabel" << "*" + labelnode->name;
+		menu.addAction(btnrunfromlabel);
+	}
 
 	QPoint temp = QCursor::pos();
 	temp.setX(temp.x() + 10);
@@ -1408,9 +1422,42 @@ void CodeWindow::RunBKE()
 		ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev";
 #endif
 #ifdef Q_OS_MAC
-	QProcess::startDetached( "open",QStringList() << ndir << "--args" << currentproject->FileDir() << "-nologo") ;
+	QProcess::startDetached( "open",QStringList() << ndir << "--args" << "-dir" << currentproject->FileDir() << "-nologo") ;
 #else
 	QProcess::startDetached(ndir, QStringList() << "-nologo", currentproject->FileDir());
+#endif
+}
+
+void CodeWindow::RunBKEWithArgs()
+{
+	QString ndir;
+	/*if (!currentproject->config->live2DKey.isEmpty())
+	#ifdef Q_OS_WIN
+	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Live2D_Dev.exe";
+	#elif defined(Q_OS_MAC)
+	ndir = BKE_CURRENT_DIR+"/BKEngine_Dev.app"; // Mac上没有Live2D
+	#else
+	ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev"; // Linux上没有Live2D
+	#endif
+	else*/
+#ifdef Q_OS_WIN
+	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev.exe";
+#elif defined(Q_OS_MAC)
+	ndir = BKE_CURRENT_DIR + "/BKEngine_Dev.app";
+#else
+	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev";
+#endif
+	QStringList args;
+#ifdef Q_OS_MAC
+	args << ndir << "--args" << "-dir" << currentproject->FileDir() << "-nologo";
+	for (auto &s : BKE_extraArgs)
+		args << s;
+	QProcess::startDetached("open", args);
+#else
+	args << "-nologo";
+	for (auto &s : BKE_extraArgs)
+		args << s;
+	QProcess::startDetached(ndir, args, currentproject->FileDir());
 #endif
 }
 
