@@ -79,6 +79,7 @@ struct CmdEntry
 	const char16_t **argNames;
 	uint32_t *argFlags;
 	CmdVersion *argVersions;
+	const char16_t **argEnums;
 	uint32_t propertyCount;
 	CmdProperty *argProps;
 	CmdVersion version;
@@ -90,12 +91,16 @@ struct CmdEntry
 
 typedef void __cdecl QueryCmdListFunc(void *opaque, const CmdEntry *entry);
 typedef void __cdecl QuerySpeCmdListFunc(void *opaque, const char16_t *name, uint32_t modeEnum, const CmdEntry *entry);
-typedef void __cdecl QueryEnumListFunc(void *opaque, const char16_t *name, uint32_t value);
+//typedef void __cdecl QueryEnumListFunc(void *opaque, const char16_t *name, uint32_t value);
 
+typedef int(__cdecl *QueryVersionFunc)();
 typedef void(__cdecl *PQUERYCMDLIST)(QueryCmdListFunc func, void *opaque);
 typedef void(__cdecl *PQUERYSPECMDLIST)(QuerySpeCmdListFunc func, void *opaque);
-typedef void(__cdecl *PQUERYENUMLIST)(QueryEnumListFunc func, CmdEnumType type, void *opaque);
+//typedef void(__cdecl *PQUERYENUMLIST)(QueryEnumListFunc func, CmdEnumType type, void *opaque);
 
+BKECMDLIST_API int __cdecl QueryPluginVersion();
 BKECMDLIST_API void __cdecl QueryCmdList(QueryCmdListFunc func, void *opaque);
 BKECMDLIST_API void __cdecl QuerySpeCmdList(QuerySpeCmdListFunc func, void *opaque);
-BKECMDLIST_API void __cdecl QueryEnumList(QueryEnumListFunc func, CmdEnumType type, void *opaque);
+//BKECMDLIST_API void __cdecl QueryEnumList(QueryEnumListFunc func, CmdEnumType type, void *opaque);
+
+#define BKE_CMD_VERSION 1001 

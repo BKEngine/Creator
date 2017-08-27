@@ -27,6 +27,7 @@ struct QBkeCmdInfo
 	QList<uint32_t> argFlags;
 	QList<QBkeCmdVersion> argVersions;
 	QList<QBkeCmdProperty> properties;
+	QList<QString> argEnums;
 	QBkeCmdVersion version;
 	QString description;
 	int priority;
@@ -40,4 +41,4 @@ public:
 
 extern QHash<QString, QBkeCmdInfo> CmdList;
 extern QHash<QString, QHash<QString, QBkeCmdInfo>> SpecialCmdList;
-extern QHash<QString, uint32_t> CmdAnimateLoopModeEnumList;
+//extern QHash<QString, uint32_t> CmdAnimateLoopModeEnumList;

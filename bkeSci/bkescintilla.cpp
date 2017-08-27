@@ -327,14 +327,14 @@ QString BkeScintilla::getAttrs(const QString &name, const QStringList &attrs, co
 	return QString();
 }
 
-static struct  
-{
-	QString cmd;
-	QString param;
-	QHash<QString, uint32_t> *map;
-} argEnumAutoLists[] = {
-	{"animate", "loop", &CmdAnimateLoopModeEnumList},
-};
+//static struct  
+//{
+//	QString cmd;
+//	QString param;
+//	QHash<QString, uint32_t> *map;
+//} argEnumAutoLists[] = {
+//	{"animate", "loop", &CmdAnimateLoopModeEnumList},
+//};
 
 QStringList BkeScintilla::getScriptList()
 {
@@ -360,20 +360,23 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 			auto it2 = it->argNames.indexOf(attr);
 			if (it2 >= 0)
 			{
-				for (auto &&s : argEnumAutoLists)
-				{
-					if (name == s.cmd && attr == s.param)
-					{
-						QHash<QString, uint32_t> *map = s.map;
-						auto ls = map->keys();
-						for (auto &it3 : ls)
-						{
-							it3 = '\"' + it3 + '\"';
-						}
-						return ls.join(' ');
-					}
-				}
-				if (it->argFlags[it2] & PT_BOOL)
+				//for (auto &&s : argEnumAutoLists)
+				//{
+				//	if (name == s.cmd && attr == s.param)
+				//	{
+				//		QHash<QString, uint32_t> *map = s.map;
+				//		auto ls = map->keys();
+				//		for (auto &it3 : ls)
+				//		{
+				//			it3 = '\"' + it3 + '\"';
+				//		}
+				//		return ls.join(' ');
+				//	}
+				//}
+				auto argEnums = it->argEnums[it2];
+				if (argEnums != NULL)
+					return argEnums;
+				else if (it->argFlags[it2] & PT_BOOL)
 					return "false true";
 				else if (it->argFlags[it2] & PT_SCRIPT)
 				{
@@ -453,20 +456,23 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 					auto it2 = info->argNames.indexOf(attr);
 					if (it2 >= 0)
 					{
-						for (auto &&s : argEnumAutoLists)
-						{
-							if (name == s.cmd && attr == s.param)
-							{
-								QHash<QString, uint32_t> *map = s.map;
-								auto ls = map->keys();
-								for (auto &it3 : ls)
-								{
-									it3 = '\"' + it3 + '\"';
-								}
-								return ls.join(' ');
-							}
-						}
-						if (info->argFlags[it2] & PT_BOOL)
+						//for (auto &&s : argEnumAutoLists)
+						//{
+						//	if (name == s.cmd && attr == s.param)
+						//	{
+						//		QHash<QString, uint32_t> *map = s.map;
+						//		auto ls = map->keys();
+						//		for (auto &it3 : ls)
+						//		{
+						//			it3 = '\"' + it3 + '\"';
+						//		}
+						//		return ls.join(' ');
+						//	}
+						//}
+						auto argEnums = info->argEnums[it2];
+						if (argEnums != NULL)
+							return argEnums;
+						else if (info->argFlags[it2] & PT_BOOL)
 							return "false true";
 						else if (info->argFlags[it2] & PT_SCRIPT)
 						{
