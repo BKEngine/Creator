@@ -42,7 +42,6 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_WARNING, 0xFF0000);//BGR
 	SendScintilla(SCI_INDICSETOUTLINEALPHA, BKE_INDICATOR_WARNING, 255);
 
-
 	DefineIndicators(BKE_INDICATOR_FIND, INDIC_STRAIGHTBOX);  //标记搜索的风格指示器
 	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_FIND, QColor(0, 0xff, 0));
 	SendScintilla(SCI_INDICSETALPHA, BKE_INDICATOR_FIND, 255);
@@ -1811,7 +1810,15 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERMIDTAIL, 0xa0a0a0);
 	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERTAIL, 0xa0a0a0);
 
-	SendScintilla(SCI_SETFOLDFLAGS, 16 | 4); //如果折叠就在折叠行的上下各画一条横线
+	//Fold Margin
+	SendScintilla(SCI_SETMARGINTYPEN, 1, SC_MARGIN_SYMBOL);
+	SendScintilla(SCI_SETMARGINMASKN, 1, SC_MASK_FOLDERS);
+	SendScintilla(SCI_SETMARGINWIDTHN, 1, 20);
+	SendScintilla(SCI_SETMARGINSENSITIVEN, 1, 1);
+
+	SendScintilla(SCI_SETFOLDFLAGS, SC_FOLDFLAG_LINEBEFORE_CONTRACTED | SC_FOLDFLAG_LINEAFTER_CONTRACTED); //如果折叠就在折叠行的上下各画一条横线
+
+	setFolding(FoldStyle::BoxedTreeFoldStyle, 1);
 
 	SendScintilla(SCI_PRIVATELEXERCALL, 0, &global_bke_info);
 	//SendScintilla(SCI_PRIVATELEXERCALL, 1, pdata);

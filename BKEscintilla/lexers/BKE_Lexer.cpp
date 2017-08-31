@@ -41,7 +41,7 @@ class BKE_Lexer :public ILexer
 private:
 	//what do we need for a perfect highlight?
 
-	LexAccessor *accessor;
+	LexAccessor *myAccessor;
 
 	StyleContext/*BKE_Accessor*/ *styler;
 
@@ -60,6 +60,15 @@ private:
 	unsigned char startStyle;
 
 	IDocument *myDoc;
+
+	//something for fold
+	int lineCurrent;
+	int levelPrev;	//实际是当前行的level
+	int levelCurrent;	//实际是下一行的level
+
+	//下一行增加缩进；当前行减少缩进
+	//else和elseif指令为同时具有这两种效果
+	QSet<QString> nextIndent, currentDeIndent;
 
 	class BracketsStack
 	{
@@ -121,18 +130,25 @@ private:
 public:
 	BKE_Lexer()
 	{
-		accessor = NULL;
+		myAccessor = NULL;
 		styler = NULL;
 		info = NULL;
 		firstLex = false;	//反正第一次是一下高亮完的
 		cur_mask = 0;
 		pdata = NULL;
 		curnode = NULL;
+
+		//折叠和缩进无关，所以else等不考虑
+		nextIndent.insert("if");
+		nextIndent.insert("for");
+
+		currentDeIndent.insert("endif");
+		currentDeIndent.insert("next");
 	}
 
 	virtual int SCI_METHOD Version() const
 	{
-		return 1;
+		return lvOriginal; 
 	};
 	virtual void SCI_METHOD Release()
 	{
@@ -239,10 +255,10 @@ private:
 	bool ParseString2();	//'
 	bool ParseNumber();
 	bool ParseColor();
-	bool ParseVarname();
+	bool ParseVarname(bool forceVariable = false);
 };
 
-bool BKE_Lexer::ParseVarname()
+bool BKE_Lexer::ParseVarname(bool forceVariable)
 {
 	QString s(QChar(styler->chPrev));
 	while (styler->More())
@@ -255,7 +271,7 @@ bool BKE_Lexer::ParseVarname()
 		else
 			break;
 	}
-	if (info->BagelWords.contains(s))
+	if (!forceVariable && info->BagelWords.contains(s))
 	{
 		styler->SetState(last_state | cur_mask);
 	}
@@ -552,6 +568,7 @@ void BKE_Lexer::handleBracketsError(BracketsStack &stack)
 void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 {
 	BracketsStack stack; //栈
+	bool lastOpIsDot = false;
 	int defaultState;
 	if (ignoreLineEnd)
 		defaultState = SCE_BKE_PARSER_DEFAULT;
@@ -578,6 +595,20 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			removeMask(BEGAL_MASK);
 			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			break;
+		}
+		if (styler->atLineEnd)
+		{
+			int lev = levelPrev;
+			if (levelCurrent > levelPrev) {
+				lev |= SC_FOLDLEVELHEADERFLAG;
+			};
+			if (lev != myAccessor->LevelAt(lineCurrent)) {
+				myAccessor->SetLevel(lineCurrent, lev);
+			};
+			lineCurrent++;
+			levelPrev = levelCurrent;
+			styler->Forward();
+			continue;
 		}
 		if (styler->ch == ']' && !atCommand && !stack.hasBracket())
 		{
@@ -676,13 +707,25 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 				{
 					styler->SetState(SCE_BKE_OPERATORS | cur_mask);
 					if (styler->ch == '[')
+					{
 						stack.pushBracket(styler->currentPos);
+					}
 					else if (styler->ch == '{')
+					{
 						stack.pushBrace(styler->currentPos);
+						if (ignoreLineEnd)
+							levelCurrent++;
+					}
 					else if (styler->ch == '(')
+					{
 						stack.pushParenthesis(styler->currentPos);
+					}
 					else if (styler->ch == ']' || styler->ch == '}' || styler->ch == ')')	//正确性已在上面检验过
+					{
 						stack.pop();
+						if (styler->ch == '}' && ignoreLineEnd)
+							levelCurrent--;
+					}
 				}
 				styler->Forward();
 			}
@@ -690,12 +733,11 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			{
 				styler->SetState(SCE_BKE_PARSER_KEYWORD | cur_mask);
 				styler->Forward();
-				ParseVarname();
+				ParseVarname(lastOpIsDot);
 			}
 			else if (isspace(styler->ch))
 			{
 				styler->SetState(defaultState | cur_mask);
-				styler->Forward();
 				while (styler->More() && !styler->atLineEnd)
 				{
 					if (styler->ch == '\t')
@@ -715,6 +757,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 					else
 						break;
 				}
+				continue;
 			}
 			else
 			{
@@ -722,6 +765,11 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 				styler->Forward();
 			}
 		}
+		//这里已经不会出现空字符，所以不是.就是其他有效字符
+		if (styler->ch == '.')
+			lastOpIsDot = true;
+		else
+			lastOpIsDot = false;
 	}
 	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 }
@@ -732,14 +780,32 @@ void BKE_Lexer::DoCommand()
 	setMask(CMD_MASK);
 	styler->SetState(styler->state | cur_mask);
 	//bool error = false;
+	QString cmdName;
 	if (!styler->atLineEnd && !isspace(styler->ch) && styler->ch != ']')
 	{
 		while (styler->More())
 		{
 			if (isspace(styler->ch) || styler->ch == ']')
+			{
 				break;
+			}
+			else if (atComment())
+			{
+				int rawstate = styler->state;
+				JudgeStyle();
+				if ((styler->state & BASE_MASK) == SCE_BKE_ANNOTATE)
+					ContinueLineComment();
+				else
+					ContinueBlockComment();
+				styler->SetState(rawstate);
+				//removeMask(CMD_MASK);
+				//styler->SetState(SCE_BKE_DEFAULT | cur_mask);
+			}
 			else
+			{
+				cmdName.push_back(styler->ch);
 				styler->Forward();
+			}
 		}
 	}
 	//else
@@ -802,6 +868,15 @@ void BKE_Lexer::DoCommand()
 	{
 		removeMask(CMD_MASK);
 	}
+	//fold
+	if (nextIndent.contains(cmdName))
+	{
+		levelCurrent++;
+	}
+	if (currentDeIndent.contains(cmdName))
+	{
+		levelCurrent--;
+	}
 }
 
 void BKE_Lexer::DoAtCommand()
@@ -809,20 +884,32 @@ void BKE_Lexer::DoAtCommand()
 	setMask(CMD_MASK);
 	styler->SetState(styler->state | cur_mask);
 	//check cmd name
+	QString cmdName;
 	if (!styler->atLineEnd && !isspace(styler->ch))
 	{
 		while (styler->More())
 		{
 			if (isspace(styler->ch))
+			{
 				break;
+			}
 			else if (atComment())
 			{
-				removeMask(CMD_MASK);
-				styler->SetState(SCE_BKE_DEFAULT | cur_mask);
-				return;
+				int rawstate = styler->state;
+				JudgeStyle();
+				if ((styler->state & BASE_MASK) == SCE_BKE_ANNOTATE)
+					ContinueLineComment();
+				else
+					ContinueBlockComment();
+				styler->SetState(rawstate);
+				//removeMask(CMD_MASK);
+				//styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			}
 			else
+			{
+				cmdName.push_back(styler->ch);
 				styler->Forward();
+			}
 		}
 	}
 	//有了indicator后不用在Lexer里画Error了
@@ -871,6 +958,15 @@ void BKE_Lexer::DoAtCommand()
 		ParseBegal(false, false, true);
 	}
 	removeMask(CMD_MASK);
+	//fold
+	if (nextIndent.contains(cmdName))
+	{
+		levelCurrent++;
+	}
+	if (currentDeIndent.contains(cmdName))
+	{
+		levelCurrent--;
+	}
 }
 
 void BKE_Lexer::ContinueLabel()
@@ -1035,6 +1131,15 @@ void BKE_Lexer::JudgeStyle()
 		styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 		if (styler->ch == '\r' && styler->chNext == '\n')
 			styler->Forward();
+		int lev = levelPrev;
+		if (levelCurrent > levelPrev) {
+			lev |= SC_FOLDLEVELHEADERFLAG;
+		};
+		if (lev != myAccessor->LevelAt(lineCurrent)) {
+			myAccessor->SetLevel(lineCurrent, lev);
+		};
+		lineCurrent++;
+		levelPrev = levelCurrent;
 	}
 	else
 	{
@@ -1069,6 +1174,7 @@ void BKE_Lexer::ContinueText()
 void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess)
 {
 	LexAccessor accessor(pAccess);
+	myAccessor = &accessor;
 
 	myDoc = pAccess;
 
@@ -1121,6 +1227,10 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 	//styler->setRange(startPos, startPos + lengthDoc, initStyle);
 	//curnode = NULL;
 
+	//fold info
+	lineCurrent = accessor.GetLine(startPos);
+	levelPrev = accessor.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
+	levelCurrent = levelPrev;
 	while (styler->More())
 	{
 		switch (styler->state & BASE_MASK)
@@ -1183,10 +1293,46 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 
 void SCI_METHOD BKE_Lexer::Fold(unsigned int startPos, int lengthDoc, int initStyle, IDocument *pAccess)
 {
+	//do nothing because we do all in Lex
+	return;
 	LexAccessor styler(pAccess);
+	int lineCurrent = styler.GetLine(startPos);
+	unsigned int endPos = startPos + lengthDoc;
+	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
+	int levelCurrent = levelPrev;	char chNext = styler[startPos];
+	char ch;
+	bool atEOL;
 
-	int levelCurrent = SC_FOLDLEVELBASE >> 16;
-	styler.SetLevel(0, 0xFFFFFFFF);
+	for (unsigned int i = startPos; i < endPos; i++) {
+		ch = chNext;
+		chNext = styler.SafeGetCharAt(i + 1);
+		if (ch == '\r' && chNext == '\n')
+		{
+			i++;
+			atEOL = true;
+		}
+		else
+		{
+			atEOL = (ch == '\r') || (ch == '\n');
+		}
+		if (ch == '{') {
+			levelCurrent++;
+		};
+		if (ch == '}') {
+			levelCurrent --;
+		};
+		if (atEOL || (i == (endPos - 1))) {
+			int lev = levelPrev;
+			if (levelCurrent > levelPrev) {
+				lev |= SC_FOLDLEVELHEADERFLAG;
+			};
+			if (lev != styler.LevelAt(lineCurrent)) {
+				styler.SetLevel(lineCurrent, lev);
+			};
+			lineCurrent++;
+			levelPrev = levelCurrent;
+		};
+	};
 }
 
 #define SCLEX_BKE 108
