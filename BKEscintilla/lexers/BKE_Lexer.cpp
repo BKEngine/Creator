@@ -68,7 +68,7 @@ private:
 
 	//下一行增加缩进；当前行减少缩进
 	//else和elseif指令为同时具有这两种效果
-	QSet<QString> nextIndent, currentDeIndent;
+	QSet<QString> nextIndent, currentDeIndent, stopAndStart;
 
 	class BracketsStack
 	{
@@ -127,6 +127,31 @@ private:
 
 	void handleBracketsError(BracketsStack &stack);
 
+	void handleFold()
+	{
+		int lev = levelPrev;
+		if (levelCurrent > levelPrev) {
+			lev |= SC_FOLDLEVELHEADERFLAG;
+		};
+		if (lev != myAccessor->LevelAt(lineCurrent)) {
+			myAccessor->SetLevel(lineCurrent, lev);
+		};
+		lineCurrent++;
+		levelPrev = levelCurrent;
+	}
+
+	void stopAndStartNewBlock()
+	{
+		if (levelPrev == SC_FOLDLEVELBASE)
+		{
+			levelCurrent++;
+		}
+		else
+		{
+			levelPrev--;
+		}
+	}
+
 public:
 	BKE_Lexer()
 	{
@@ -138,12 +163,14 @@ public:
 		pdata = NULL;
 		curnode = NULL;
 
-		//折叠和缩进无关，所以else等不考虑
 		nextIndent.insert("if");
 		nextIndent.insert("for");
 
 		currentDeIndent.insert("endif");
 		currentDeIndent.insert("next");
+
+		stopAndStart.insert("else");
+		stopAndStart.insert("elseif");
 	}
 
 	virtual int SCI_METHOD Version() const
@@ -598,15 +625,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 		}
 		if (styler->atLineEnd)
 		{
-			int lev = levelPrev;
-			if (levelCurrent > levelPrev) {
-				lev |= SC_FOLDLEVELHEADERFLAG;
-			};
-			if (lev != myAccessor->LevelAt(lineCurrent)) {
-				myAccessor->SetLevel(lineCurrent, lev);
-			};
-			lineCurrent++;
-			levelPrev = levelCurrent;
+			handleFold();
 			styler->Forward();
 			continue;
 		}
@@ -875,7 +894,12 @@ void BKE_Lexer::DoCommand()
 	}
 	if (currentDeIndent.contains(cmdName))
 	{
-		levelCurrent--;
+		levelPrev--;
+		levelCurrent = levelPrev;
+	}
+	if (stopAndStart.contains(cmdName))
+	{
+		stopAndStartNewBlock();
 	}
 }
 
@@ -965,7 +989,12 @@ void BKE_Lexer::DoAtCommand()
 	}
 	if (currentDeIndent.contains(cmdName))
 	{
-		levelCurrent--;
+		levelPrev--;
+		levelCurrent = levelPrev;
+	}
+	if (stopAndStart.contains(cmdName))
+	{
+		stopAndStartNewBlock();
 	}
 }
 
@@ -997,6 +1026,8 @@ void BKE_Lexer::ContinueLabel()
 	//curnode->name.clear();
 	//curnode->name.prepend(ba);
 	//curnode->cached = true;
+
+	stopAndStartNewBlock();
 	return;
 }
 
@@ -1011,6 +1042,10 @@ void BKE_Lexer::ContinueBlockComment()
 			//styler->removeMaskState(COMMENT_MASK);
 			styler->SetState(last_state | cur_mask);   //恢复原状态
 			break;
+		}
+		if (styler->atLineEnd)
+		{
+			handleFold();
 		}
 		styler->Forward();
 	}
@@ -1131,15 +1166,7 @@ void BKE_Lexer::JudgeStyle()
 		styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 		if (styler->ch == '\r' && styler->chNext == '\n')
 			styler->Forward();
-		int lev = levelPrev;
-		if (levelCurrent > levelPrev) {
-			lev |= SC_FOLDLEVELHEADERFLAG;
-		};
-		if (lev != myAccessor->LevelAt(lineCurrent)) {
-			myAccessor->SetLevel(lineCurrent, lev);
-		};
-		lineCurrent++;
-		levelPrev = levelCurrent;
+		handleFold();
 	}
 	else
 	{
@@ -1230,7 +1257,8 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 	//fold info
 	lineCurrent = accessor.GetLine(startPos);
 	levelPrev = accessor.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
-	levelCurrent = levelPrev;
+	levelCurrent = levelPrev;
+
 	while (styler->More())
 	{
 		switch (styler->state & BASE_MASK)
@@ -1295,44 +1323,6 @@ void SCI_METHOD BKE_Lexer::Fold(unsigned int startPos, int lengthDoc, int initSt
 {
 	//do nothing because we do all in Lex
 	return;
-	LexAccessor styler(pAccess);
-	int lineCurrent = styler.GetLine(startPos);
-	unsigned int endPos = startPos + lengthDoc;
-	int levelPrev = styler.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
-	int levelCurrent = levelPrev;	char chNext = styler[startPos];
-	char ch;
-	bool atEOL;
-
-	for (unsigned int i = startPos; i < endPos; i++) {
-		ch = chNext;
-		chNext = styler.SafeGetCharAt(i + 1);
-		if (ch == '\r' && chNext == '\n')
-		{
-			i++;
-			atEOL = true;
-		}
-		else
-		{
-			atEOL = (ch == '\r') || (ch == '\n');
-		}
-		if (ch == '{') {
-			levelCurrent++;
-		};
-		if (ch == '}') {
-			levelCurrent --;
-		};
-		if (atEOL || (i == (endPos - 1))) {
-			int lev = levelPrev;
-			if (levelCurrent > levelPrev) {
-				lev |= SC_FOLDLEVELHEADERFLAG;
-			};
-			if (lev != styler.LevelAt(lineCurrent)) {
-				styler.SetLevel(lineCurrent, lev);
-			};
-			lineCurrent++;
-			levelPrev = levelCurrent;
-		};
-	};
 }
 
 #define SCLEX_BKE 108
