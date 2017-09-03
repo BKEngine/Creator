@@ -319,7 +319,6 @@ void MainWindow::Recentfile()
 	QAction *p = dynamic_cast<QAction*>(sender()) ;
 	if( p == NULL ) return ;
 	else if( p->text().endsWith(".bkp") ) projectedit->OpenProject(p->text());
-	else if( p->text().endsWith("bkscr")) codeedit->addFile(p->text(),"");
 }
 
 void MainWindow::NormalAction()

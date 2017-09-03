@@ -37,17 +37,13 @@ public:
 
 	~ProjectWindow();
 	ProjectWindow(QWidget *parent = 0);
-	BkeProject *FindPro(const QString &proname);
-	BkeProject *FindFileProject(const QString &file);
-	BkeProject *FindProjectFromDir(const QString &dir);
 	void OpenProject(const QString &file);
-	//QList<BkeProject*> ProjectList(){ return projectlist ; }
 	bool hasProject(){ return !!workpro; }
 
 	BkeProject *workpro;
 
 signals:
-	void OpenThisFile(const QString &file, const QString &prodir);
+	void OpenBkscrFile(const QString &file);
 	void DirWillBeInsert(const QString &text);
 	void CheckFileOpen(const QString &file, bool &IsOpen);
 	void ImportFileChange(const QString &text, int type);
@@ -63,6 +59,7 @@ public slots:
 	void NewProject();
 	void OpenProject();
 	void ItemDoubleClick(QTreeWidgetItem * item, int column);
+	void OpenProjectFile(QString);
 	void ShowRmenu(const QPoint & pos);
 	void SetCurrentItem(const QString &file);
 	//void ReName() ;

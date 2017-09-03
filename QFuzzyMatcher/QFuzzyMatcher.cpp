@@ -85,6 +85,7 @@ void worker(
 
 QFuzzyMatcher::QFuzzyMatcher(const QStringList &candidates)
 {
+	candidates_.reserve(candidates.size());
 	for (const QString &s : candidates)
 	{
 		addCandidate(s);

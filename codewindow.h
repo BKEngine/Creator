@@ -154,7 +154,7 @@ public slots:
 	bool CloseAll();
 	void ChangeCurrentEdit(int pos);
 	void SetCurrentEdit(int pos);
-	void addFile(const QString &file, const QString &prodir);
+	void AddFile(const QString &file);
 	void TextInsert(const QString &text);
 	void DocChange(bool m);
 	void NextNavigation();
@@ -167,8 +167,10 @@ public slots:
 	void ImportBeChange(const QString &text, int type);
 	void FileWillBeDel(const QString &file);
 	void Compile();
-	void CompileAll(bool release = false);
-	void CompileLang(bool release = false);
+	void CompileAll(bool release);
+	void CompileAll();
+	void CompileLang(bool release);
+	void CompileLang();
 	void CompileFinish();
 	void CompileError(QString s);
 	void CompileAndRun(const QStringList &extraArgs = QStringList());
@@ -228,7 +230,7 @@ private:
 	int navigationLocker = 0;
 	OtherWindow *othwin;
 	ProjectWindow *prowin;
-	BkeProject *currentproject;
+	BkeProject *workpro;
 	QStackedWidget *stackwidget;
 
 	QStringList ItemTextList;

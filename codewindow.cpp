@@ -3,6 +3,7 @@
 #include "dia/lablesuredialog.h"
 #include "dia/WaitWindow.h"
 #include "dia/openlabeldialog.h"
+#include "dia/gotofiledialog.h"
 
 CodeWindow::CodeWindow(QWidget *parent)
 	:QMainWindow(parent)
@@ -235,19 +236,19 @@ void CodeWindow::OtherWinProject(ProjectWindow *p)
 {
 	prowin = p;
 	//rename
-	connect(p, SIGNAL(FileNameChange(QString, QString)), this, SLOT(Rename(QString, QString)));
+	connect(p, &ProjectWindow::FileNameChange, this, &CodeWindow::Rename);
 	//打开文件
-	connect(p, SIGNAL(OpenThisFile(QString, QString)), this, SLOT(addFile(QString, QString)));
+	connect(p, &ProjectWindow::OpenBkscrFile, this, &CodeWindow::AddFile);
 	//插入路径
-	connect(p, SIGNAL(DirWillBeInsert(QString)), this, SLOT(TextInsert(QString)));
+	connect(p, &ProjectWindow::DirWillBeInsert, this, &CodeWindow::TextInsert);
 	//编译脚本
-	connect(p, SIGNAL(Compile()), this, SLOT(CompileAll()));
+	connect(p, &ProjectWindow::Compile, this, (void (QObject::*)())&CodeWindow::CompileAll);
 	//当前工程被改变
-	connect(p, SIGNAL(CurrentProChange(BkeProject*)), this, SLOT(ChangeProject(BkeProject*)));
+	connect(p, &ProjectWindow::CurrentProChange, this, &CodeWindow::ChangeProject);
 	//改变当前文件
-	connect(this, SIGNAL(CurrentFileChange(QString)), p, SLOT(SetCurrentItem(QString)));
+	connect(this, (void(QObject::*)(const QString&))&CodeWindow::CurrentFileChange, p, &ProjectWindow::SetCurrentItem);
 	//打开工程时读取书签以及标记
-	connect(p, SIGNAL(TextToMarks(QString, QString, int)), this, SLOT(TextToMarks(QString, QString, int)));
+	connect(p, &ProjectWindow::TextToMarks, this, &CodeWindow::TextToMarks);
 	//新建空白文档
 	//connect(p->btnnewfileact,SIGNAL(triggered()),this,SLOT(NewEmptyFile())) ;
 }
@@ -256,11 +257,11 @@ void CodeWindow::OtherwinFileList(BkeLeftFileWidget *flist)
 {
 	filewidget = flist;
 	//改变文件
-	connect(filewidget, SIGNAL(currentRowChanged(int)), this, SLOT(SetCurrentEdit(int)));
+	connect(filewidget, &BkeLeftFileWidget::currentRowChanged, this, (void(QObject::*)(int))&CodeWindow::SetCurrentEdit);
 	//关闭文件
-	connect(filewidget->btnclose, SIGNAL(triggered()), this, SLOT(CloseFile()));
+	connect(filewidget->btnclose, &QAction::triggered, this, (void(QObject::*)())&CodeWindow::CloseFile);
 	//关闭所有
-	connect(filewidget->btnCloseAll, SIGNAL(triggered()), this, SLOT(CloseAll()));
+	connect(filewidget->btnCloseAll, &QAction::triggered, this, &CodeWindow::CloseAll);
 }
 
 //设置正在编辑工程
@@ -330,7 +331,7 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 	}
 
 	//改变工程
-	ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
+	//ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
 	currentedit = currentbase->edit;
 	//reset lexer
 	currentedit->deflex->ReadConfig(currentedit->deflex->ConfigName());
@@ -440,7 +441,7 @@ void CodeWindow::Rename(const QString &old, const QString &now)
 
 void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bool iscase, bool isregular, bool isword)
 {
-	if (!currentproject)
+	if (!workpro)
 		return;
 	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
 	bool close = !loli;
@@ -459,7 +460,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 			delete loli;
 			return;
 		}
-		loli->SetProjectDir(prowin->workpro->FileDir());
+		loli->SetProjectDir(prowin->workpro->ProjectDir());
 		//新的编辑窗口
 		QDir d(loli->ProjectDir());
 		QString shortname = d.relativeFilePath(file);
@@ -502,7 +503,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 
 void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen)
 {
-	if (!currentproject)
+	if (!workpro)
 		return;
 	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
 	bool close = !loli;
@@ -521,7 +522,7 @@ void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, c
 			delete loli;
 			return;
 		}
-		loli->SetProjectDir(prowin->workpro->FileDir());
+		loli->SetProjectDir(prowin->workpro->ProjectDir());
 		//新的编辑窗口
 		QDir d(loli->ProjectDir());
 		QString shortname = d.relativeFilePath(file);
@@ -598,14 +599,14 @@ w->addNum();
 
 void CodeWindow::searchAllFile(const QString &searchstr, bool iscase, bool isregular, bool isword)
 {
-	if (!currentproject)
+	if (!workpro)
 	{
 		return;
 	}
 	QStringList ls;
-	ls.append(currentproject->ListFiles(1));
-	ls.append(currentproject->ListFiles(2));
-	QString base = currentproject->FileDir() + '/';
+	ls.append(workpro->ListFiles(1));
+	ls.append(workpro->ListFiles(2));
+	QString base = workpro->ProjectDir();
 	if (ls.empty())
 		return;
 	//WaitWindow *w = new WaitWindow();
@@ -623,14 +624,14 @@ void CodeWindow::searchAllFile(const QString &searchstr, bool iscase, bool isreg
 
 void CodeWindow::replaceAllFile(const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen)
 {
-	if (!currentproject)
+	if (!workpro)
 	{
 		return;
 	}
 	QStringList ls;
-	ls.append(currentproject->ListFiles(1));
-	ls.append(currentproject->ListFiles(2));
-	QString base = currentproject->FileDir();
+	ls.append(workpro->ListFiles(1));
+	ls.append(workpro->ListFiles(2));
+	QString base = workpro->ProjectDir();
 	for (auto &&it : ls)
 	{
 		replaceOneFile(base + '/' + it, searchstr, replacestr, iscase, isregular, isword, stayopen);
@@ -638,7 +639,7 @@ void CodeWindow::replaceAllFile(const QString &searchstr, const QString &replace
 }
 
 //打开文件，文件列表是自动维护的
-void CodeWindow::addFile(const QString &file, const QString &prodir)
+void CodeWindow::AddFile(const QString &file)
 {
 	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
 
@@ -657,15 +658,10 @@ void CodeWindow::addFile(const QString &file, const QString &prodir)
 			return;
 		}
 
-		loli->SetProjectDir(prodir);
+		loli->SetProjectDir(workpro->ProjectDir());
 		//新的编辑窗口
-		QDir d(prodir);
-		QString shortname = d.relativeFilePath(file);
 		simpleNew(loli, en);
-		if (shortname.startsWith("..") || shortname[1] == ':')
-			loli->edit->FileName = file;
-		else
-			loli->edit->FileName = shortname;
+		loli->edit->FileName = workpro->AllNameToName(file);
 		//BkeProject *tpro = prowin->FindProjectFromDir(prodir);
 		//if (prodir != 0) loli->edit->setParser(tpro->lex);
 
@@ -689,9 +685,9 @@ void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 	ignoreflag = true; //忽略改变，在所有准备工作完成以后才改变
 
 	loli->edit = new BkeScintilla(this);
-	if (currentproject)
-		loli->edit->analysis = currentproject->analysis;
-	loli->edit->workpro = currentproject;
+	if (workpro)
+		loli->edit->analysis = workpro->analysis;
+	loli->edit->workpro = workpro;
 	loli->edit->basedoc = loli;
 	int pos = LOLI_SORT_INSERT(ItemTextList, loli->Name());
 	filewidget->insertItem(pos, loli->Name());
@@ -787,8 +783,8 @@ void CodeWindow::backupAll()
 	static QJsonObject jo;
 	static QStringList files;
 	static QJsonDocument jd;
-	if (currentproject)
-		jo.insert("project", currentproject->ProjectFile());
+	if (workpro)
+		jo.insert("project", workpro->ProjectFile());
 	files.clear();
 	BkeDocBase *llm;
 	for (int i = 0; i < stackwidget->count(); i++){
@@ -797,8 +793,8 @@ void CodeWindow::backupAll()
 			continue;
 		else
 		{
-			if (currentproject)
-				files.push_back(currentproject->FileDir() + '/' + llm->edit->FileName);
+			if (workpro)
+				files.push_back(workpro->ProjectDir() + llm->edit->FileName);
 			simpleBackup(llm);
 		}
 	}
@@ -977,7 +973,7 @@ void CodeWindow::CompileLang(bool release /*= false*/)
 {
 	LOLI_CLEAR_TEMP(BKE_CURRENT_DIR + "/temp");
 	//当前编辑项不是工程的话，什么也不会发生
-	if (currentproject == 0) return;
+	if (workpro == 0) return;
 
 	//设置按钮
 	btncompileact->setEnabled(false);
@@ -1002,21 +998,26 @@ void CodeWindow::CompileLang(bool release /*= false*/)
 	//    msg.exec() ;
 	//    return ;
 	//}
-	QStringList ls = currentproject->AllScriptFiles();
+	QStringList ls = workpro->AllScriptFiles();
 	kag->setMaximum(ls.size());
 	kag->setValue(0);
 	kag->show();
 	//开始编译
 	//comtool.Compile(BKE_CURRENT_DIR+"/temp");
 	SaveALL();
-	comtool.CompileLang(currentproject->FileDir(), release);
+	comtool.CompileLang(workpro->ProjectDir(), release);
+}
+
+void CodeWindow::CompileLang()
+{
+	CompileLang(false);
 }
 
 void CodeWindow::CompileAll(bool release /*= false*/)
 {
 	LOLI_CLEAR_TEMP(BKE_CURRENT_DIR + "/temp");
 	//当前编辑项不是工程的话，什么也不会发生
-	if (currentproject == 0) return;
+	if (workpro == 0) return;
 
 	//设置按钮
 	btncompileact->setEnabled(false);
@@ -1041,14 +1042,19 @@ void CodeWindow::CompileAll(bool release /*= false*/)
 	//    msg.exec() ;
 	//    return ;
 	//}
-	QStringList ls = currentproject->AllScriptFiles();
+	QStringList ls = workpro->AllScriptFiles();
 	kag->setMaximum(ls.size());
 	kag->setValue(0);
 	kag->show();
 	//开始编译
 	//comtool.Compile(BKE_CURRENT_DIR+"/temp");
 	SaveALL();
-	comtool.Compile(currentproject->FileDir(), release);
+	comtool.Compile(workpro->ProjectDir(), release);
+}
+
+void CodeWindow::CompileAll()
+{
+	CompileAll(false);
 }
 
 bool CodeWindow::WriteOpenFile(const QString &dir)
@@ -1145,9 +1151,9 @@ QStringList fileEntries(const QString &dir, const QStringList &suffixes)
 //删除编译过的文件
 void CodeWindow::deleteCompileFile()
 {
-	if (currentproject == 0)
+	if (workpro == 0)
 		return;
-	QStringList l = fileEntries(currentproject->FileDir(), QStringList() << ".bkbin");
+	QStringList l = fileEntries(workpro->ProjectDir(), QStringList() << ".bkbin");
 	for (auto i : l)
 	{
 		QFile(i).remove();
@@ -1196,7 +1202,7 @@ void CodeWindow::CompileFinish()
 	kag->setValue(kag->maximum());
 
     QString comResult = comtool.Result();
-    markadmin.ProblemsFromText(currentproject->FileDir(), comResult);
+    markadmin.ProblemsFromText(workpro->ProjectDir(), comResult);
 
 	BkeMarkList *problemslist;
 	if (stackwidget->count() > 0){
@@ -1212,7 +1218,7 @@ void CodeWindow::CompileFinish()
 
     othwin->compileedit->setText(comResult);
 	othwin->compileedit->setReadOnly(true);
-	othwin->ShowProblem(problemslist, currentproject->FileDir());
+	othwin->ShowProblem(problemslist, workpro->ProjectDir());
 
 	//按钮可用
 	btncompileact->setEnabled(true);
@@ -1241,10 +1247,7 @@ void CodeWindow::FileNameChange(const QString &oldname, const QString &newname, 
 //转到文件
 void CodeWindow::ToLocation(BkeMarkerBase *p, const QString &prodir)
 {
-	if (prodir.isEmpty())
-		addFile(p->FullName, currentproject->FileDir());
-	else
-		addFile(p->FullName, prodir);
+	AddFile(p->FullName);
 	//    BKEproject *pro = prowin->FindFileProject(p->FullName) ;
 	//    if( pro == 0){
 	//        addFile(p->FullName,0);
@@ -1332,7 +1335,7 @@ void CodeWindow::AddBookMark()
 	int line = currentedit->GetCurrentLine();
 	if (currentbase != 0){
 		//markadmin.AddBookMark(info, line ,BkeFullnameToName(currentbase->fullname,currentproject->FileDir()) );
-		currentproject->WriteMarkFile(&markadmin);
+		workpro->WriteMarkFile(&markadmin);
 	}
 	else{
 		markadmin.AddBookMark(info, line, "");
@@ -1429,9 +1432,9 @@ void CodeWindow::RunBKE()
 		ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev";
 #endif
 #ifdef Q_OS_MAC
-	QProcess::startDetached( "open",QStringList() << ndir << "--args" << "-dir" << currentproject->FileDir() << "-nologo") ;
+	QProcess::startDetached( "open",QStringList() << ndir << "--args" << "-dir" << workpro->ProjectDir() << "-nologo") ;
 #else
-	QProcess::startDetached(ndir, QStringList() << "-nologo", currentproject->FileDir());
+	QProcess::startDetached(ndir, QStringList() << "-nologo", workpro->ProjectDir());
 #endif
 }
 
@@ -1456,7 +1459,7 @@ void CodeWindow::RunBKEWithArgs()
 #endif
 	QStringList args;
 #ifdef Q_OS_MAC
-	args << ndir << "--args" << "-dir" << currentproject->FileDir() << "-nologo";
+	args << ndir << "--args" << "-dir" << workpro->ProjectDir() << "-nologo";
 	for (auto &s : BKE_extraArgs)
 		args << s;
 	QProcess::startDetached("open", args);
@@ -1464,7 +1467,7 @@ void CodeWindow::RunBKEWithArgs()
 	args << "-nologo";
 	for (auto &s : BKE_extraArgs)
 		args << s;
-	QProcess::startDetached(ndir, args, currentproject->FileDir());
+	QProcess::startDetached(ndir, args, workpro->ProjectDir());
 #endif
 }
 
@@ -1526,7 +1529,7 @@ void CodeWindow::FileReadyToCompile(int i)
 //当前工程被改变
 void CodeWindow::ChangeProject(BkeProject *p)
 {
-	if (p != currentproject)
+	if (p != workpro)
 	{
 		navigationList.clear();
 		currentNavigation = -1;
@@ -1536,11 +1539,11 @@ void CodeWindow::ChangeProject(BkeProject *p)
 			btncompilerunact->setEnabled(false);
 			btnrunact->setEnabled(false);
 			btndebugact->setEnabled(false);
-			currentproject = 0;
+			workpro = 0;
 			return;
 		}
 
-		currentproject = p;
+		workpro = p;
 		btncompileact->setEnabled(true);  //工程出现后编译按钮都是可用的
 		btncompilerunact->setEnabled(true);
 	}
@@ -1593,7 +1596,8 @@ void CodeWindow::QfileChange(const QString &path)
 		msg.addButton(QMessageBox::Cancel);
 		int i = msg.exec();
 		if (i == QMessageBox::Close){
-			BkeProject *pro = prowin->FindProjectFromDir(tempbase->ProjectDir());
+			//BkeProject *pro = prowin->FindProjectFromDir(tempbase->ProjectDir());
+			BkeProject *pro = workpro;
 			if (pro != 0) pro->RemoveItem(tempbase->FullName());
 			simpleClose(tempbase);
 		}
@@ -1745,7 +1749,10 @@ void CodeWindow::GotoLabelList()
 
 void CodeWindow::GotoFile()
 {
-
+	QStringList qs = workpro->AllScriptFiles();
+	GotoFileDialog *dialog = new GotoFileDialog(qs, this);
+	connect(dialog, &GotoFileDialog::GotoFile, projectedit, &ProjectWindow::OpenProjectFile);
+	dialog->show();
 }
 
 void CodeWindow::DrawLine(bool isClear)
@@ -1800,7 +1807,7 @@ void CodeWindow::jumpToDefFunc()
 	QAction *act = (QAction*)sender();
 	QStringList ls = act->data().toString().split('|');
 	int pos = ls[1].toInt();
-	addFile(currentproject->FileDir() + '/' + ls[0], currentproject->FileDir());
+	AddFile(ls[0]);
 	if (currentedit->FileName != ls[0])
 		return;
 	int line, xpos;
@@ -1812,7 +1819,7 @@ void CodeWindow::jumpToCodeFunc()
 {
 	QAction *act = (QAction*)sender();
 	QStringList ls = act->data().toString().split('|');
-	addFile(currentproject->FileDir() + '/' + ls[0], currentproject->FileDir());
+	AddFile(ls[0]);
 	if (currentedit->FileName != ls[0])
 		return;
 	int pos = currentedit->analysis->findLabel(currentedit->FileName, ls[1]);

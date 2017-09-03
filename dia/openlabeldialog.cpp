@@ -19,7 +19,7 @@ OpenLabelDialog::OpenLabelDialog(const QStringList &labels, QWidget *parent /*= 
 	ui->tableWidget->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 	ui->tableWidget->setItemDelegate(new QNoFocusItemDelegate());
 	connect(ui->okButton, &QPushButton::clicked, this, &OpenLabelDialog::OnOK);
-	connect(ui->cancelButton, &QPushButton::clicked, this, &OpenLabelDialog::close);
+	connect(ui->cancelButton, &QPushButton::clicked, this, &OpenLabelDialog::reject);
 	connect(ui->lineEdit, &QLineEdit::textChanged, this, &OpenLabelDialog::LineEditTextChanged);
 	ui->lineEdit->installEventFilter(this);
 	setLabels(labels);
@@ -33,9 +33,8 @@ OpenLabelDialog::~OpenLabelDialog()
 void OpenLabelDialog::setLabels(const QStringList &labels)
 {
 	this->labels = labels;
-	matches = QPinyin::ExtractPinyin(labels, map);
-	matches << labels;
-	matcher.reset(new QFuzzyMatcher(matches));
+	QPinyin::ExtractPinyinToMap(labels, map);
+	matcher.reset(new QFuzzyMatcher(map.keys()));
 	LineEditTextChanged(QString());
 }
 
@@ -77,16 +76,19 @@ void OpenLabelDialog::LineEditTextChanged(QString s)
 		}
 	}
 	ui->tableWidget->setCurrentCell(0, 0);
+	tableContents = qs;
 }
 
 void OpenLabelDialog::OnOK()
 {
-	auto item = ui->tableWidget->currentItem();
-	if (item)
+	int row = ui->tableWidget->currentRow();
+	if (row >= 0)
 	{
-		emit GotoLabel(item->text());
+		emit GotoLabel(tableContents[row]);
+		this->accept();
+		return;
 	}
-	this->close();
+	this->reject();
 }
 
 bool OpenLabelDialog::eventFilter(QObject *obj, QEvent *event)
@@ -107,7 +109,7 @@ bool OpenLabelDialog::eventFilter(QObject *obj, QEvent *event)
 			}
 			else if (keyEvent->key() == Qt::Key_Escape && event->type() == QEvent::KeyRelease)
 			{
-				close();
+				reject();
 				return true;
 			}
 		}

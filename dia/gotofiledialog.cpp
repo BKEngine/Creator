@@ -19,7 +19,7 @@ GotoFileDialog::GotoFileDialog(const QStringList &files, QWidget *parent /*= 0*/
 	ui->tableWidget->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 	ui->tableWidget->setItemDelegate(new QNoFocusItemDelegate());
 	connect(ui->okButton, &QPushButton::clicked, this, &GotoFileDialog::OnOK);
-	connect(ui->cancelButton, &QPushButton::clicked, this, &GotoFileDialog::close);
+	connect(ui->cancelButton, &QPushButton::clicked, this, &GotoFileDialog::reject);
 	connect(ui->lineEdit, &QLineEdit::textChanged, this, &GotoFileDialog::LineEditTextChanged);
 	ui->lineEdit->installEventFilter(this);
 	setFiles(files);
@@ -33,17 +33,22 @@ GotoFileDialog::~GotoFileDialog()
 void GotoFileDialog::setFiles(const QStringList &files)
 {
 	this->files = files;
-	matches = QPinyin::ExtractPinyin(files, map);
-	matcher.reset(new QFuzzyMatcher(matches));
+	QPinyin::ExtractPinyinToMap(files, map);
+	QStringList keys = map.keys();
+	for (auto &s : keys)
+	{
+		if (s.endsWith(".bkscr"))
+		{
+			auto newkey = s.right(s.size() - 6);
+			map.insert(newkey, map[s]);
+		}
+	}
+	matcher.reset(new QFuzzyMatcher(map.keys()));
 	LineEditTextChanged(QString());
 }
 
 void GotoFileDialog::LineEditTextChanged(QString s)
 {
-	if (s.startsWith("*"))
-	{
-		s = s.right(s.length() - 1);
-	}
 	QStringList qs;
 	if (s.isEmpty())
 	{
@@ -65,27 +70,33 @@ void GotoFileDialog::LineEditTextChanged(QString s)
 	ui->tableWidget->setRowCount(qs.length());
 	for (int i = 0; i < qs.length(); i++)
 	{
-		QString label = "*" + qs[i];
+		QString path = qs[i];
+		QString filename = QFileInfo(path).fileName();
 		if (i < rows)
 		{
-			ui->tableWidget->item(i, 0)->setText(label);
+			ui->tableWidget->item(i, 0)->setText(filename);
+			ui->tableWidget->item(i, 1)->setText(path);
 		}
 		else
 		{
-			ui->tableWidget->setItem(i, 0, new QTableWidgetItem(label));
+			ui->tableWidget->setItem(i, 0, new QTableWidgetItem(filename));
+			ui->tableWidget->setItem(i, 1, new QTableWidgetItem(path));
 		}
 	}
 	ui->tableWidget->setCurrentCell(0, 0);
+	tableContents = qs;
 }
 
 void GotoFileDialog::OnOK()
 {
-	auto item = ui->tableWidget->currentItem();
-	if (item)
+	int row = ui->tableWidget->currentRow();
+	if (row >= 0)
 	{
-		emit GotoFile(item->text());
+		emit GotoFile(tableContents[row]);
+		this->accept();
+		return;
 	}
-	this->close();
+	this->accept();
 }
 
 bool GotoFileDialog::eventFilter(QObject *obj, QEvent *event)
@@ -106,7 +117,7 @@ bool GotoFileDialog::eventFilter(QObject *obj, QEvent *event)
 			}
 			else if (keyEvent->key() == Qt::Key_Escape && event->type() == QEvent::KeyRelease)
 			{
-				close();
+				reject();
 				return true;
 			}
 		}

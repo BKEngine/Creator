@@ -36,9 +36,10 @@ private:
 
 	QStringList labels;
 	QHash<QString, QString> map;
-	QStringList matches;
 	std::unique_ptr<QFuzzyMatcher> matcher;
 	MatcherOptions options;
+
+	QStringList tableContents;
 };
 
 #endif // OPENLABELDIALOG_H

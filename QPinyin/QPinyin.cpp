@@ -1,20 +1,25 @@
 #include "QPinyin.h"
 #include "PinyinHelper.h"
 
-QStringList QPinyin::ExtractPinyin(const QStringList &qs, QHash<QString, QString> &map)
+void QPinyin::ExtractPinyinToMap(const QStringList &qs, QHash<QString, QString> &map)
 {
-	QStringList pinyins;
 	for (auto &&s : qs)
 	{
-		map[s] = s;
+		ExtractPinyinToMap(s, map);
+	}
+}
+
+void QPinyin::ExtractPinyinToMap(const QString &s, QHash<QString, QString> &map)
+{
+	if (!map.contains(s))
+	{
+		map.insert(s, s);
 		QStringList tmp = ConvertToPinyin(s);
-		pinyins << tmp;
 		for (auto &&ss : tmp)
 		{
-			map[ss] = s;
+			map.insert(ss, s);
 		}
 	}
-	return pinyins;
 }
 
 QStringList QPinyin::ConvertToPinyin(const QString &s)
