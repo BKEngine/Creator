@@ -4,6 +4,7 @@
 #include "../codewindow.h"
 #include "CmdListLoader.h"
 #include "loli/loli_island.h"
+#include <Qsci/qscicommandset.h>
 
 QImage BKE_AUTOIMAGE_KEY(":/auto/source/auto_key.png");
 QImage BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_funcotin.png");
@@ -79,6 +80,8 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	setLexer(deflex);
 	//Selfparser = defparser = new BkeParser;     //新的词法分析器
 	Selfparser = defparser = NULL;
+
+	standardCommands()->find(QsciCommand::LineCut)->setKey(0);
 
 	connect(this, SIGNAL(SCN_MODIFIED(int, int, const char *, int, int, int, int, int, int, int)),
 		SLOT(EditModified(int, int, const char *, int, int, int, int, int, int, int)));

@@ -133,6 +133,8 @@ public:
 	QAction *btncodeact;
 	QAction *btnselectall;
 	QAction *btnfly;
+	QAction *btngotolabellist;
+	QAction *btngotofile;
 	QToolBar *toolbar;
 	QComboBox *slablelist;
 	QStringList slablels;
@@ -188,12 +190,15 @@ public slots:
 	void QfileChange(const QString &path);
 	void GotoLine();
 	void GotoLabel(int i);
+	void GotoLabel(QString label);
 	void ActUndo();
 	void ActRedo();
 	void ActCurrentChange();
 	void ActCut();
 	void ActPaste();
 	void ActCopy();
+	void GotoLabelList();
+	void GotoFile();
 	void Rename(const QString &old, const QString &now);
 	void searchOneFile(const QString &file, const QString &searchstr, bool iscase, bool isregular, bool isword);
 	void searchAllFile(const QString &searchstr, bool iscase, bool isregular, bool isword);

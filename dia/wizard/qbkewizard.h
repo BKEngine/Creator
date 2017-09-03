@@ -39,7 +39,7 @@ private:
 
 private:
     Ui::QBkeWizard *ui;
-    QList<QBkeWizardPage> _pages;
+    QList<QBkeWizardPage *> _pages;
     QList<int> _subtitleSequence;
     int _currentPageId = -1;
 };

@@ -56,13 +56,13 @@ public:
     //从当前页取消时执行的函数
     virtual void onCancel();
     //从当前页返回上一页时执行的函数
-    virtual void onBackTo(int id){}
+    virtual void onBackTo(int id);
     //从下一页返回本页面时执行的函数
-    virtual void onBackFrom(int id){}
+    virtual void onBackFrom(int id);
     //从当前页进入下一页/结束时执行的函数
-    virtual void onNextToOrFinished(int id){}
+    virtual void onNextToOrFinished(int id);
     //从上一页进入本页时执行的函数
-    virtual void onNextFrom(int id){}
+    virtual void onNextFrom(int id);
 
     void setDelegate(QBkeWizardPageDelegate *delegate){_delegate = delegate;}
 

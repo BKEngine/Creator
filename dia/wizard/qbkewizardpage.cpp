@@ -1,6 +1,7 @@
 #include "qbkewizardpage.h"
 
-QBkeWizardPage::QBkeWizardPage(QWidget *parent) : QWidget(parent, Qt::Dialog & (~Qt::WindowMinMaxButtonsHint))
+QBkeWizardPage::QBkeWizardPage(QWidget *parent)
+    : QWidget(parent, (Qt::WindowFlags)(Qt::Dialog & (~Qt::WindowMinMaxButtonsHint)))
 {
 
 }
@@ -36,11 +37,11 @@ void QBkeWizardPage::onInitialize(bool isFirst)
     }
 }
 
-void QBkeWizardPage::onCancel(int id)
+void QBkeWizardPage::onCancel()
 {
     if(_delegate)
     {
-        _delegate->onCancel(id);
+        _delegate->onCancel();
     }
 }
 

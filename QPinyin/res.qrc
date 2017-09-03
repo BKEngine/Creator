@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/pinyin4cpp">
+        <file>pinyin.txt.compress</file>
+    </qresource>
+</RCC>

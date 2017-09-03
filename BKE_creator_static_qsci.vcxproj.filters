@@ -68,6 +68,12 @@
     <Filter Include="Scintilla">
       <UniqueIdentifier>{e575b85b-845a-4a94-a1d7-239711af231d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="QPinyin">
+      <UniqueIdentifier>{e60019cc-52e1-4f84-9f39-36adb84ed2fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="QFuzzyMatcher">
+      <UniqueIdentifier>{07e335b2-cb4f-400d-9080-38d551bc157d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp">
@@ -631,6 +637,54 @@
     <ClCompile Include="CmdListLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="QPinyin\ChineseToPinyinResource.cpp">
+      <Filter>QPinyin</Filter>
+    </ClCompile>
+    <ClCompile Include="QPinyin\HanyuPinyinOutputFormat.cpp">
+      <Filter>QPinyin</Filter>
+    </ClCompile>
+    <ClCompile Include="QPinyin\PinyinFormatter.cpp">
+      <Filter>QPinyin</Filter>
+    </ClCompile>
+    <ClCompile Include="QPinyin\PinyinHelper.cpp">
+      <Filter>QPinyin</Filter>
+    </ClCompile>
+    <ClCompile Include="QPinyin\ResourceHelper.cpp">
+      <Filter>QPinyin</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QFuzzyMatcher\score_match.cpp">
+      <Filter>QFuzzyMatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\openlabeldialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_openlabeldialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_openlabeldialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="QFuzzyMatcher\QFuzzyMatcher.cpp">
+      <Filter>QFuzzyMatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QPinyin\QPinyin.cpp">
+      <Filter>QPinyin</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\qnofocusitemdelegate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\gotofiledialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_gotofiledialog.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_gotofiledialog.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -1035,6 +1089,51 @@
     <ClInclude Include="CmdListLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="QPinyin\ChineseToPinyinResource.h">
+      <Filter>QPinyin</Filter>
+    </ClInclude>
+    <ClInclude Include="QPinyin\HanyuPinyinCaseType.h">
+      <Filter>QPinyin</Filter>
+    </ClInclude>
+    <ClInclude Include="QPinyin\HanyuPinyinOutputFormat.h">
+      <Filter>QPinyin</Filter>
+    </ClInclude>
+    <ClInclude Include="QPinyin\HanyuPinyinToneType.h">
+      <Filter>QPinyin</Filter>
+    </ClInclude>
+    <ClInclude Include="QPinyin\HanyuPinyinVCharType.h">
+      <Filter>QPinyin</Filter>
+    </ClInclude>
+    <ClInclude Include="QPinyin\pinyin4cpp_global.h">
+      <Filter>QPinyin</Filter>
+    </ClInclude>
+    <ClInclude Include="QPinyin\PinyinFormatter.h">
+      <Filter>QPinyin</Filter>
+    </ClInclude>
+    <ClInclude Include="QPinyin\PinyinHelper.h">
+      <Filter>QPinyin</Filter>
+    </ClInclude>
+    <ClInclude Include="QPinyin\ResourceHelper.h">
+      <Filter>QPinyin</Filter>
+    </ClInclude>
+    <ClInclude Include="QFuzzyMatcher\score_match.h">
+      <Filter>QFuzzyMatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_openlabeldialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QFuzzyMatcher\QFuzzyMatcher.h">
+      <Filter>QFuzzyMatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QPinyin\QPinyin.h">
+      <Filter>QPinyin</Filter>
+    </ClInclude>
+    <ClInclude Include="dia\qnofocusitemdelegate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_gotofiledialog.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\Setoptiondia.ui">
@@ -1092,6 +1191,21 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="dia\ParserEditorTreeModel.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="QPinyin\res.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\openlabeldialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\openlabeldialog.h">
+      <Filter>Source Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\gotofiledialog.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\gotofiledialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -1268,6 +1382,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="source\wainningsmall.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="QPinyin\pinyin.txt.compress">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

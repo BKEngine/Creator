@@ -127,7 +127,6 @@ SOURCES += ./main.cpp \
     dia/GameProperty.cpp \
     dia/LangOpt.cpp \
     dia/doubleinput.cpp \
-    bkeSci/autolex.cpp \
     BKEscintilla/Qt4Qt5/InputMethod.cpp \
     BKEscintilla/lexlib/CharacterCategory.cpp \
     BKEscintilla/src/CaseConvert.cpp \
@@ -139,7 +138,18 @@ SOURCES += ./main.cpp \
     dia/ParserEditor.cpp \
     dia/ParserEditorTreeItem.cpp \
     dia/ParserEditorTreeModel.cpp \
-    CmdListLoader.cpp
+    CmdListLoader.cpp \
+    dia/openlabeldialog.cpp \
+    QFuzzyMatcher/QFuzzyMatcher.cpp \
+    QFuzzyMatcher/score_match.cpp \
+    QPinyin/ChineseToPinyinResource.cpp \
+    QPinyin/HanyuPinyinOutputFormat.cpp \
+    QPinyin/PinyinFormatter.cpp \
+    QPinyin/PinyinHelper.cpp \
+    QPinyin/QPinyin.cpp \
+    QPinyin/ResourceHelper.cpp \
+    dia/qnofocusitemdelegate.cpp \
+    dia/gotofiledialog.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -252,7 +262,6 @@ HEADERS  += \
     BG_Analysis.h \
     BKS_info.h \
     ParseData.h \
-    bkeSci/autolex.h \
     BKEscintilla/lexlib/StringCopy.h \
     BKEscintilla/src/CaseConvert.h \
     BKEscintilla/src/CaseFolder.h \
@@ -266,10 +275,26 @@ HEADERS  += \
     EnumsComponent.h \
     ScriptEnums.h \
     BKECmdList.h \
-    CmdListLoader.h
+    CmdListLoader.h \
+    dia/openlabeldialog.h \
+    QFuzzyMatcher/QFuzzyMatcher.h \
+    QFuzzyMatcher/score_match.h \
+    QPinyin/ChineseToPinyinResource.h \
+    QPinyin/HanyuPinyinCaseType.h \
+    QPinyin/HanyuPinyinOutputFormat.h \
+    QPinyin/HanyuPinyinToneType.h \
+    QPinyin/HanyuPinyinVCharType.h \
+    QPinyin/pinyin4cpp_global.h \
+    QPinyin/PinyinFormatter.h \
+    QPinyin/PinyinHelper.h \
+    QPinyin/QPinyin.h \
+    QPinyin/ResourceHelper.h \
+    dia/qnofocusitemdelegate.h \
+    dia/gotofiledialog.h
 
 RESOURCES += \
-    source.qrc
+    source.qrc \
+    QPinyin/res.qrc
 
 INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKEscintilla/src ./BKEscintilla/Qt4Qt5 ./
 
@@ -285,7 +310,9 @@ FORMS += \
     dia/LangOpt.ui \
     dia/GameProperty.ui \
     dia/doubleinput.ui \
-    dia/ParserEditor.ui
+    dia/ParserEditor.ui \
+    dia/openlabeldialog.ui \
+    dia/gotofiledialog.ui
 
 mac{
     QT += macextras

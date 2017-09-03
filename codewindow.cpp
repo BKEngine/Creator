@@ -2,6 +2,7 @@
 #include "codewindow.h"
 #include "dia/lablesuredialog.h"
 #include "dia/WaitWindow.h"
+#include "dia/openlabeldialog.h"
 
 CodeWindow::CodeWindow(QWidget *parent)
 	:QMainWindow(parent)
@@ -134,6 +135,8 @@ void CodeWindow::CreateBtn()
 	pannote = new QAction("选中部分注释/反注释", this);
 	btnselectall = new QAction("全选", this);
 	btnfly = new QAction(QIcon(":/cedit/source/flay.png"), "转到行...", this);
+	btngotolabellist = new QAction("转到标签", this);
+	btngotofile = new QAction("转到文件", this);
 
 	jumpToDef = new QAction(this);
 	jumpToCode = new QAction(this);
@@ -142,20 +145,24 @@ void CodeWindow::CreateBtn()
 	connect(jumpToDef, SIGNAL(triggered()), this, SLOT(jumpToDefFunc()));
 	connect(jumpToCode, SIGNAL(triggered()), this, SLOT(jumpToCodeFunc()));
 	connect(gotoLabel, SIGNAL(triggered()), this, SLOT(jumpToLabelFunc()));
+	connect(btngotolabellist, SIGNAL(triggered()), this, SLOT(GotoLabelList()));
+	connect(btngotofile, SIGNAL(triggered()), this, SLOT(GotoFile()));
 
 
 	btnsaveact->setShortcut(Qt::CTRL + Qt::Key_S);
-	btncopyact->setShortcut(Qt::CTRL + Qt::Key_C);
-	btnpasteact->setShortcut(Qt::CTRL + Qt::Key_V);
-	btncutact->setShortcut(Qt::CTRL + Qt::Key_X);
-	btnundoact->setShortcut(Qt::CTRL + Qt::Key_Z);
-	btnredoact->setShortcut(Qt::CTRL + Qt::Key_Y);
+	//btncopyact->setShortcut(Qt::CTRL + Qt::Key_C);
+	//btnpasteact->setShortcut(Qt::CTRL + Qt::Key_V);
+	//btncutact->setShortcut(Qt::CTRL + Qt::Key_X);
+	//btnundoact->setShortcut(Qt::CTRL + Qt::Key_Z);
+	//btnredoact->setShortcut(Qt::CTRL + Qt::Key_Y);
 	btnfindact->setShortcut(Qt::CTRL + Qt::Key_F);
 	btnreplaceact->setShortcut(Qt::CTRL + Qt::Key_H);
 	btncompileact->setShortcut(Qt::CTRL + Qt::Key_B);
-	btnselectall->setShortcut(Qt::CTRL + Qt::Key_A);
+	//btnselectall->setShortcut(Qt::CTRL + Qt::Key_A);
 	btnfly->setShortcut(Qt::CTRL + Qt::Key_G);
 	btncompilerunact->setShortcut(Qt::CTRL + Qt::Key_R);
+	btngotolabellist->setShortcut(Qt::CTRL + Qt::Key_L);
+	btngotofile->setShortcut(Qt::CTRL + Qt::Key_P);
 
 	toolbar->addAction(btnlastact);
 	toolbar->addAction(btnnextact);
@@ -180,8 +187,8 @@ void CodeWindow::CreateBtn()
 	toolbar->addAction(btncutact);
 	toolbar->addAction(btnpasteact);
 	toolbar->addSeparator();
-	toolbar->addAction(btnbookmarkact);
-	toolbar->addAction(btnmarkact);
+	toolbar->addAction(btngotolabellist);
+	toolbar->addAction(btngotofile);
 	toolbar->addSeparator();
 
 
@@ -1709,14 +1716,36 @@ void CodeWindow::GotoLabel(int i)
 		return;
 	//currentedit->setFirstVisibleLine(slablelist->itemData(i).toInt());
 	QString l = slablelist->itemText(i);
-	l = l.right(l.length() - 1);
+	GotoLabel(l);
+	//currentedit->SendScintilla(QsciScintilla::SCI_GOTOLINE, line);
+}
+
+void CodeWindow::GotoLabel(QString l)
+{
+	if (l.startsWith("*"))
+	{
+		l = l.right(l.length() - 1);
+	}
 	int pos = currentedit->analysis->findLabel(currentedit->FileName, l);
 	int line, index;
 	currentedit->lineIndexFromPositionByte(pos, &line, &index);
 	if (line < 0)
 		return;
 	currentedit->setFirstVisibleLine(line);
-	//currentedit->SendScintilla(QsciScintilla::SCI_GOTOLINE, line);
+}
+
+void CodeWindow::GotoLabelList()
+{
+	QStringList qs;
+	currentedit->analysis->getLabels(currentedit->FileName, qs);
+	OpenLabelDialog *dialog = new OpenLabelDialog(qs, this);
+	connect(dialog, &OpenLabelDialog::GotoLabel, this, (void(QObject::*)(QString))&CodeWindow::GotoLabel);
+	dialog->show();
+}
+
+void CodeWindow::GotoFile()
+{
+
 }
 
 void CodeWindow::DrawLine(bool isClear)
