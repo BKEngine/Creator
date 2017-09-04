@@ -136,19 +136,24 @@ void ProjectWindow::ItemDoubleClick(QTreeWidgetItem * item, int column)
 {
 	if (!ReadItemInfo(item, info)) return;
 
-	QString name = workpro->ProjectDir() + info.FullName;
+	OpenProjectFile(info.FullName);
+}
 
-	if (info.FullName == "config.bkpsr")
+void ProjectWindow::OpenProjectFile(QString file)
+{
+	QString name = workpro->ProjectDir() + file;
+
+	if (file == "config.bkpsr")
 	{
 		ConfigProject(workpro->config);
 		return;
 	}
 
-	if (info.FullName.endsWith(".bkscr"))
+	if (file.endsWith(".bkscr"))
 	{
 		emit OpenBkscrFile(name);
 	}
-	else if (info.FullName.endsWith(".bkpsr"))
+	else if (file.endsWith(".bkpsr"))
 	{
 		ParserEditor *edit = new ParserEditor(name);
 		edit->load();
@@ -159,14 +164,9 @@ void ProjectWindow::ItemDoubleClick(QTreeWidgetItem * item, int column)
 			edit->setParent(NULL);
 			delete edit;
 		}
-		else 
+		else
 			edit->show();
 	}
-}
-
-void ProjectWindow::OpenProjectFile(QString)
-{
-
 }
 
 //右键菜单

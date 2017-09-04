@@ -1740,6 +1740,10 @@ void CodeWindow::GotoLabel(QString l)
 
 void CodeWindow::GotoLabelList()
 {
+	if (currentedit == nullptr || currentedit->analysis == nullptr)
+	{
+		return;
+	}
 	QStringList qs;
 	currentedit->analysis->getLabels(currentedit->FileName, qs);
 	OpenLabelDialog *dialog = new OpenLabelDialog(qs, this);
@@ -1749,6 +1753,10 @@ void CodeWindow::GotoLabelList()
 
 void CodeWindow::GotoFile()
 {
+	if (workpro == nullptr)
+	{
+		return;
+	}
 	QStringList qs = workpro->AllScriptFiles();
 	GotoFileDialog *dialog = new GotoFileDialog(qs, this);
 	connect(dialog, &GotoFileDialog::GotoFile, projectedit, &ProjectWindow::OpenProjectFile);
