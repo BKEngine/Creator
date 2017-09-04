@@ -141,7 +141,7 @@ public:
 	bool ignoreActive;
 
 signals:
-	void CurrentFileChange(const QString &file);
+    void CurrentFileChange(QString file);
 	void CurrentFileChange(const QString &name, const QString &prodir);
 	void FileAddProject(const QString &file);
 

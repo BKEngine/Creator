@@ -272,8 +272,6 @@ HEADERS  += \
     dia/ParserEditor.h \
     dia/ParserEditorTreeItem.h \
     dia/ParserEditorTreeModel.h \
-    EnumsComponent.h \
-    ScriptEnums.h \
     BKECmdList.h \
     CmdListLoader.h \
     dia/openlabeldialog.h \
@@ -315,6 +313,7 @@ FORMS += \
     dia/gotofiledialog.ui
 
 mac{
+    QMAKE_INFO_PLIST = info-mac.plist
     QT += macextras
     LIBS += -L$$PWD/quazip -lquazip
     CONFIG(release, debug|release){

@@ -17,21 +17,21 @@ const float ADDITIONAL_DISTANCE_PENALTY = 0.05f;
 const float MIN_DISTANCE_PENALTY = 0.2f + 1e-9f;
 
 // Bail if the state space exceeds this limit.
-const size_t MAX_MEMO_SIZE = 10000;
+const int MAX_MEMO_SIZE = 10000;
 
 // Convenience structure for passing around during recursion.
 struct MatchInfo {
 	QString haystack;
 	QString haystack_case;
-	size_t haystack_len;
+    int haystack_len;
 	QString needle;
 	QString needle_case;
-	size_t needle_len;
+    int needle_len;
 	int* last_match;
 	float *memo;
-	size_t *best_match;
+    int *best_match;
 	bool smart_case;
-	size_t max_gap;
+    int max_gap;
 };
 
 /**
@@ -56,8 +56,8 @@ struct MatchInfo {
 * be relatively sparse in most practical use cases.
 */
 float recursive_match(const MatchInfo &m,
-	const size_t haystack_idx,
-	const size_t needle_idx) {
+    const int haystack_idx,
+    const int needle_idx) {
 	if (needle_idx == m.needle_len) {
 		return 1;
 	}
@@ -68,19 +68,19 @@ float recursive_match(const MatchInfo &m,
 	}
 
 	float score = 0;
-	size_t best_match = 0;
+    int best_match = 0;
 	QChar c = m.needle_case[needle_idx];
 
-	size_t lim = m.last_match[needle_idx];
+    int lim = m.last_match[needle_idx];
 	if (needle_idx > 0 && m.max_gap && haystack_idx + m.max_gap < lim) {
 		lim = haystack_idx + m.max_gap;
 	}
 
 	// This is only used when needle_idx == haystack_idx == 0.
 	// It won't be accurate for any other run.
-	size_t last_slash = 0;
+    int last_slash = 0;
 	float dist_penalty = BASE_DISTANCE_PENALTY;
-	for (size_t j = haystack_idx; j <= lim; j++) {
+    for (int j = haystack_idx; j <= lim; j++) {
 		QChar d = m.haystack_case[j];
 		if (needle_idx == 0 && (d == '/' || d == '\\')) {
 			last_slash = j;
@@ -182,13 +182,13 @@ float score_match(const QString &haystack,
 	m.haystack = haystack;
 	m.needle = needle;
 
-	size_t memo_size = m.haystack_len * m.needle_len;
+    int memo_size = m.haystack_len * m.needle_len;
 	if (memo_size >= MAX_MEMO_SIZE) {
 		// Just return the initial match.
 		float penalty = 1.0;
 		if (match_indexes != nullptr) {
 			match_indexes->resize(m.needle_len);
-			for (size_t i = 0; i < m.needle_len; i++) {
+            for (int i = 0; i < m.needle_len; i++) {
 				match_indexes->operator[](i) = last_match[i];
 				if (i && last_match[i] != last_match[i - 1] + 1) {
 					penalty *= BASE_DISTANCE_PENALTY;
@@ -199,7 +199,7 @@ float score_match(const QString &haystack,
 	}
 
 	if (match_indexes != nullptr) {
-		m.best_match = new size_t[memo_size];
+        m.best_match = new int[memo_size];
 	}
 	else {
 		m.best_match = nullptr;
@@ -222,8 +222,8 @@ float score_match(const QString &haystack,
 
 	if (match_indexes != nullptr) {
 		match_indexes->resize(m.needle_len);
-		size_t curr_start = 0;
-		for (size_t i = 0; i < m.needle_len; i++) {
+        int curr_start = 0;
+        for (int i = 0; i < m.needle_len; i++) {
 			match_indexes->operator[](i) = m.best_match[i * m.haystack_len + curr_start];
 			curr_start = match_indexes->at(i) + 1;
 		}

@@ -11,8 +11,8 @@ GotoFileDialog::GotoFileDialog(const QStringList &files, QWidget *parent /*= 0*/
 	ui(new Ui::GotoFileDialog)
 {
 	ui->setupUi(this);
-	ui->tableWidget->setColumnCount(2); //设置列数
-	ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "文件" << "路径");
+	ui->tableWidget->setColumnCount(2); //璁剧疆鍒楁暟
+	ui->tableWidget->setHorizontalHeaderLabels(QStringList() << "鏂囦欢" << "璺緞");
 	ui->tableWidget->setVerticalHeaderLabels(QStringList());
 	ui->tableWidget->horizontalHeader()->setDefaultSectionSize(150);
 	ui->tableWidget->horizontalHeader()->setSectionsClickable(false);

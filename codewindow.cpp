@@ -245,9 +245,9 @@ void CodeWindow::OtherWinProject(ProjectWindow *p)
 	connect(p, &ProjectWindow::Compile, this, (void (QObject::*)())&CodeWindow::CompileAll);
 	//当前工程被改变
 	connect(p, &ProjectWindow::CurrentProChange, this, &CodeWindow::ChangeProject);
-	//改变当前文件
-	connect(this, (void(QObject::*)(const QString&))&CodeWindow::CurrentFileChange, p, &ProjectWindow::SetCurrentItem);
-	//打开工程时读取书签以及标记
+    //改变当前文件
+    connect(this, SIGNAL(CurrentFileChange(QString)), p, SLOT(SetCurrentItem(QString)));
+    //打开工程时读取书签以及标记
 	connect(p, &ProjectWindow::TextToMarks, this, &CodeWindow::TextToMarks);
 	//新建空白文档
 	//connect(p->btnnewfileact,SIGNAL(triggered()),this,SLOT(NewEmptyFile())) ;
