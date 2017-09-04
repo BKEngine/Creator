@@ -102,7 +102,6 @@ SOURCES += ./main.cpp \
     BKEscintilla/Qt4Qt5/SciClasses.cpp \
     BKEscintilla/Qt4Qt5/ScintillaQt.cpp \
     BKEscintilla/lexlib/CharacterSet.cpp \
-    singleapplication.cpp \
     dia/cconfigdia.cpp \
     dia/ctextedit.cpp \
     bkeprojectconfig.cpp \
@@ -149,7 +148,8 @@ SOURCES += ./main.cpp \
     QPinyin/QPinyin.cpp \
     QPinyin/ResourceHelper.cpp \
     dia/qnofocusitemdelegate.cpp \
-    dia/gotofiledialog.cpp
+    dia/gotofiledialog.cpp \
+    qmacopenfileapplication.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -235,7 +235,6 @@ HEADERS  += \
     BKEscintilla/Qt4Qt5/Qsci/qsciscintillabase.h \
     BKEscintilla/Qt4Qt5/Qsci/qscistyle.h \
     BKEscintilla/Qt4Qt5/Qsci/qscistyledtext.h \
-    singleapplication.h \
     dia/cconfigdia.h \
     dia/ctextedit.h \
     bkeprojectconfig.h \
@@ -288,7 +287,8 @@ HEADERS  += \
     QPinyin/QPinyin.h \
     QPinyin/ResourceHelper.h \
     dia/qnofocusitemdelegate.h \
-    dia/gotofiledialog.h
+    dia/gotofiledialog.h \
+    qmacopenfileapplication.h
 
 RESOURCES += \
     source.qrc \

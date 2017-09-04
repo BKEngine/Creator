@@ -4,10 +4,10 @@
 #include <QMainWindow>
 #include <QLibrary>
 #include "mainwindow.h"
-#include "singleapplication.h"
 #include <stdint.h>
 #include "quazip/JlCompress.h"
 #include "codewindow.h"
+#include "qmacopenfileapplication.h"
 
 QString title = "BKE Creator - ";
 uint32_t titlehash = 0;
@@ -155,46 +155,50 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-   QApplication a(argc, argv);
+#ifdef Q_OS_MAC
+    QMacOpenFileApplication a(argc, argv);
+#else
+    QApplication a(argc, argv);
+#endif
 
 #ifdef Q_OS_MAC
-   BKE_CURRENT_DIR = QDir::homePath() + "/Documents/BKE_Creator";
-   QDir dir(BKE_CURRENT_DIR);
-   do{
-	   QDir d(qApp->applicationDirPath());
-	   d.cdUp();
-	   d.cd("Resources");
+    BKE_CURRENT_DIR = QDir::homePath() + "/Documents/BKE_Creator";
+    QDir dir(BKE_CURRENT_DIR);
+    do{
+       QDir d(qApp->applicationDirPath());
+       d.cdUp();
+       d.cd("Resources");
 
-	   QString dataPath = d.filePath("data.compress");
-	   QString macvsPath = dir.filePath("macvs.txt");
-	   if(dir.exists())
-	   {
-		   QFileInfo fi(dataPath);
-		   QFileInfo vs(macvsPath);
-		   if(vs.exists())
-		   {
-			   QString s;
-			   if(LOLI::AutoRead(s, macvsPath))
-			   {
+       QString dataPath = d.filePath("data.compress");
+       QString macvsPath = dir.filePath("macvs.txt");
+       if(dir.exists())
+       {
+           QFileInfo fi(dataPath);
+           QFileInfo vs(macvsPath);
+           if(vs.exists())
+           {
+               QString s;
+               if(LOLI::AutoRead(s, macvsPath))
+               {
                    if(!fi.exists() || s == QString::number(fi.size()))
-				   {
-					   break;
-				   }
-			   }
-		   }
-	   }
+                   {
+                       break;
+                   }
+               }
+           }
+       }
 
-	   if(JlCompress::extractDir(dataPath, dir.absolutePath()).count()==0)
-	   {
-		   QMessageBox::information(0, "Error", "Cannot uncompress the resources. :( \nPlease unzip \"[.app path]/Resources/data.compress\" to \"~/Documents/BKE_Creator\" by yourself, and write the decimal size of \"data.compress\" into \"macvs.txt\", then restart the application.");
-		   exit(0);
-	   }
-	   LOLI::AutoWrite(macvsPath, QString::number(QFileInfo(dataPath).size()));
-   }while(0);
+       if(JlCompress::extractDir(dataPath, dir.absolutePath()).count()==0)
+       {
+           QMessageBox::information(0, "Error", "Cannot uncompress the resources. :( \nPlease unzip \"[.app path]/Resources/data.compress\" to \"~/Documents/BKE_Creator\" by yourself, and write the decimal size of \"data.compress\" into \"macvs.txt\", then restart the application.");
+           exit(0);
+       }
+       LOLI::AutoWrite(macvsPath, QString::number(QFileInfo(dataPath).size()));
+    }while(0);
 #endif
 
 #ifdef Q_OS_LINUX
-   QApplication::setWindowIcon(QIcon("icon.png"));
+    QApplication::setWindowIcon(QIcon("icon.png"));
 #endif
 	//SingleApplication a(argc, argv);
 
