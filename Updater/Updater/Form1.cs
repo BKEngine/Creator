@@ -10,6 +10,8 @@ using System.IO.Compression;
 using System.Threading;
 using System.Text;
 using System.Diagnostics;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Updater
 {
@@ -23,6 +25,13 @@ namespace Updater
 #if DEBUG
             this.ForceUseSelf = true;
 #endif
+            ServicePointManager.ServerCertificateValidationCallback += ValidateRemoteCertificate;
+            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3;
+        }
+
+        private bool ValidateRemoteCertificate(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors error)
+        {
+            return true;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -41,7 +50,7 @@ namespace Updater
 
         public bool ForceUseSelf { get; set; }
 
-        private static string HTTP_ADDRESS = "http://creator.up.bakery.moe/windows/";
+        private static string HTTP_ADDRESS = "https://creator.up.bakery.moe/windows/";
         private static string INFO_FILE = "version";
         private WebClient _client = new MyWebClient();
         private string _version = "";
