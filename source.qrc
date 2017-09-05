@@ -78,10 +78,8 @@
     </qresource>
     <qresource prefix="/auto">
         <file>source/auto_key.png</file>
-        <file>source/auto_nomal.png</file>
-        <file>source/auto_diction.png</file>
-        <file>source/auto_funcotin.png</file>
-        <file>source/auto_math.png</file>
+        <file>source/auto_normal.png</file>
+        <file>source/auto_function.png</file>
     </qresource>
     <qresource prefix="/newversioninfo">
         <file>source/728.GIF</file>

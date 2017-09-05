@@ -4,7 +4,6 @@
 #include <QSettings>
 #include <QMap>
 #include "weh.h"
-#include "paper/creator_parser.h"
 #include "bkeSci/bkemarks.h"
 #include "bkeprojectconfig.h"
 #include "BG_Analysis.h"
@@ -19,7 +18,6 @@ public:
 	QTreeWidgetItem *Root ;  //所属目录树，工程下的导入、脚本、资源
 	QTreeWidgetItem *_this;
 	qint64  IconKey ;   //图标hash码，用于标识文件类型
-	QString ProName ;  //工程名称
 	QString Dirs ;  //相对路径
 	QString Name ;  //名称
 	QString RootName ;
@@ -53,17 +51,11 @@ public:
 
 	QString getDir() const
 	{
-		if (Layer <= 1)
-			return QString();
-		return FullName;
+		return Dirs;
 	}
 
 	QString getFullName() const
 	{
-		if (FullName.startsWith("/") || FullName.startsWith("\\"))
-		{
-			return FullName.right(FullName.length() - 1);  //开头不带/
-		}
 		return FullName;
 	}
 
@@ -95,9 +87,9 @@ public:
 	~BkeProject() ;
 	QString ProjectFile() const;
 	QString ProjectLangFile() const;
-	QString FileDir() const;
+	QString ProjectDir() const;
 	QString ProjectName() const ;
-	QString absName(const QString &name){ return FileDir()+"/"+name ; }
+	QString absName(const QString &name){ return ProjectDir()+name ; }
 	QString AllNameToName(const QString &allname) ;
 	bool NewProject(const QString &dir,const QString &name) ;
 	bool OpenProject(const QString &name) ;
@@ -143,7 +135,6 @@ public:
 	QTreeWidgetItem *ImageFile;
 	QTreeWidgetItem *VoiceFile;
 	QTreeWidgetItem *Root;
-	BkeParser *lex;
 
 private:
 	void SetupConfig();

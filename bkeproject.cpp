@@ -3,6 +3,16 @@
 //#include "dia/newversiondatawizard.h"
 //#include "dia/versioninfo.h"
 
+QString NormalizeDirPath(QString path) 
+{
+	path.replace('\\', '/');
+	if (!path.endsWith('/'))
+	{
+		path.push_back('/');
+	}
+	return path;
+}
+
 //读取一个item信息s
 void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 {
@@ -15,28 +25,24 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 		root = root->parent();
 		list.prepend(root->text(0)); //父节点总是在前面
 	}
-	info.Dirs = '/';
+	info.Dirs.clear();
 	for (int i = 2; i < list.size(); i++){
 		info.Dirs.append(list.at(i));
-		if (i != list.size() - 1) info.Dirs.append("/");
+		info.Dirs.append('/');
 	}
 	info.Layer = list.size();
 	info.Root = dest;
 	if (list.size() == 0){  //工程文件本身
-		info.ProName = info.Name;
 		info.RootName = "";
 	}
 	else if (list.size() == 1){  //导入，脚本，资源
-		info.ProName = list.at(0);
 		info.RootName = info.Name;
 	}
 	else{
-		info.ProName = list.at(0);
 		info.RootName = list.at(1);
 	}
 
-	if (info.Dirs == "/") info.FullName = '/' + info.Name;
-	else info.FullName = info.Dirs + "/" + info.Name;
+	info.FullName = info.Dirs + info.Name;
 }
 
 //新建一个工程
@@ -46,8 +52,6 @@ BkeProject::BkeProject(QObject *parent)
 	isnull = true;
 	currentptr = 0;
 	analysis = 0;
-	//lex = new BkeParser(this);
-	lex = NULL;
 
 	fileico = new QIcon(":/project/source/file.png");
 	dirsico = new QIcon(":/project/source/doc.png");
@@ -106,7 +110,7 @@ void BkeProject::BuildItem(const QString &name)
 
 bool BkeProject::NewProject(const QString &dir, const QString &name)
 {
-	pdir = dir;
+	pdir = NormalizeDirPath(dir);
 	pname = name;
 
 	//初始化工程
@@ -120,7 +124,7 @@ bool BkeProject::NewProject(const QString &dir, const QString &name)
 	}*/
 
 	delete analysis;
-	analysis = new BG_Analysis(FileDir() + '/');
+	analysis = new BG_Analysis(ProjectDir());
 	return WriteBkpFile();
 }
 
@@ -179,13 +183,13 @@ bool BkeProject::OpenProject(const QString &name)
 	int version = int(bkpAdmin->value("version").toString().toDouble() * 10 + 0.5);
 
 	QFileInfo fi(name);
-	pdir = fi.path();
+	pdir = NormalizeDirPath(fi.path());
 	pfile = fi.fileName();
 	pname = bkpAdmin->value("name").toString();
 	//if( bkpAdmin->value("version").toString().isEmpty() ) pdir = pdir + "/" + pname ;
 
 	delete config;
-	config = new BkeProjectConfig(pdir, pdir + "/config.bkpsr");
+	config = new BkeProjectConfig(pdir, pdir + "config.bkpsr");
 	config->readFile();
 	SetupConfig();
 
@@ -205,7 +209,7 @@ bool BkeProject::OpenProject(const QString &name)
 	delete analysis;
 	auto ls = AllScriptFiles();
 
-	analysis = new BG_Analysis(FileDir() + '/');
+	analysis = new BG_Analysis(ProjectDir());
 	analysis->addFiles(ls);
 	//检查路径是否已经改变
 	/*
@@ -239,7 +243,7 @@ void BkeProject::SetupConfig()
 //寻找输入输出文件
 void BkeProject::MakeImport()
 {
-	QString dirs = FileDir();
+	QString dirs = ProjectDir();
 
 	QStringList OutFilelist;
 	OutFilelist << "config.bkpsr" << "main.bkscr" << "macro.bkscr";
@@ -339,7 +343,7 @@ QTreeWidgetItem *BkeProject::FindItem(QTreeWidgetItem *dest, const QString &dir,
 	return root;
 }
 
-QString BkeProject::FileDir() const
+QString BkeProject::ProjectDir() const
 {
 	return pdir;
 }
@@ -351,12 +355,12 @@ QString BkeProject::ProjectName() const
 
 QString BkeProject::ProjectFile() const
 {
-	return pdir + "/" + pfile;
+	return pdir + pfile;
 }
 
 QString BkeProject::ProjectLangFile() const
 {
-	return pdir + "/" + pfile + ".user";
+	return pdir + pfile + ".user";
 }
 
 //寻找指定的文件
@@ -436,7 +440,7 @@ bool BkeProject::WriteBkpFile()
 
 	QJsonDocument llm;
 	llm.setObject(*bkpAdmin);
-	return LOLI::AutoWrite(FileDir() + "/" + BKE_PROJECT_NAME, llm.toJson());
+	return LOLI::AutoWrite(ProjectDir() + BKE_PROJECT_NAME, llm.toJson());
 }
 
 QJsonObject BkeProject::TreeToJson(QTreeWidgetItem *tree)
@@ -694,7 +698,7 @@ bool BkeProject::WriteMarkFile(BkeMarkSupport *m)
 		akb.append(MarksToString(mks));
 	}
 
-	return LOLI::AutoWrite(FileDir() + "/BkeProject.bkpmk", akb);
+	return LOLI::AutoWrite(ProjectDir() + "BkeProject.bkpmk", akb);
 }
 
 QString BkeProject::MarksToString(BkeMarkList *mk)
@@ -735,7 +739,7 @@ void BkeProject::AddDir(const QString &dir, const ItemInfo &f)
 	auto ff = f.getLayer1ItemInfo();
 	FindItem(f.Root, dir);
 	
-	QStringList ls = SearchDir(FileDir()+f.getDir(), dir, (ff.Name == "脚本" || ff.Name == "宏") ? scriptSuffixes : (audioSuffixes + imageSuffixes));
+	QStringList ls = SearchDir(ProjectDir()+f.getDir(), dir, (ff.Name == "脚本" || ff.Name == "宏") ? scriptSuffixes : (audioSuffixes + imageSuffixes));
 	AddFiles(ls, f);
 }
 
@@ -762,8 +766,8 @@ QString BkeProject::AllNameToName(const QString &allname)
 {
 
 	if (allname.startsWith("/") || (allname.length() > 1 && allname[1] == QChar(':'))){
-		if (allname.length() == FileDir().length()) return "";
-		else return  allname.right(allname.length() - FileDir().length() - 1);
+		if (allname.length() == ProjectDir().length()) return "";
+		else return  allname.right(allname.length() - ProjectDir().length());
 	}
 	else return allname;
 }

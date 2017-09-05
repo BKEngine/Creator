@@ -6,16 +6,9 @@
 #include <QMessageBox>
 #include <QToolTip>
 #include "bkeSci/qscilexerbkescript.h"
-#include "paper/creator_parser.h"
 #include "bkeSci/BkeIndicatorBase.h"
 #include <weh.h>
 #include "../BG_Analysis.h"
-
-extern QImage BKE_AUTOIMAGE_KEY ;
-extern QImage BKE_AUTOIMAGE_FUNCTION ;
-extern QImage BKE_AUTOIMAGE_DICTIONARIES ;
-extern QImage BKE_AUTOIMAGE_NORMAL ;
-extern QImage BKE_AUTOIMAGE_MATH ;
 
 class BkeDocBase;
 class BkeProject;
@@ -77,7 +70,6 @@ public:
 	int GetCurrentPosition();
 	void SetCurrentPosition(int pos);
 	void setLexer(QsciLexer *lex = 0);
-	void setParser( BkeParser *p){ defparser = p ; }
 	void setSelection(BkeIndicatorBase &p);
 
 	int findcount ;
@@ -152,11 +144,6 @@ private:
 	QByteArray fstrdata ;
 	QString Separate ;
 	QString LaterInsertWord ;   //Ui更新后插入
-
-
-
-	BkeParser *defparser ;
-	BkeParser *Selfparser ;
 
 	QFile fileIO ;
 	QString errorinfo ;

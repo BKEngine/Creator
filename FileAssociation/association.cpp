@@ -1,17 +1,18 @@
 #include <Windows.h>
 #include <tchar.h>
+#include <shlobj.h>
 #include "resource.h"
 
 HWND    hWinMain = NULL;
 
 TCHAR    szKeyEnter[] = TEXT("bkpfile");
 TCHAR    szKeyExt1[] = TEXT(".bkp");
-TCHAR    szKeyExt2[] = TEXT("bkpfile//shell//open//command");
+TCHAR    szKeyExt2[] = TEXT("bkpfile\\shell\\open\\command");
 TCHAR    szParam[] = TEXT(" \"%1\"");
 
 
-TCHAR    szDelSub1[] = TEXT("bkpfile//shell//open");
-TCHAR    szDelSub2[] = TEXT("bkpfile//shell");
+TCHAR    szDelSub1[] = TEXT("bkpfile\\shell\\open");
+TCHAR    szDelSub2[] = TEXT("bkpfile\\shell");
 
 
 void SetAssociate();
@@ -20,18 +21,18 @@ BOOL IsAssociate();
 
 int _tmain(int argc, TCHAR *argv[])
 {
-	if (argc < 1)
+	if (argc < 2)
 		return -1;
-	if (_tcscmp(argv[0], _T("-is")) == 0)
+	if (_tcscmp(argv[1], _T("-is")) == 0)
 	{
 		_tprintf(IsAssociate() ? _T("true") : _T("false"));
 		return 0;
 	}
-	else if (_tcscmp(argv[0], _T("-set")) == 0)
+	else if (_tcscmp(argv[1], _T("-set")) == 0)
 	{
 		SetAssociate();
 	}
-	else if (_tcscmp(argv[0], _T("-del")) == 0)
+	else if (_tcscmp(argv[1], _T("-del")) == 0)
 	{
 		DelAssociate();
 	}
@@ -58,6 +59,7 @@ void SetAssociate()
 		RegSetValueEx(hKey, NULL, 0, REG_SZ, (const BYTE *)szFileName, (_tcslen(szFileName) + 1) * sizeof(TCHAR));
 		RegCloseKey(hKey);
 	}
+	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_FLUSH, NULL, NULL);
 }
 
 void DelAssociate()
@@ -82,16 +84,22 @@ void DelAssociate()
 		RegCloseKey(hKey);
 	}
 	RegDeleteKey(HKEY_CLASSES_ROOT, szKeyEnter); // É¾³ýtestfileÕâÒ»²ã
+	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_FLUSH, NULL, NULL);
 }
 
 BOOL IsAssociate()
 {
 	HKEY    hKey;
 
-	if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_CLASSES_ROOT, szKeyExt1, 0, KEY_WRITE, &hKey))
+	if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_CLASSES_ROOT, szKeyExt1, 0, KEY_QUERY_VALUE, &hKey))
 	{
+		DWORD len;
+		if (ERROR_SUCCESS == RegQueryValueEx(hKey, NULL, 0, NULL, NULL, &len))
+		{
+			RegCloseKey(hKey);
+			return len != 0 ? TRUE : FALSE;
+		}
 		RegCloseKey(hKey);
-		return TRUE;
 	}
 	return FALSE;
 }

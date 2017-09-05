@@ -133,13 +133,15 @@ public:
 	QAction *btncodeact;
 	QAction *btnselectall;
 	QAction *btnfly;
+	QAction *btngotolabellist;
+	QAction *btngotofile;
 	QToolBar *toolbar;
 	QComboBox *slablelist;
 	QStringList slablels;
 	bool ignoreActive;
 
 signals:
-	void CurrentFileChange(const QString &file);
+    void CurrentFileChange(QString file);
 	void CurrentFileChange(const QString &name, const QString &prodir);
 	void FileAddProject(const QString &file);
 
@@ -152,7 +154,7 @@ public slots:
 	bool CloseAll();
 	void ChangeCurrentEdit(int pos);
 	void SetCurrentEdit(int pos);
-	void addFile(const QString &file, const QString &prodir);
+	void AddFile(const QString &file);
 	void TextInsert(const QString &text);
 	void DocChange(bool m);
 	void NextNavigation();
@@ -165,8 +167,10 @@ public slots:
 	void ImportBeChange(const QString &text, int type);
 	void FileWillBeDel(const QString &file);
 	void Compile();
-	void CompileAll(bool release = false);
-	void CompileLang(bool release = false);
+	void CompileAll(bool release);
+	void CompileAll();
+	void CompileLang(bool release);
+	void CompileLang();
 	void CompileFinish();
 	void CompileError(QString s);
 	void CompileAndRun(const QStringList &extraArgs = QStringList());
@@ -188,12 +192,15 @@ public slots:
 	void QfileChange(const QString &path);
 	void GotoLine();
 	void GotoLabel(int i);
+	void GotoLabel(QString label);
 	void ActUndo();
 	void ActRedo();
 	void ActCurrentChange();
 	void ActCut();
 	void ActPaste();
 	void ActCopy();
+	void GotoLabelList();
+	void GotoFile();
 	void Rename(const QString &old, const QString &now);
 	void searchOneFile(const QString &file, const QString &searchstr, bool iscase, bool isregular, bool isword);
 	void searchAllFile(const QString &searchstr, bool iscase, bool isregular, bool isword);
@@ -223,7 +230,7 @@ private:
 	int navigationLocker = 0;
 	OtherWindow *othwin;
 	ProjectWindow *prowin;
-	BkeProject *currentproject;
+	BkeProject *workpro;
 	QStackedWidget *stackwidget;
 
 	QStringList ItemTextList;
@@ -284,7 +291,6 @@ private:
 	void CheckMarks(BkeScintilla *edit, BkeMarkList *list);
 	void AddMarksToEdit();
 	void FileIOclose(const QStringList &list);
-	void BackstageSearchLable(BkeScintilla *edit);
 	void DrawLine(bool isClear);
 	bool WriteOpenFile(const QString &dir);
 };

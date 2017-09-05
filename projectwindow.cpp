@@ -67,7 +67,7 @@ void ProjectWindow::NewProject()
 	//projectlist << pro ;
 	addTopLevelItem(workpro->Root);
 	BkeChangeCurrentProject();
-	BkeCreator::AddRecentProject(workpro->FileDir() + "/" + BKE_PROJECT_NAME);
+	BkeCreator::AddRecentProject(workpro->ProjectDir() + BKE_PROJECT_NAME);
 }
 
 void ProjectWindow::OpenProject()
@@ -110,7 +110,7 @@ void ProjectWindow::OpenProject(const QString &file)
 	//    QString text ;
 	//    LOLI::AutoRead(text,pro->FileDir()+"/BkeProject.bmk") ;
 	//    emit TextToMarks(text,pro->FileDir(),0);
-	BkeCreator::AddRecentProject(workpro->FileDir() + "/" + BKE_PROJECT_NAME);
+	BkeCreator::AddRecentProject(workpro->ProjectDir() + BKE_PROJECT_NAME);
 	//默认展开节点
 	workpro->Root->setExpanded(true);
 	workpro->Script->setExpanded(true);
@@ -136,33 +136,37 @@ void ProjectWindow::ItemDoubleClick(QTreeWidgetItem * item, int column)
 {
 	if (!ReadItemInfo(item, info)) return;
 
-	BkeProject *p = FindPro(info.ProName);
-	QString name = p->FileDir() + info.FullName;
+	OpenProjectFile(info.FullName);
+}
 
-	if (info.FullName == "/config.bkpsr"){
-		ConfigProject(p->config);
+void ProjectWindow::OpenProjectFile(QString file)
+{
+	QString name = workpro->ProjectDir() + file;
+
+	if (file == "config.bkpsr")
+	{
+		ConfigProject(workpro->config);
 		return;
 	}
 
-	if (name.endsWith(".bkscr")){
-		emit OpenThisFile(name, p->FileDir());
+	if (file.endsWith(".bkscr"))
+	{
+		emit OpenBkscrFile(name);
 	}
-
-	if (name.endsWith(".bkpsr")) {
+	else if (file.endsWith(".bkpsr"))
+	{
 		ParserEditor *edit = new ParserEditor(name);
 		edit->load();
 		QString error = edit->error();
 		if (!error.isEmpty())
 		{
-			emit OpenThisFile(name, p->FileDir());
+			emit OpenBkscrFile(name);
 			edit->setParent(NULL);
 			delete edit;
 		}
-		else 
+		else
 			edit->show();
 	}
-
-
 }
 
 //右键菜单
@@ -264,7 +268,7 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
 	}
 
 	BkeProject *p = workpro;
-	QFileInfo sk(p->FileDir() + info.getDir() + '/' + name);
+	QFileInfo sk(workpro->ProjectDir() + f.getDir() + name);
 	if (sk.exists()){
 		int sk = QMessageBox::information(this, "", "文件已经存在，是否直接添加文件", QMessageBox::Yes | QMessageBox::No);
 		if (sk == QMessageBox::No)
@@ -275,24 +279,9 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
 		LOLI_MAKE_NULL_FILE(sk.filePath(), (ismacro ? "macro.bkscr" : ""));
 	}
 
-	p->AddFiles(QStringList() << name, info);
+	workpro->AddFiles(QStringList() << name, f);
 }
 
-
-//寻找工程
-BkeProject *ProjectWindow::FindPro(const QString &proname)
-{
-	if (workpro && workpro->ProjectName() == proname)
-		return workpro;
-	//BkeProject *abc ;
-	//for( int i = 0 ; i < projectlist.size() ; i++){
-	//    abc = projectlist.at(i) ;
-	//    if( abc->ProjectName() == proname){
-	//        return abc ;
-	//    }
-	//}
-	return 0;
-}
 
 QTreeWidgetItem *ProjectWindow::findFileInProject(const QString &name)
 {
@@ -322,8 +311,7 @@ void ProjectWindow::RunBKEFromFile(const ItemInfo & f)
 void ProjectWindow::DeleteFile(const ItemInfo &f)
 {
 	//是文件的话将询问是否移除文件
-	BkeProject *p = FindPro(f.ProName);
-	QString sk = p->FileDir() + f.FullName;
+	QString sk = workpro->ProjectDir() + f.FullName;
 	LableSureDialog msg;
 	msg.SetLable("要移除文件" + sk + "吗？");
 	msg.SetCheckbox(QStringList() << "彻底删除");
@@ -331,29 +319,28 @@ void ProjectWindow::DeleteFile(const ItemInfo &f)
 	if (msg.WaitUser(240, 130) == 1) return;
 
 	if (msg.IsCheckboxChoise(0)){
-		if (p->CheckIsDir(f))
+		if (workpro->CheckIsDir(f))
 			QDir(sk).removeRecursively();
 		else
 			QFile(sk).remove();
 	}
 	//移除文件
-	if (!p->RemoveItem(f)){
+	if (!workpro->RemoveItem(f)){
 		QMessageBox::information(this, "错误", "移除工程过程中出了一个错误", QMessageBox::Ok);
 		return;
 	}
 	//写出结果
-	p->WriteBkpFile();
+	workpro->WriteBkpFile();
 }
 
 void ProjectWindow::AddFiles(const ItemInfo &f)
 {
-	BkeProject *p = FindPro(f.ProName);
 	QStringList ls;
-	if (f.Layer > 1 && !p->CheckIsDir(f))
+	if (f.Layer > 1 && !workpro->CheckIsDir(f))
 	{
 		ReadItemInfo(f.Root->parent(), info);
 	}
-	QString path = p->FileDir() + f.getDir();
+	QString path = workpro->ProjectDir() + f.getDir();
 	if (f.RootName == "宏" || f.RootName == "脚本"){
 		ls = QFileDialog::getOpenFileNames(this, "添加文件", path, "bkscr脚本(*.bkscr)");
 	}
@@ -409,18 +396,17 @@ void ProjectWindow::AddFiles(const ItemInfo &f)
 			}
 		}
 	}
-	p->AddFiles(ls, f);
+	workpro->AddFiles(ls, f);
 }
 
 //
 void ProjectWindow::AddDir(const ItemInfo &f)
 {
-	BkeProject *p = FindPro(f.ProName);
-	if (f.Layer > 1 && !p->CheckIsDir(f))
+	if (f.Layer > 1 && !workpro->CheckIsDir(f))
 	{
 		ReadItemInfo(f.Root->parent(), info);
 	}
-	QString path = p->FileDir() + f.getDir();
+	QString path = workpro->ProjectDir() + f.getDir();
 	QString d = QFileDialog::getExistingDirectory(this, "添加目录", path);
 	if (d.isEmpty())
 		return;
@@ -446,7 +432,7 @@ void ProjectWindow::AddDir(const ItemInfo &f)
 		}
 	}
 	if (!tmp.isEmpty()) {
-		p->AddDir(tmp, f);
+		workpro->AddDir(tmp, f);
 	}
 }
 
@@ -484,8 +470,9 @@ void ProjectWindow::OpenFile()
 	if (filename.isNull()) return;
 
 	QTreeWidgetItem *llm = findFileInProject(filename);
-	if (llm == 0) emit OpenThisFile(filename, "");
-	else OpenThisFile(filename, workpro->FileDir());
+	if (llm == 0) 
+		return;
+	OpenBkscrFile(filename);
 }
 
 void ProjectWindow::BkeChangeCurrentProject(/*BkeProject *p*/)
@@ -497,23 +484,6 @@ void ProjectWindow::BkeChangeCurrentProject(/*BkeProject *p*/)
 	{
         QMessageBox::warning(0, "警告", "BKECmdList库不存在，智能提示和自动补全功能将禁用。");
 	}
-}
-
-BkeProject *ProjectWindow::FindFileProject(const QString &file)
-{
-	if (findFileInProject(file) != 0) return workpro;
-	else return 0;
-}
-
-BkeProject *ProjectWindow::FindProjectFromDir(const QString &dir)
-{
-	QString a = LOLI_OS_QSTRING(dir);
-	if (workpro && a == LOLI_OS_QSTRING(workpro->FileDir()))
-		return workpro;
-	//for( int i = 0 ; i< projectlist.size() ; i++){
-	//    if( a == LOLI_OS_QSTRING(projectlist.at(i)->FileDir()) ) return projectlist.at(i) ;
-	//}
-	return 0;
 }
 
 void ProjectWindow::ConfigProject(BkeProjectConfig *config)
@@ -547,10 +517,9 @@ void ProjectWindow::ActionAdmin()
 
 void ProjectWindow::RenameFile(const ItemInfo &f)
 {
-	BkeProject *p = FindPro(f.ProName);
 	if (f.Layer <= 1)
 		return;
-	if (!p->CheckIsDir(f))
+	if (!workpro->CheckIsDir(f))
 	{
 		//file
 		bool change;
@@ -561,8 +530,8 @@ void ProjectWindow::RenameFile(const ItemInfo &f)
 		name = chopFileNameWithoutExt(name) + ext;
 		if (name == ".bkscr")
 			return;
-		QString rawname = p->FileDir() + f.FullName;
-		QString newname = p->FileDir() + f.Dirs + '/' + name;
+		QString rawname = workpro->ProjectDir() + f.FullName;
+		QString newname = workpro->ProjectDir() + f.Dirs + name;
 		QFile temp(newname);
 		if (temp.exists()){
 			QMessageBox::information(this, "重命名", "文件已存在，不能再使用这个名称。", QMessageBox::Ok);
@@ -584,8 +553,8 @@ void ProjectWindow::RenameFile(const ItemInfo &f)
 	{
 		QString name = QInputDialog::getText(this, "重命名", "输入新文件夹名(不可新建子文件夹)");
 		name = chopFileName(name);
-		QString rawname = p->FileDir() + f.FullName;
-		QString newname = p->FileDir() + f.Dirs + '/' + name;
+		QString rawname = workpro->ProjectDir() + f.FullName;
+		QString newname = workpro->ProjectDir() + f.Dirs + name;
 		QDir temp(newname);
 		if (temp.exists()){
 			QMessageBox::information(this, "重命名", "文件已存在，不能再使用这个名称。", QMessageBox::Ok);
@@ -598,18 +567,19 @@ void ProjectWindow::RenameFile(const ItemInfo &f)
 			return;
 		}
 		f.Root->setText(0, name);
-		p->config->removeScriptDir(f.FullName);
-		p->config->addScriptDir(f.Dirs + '/' + name);
+		workpro->config->removeScriptDir(f.FullName);
+		workpro->config->addScriptDir(f.Dirs + name);
 	}
-	p->WriteBkpFile();
+	workpro->WriteBkpFile();
 }
 
 void ProjectWindow::PreviewFile(const ItemInfo &f)
 {
-	BkeProject *p = FindPro(f.ProName);
-	QString n = p->FileDir() + "/" + info.FullName;
-	if (n.endsWith(".bkscr") || n.endsWith(".bkpsr")) emit OpenThisFile(n, p->FileDir());
-	else{
+	QString n = workpro->ProjectDir() + info.FullName;
+	if (info.FullName.endsWith(".bkscr") || info.FullName.endsWith(".bkpsr"))
+		emit OpenBkscrFile(n);
+	else
+	{
 		QDesktopServices::openUrl(QUrl::fromLocalFile(n));
 	}
 }
@@ -631,22 +601,6 @@ void ProjectWindow::CloseProject()
 void ProjectWindow::CloseProject(const ItemInfo &f)
 {
 	CloseProject();
-	//BkeProject *p = FindPro(f.ProName);
-	//if(p)
-	//{
-	//    projectlist.removeOne(p);
-	//    p->deleteLater();
-	//    takeTopLevelItem(indexOfTopLevelItem(p->Root));
-	//    if(p == workpro)
-	//    {
-	//        p = NULL;
-	//        if(!projectlist.empty())
-	//        {
-	//            p = projectlist.first();
-	//        }
-	//        BkeChangeCurrentProject(p);
-	//    }
-	//}
 }
 
 //void ProjectWindow::Active(const ItemInfo &f)
@@ -666,8 +620,7 @@ void ProjectWindow::CloseProject(const ItemInfo &f)
 
 void ProjectWindow::ShowInDir(const ItemInfo &f)
 {
-	BkeProject *p = FindPro(f.ProName);
-	QString n = p->FileDir();
+	QString n = workpro->ProjectDir();
 	if (info.Layer > 1)
 		n += info.FullName;
 	else
@@ -700,8 +653,7 @@ void ProjectWindow::ShowInDir(const ItemInfo &f)
 
 void ProjectWindow::ReleaseGame(const ItemInfo &f)
 {
-	BkeProject *p = FindPro(f.ProName);
-	p->ReleaseGame();
+	workpro->ReleaseGame();
 }
 
 void ProjectWindow::ExportScenario(const ItemInfo &f)
@@ -709,7 +661,7 @@ void ProjectWindow::ExportScenario(const ItemInfo &f)
 	if (workpro)
 	{
 		QString text;
-		QString path = workpro->FileDir() + f.FullName;
+		QString path = workpro->ProjectDir() + f.FullName;
 		if (LOLI::AutoRead(text, path))
 		{
 			text = CodeWindow::getScenarioTextFromCode(text).replace("\n\n","\n");

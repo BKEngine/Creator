@@ -28,7 +28,7 @@ QString QsciLexerBkeScript::description(int style) const
 	case SCE_BKE_STRING:
 	case SCE_BKE_STRING2:  return QString("String");
 	case SCE_BKE_NUMBER:  return QString("Number");
-	case SCE_BKE_LABEL:   return QString("Lable");
+	case SCE_BKE_LABEL_DEFINE:   return QString("Lable");
 	case SCE_BKE_LABEL_IN_PARSER:   return QString("LableInParser");
 	case SCE_BKE_ANNOTATE: return QString("LineComment");
 	case SCE_BKE_COMMENT: return QString("BlockComment");
@@ -57,7 +57,7 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
 	case SCE_BKE_STRING:
 	case SCE_BKE_STRING2:  return QColor(0x00, 0x9f, 0x3c);
 	case SCE_BKE_NUMBER:  return QColor(0xff, 0x00, 0x00);
-	case SCE_BKE_LABEL:   return QColor(0xff, 0x00, 0xff);
+	case SCE_BKE_LABEL_DEFINE:   return QColor(0xff, 0x00, 0xff);
 	case SCE_BKE_LABEL_IN_PARSER:   return QColor(0xff, 0x00, 0xff);
 	case SCE_BKE_ANNOTATE: return QColor(0x80, 0x80, 0x80);
 	case SCE_BKE_COMMENT: return QColor(0x80, 0x80, 0x80);

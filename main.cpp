@@ -4,10 +4,10 @@
 #include <QMainWindow>
 #include <QLibrary>
 #include "mainwindow.h"
-#include "singleapplication.h"
 #include <stdint.h>
 #include "quazip/JlCompress.h"
 #include "codewindow.h"
+#include "qmacopenfileapplication.h"
 
 QString title = "BKE Creator - ";
 uint32_t titlehash = 0;
@@ -155,46 +155,50 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-   QApplication a(argc, argv);
+#ifdef Q_OS_MAC
+    QMacOpenFileApplication a(argc, argv);
+#else
+    QApplication a(argc, argv);
+#endif
 
 #ifdef Q_OS_MAC
-   BKE_CURRENT_DIR = QDir::homePath() + "/Documents/BKE_Creator";
-   QDir dir(BKE_CURRENT_DIR);
-   do{
-	   QDir d(qApp->applicationDirPath());
-	   d.cdUp();
-	   d.cd("Resources");
+    BKE_CURRENT_DIR = QDir::homePath() + "/Documents/BKE_Creator";
+    QDir dir(BKE_CURRENT_DIR);
+    do{
+       QDir d(qApp->applicationDirPath());
+       d.cdUp();
+       d.cd("Resources");
 
-	   QString dataPath = d.filePath("data.compress");
-	   QString macvsPath = dir.filePath("macvs.txt");
-	   if(dir.exists())
-	   {
-		   QFileInfo fi(dataPath);
-		   QFileInfo vs(macvsPath);
-		   if(vs.exists())
-		   {
-			   QString s;
-			   if(LOLI::AutoRead(s, macvsPath))
-			   {
+       QString dataPath = d.filePath("data.compress");
+       QString macvsPath = dir.filePath("macvs.txt");
+       if(dir.exists())
+       {
+           QFileInfo fi(dataPath);
+           QFileInfo vs(macvsPath);
+           if(vs.exists())
+           {
+               QString s;
+               if(LOLI::AutoRead(s, macvsPath))
+               {
                    if(!fi.exists() || s == QString::number(fi.size()))
-				   {
-					   break;
-				   }
-			   }
-		   }
-	   }
+                   {
+                       break;
+                   }
+               }
+           }
+       }
 
-	   if(JlCompress::extractDir(dataPath, dir.absolutePath()).count()==0)
-	   {
-		   QMessageBox::information(0, "Error", "Cannot uncompress the resources. :( \nPlease unzip \"[.app path]/Resources/data.compress\" to \"~/Documents/BKE_Creator\" by yourself, and write the decimal size of \"data.compress\" into \"macvs.txt\", then restart the application.");
-		   exit(0);
-	   }
-	   LOLI::AutoWrite(macvsPath, QString::number(QFileInfo(dataPath).size()));
-   }while(0);
+       if(JlCompress::extractDir(dataPath, dir.absolutePath()).count()==0)
+       {
+           QMessageBox::information(0, "Error", "Cannot uncompress the resources. :( \nPlease unzip \"[.app path]/Resources/data.compress\" to \"~/Documents/BKE_Creator\" by yourself, and write the decimal size of \"data.compress\" into \"macvs.txt\", then restart the application.");
+           exit(0);
+       }
+       LOLI::AutoWrite(macvsPath, QString::number(QFileInfo(dataPath).size()));
+    }while(0);
 #endif
 
 #ifdef Q_OS_LINUX
-   QApplication::setWindowIcon(QIcon("icon.png"));
+    QApplication::setWindowIcon(QIcon("icon.png"));
 #endif
 	//SingleApplication a(argc, argv);
 
@@ -328,14 +332,7 @@ int main(int argc, char *argv[])
 void CheckOpenAL32()
 {
 #ifdef Q_OS_WIN
-	QLibrary lib("OpenAL32.dll") ;
-	if( lib.load() )
-	{
-		lib.unload();
-		return;
-	}
-	QMessageBox::information(0,"安装支持库","你的计算机没有安装OpenAL32，Creator将为你安装，\n在接下来的窗口中选择 OK ") ;
-	QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/tool/OpenAL.exe")) ;
+	
 #else
 	QLibrary lib("openal");
 	if( lib.load() )
@@ -353,19 +350,20 @@ void CheckFileAssociation()
 #ifdef Q_OS_WIN
 	if (!QFile::exists(BKE_CURRENT_DIR + "/FileAssociation.exe"))
 		return;
-	QSettings *ukenvFileReg = new QSettings("HKEY_CLASSES_ROOT\\.bkp", QSettings::NativeFormat);   //
-
-	//判断UKEnv类型是否已在注册表中，并关联了正确的打开方式（程序打开方式），没有则写入
-	QString currentValue = ukenvFileReg->value("Default").toString();
-
-	if (currentValue.isEmpty() || currentValue != "BKE_Creator")
-	{
-		if(QMessageBox::question(0,"提示","检测到工程文件尚未关联。是否关联工程文件？")==QMessageBox::Yes)
+	
+	QProcess *cmd = new QProcess();
+	QObject::connect(cmd, &QProcess::readyReadStandardOutput, [cmd]() {
+		if (QString::fromUtf8(cmd->readAllStandardOutput()).trimmed() != "true")
 		{
-			QDesktopServices::openUrl(QUrl::fromLocalFile(BKE_CURRENT_DIR+"/FileAssociation.exe")) ;
+			if (QMessageBox::question(0, "提示", "检测到工程文件尚未关联。是否关联工程文件？") == QMessageBox::Yes)
+			{
+				QProcess::execute(BKE_CURRENT_DIR + "/FileAssociation.exe -set");
+			}
 		}
-	}
-	delete ukenvFileReg;
+		delete cmd;
+	});
+	cmd->setWorkingDirectory(BKE_CURRENT_DIR);
+	cmd->start("FileAssociation.exe -is");
 #else
 	QProcess *cmd = new QProcess();
 	QObject::connect(cmd, &QProcess::readyReadStandardOutput, [cmd](){
@@ -385,6 +383,7 @@ void CheckFileAssociation()
 				s->start();
 			}
 		}
+		delete cmd;
 	});
 	cmd->start("xdg-mime query default application/x-bke-project");
 #endif

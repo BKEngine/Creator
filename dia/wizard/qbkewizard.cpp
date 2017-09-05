@@ -1,3 +1,4 @@
+﻿#include <QDebug>
 #include "qbkewizard.h"
 #include "ui_qbkewizard.h"
 
@@ -18,7 +19,7 @@ void QBkeWizard::addPage(QBkeWizardPage *page)
     if(!_pages.empty())
     {
         QBkeWizardPage *prevPage = _pages.last();
-        pageId = _pages.size();
+        auto pageId = _pages.size();
         if(prevPage->nextPageId()==-1)
         {
             prevPage->setNextPageId(pageId);
@@ -61,7 +62,7 @@ void QBkeWizard::nextToPage(int id)
     int nextPageId = id;
     if(id < 0 || id >= _pages.size())
     {
-        qWarning()<<"Error Page Id :" + QString.number(id);
+        qWarning()<<"Error Page Id :" + QString::number(id);
         return;
     }
     currentPage->onNextToOrFinished(nextPageId);
@@ -82,7 +83,7 @@ void QBkeWizard::backToPage(int id)
     int prevPageId = id;
     if(id < 0 || id >= _pages.size())
     {
-        qWarning()<<"Error Page Id :" + QString.number(id);
+        qWarning()<<"Error Page Id :" + QString::number(id);
         return;
     }
     currentPage->onBackTo(prevPageId);

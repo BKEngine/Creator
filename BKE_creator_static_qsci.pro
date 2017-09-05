@@ -46,8 +46,6 @@ SOURCES += ./main.cpp \
     bkeSci/bkecompile.cpp \
     function.cpp \
     paper/wordsupport.cpp \
-    paper/creator_parser.cpp \
-    paper/completebase.cpp \
     dia/searchbox.cpp \
     bkeSci/bkemarks.cpp \
     dia/bkeconfigdialog.cpp \
@@ -102,7 +100,6 @@ SOURCES += ./main.cpp \
     BKEscintilla/Qt4Qt5/SciClasses.cpp \
     BKEscintilla/Qt4Qt5/ScintillaQt.cpp \
     BKEscintilla/lexlib/CharacterSet.cpp \
-    singleapplication.cpp \
     dia/cconfigdia.cpp \
     dia/ctextedit.cpp \
     bkeprojectconfig.cpp \
@@ -127,7 +124,6 @@ SOURCES += ./main.cpp \
     dia/GameProperty.cpp \
     dia/LangOpt.cpp \
     dia/doubleinput.cpp \
-    bkeSci/autolex.cpp \
     BKEscintilla/Qt4Qt5/InputMethod.cpp \
     BKEscintilla/lexlib/CharacterCategory.cpp \
     BKEscintilla/src/CaseConvert.cpp \
@@ -139,7 +135,19 @@ SOURCES += ./main.cpp \
     dia/ParserEditor.cpp \
     dia/ParserEditorTreeItem.cpp \
     dia/ParserEditorTreeModel.cpp \
-    CmdListLoader.cpp
+    CmdListLoader.cpp \
+    dia/openlabeldialog.cpp \
+    QFuzzyMatcher/QFuzzyMatcher.cpp \
+    QFuzzyMatcher/score_match.cpp \
+    QPinyin/ChineseToPinyinResource.cpp \
+    QPinyin/HanyuPinyinOutputFormat.cpp \
+    QPinyin/PinyinFormatter.cpp \
+    QPinyin/PinyinHelper.cpp \
+    QPinyin/QPinyin.cpp \
+    QPinyin/ResourceHelper.cpp \
+    dia/qnofocusitemdelegate.cpp \
+    dia/gotofiledialog.cpp \
+    qmacopenfileapplication.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -157,8 +165,6 @@ HEADERS  += \
     function.h \
     function.h \
     paper/wordsupport.h \
-    paper/creator_parser.h \
-    paper/completebase.h \
     dia/searchbox.h \
     bkeSci/BkeIndicatorBase.h \
     bkeSci/bkemarks.h \
@@ -225,7 +231,6 @@ HEADERS  += \
     BKEscintilla/Qt4Qt5/Qsci/qsciscintillabase.h \
     BKEscintilla/Qt4Qt5/Qsci/qscistyle.h \
     BKEscintilla/Qt4Qt5/Qsci/qscistyledtext.h \
-    singleapplication.h \
     dia/cconfigdia.h \
     dia/ctextedit.h \
     bkeprojectconfig.h \
@@ -252,7 +257,6 @@ HEADERS  += \
     BG_Analysis.h \
     BKS_info.h \
     ParseData.h \
-    bkeSci/autolex.h \
     BKEscintilla/lexlib/StringCopy.h \
     BKEscintilla/src/CaseConvert.h \
     BKEscintilla/src/CaseFolder.h \
@@ -263,13 +267,28 @@ HEADERS  += \
     dia/ParserEditor.h \
     dia/ParserEditorTreeItem.h \
     dia/ParserEditorTreeModel.h \
-    EnumsComponent.h \
-    ScriptEnums.h \
     BKECmdList.h \
-    CmdListLoader.h
+    CmdListLoader.h \
+    dia/openlabeldialog.h \
+    QFuzzyMatcher/QFuzzyMatcher.h \
+    QFuzzyMatcher/score_match.h \
+    QPinyin/ChineseToPinyinResource.h \
+    QPinyin/HanyuPinyinCaseType.h \
+    QPinyin/HanyuPinyinOutputFormat.h \
+    QPinyin/HanyuPinyinToneType.h \
+    QPinyin/HanyuPinyinVCharType.h \
+    QPinyin/pinyin4cpp_global.h \
+    QPinyin/PinyinFormatter.h \
+    QPinyin/PinyinHelper.h \
+    QPinyin/QPinyin.h \
+    QPinyin/ResourceHelper.h \
+    dia/qnofocusitemdelegate.h \
+    dia/gotofiledialog.h \
+    qmacopenfileapplication.h
 
 RESOURCES += \
-    source.qrc
+    source.qrc \
+    QPinyin/res.qrc
 
 INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKEscintilla/src ./BKEscintilla/Qt4Qt5 ./
 
@@ -285,9 +304,12 @@ FORMS += \
     dia/LangOpt.ui \
     dia/GameProperty.ui \
     dia/doubleinput.ui \
-    dia/ParserEditor.ui
+    dia/ParserEditor.ui \
+    dia/openlabeldialog.ui \
+    dia/gotofiledialog.ui
 
 mac{
+    QMAKE_INFO_PLIST = info-mac.plist
     QT += macextras
     LIBS += -L$$PWD/quazip -lquazip
     CONFIG(release, debug|release){

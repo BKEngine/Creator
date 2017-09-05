@@ -4,12 +4,11 @@
 #include "../codewindow.h"
 #include "CmdListLoader.h"
 #include "loli/loli_island.h"
+#include <Qsci/qscicommandset.h>
 
+QImage BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_function.png");
+QImage BKE_AUTOIMAGE_NORMAL(":/auto/source/auto_normal.png");
 QImage BKE_AUTOIMAGE_KEY(":/auto/source/auto_key.png");
-QImage BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_funcotin.png");
-QImage BKE_AUTOIMAGE_DICTIONARIES(":/auto/source/auto_diction.png");
-QImage BKE_AUTOIMAGE_NORMAL(":/auto/source/auto_nomal.png");
-QImage BKE_AUTOIMAGE_MATH(":/auto/source/auto_math.png");
 
 BkeScintilla::BkeScintilla(QWidget *parent)
 	:QsciScintilla(parent)
@@ -47,11 +46,9 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	SendScintilla(SCI_INDICSETALPHA, BKE_INDICATOR_FIND, 255);
 	SendScintilla(SCI_INDICSETUNDER, BKE_INDICATOR_FIND, true);
 
-	registerImage(CompleteBase::BKE_TYPE_NORMAL, BKE_AUTOIMAGE_NORMAL);
-	registerImage(CompleteBase::BKE_TYPE_FUNCTION, BKE_AUTOIMAGE_FUNCTION);
-	registerImage(CompleteBase::BKE_TYPE_DICTIONARIES, BKE_AUTOIMAGE_DICTIONARIES);
+	registerImage(0, BKE_AUTOIMAGE_NORMAL);
+	registerImage(3, BKE_AUTOIMAGE_FUNCTION);
 	registerImage(9, BKE_AUTOIMAGE_KEY);
-	registerImage(8, BKE_AUTOIMAGE_MATH);
 
 	setMarginsForegroundColor(QColor(100, 100, 100));
 	setMarginsBackgroundColor(QColor(240, 240, 240));
@@ -77,8 +74,8 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	deflex = new QsciLexerBkeScript(this);
 	//pdata = new ParseData(this);
 	setLexer(deflex);
-	//Selfparser = defparser = new BkeParser;     //新的词法分析器
-	Selfparser = defparser = NULL;
+
+	standardCommands()->find(QsciCommand::LineCut)->setKey(0);
 
 	connect(this, SIGNAL(SCN_MODIFIED(int, int, const char *, int, int, int, int, int, int, int)),
 		SLOT(EditModified(int, int, const char *, int, int, int, int, int, int, int)));
@@ -637,7 +634,7 @@ void BkeScintilla::showComplete()
 	unsigned int lastStyle = 0;
 	unsigned char st = style & 63;
 
-	if (st == SCE_BKE_STRING || st == SCE_BKE_STRING2 || st == SCE_BKE_TRANS || st == SCE_BKE_ANNOTATE || st == SCE_BKE_COMMENT || st == SCE_BKE_LABEL || st == SCE_BKE_TEXT)
+	if (st == SCE_BKE_STRING || st == SCE_BKE_STRING2 || st == SCE_BKE_TRANS || st == SCE_BKE_ANNOTATE || st == SCE_BKE_COMMENT || st == SCE_BKE_LABEL_DEFINE || st == SCE_BKE_TEXT)
 		return;
 
 	bool l = SendScintilla(SCI_AUTOCACTIVE);
