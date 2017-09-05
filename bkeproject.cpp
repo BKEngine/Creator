@@ -52,8 +52,6 @@ BkeProject::BkeProject(QObject *parent)
 	isnull = true;
 	currentptr = 0;
 	analysis = 0;
-	//lex = new BkeParser(this);
-	lex = NULL;
 
 	fileico = new QIcon(":/project/source/file.png");
 	dirsico = new QIcon(":/project/source/doc.png");

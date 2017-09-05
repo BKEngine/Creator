@@ -291,7 +291,6 @@ private:
 	void CheckMarks(BkeScintilla *edit, BkeMarkList *list);
 	void AddMarksToEdit();
 	void FileIOclose(const QStringList &list);
-	void BackstageSearchLable(BkeScintilla *edit);
 	void DrawLine(bool isClear);
 	bool WriteOpenFile(const QString &dir);
 };

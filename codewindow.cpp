@@ -245,9 +245,9 @@ void CodeWindow::OtherWinProject(ProjectWindow *p)
 	connect(p, &ProjectWindow::Compile, this, (void (QObject::*)())&CodeWindow::CompileAll);
 	//当前工程被改变
 	connect(p, &ProjectWindow::CurrentProChange, this, &CodeWindow::ChangeProject);
-    //改变当前文件
-    connect(this, SIGNAL(CurrentFileChange(QString)), p, SLOT(SetCurrentItem(QString)));
-    //打开工程时读取书签以及标记
+	//改变当前文件
+	connect(this, SIGNAL(CurrentFileChange(QString)), p, SLOT(SetCurrentItem(QString)));
+	//打开工程时读取书签以及标记
 	connect(p, &ProjectWindow::TextToMarks, this, &CodeWindow::TextToMarks);
 	//新建空白文档
 	//connect(p->btnnewfileact,SIGNAL(triggered()),this,SLOT(NewEmptyFile())) ;
@@ -1672,46 +1672,6 @@ void CodeWindow::GotoLine()
 	else if (i < 1) i = 1;
 	else if (i > currentedit->lines()) i = currentedit->lines();
 	currentedit->setFirstVisibleLine(i - 1);
-}
-
-//后台搜索标签
-void CodeWindow::BackstageSearchLable(BkeScintilla *edit)
-{
-	if (isSearLable){  //正在运行，进入队列
-		searchlablelater = edit;
-		return;
-	}
-
-	isSearLable = true;
-
-	int fline = edit->firstVisibleLine();
-	edit->findFirst1("^[*].*", false, true, false, false);
-
-	slablelist->clear();
-	slablels.clear();
-	WordSupport wow;
-	for (int i = 0; i < edit->testlist.size(); i++){
-		BkeIndicatorBase llm = edit->testlist.at(i);
-		if (llm.IsNull()) continue;
-
-		int xl, xi;
-		edit->lineIndexFromPosition(llm.Start(), &xl, &xi);
-		wow.setText(edit->text(xl));
-		if (wow.NextWord2() == "*"){
-			QString labelName = wow.NextWord2();
-			slablelist->addItem("*" + labelName, xl);
-			slablels.append("*" + labelName);
-		}
-	}
-
-	isSearLable = false;
-
-	if (searchlablelater != 0){
-		BackstageSearchLable(searchlablelater);
-		searchlablelater = 0;
-	}
-
-	edit->setFirstVisibleLine(fline);
 }
 
 void CodeWindow::GotoLabel(int i)

@@ -130,12 +130,6 @@
     <ClCompile Include="codewindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="paper\completebase.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="paper\creator_parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dia\cskinoption.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -212,9 +206,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dia\searchbox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="singleapplication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="topbarwindow.cpp">
@@ -370,12 +361,6 @@
     <ClCompile Include="Release\moc_codewindow.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="Debug\moc_creator_parser.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_creator_parser.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_cskinoption.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -476,12 +461,6 @@
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
     <ClCompile Include="Release\moc_searchbox.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_singleapplication.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_singleapplication.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="Debug\moc_topbarwindow.cpp">
@@ -879,12 +858,6 @@
     <CustomBuild Include="codewindow.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <ClInclude Include="paper\completebase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <CustomBuild Include="paper\creator_parser.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="dia\cskinoption.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -970,9 +943,6 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="dia\searchbox.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="singleapplication.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="topbarwindow.h">

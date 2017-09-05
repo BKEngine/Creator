@@ -4,7 +4,6 @@
 #include <QSettings>
 #include <QMap>
 #include "weh.h"
-#include "paper/creator_parser.h"
 #include "bkeSci/bkemarks.h"
 #include "bkeprojectconfig.h"
 #include "BG_Analysis.h"
@@ -136,7 +135,6 @@ public:
 	QTreeWidgetItem *ImageFile;
 	QTreeWidgetItem *VoiceFile;
 	QTreeWidgetItem *Root;
-	BkeParser *lex;
 
 private:
 	void SetupConfig();

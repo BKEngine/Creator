@@ -27,8 +27,6 @@
 
 #include "../BKS_info.h"
 
-#include "../paper/creator_parser.h"
-
 #include "../ParseData.h"
 
 #define BASE_MASK 63
@@ -1001,7 +999,7 @@ void BKE_Lexer::DoAtCommand()
 void BKE_Lexer::ContinueLabel()
 {
 	setMask(CMD_MASK);
-	styler->SetState(SCE_BKE_LABEL | cur_mask);
+	styler->SetState(SCE_BKE_LABEL_DEFINE | cur_mask);
 	//QByteArray ba;
 	bool sp = false;
 	while (styler->More() && !styler->atLineEnd)
@@ -1126,7 +1124,7 @@ void BKE_Lexer::JudgeStyle()
 		//curnode->type = BaseNode::Node_Label;
 		//curnode->startPos.line = myDoc->LineFromPosition(styler->currentPos);
 		//curnode->startPos.pos = styler->currentPos - myDoc->LineStart(curnode->startPos.line);
-		styler->SetState(SCE_BKE_LABEL | cur_mask);
+		styler->SetState(SCE_BKE_LABEL_DEFINE | cur_mask);
 	}
 	else if (styler->ch == '#')
 	{
@@ -1276,7 +1274,7 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 		case SCE_BKE_COMMAND2:
 			DoCommand();
 			break;
-		case SCE_BKE_LABEL:
+		case SCE_BKE_LABEL_DEFINE:
 			ContinueLabel();
 			break;
 		case SCE_BKE_ANNOTATE:

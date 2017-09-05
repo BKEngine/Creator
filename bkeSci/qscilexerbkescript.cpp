@@ -28,7 +28,7 @@ QString QsciLexerBkeScript::description(int style) const
 	case SCE_BKE_STRING:
 	case SCE_BKE_STRING2:  return QString("String");
 	case SCE_BKE_NUMBER:  return QString("Number");
-	case SCE_BKE_LABEL:   return QString("Lable");
+	case SCE_BKE_LABEL_DEFINE:   return QString("Lable");
 	case SCE_BKE_ANNOTATE: return QString("LineComment");
 	case SCE_BKE_COMMENT: return QString("BlockComment");
 	case SCE_BKE_OPERATORS: return QString("Operators");
@@ -56,7 +56,7 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
 	case SCE_BKE_STRING:
 	case SCE_BKE_STRING2:  return QColor(0x00, 0x9f, 0x3c);
 	case SCE_BKE_NUMBER:  return QColor(0xff, 0x00, 0x00);
-	case SCE_BKE_LABEL:   return QColor(0xff, 0x00, 0xff);
+	case SCE_BKE_LABEL_DEFINE:   return QColor(0xff, 0x00, 0xff);
 	case SCE_BKE_ANNOTATE: return QColor(0x80, 0x80, 0x80);
 	case SCE_BKE_COMMENT: return QColor(0x80, 0x80, 0x80);
 	case SCE_BKE_OPERATORS: return QColor(0x00, 0x00, 0x00);
@@ -83,7 +83,7 @@ QColor QsciLexerBkeScript::color(int style) const
 	case SCE_BKE_STRING:
 	case SCE_BKE_STRING2:  return hlb[3].fc;
 	case SCE_BKE_NUMBER:  return hlb[4].fc;
-	case SCE_BKE_LABEL:   return hlb[7].fc;
+	case SCE_BKE_LABEL_DEFINE:   return hlb[7].fc;
 	case SCE_BKE_ANNOTATE:
 	case SCE_BKE_COMMENT: return hlb[8].fc;
 	case SCE_BKE_OPERATORS: return hlb[9].fc;
@@ -120,7 +120,7 @@ QColor QsciLexerBkeScript::paper(int style) const
 	case SCE_BKE_STRING:
 	case SCE_BKE_STRING2:  return hlb[3].bc;
 	case SCE_BKE_NUMBER:  return hlb[4].bc;
-	case SCE_BKE_LABEL:   return hlb[7].bc;
+	case SCE_BKE_LABEL_DEFINE:   return hlb[7].bc;
 	case SCE_BKE_ANNOTATE:
 	case SCE_BKE_COMMENT: return hlb[8].bc;
 	case SCE_BKE_OPERATORS: return hlb[9].bc;

@@ -46,8 +46,6 @@ SOURCES += ./main.cpp \
     bkeSci/bkecompile.cpp \
     function.cpp \
     paper/wordsupport.cpp \
-    paper/creator_parser.cpp \
-    paper/completebase.cpp \
     dia/searchbox.cpp \
     bkeSci/bkemarks.cpp \
     dia/bkeconfigdialog.cpp \
@@ -167,8 +165,6 @@ HEADERS  += \
     function.h \
     function.h \
     paper/wordsupport.h \
-    paper/creator_parser.h \
-    paper/completebase.h \
     dia/searchbox.h \
     bkeSci/BkeIndicatorBase.h \
     bkeSci/bkemarks.h \
