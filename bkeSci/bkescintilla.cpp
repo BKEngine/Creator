@@ -482,6 +482,11 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 						{
 							auto p = analysis->lockFile(FileName);
 							auto ls = p->getLabels();
+							analysis->unlockFile();
+							for (auto &s : ls)
+							{
+								s = "\"*" + s + "\"";
+							}
 							return ls.join(' ');
 						}
 					}
@@ -640,7 +645,12 @@ void BkeScintilla::showComplete()
 		return;
 	completeType = SHOW_NULL;
 
-	if (style & 64 /*BEGAL_MASK*/)
+	//handle label in parser
+	if ((style & 63) == SCE_BKE_LABEL_IN_PARSER)
+	{
+		completeType = SHOW_LABEL;
+	}
+	else if (style & 64 /*BEGAL_MASK*/)
 	{
 		beginPos--;
 		style = SendScintilla(SCI_GETSTYLEAT, beginPos);
@@ -807,6 +817,16 @@ void BkeScintilla::showComplete()
 		if (!completeList.isEmpty())
 			SendScintilla(SCI_AUTOCSHOW, lastContext.length(), completeList.toUtf8().data());
 		break;
+	case SHOW_LABEL:	//show label in parser, without "
+		{
+			auto p = analysis->lockFile(FileName);
+			auto ls = p->getLabels();
+			analysis->unlockFile();
+			completeList = ls.join(' ');
+			if (!completeList.isEmpty())
+				SendScintilla(SCI_AUTOCSHOW, 0UL, completeList.toUtf8().data());
+		}
+		break;
 	default:
 		break;
 	} 
@@ -838,6 +858,23 @@ void BkeScintilla::UiChange(int updated)
 
 	//缩进
 	//额外处理]和}
+
+	////根据fold判断缩进
+	//if(modfieddata.line > 0)
+	//{
+	//	int prevFold = SendScintilla(SCI_GETFOLDLEVEL, modfieddata.line - 1) & SC_FOLDLEVELNUMBERMASK;
+	//	int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line - 1);
+	//	for (int l = modfieddata.line; l <= modfieddata.line + modfieddata.lineadd; l++)
+	//	{
+	//		int curFold = SendScintilla(SCI_GETFOLDLEVEL, l) & SC_FOLDLEVELNUMBERMASK;
+	//		int count2 = count + (curFold - prevFold) * tabWidth;
+	//		if (count2 < 0)
+	//			count2 = 0;
+	//		SendScintilla(SCI_SETLINEINDENTATION, l, count2);
+	//	}
+	//	SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + modfieddata.lineadd));
+	//}
+	
 	if ((ChangeType & SC_MOD_INSERTTEXT) && (modfieddata.text == "]" || modfieddata.text == "}"))
 	{
 		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
@@ -1002,6 +1039,7 @@ void BkeScintilla::UiChange(int updated)
 		}
 		SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
 	}
+	
 
 	//括号，引号补全
 	if (modfieddata.text.length() == 1 && (modfieddata.text == "(" || modfieddata.text == "[" || modfieddata.text == "{" || modfieddata.text == "\"" || modfieddata.text == "'" || modfieddata.text == ")" || modfieddata.text == "]" || modfieddata.text == "}"))

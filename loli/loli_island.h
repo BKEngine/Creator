@@ -12,6 +12,7 @@ enum
 	SCE_BKE_STRING2,	//'
 	SCE_BKE_NUMBER,
 	SCE_BKE_LABEL,
+	SCE_BKE_LABEL_IN_PARSER,	//代码中的标签
 	SCE_BKE_ANNOTATE,	//行注释
 	SCE_BKE_COMMENT,	//块注释
 	SCE_BKE_OPERATORS,
@@ -21,7 +22,9 @@ enum
 	SCE_BKE_TRANS,		//单字符转义
 	SCE_BKE_PARSER_KEYWORD,
 	SCE_BKE_PARSER_VAR,
-	SCE_BKE_ERROR
+	SCE_BKE_ERROR,
+	SCE_BKE_PARSER_BG,	//only for background color of parser
+	SCE_BKE_COLOR_COUNT
 };
 
 #include <QtCore>

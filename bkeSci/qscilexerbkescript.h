@@ -38,7 +38,7 @@ public:
     bool ConfigVoid(QString stylename) ;
 	virtual const char *keywords(int set) const;
 
-    HighlightAttribute hlb[20] ;
+    HighlightAttribute hlb[SCE_BKE_COLOR_COUNT] ;
     QFont Lfont ;
 private:
 

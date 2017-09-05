@@ -274,6 +274,7 @@ private:
 	void ContinueBlockComment();
 	void ContinueLineComment();
 	void ContinueLabel();
+	void ContinueLabelInParser();
 	void DoAtCommand();
 	void DoCommand();
 	void ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand);	//true, true for ##, false, true for #, false, false for prop-value, the last true/false means @ or [
@@ -596,6 +597,8 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 {
 	BracketsStack stack; //栈
 	bool lastOpIsDot = false;
+	bool nextIsLed = false;	//下一个是不是双目运算符
+	char lastOp = 0;
 	int defaultState;
 	if (ignoreLineEnd)
 		defaultState = SCE_BKE_PARSER_DEFAULT;
@@ -672,21 +675,25 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			styler->SetState(SCE_BKE_STRING | cur_mask);
 			styler->Forward();
 			ParseString();
+			nextIsLed = true;
 			break;
 		case '\'':
 			styler->SetState(SCE_BKE_STRING2 | cur_mask);
 			styler->Forward();
 			ParseString2();
+			nextIsLed = true;
 			break;
 		case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
 			styler->SetState(SCE_BKE_NUMBER | cur_mask);
 			styler->Forward();
 			ParseNumber();
+			nextIsLed = true;
 			break;
 		case '#':
 			styler->SetState(SCE_BKE_COLOR | cur_mask);
 			styler->Forward();
 			ParseColor();
+			nextIsLed = true;
 			break;
 		//operator and comment
 		case '/':
@@ -707,6 +714,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 				ContinueBlockComment();
 				break;
 			}
+			//no break, '/' is same as default
 		default:
 			if (info->OperatorAncestor.indexOf(styler->ch) >= 0)
 			{
@@ -725,6 +733,47 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 				else
 				{
 					styler->SetState(SCE_BKE_OPERATORS | cur_mask);
+					switch (styler->ch)
+					{
+					case '[':
+						stack.pushBracket(styler->currentPos);
+						nextIsLed = false;
+						break;
+					case '{':
+						stack.pushBrace(styler->currentPos);
+						if (ignoreLineEnd)
+							levelCurrent++;
+						nextIsLed = false;
+						break;
+					case '(':
+						stack.pushParenthesis(styler->currentPos);
+						nextIsLed = false;
+						break;
+					case ']':
+					case '}':
+					case ')':
+						//正确性已在上面检验过
+						stack.pop();
+						if (styler->ch == '}' && ignoreLineEnd)
+							levelCurrent--;
+						nextIsLed = true;
+						break;
+					case ';':
+					case ',':
+						nextIsLed = false;
+						break;
+					case '*':
+						if (!nextIsLed)
+						{
+							styler->SetState(SCE_BKE_LABEL_IN_PARSER | cur_mask);
+							ContinueLabelInParser();
+							continue;
+						}
+						break;
+					default:
+						nextIsLed = false;
+					}
+					/*
 					if (styler->ch == '[')
 					{
 						stack.pushBracket(styler->currentPos);
@@ -744,7 +793,14 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 						stack.pop();
 						if (styler->ch == '}' && ignoreLineEnd)
 							levelCurrent--;
+						nextIsLed = false;
 					}
+					else if (styler->ch == '*' && !nextIsLed)
+					{
+
+					}
+					*/
+					lastOp = styler->ch;
 				}
 				styler->Forward();
 			}
@@ -753,10 +809,12 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 				styler->SetState(SCE_BKE_PARSER_KEYWORD | cur_mask);
 				styler->Forward();
 				ParseVarname(lastOpIsDot);
+				nextIsLed = true;
 			}
 			else if (isspace(styler->ch))
 			{
 				styler->SetState(defaultState | cur_mask);
+				lastOp = 0;
 				while (styler->More() && !styler->atLineEnd)
 				{
 					if (styler->ch == '\t')
@@ -780,6 +838,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			}
 			else
 			{
+				//invalid symbol
 				styler->SetState(SCE_BKE_ERROR | cur_mask);
 				styler->Forward();
 			}
@@ -1029,6 +1088,34 @@ void BKE_Lexer::ContinueLabel()
 
 	stopAndStartNewBlock();
 	return;
+}
+
+void BKE_Lexer::ContinueLabelInParser()
+{
+	//pass '*'
+	styler->Forward();
+	while (styler->More() && !styler->atLineEnd)
+	{
+		if (atLineComment())
+			break;
+		else if (atBlockComment())
+		{
+			last_state = styler->state & BASE_MASK;
+			styler->SetState(SCE_BKE_COMMENT | cur_mask);
+			styler->Forward();
+			styler->Forward();
+			ContinueBlockComment();
+		}
+		else if (isalnum(styler->ch) || styler->ch == '_' || styler->ch >= 0x80)
+		{
+			styler->Forward();
+		}
+		else
+		{
+			break;
+		}
+	}
+	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 }
 
 void BKE_Lexer::ContinueBlockComment()

@@ -29,6 +29,7 @@ QString QsciLexerBkeScript::description(int style) const
 	case SCE_BKE_STRING2:  return QString("String");
 	case SCE_BKE_NUMBER:  return QString("Number");
 	case SCE_BKE_LABEL:   return QString("Lable");
+	case SCE_BKE_LABEL_IN_PARSER:   return QString("LableInParser");
 	case SCE_BKE_ANNOTATE: return QString("LineComment");
 	case SCE_BKE_COMMENT: return QString("BlockComment");
 	case SCE_BKE_OPERATORS: return QString("Operators");
@@ -57,6 +58,7 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
 	case SCE_BKE_STRING2:  return QColor(0x00, 0x9f, 0x3c);
 	case SCE_BKE_NUMBER:  return QColor(0xff, 0x00, 0x00);
 	case SCE_BKE_LABEL:   return QColor(0xff, 0x00, 0xff);
+	case SCE_BKE_LABEL_IN_PARSER:   return QColor(0xff, 0x00, 0xff);
 	case SCE_BKE_ANNOTATE: return QColor(0x80, 0x80, 0x80);
 	case SCE_BKE_COMMENT: return QColor(0x80, 0x80, 0x80);
 	case SCE_BKE_OPERATORS: return QColor(0x00, 0x00, 0x00);
@@ -72,34 +74,39 @@ QColor QsciLexerBkeScript::defaultColor (int style) const
 
 QColor QsciLexerBkeScript::color(int style) const
 {
-	switch (style & 63)
-	{
-	case SCE_BKE_PARSER:
-	case SCE_BKE_PARSER_DEFAULT:
-	case SCE_BKE_DEFAULT: return hlb[0].fc;
-	case SCE_BKE_COMMAND:
-	case SCE_BKE_COMMAND2: return hlb[1].fc;
-	case SCE_BKE_ATTRIBUTE: return hlb[2].fc;
-	case SCE_BKE_STRING:
-	case SCE_BKE_STRING2:  return hlb[3].fc;
-	case SCE_BKE_NUMBER:  return hlb[4].fc;
-	case SCE_BKE_LABEL:   return hlb[7].fc;
-	case SCE_BKE_ANNOTATE:
-	case SCE_BKE_COMMENT: return hlb[8].fc;
-	case SCE_BKE_OPERATORS: return hlb[9].fc;
-	case SCE_BKE_TEXT:    return QColor(0x00, 0x00, 0x00);
-	case SCE_BKE_COLOR:    return hlb[5].fc;
-	case SCE_BKE_TRANS:  return hlb[6].fc; //转义字符，
-	case SCE_BKE_PARSER_KEYWORD:    return hlb[11].fc;
-	case SCE_BKE_PARSER_VAR:    return QColor(47, 79, 79);
-	case SCE_BKE_ERROR:    return hlb[10].fc;
-	}
-	return QColor(0x00, 0x00, 0x00);
+	int c = style & 63;
+	if(c >= SCE_BKE_COLOR_COUNT)
+		return QColor(0x00, 0x00, 0x00);
+	return hlb[c].fc;
+	//switch (style & 63)
+	//{
+	//case SCE_BKE_PARSER:
+	//case SCE_BKE_PARSER_DEFAULT:
+	//case SCE_BKE_DEFAULT: return hlb[SCE_BKE_DEFAULT].fc;
+	//case SCE_BKE_COMMAND:
+	//case SCE_BKE_COMMAND2: return hlb[1].fc;
+	//case SCE_BKE_ATTRIBUTE: return hlb[2].fc;
+	//case SCE_BKE_STRING:
+	//case SCE_BKE_STRING2:  return hlb[3].fc;
+	//case SCE_BKE_NUMBER:  return hlb[4].fc;
+	//case SCE_BKE_LABEL:   return hlb[7].fc;
+	//case SCE_BKE_LABEL_IN_PARSER:   return hlb[7].fc;
+	//case SCE_BKE_ANNOTATE:
+	//case SCE_BKE_COMMENT: return hlb[8].fc;
+	//case SCE_BKE_OPERATORS: return hlb[9].fc;
+	//case SCE_BKE_TEXT:    return QColor(0x00, 0x00, 0x00);
+	//case SCE_BKE_COLOR:    return hlb[5].fc;
+	//case SCE_BKE_TRANS:  return hlb[6].fc; //转义字符，
+	//case SCE_BKE_PARSER_KEYWORD:    return hlb[11].fc;
+	//case SCE_BKE_PARSER_VAR:    return QColor(47, 79, 79);
+	//case SCE_BKE_ERROR:    return hlb[10].fc;
+	//}
+	//return QColor(0x00, 0x00, 0x00);
 }
 
 QColor QsciLexerBkeScript::defaultPaper(int style) const
 {
-	if ((style & (1 << 6)) && (!(style & (1 << 7))))
+	if ((style & (1 << 6)) && (!(style & (1 << 7))) || style == SCE_BKE_PARSER_BG)
 		return QColor(0xE0, 0xE0, 0xE0);
 	return QsciLexer::defaultPaper();
 }
@@ -107,30 +114,35 @@ QColor QsciLexerBkeScript::defaultPaper(int style) const
 QColor QsciLexerBkeScript::paper(int style) const
 {
 	if ((style & (1 << 6)) && (!(style & (1 << 7))))
-		return hlb[12].bc;
-	switch (style & 63)
-	{
-	case SCE_BKE_PARSER:
-	case SCE_BKE_PARSER_DEFAULT:
-	case SCE_BKE_TEXT:
-	case SCE_BKE_DEFAULT: return hlb[0].bc;
-	case SCE_BKE_COMMAND:
-	case SCE_BKE_COMMAND2: return hlb[1].bc;
-	case SCE_BKE_ATTRIBUTE: return hlb[2].bc;
-	case SCE_BKE_STRING:
-	case SCE_BKE_STRING2:  return hlb[3].bc;
-	case SCE_BKE_NUMBER:  return hlb[4].bc;
-	case SCE_BKE_LABEL:   return hlb[7].bc;
-	case SCE_BKE_ANNOTATE:
-	case SCE_BKE_COMMENT: return hlb[8].bc;
-	case SCE_BKE_OPERATORS: return hlb[9].bc;
-	case SCE_BKE_COLOR:    return hlb[5].bc;
-	case SCE_BKE_TRANS:  return hlb[6].bc; //转义字符，
-	case SCE_BKE_PARSER_KEYWORD:    return hlb[11].bc;
-	case SCE_BKE_PARSER_VAR:    return QsciLexer::defaultPaper();
-	case SCE_BKE_ERROR:    return hlb[10].bc;
-	}
-	return QsciLexer::defaultPaper();
+		return hlb[SCE_BKE_PARSER_BG].bc;
+	int c = style & 63;
+	if (c >= SCE_BKE_COLOR_COUNT)
+		return QsciLexer::defaultPaper();
+	return hlb[c].bc;
+	//switch (style & 63)
+	//{
+	//case SCE_BKE_PARSER:
+	//case SCE_BKE_PARSER_DEFAULT:
+	//case SCE_BKE_TEXT:
+	//case SCE_BKE_DEFAULT: return hlb[0].bc;
+	//case SCE_BKE_COMMAND:
+	//case SCE_BKE_COMMAND2: return hlb[1].bc;
+	//case SCE_BKE_ATTRIBUTE: return hlb[2].bc;
+	//case SCE_BKE_STRING:
+	//case SCE_BKE_STRING2:  return hlb[3].bc;
+	//case SCE_BKE_NUMBER:  return hlb[4].bc;
+	//case SCE_BKE_LABEL:   return hlb[7].bc;
+	//case SCE_BKE_LABEL_IN_PARSER:   return hlb[7].bc;
+	//case SCE_BKE_ANNOTATE:
+	//case SCE_BKE_COMMENT: return hlb[8].bc;
+	//case SCE_BKE_OPERATORS: return hlb[9].bc;
+	//case SCE_BKE_COLOR:    return hlb[5].bc;
+	//case SCE_BKE_TRANS:  return hlb[6].bc; //转义字符，
+	//case SCE_BKE_PARSER_KEYWORD:    return hlb[11].bc;
+	//case SCE_BKE_PARSER_VAR:    return QsciLexer::defaultPaper();
+	//case SCE_BKE_ERROR:    return hlb[10].bc;
+	//}
+	//return QsciLexer::defaultPaper();
 }
 
 QFont QsciLexerBkeScript::font (int style) const
@@ -195,17 +207,17 @@ bool QsciLexerBkeScript::ConfigVoid(QString stylename)
 void QsciLexerBkeScript::ReadConfig(QString hname)
 {
 	QStringList v = BKE_USER_SETTING->value(hname+"/colour", QStringList()).toStringList();
-	if (v.empty())
+	if (v.empty() || SCE_BKE_COLOR_COUNT * 2 > v.size())
 	{
-		for (int i = 0; i < sizeof(list_colors) / sizeof(int); i++)
+		for (int i = 0; i < SCE_BKE_COLOR_COUNT; i++)
 		{
 			hlb[i].font = Lfont;
-			hlb[i].fc = defaultColor(list_colors[i]).rgb();
-			hlb[i].bc = defaultPaper(list_colors[i]).rgb();
+			hlb[i].fc = defaultColor(i).rgb();
+			hlb[i].bc = defaultPaper(i).rgb();
 		}
 
 		QStringList c;
-		for (int i = 0; i < sizeof(list_colors) / sizeof(int); i++)
+		for (int i = 0; i < SCE_BKE_COLOR_COUNT; i++)
 		{
 			c.push_back(QString("%1").arg(hlb[i].fc));
 			c.push_back(QString("%1").arg(hlb[i].bc));
@@ -214,7 +226,7 @@ void QsciLexerBkeScript::ReadConfig(QString hname)
 		return;
 	}
 
-	for (int i = 0; i < sizeof(list_colors) / sizeof(int); i++)
+	for (int i = 0; i < SCE_BKE_COLOR_COUNT; i++)
 	{
 		hlb[i].font = Lfont;
 		hlb[i].fc = v[2 * i].toUInt();
