@@ -288,73 +288,7 @@
              </widget>
             </item>
             <item row="0" column="2" rowspan="3">
-             <widget class="QListWidget" name="listWidget">
-              <item>
-               <property name="text">
-                <string>普通的文字</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>命令（@action)</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>属性名（time=100)</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>字符串（&quot;面包工坊&quot;）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>数字（123456789）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>颜色（#FFFFFF）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>转义字符（'\r\n'）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>标签（*main）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>注释（//设置）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>运算符（+-*/）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>错误（&amp;^$%%^#）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>关键字（class,false,if）</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Bagel脚本内容</string>
-               </property>
-              </item>
-             </widget>
+             <widget class="QListWidget" name="listWidget"/>
             </item>
             <item row="0" column="4" alignment="Qt::AlignHCenter">
              <widget class="QPushButton" name="fcbtn">

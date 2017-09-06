@@ -3,8 +3,28 @@
 #include "ui_ctextedit.h"
 #include "../codewindow.h"
 
-int list_colors[] = { SCE_BKE_DEFAULT, SCE_BKE_COMMAND, SCE_BKE_ATTRIBUTE, SCE_BKE_STRING, SCE_BKE_NUMBER, SCE_BKE_COLOR, SCE_BKE_TRANS,
-SCE_BKE_LABEL_DEFINE, SCE_BKE_COMMENT, SCE_BKE_OPERATORS, SCE_BKE_ERROR, SCE_BKE_PARSER_KEYWORD, (1 << 6) };
+struct ColorDesc
+{
+	QString desc;
+	vector<int> colors;
+};
+static vector<ColorDesc> desc=
+{
+	{"普通的文字", { SCE_BKE_DEFAULT, SCE_BKE_PARSER_DEFAULT, SCE_BKE_PARSER, SCE_BKE_TEXT, SCE_BKE_PARSER_VAR }},
+	{"命令（@action）", { SCE_BKE_COMMAND, SCE_BKE_COMMAND2 }},
+	{"属性名（time=100）", { SCE_BKE_ATTRIBUTE }},
+	{"字符串（\"面包工坊\"）", { SCE_BKE_STRING, SCE_BKE_STRING2 }},
+	{ "数字（123456789）",{ SCE_BKE_NUMBER } },
+	{ "颜色（#FFFFFF）",{ SCE_BKE_COLOR } },
+	{ "转义字符（'\\r\\n'）",{ SCE_BKE_TRANS } },
+	{ "标签（*main）",{ SCE_BKE_LABEL_DEFINE } },
+	{ "代码中的标签（*main）",{ SCE_BKE_LABEL_IN_PARSER } },
+	{ "注释（//设置）",{ SCE_BKE_COMMENT, SCE_BKE_ANNOTATE } },
+	{ "运算符（+-*/）",{ SCE_BKE_OPERATORS } },
+	{ "错误（&^$%%^#）",{ SCE_BKE_ERROR } },
+	{ "关键字（class,false,if）",{ SCE_BKE_PARSER_KEYWORD } },
+	{ "Bagel脚本内容",{ SCE_BKE_PARSER_BG } },
+};
 
 CTextEdit::CTextEdit(QWidget *parent) :
 	QWidget(parent),
@@ -25,6 +45,13 @@ CTextEdit::CTextEdit(QWidget *parent) :
 
 	ui->listBox->setCurrentText( lex->ConfigName() );
 	curindex = ui->listBox->currentIndex();
+
+	//create widgets
+	for (auto &s : desc)
+	{
+		auto item = new QListWidgetItem(ui->listWidget);
+		item->setText(s.desc);
+	}
 
 	load();
 }
@@ -78,15 +105,24 @@ void CTextEdit::configchange(int ci)
 
 void CTextEdit::upColour(int Row)
 {
-	int begin,end ;
-	if( Row < 0){ begin = 0 ; end = ui->listWidget->count() ; }
-	else{ begin = Row ; end = Row+1 ; }
+	int begin, end ;
+	if( Row < 0)
+	{ 
+		begin = 0 ;
+		end = ui->listWidget->count() ;
+	}
+	else 
+	{
+		begin = Row; end = Row + 1;
+	}
+
 
 	for (;begin < end ; begin++ )
 	{
-		QBrush br( QColor(lex->hlb[begin].fc) );
+		int coloridx = desc[begin].colors[0];
+		QBrush br( QColor(lex->hlb[coloridx].fc) );
 		ui->listWidget->item(begin)->setForeground(br);
-		QBrush br2(QColor(lex->hlb[begin].bc));
+		QBrush br2(QColor(lex->hlb[coloridx].bc));
 		ui->listWidget->item(begin)->setBackground(br2);
 	}
 }
@@ -95,24 +131,31 @@ void CTextEdit::itemchange(int index)
 {
 	if( index < 0 || index > ui->listWidget->count() ) return ;
 	curindex = index;
-	ui->fcbtn->setStyleSheet( "QPushButton{background-color:#" + BkeCreator::IntToRgbString( lex->hlb[index].fc )+ ";}" );
-	ui->bcbtn->setStyleSheet("QPushButton{background-color:#" + BkeCreator::IntToRgbString( lex->hlb[index].bc )+ ";}" );
+	int coloridx = desc[index].colors[0];
+	ui->fcbtn->setStyleSheet( "QPushButton{background-color:#" + BkeCreator::IntToRgbString( lex->hlb[coloridx].fc )+ ";}" );
+	ui->bcbtn->setStyleSheet("QPushButton{background-color:#" + BkeCreator::IntToRgbString( lex->hlb[coloridx].bc )+ ";}" );
 	return ;
 }
 
 void CTextEdit::onForecolorClicked()
 {
 	if( !CheckBtn() ) return ;
-	lex->hlb[curindex].fc = setcolor.rgb() ;
-	ui->fcbtn->setStyleSheet("QPushButton{background-color:#" + BkeCreator::IntToRgbString(lex->hlb[curindex].fc) + ";}");
+	for (auto &idx : desc[curindex].colors)
+	{
+		lex->hlb[idx].fc = setcolor.rgb();
+	};
+	ui->fcbtn->setStyleSheet("QPushButton{background-color:#" + BkeCreator::IntToRgbString(lex->hlb[desc[curindex].colors[0]].fc) + ";}");
 	upColour(curindex);
 }
 
 void CTextEdit::onBackcolorClicked()
 {
 	if( !CheckBtn() ) return ;
-	lex->hlb[curindex].bc = setcolor.rgb() ;
-	ui->bcbtn->setStyleSheet("QPushButton{background-color:#" + BkeCreator::IntToRgbString(lex->hlb[curindex].bc) + ";}");
+	for (auto &idx : desc[curindex].colors)
+	{
+		lex->hlb[idx].bc = setcolor.rgb();
+	};
+	ui->bcbtn->setStyleSheet("QPushButton{background-color:#" + BkeCreator::IntToRgbString(lex->hlb[desc[curindex].colors[0]].bc) + ";}");
 	upColour(curindex);
 }
 
