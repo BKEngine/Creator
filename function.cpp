@@ -35,7 +35,7 @@ QString LOLI_OS_QSTRING(const QString &text)
 }
 
 //将优先比对模版库中的文件，如果模版库中存在相同文件名的文件则进行拷贝，否则创建空白文件
-bool    LOLI_MAKE_NULL_FILE(const QString &filename,const QString &stencilname)
+bool LOLI_MAKE_NULL_FILE(const QString &filename,const QString &stencilname)
 {
     QFileInfo temp(filename) ;
     if( temp.exists() )

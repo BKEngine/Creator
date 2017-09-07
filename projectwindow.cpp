@@ -268,7 +268,7 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
 	}
 
 	BkeProject *p = workpro;
-	QFileInfo sk(workpro->ProjectDir() + f.getDir() + name);
+	QFileInfo sk(workpro->ProjectDir() + f.getFullName() + '/' + name);
 	if (sk.exists()){
 		int sk = QMessageBox::information(this, "", "文件已经存在，是否直接添加文件", QMessageBox::Yes | QMessageBox::No);
 		if (sk == QMessageBox::No)
@@ -280,6 +280,9 @@ void ProjectWindow::NewFile(const ItemInfo &f, int type)
 	}
 
 	workpro->AddFiles(QStringList() << name, f);
+	
+	//then open
+	OpenProjectFile(f.getFullName() + '/' + name);
 }
 
 
