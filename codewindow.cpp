@@ -337,12 +337,16 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 
 	//改变工程
 	//ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
+	if(currentedit)
+		currentedit->saveTopLine();
 	currentedit = currentbase->edit;
 	//reset lexer
 	currentedit->deflex->ReadConfig(currentedit->deflex->ConfigName());
 	currentedit->setLexer(currentedit->deflex);
 	//连接文档改变信号
 	CurrentConnect(true);
+	currentedit->clearAnnotations();
+	currentedit->restoreTopLine();
 
 	diasearch->SetSci(currentedit); //查找管理
 	markadmin.SetFile(currentbase->FullName());  //标记管理器
@@ -1795,7 +1799,7 @@ void CodeWindow::jumpToDefFunc()
 	QAction *act = (QAction*)sender();
 	QStringList ls = act->data().toString().split('|');
 	int pos = ls[1].toInt();
-	AddFile(ls[0]);
+	AddFile(workpro->ProjectDir() + ls[0]);
 	if (currentedit->FileName != ls[0])
 		return;
 	int line, xpos;
@@ -1807,7 +1811,7 @@ void CodeWindow::jumpToCodeFunc()
 {
 	QAction *act = (QAction*)sender();
 	QStringList ls = act->data().toString().split('|');
-	AddFile(ls[0]);
+	AddFile(workpro->ProjectDir() + ls[0]);
 	if (currentedit->FileName != ls[0])
 		return;
 	int pos = currentedit->analysis->findLabel(currentedit->FileName, ls[1]);

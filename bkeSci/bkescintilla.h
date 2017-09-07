@@ -74,6 +74,8 @@ public:
 
 	int findcount ;
 
+	int topLine;
+
 	BkeDocBase *basedoc;
 	BkeProject *workpro;
 	QsciLexerBkeScript *deflex;
@@ -120,6 +122,9 @@ private slots:
 public:
 	int ChangeStateFlag ;
 	bool refind;
+
+	void saveTopLine();
+	void restoreTopLine();
 
 private:
 	QTimer tm;

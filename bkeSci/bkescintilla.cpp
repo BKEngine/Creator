@@ -136,6 +136,16 @@ void BkeScintilla::onTimer()
 	analysis->unlockFile();
 }
 
+void BkeScintilla::saveTopLine()
+{
+	topLine = SendScintilla(SCI_GETFIRSTVISIBLELINE);
+}
+
+void BkeScintilla::restoreTopLine()
+{
+	SendScintilla(SCI_SETFIRSTVISIBLELINE, topLine);
+}
+
 void BkeScintilla::CurrentPosChanged(int line, int index)
 {
 	int lineChanged = abs(line - LastLine);
@@ -1858,6 +1868,7 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 	SendScintilla(SCI_PRIVATELEXERCALL, 0, &global_bke_info);
 	//SendScintilla(SCI_PRIVATELEXERCALL, 1, pdata);
 	//SendScintilla(SCI_SETMARGINSENSITIVEN, SC_MARKNUM_FOLDER, true);
+	
 }
 
 int BkeScintilla::GetActualIndentCharLength(int lineID)

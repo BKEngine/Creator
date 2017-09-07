@@ -155,6 +155,7 @@ public slots:
 	bool CloseAll();
 	void ChangeCurrentEdit(int pos);
 	void SetCurrentEdit(int pos);
+	//file:绝对路径
 	void AddFile(const QString &file);
 	void TextInsert(const QString &text);
 	void DocChange(bool m);
