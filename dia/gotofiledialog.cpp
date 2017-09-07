@@ -1,4 +1,4 @@
-#include "weh.h"
+﻿#include "weh.h"
 #include "gotofiledialog.h"
 #include "ui_gotofiledialog.h"
 #include "QPinyin/QPinyin.h"
