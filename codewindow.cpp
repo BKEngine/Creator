@@ -78,6 +78,8 @@ CodeWindow::CodeWindow(QWidget *parent)
 	connect(btnpasteact, SIGNAL(triggered()), this, SLOT(ActPaste()));
 	//复制
 	connect(btncopyact, SIGNAL(triggered()), this, SLOT(ActCopy()));
+	//切换折叠
+	connect(btnswitchfold, SIGNAL(triggered()), this, SLOT(SwitchFold()));
 
 
 	btnDisable();
@@ -138,7 +140,9 @@ void CodeWindow::CreateBtn()
 	btnfly = new QAction(QIcon(":/cedit/source/flay.png"), "转到行...", this);
 	btngotolabellist = new QAction("转到标签", this);
 	btngotofile = new QAction("转到文件", this);
+	btnswitchfold = new QAction("全部折叠", this);
 
+	//右键菜单
 	jumpToDef = new QAction(this);
 	jumpToCode = new QAction(this);
 	gotoLabel = new QAction(this);
@@ -164,6 +168,7 @@ void CodeWindow::CreateBtn()
 	btncompilerunact->setShortcut(Qt::CTRL + Qt::Key_R);
 	btngotolabellist->setShortcut(Qt::CTRL + Qt::Key_L);
 	btngotofile->setShortcut(Qt::CTRL + Qt::Key_P);
+	btnswitchfold->setShortcut(Qt::CTRL + Qt::Key_M);
 
 	toolbar->addAction(btnlastact);
 	toolbar->addAction(btnnextact);
@@ -1519,6 +1524,21 @@ void CodeWindow::refreshLabel(QStringList &l)
 		slablelist->addItem("*" + it);
 	}
 	labelbanned = false;
+}
+
+void CodeWindow::SwitchFold()
+{
+	if (!currentedit)
+		return;
+	if (btnswitchfold->text() == "全部折叠")
+	{
+		btnswitchfold->setText("全部展开");
+	}
+	else
+	{
+		btnswitchfold->setText("全部折叠");
+	}
+	currentedit->foldAll(true);
 }
 
 void CodeWindow::FileReadyToCompile(int i)

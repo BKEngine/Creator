@@ -149,13 +149,14 @@ void MainWindow::CreateMenu()
 	wmenu->addAction(codeedit->btnpasteact) ;
 	wmenu->addAction(codeedit->btnselectall) ;
 	wmenu->addSeparator() ;
-	wmenu->addMenu( "高级" ) ;
+	//wmenu->addMenu( "高级" ) ;
 	wmenu->addSeparator() ;
 	wmenu->addAction(codeedit->btnfindact) ;
 	wmenu->addAction(codeedit->btnreplaceact) ;
-	wmenu->addAction("在文件中查找/替换...") ;
+	//wmenu->addAction("在文件中查找/替换...") ;
 	wmenu->addAction(codeedit->btnfly) ;
 	wmenu->addAction(codeedit->btncodeact) ;
+	wmenu->addAction(codeedit->btnswitchfold);
 
 	wmenu = this->menuBar()->addMenu("&构建");
 	wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());

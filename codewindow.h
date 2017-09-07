@@ -135,6 +135,7 @@ public:
 	QAction *btnfly;
 	QAction *btngotolabellist;
 	QAction *btngotofile;
+	QAction *btnswitchfold;	//	全部折叠/全部展开
 	QToolBar *toolbar;
 	QComboBox *slablelist;
 	QStringList slablels;
@@ -209,6 +210,7 @@ public slots:
 	void resetLexer();
 	void refreshLabel(BkeScintilla *sci);
 	void refreshLabel(QStringList &l);
+	void SwitchFold();
 	void jumpToDefFunc();
 	void jumpToCodeFunc();
 	void jumpToLabelFunc();
