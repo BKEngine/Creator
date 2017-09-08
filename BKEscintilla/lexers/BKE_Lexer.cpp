@@ -1304,6 +1304,38 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 		//Lex(startPos, lengthDoc, laststyle, pAccess);
 		//return;
 
+		//当前处于comment时，必须退回到comment之前进行解析，否则无法知道comment后接的是啥style
+		if ((initStyle & 63) == SCE_BKE_COMMENT || (initStyle & 63) == SCE_BKE_ANNOTATE)
+		{
+			int endPos = startPos + lengthDoc;
+			initStyle = curstyle;
+			//search begin of cmd
+			while (startPos-- > 0)
+			{
+				if ((initStyle & 63) == SCE_BKE_COMMENT || (initStyle & 63) == SCE_BKE_ANNOTATE)
+				{
+					initStyle = pAccess->StyleAt(startPos);
+				}
+				else
+				{
+					break;
+				}
+			}
+			if (startPos == 0)
+			{
+				if ((initStyle & 63) == SCE_BKE_COMMENT || (initStyle & 63) == SCE_BKE_ANNOTATE)
+				{
+					laststyle = SCE_BKE_DEFAULT;
+					Lex(0, endPos, SCE_BKE_DEFAULT, pAccess);
+					return;
+				}
+			}
+			laststyle = pAccess->StyleAt(startPos - 1);
+			firstLex = true;
+			Lex(startPos, endPos - startPos, pAccess->StyleAt(startPos - 1), pAccess);
+			return;
+		}
+
 		if (initStyle & CMD_MASK)
 		{
 			int endPos = startPos + lengthDoc;
