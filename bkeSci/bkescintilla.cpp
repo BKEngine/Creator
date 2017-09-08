@@ -54,7 +54,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	setMarginsBackgroundColor(QColor(240, 240, 240));
 	//setAutoIndent(true);
 	
-	SendScintilla(SCI_AUTOCSTOPS, "", " ~,./!@#$%^&*()+-=\\;'[]{}|:?<>");
+	SendScintilla(SCI_AUTOCSTOPS, "", " ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
 	SendScintilla(SCI_SETUSETABS, true);
 	SendScintilla(SCI_SETINDENT, 0);
 	SendScintilla(SCI_AUTOCSETORDER, SC_ORDER_CUSTOM);
