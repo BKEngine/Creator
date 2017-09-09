@@ -1856,7 +1856,8 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERTAIL, 0xa0a0a0);
 
 	setFolding(FoldStyle::BoxedTreeFoldStyle, 1);
-	SendScintilla(SCI_SETFOLDFLAGS, SC_FOLDFLAG_LEVELNUMBERS);
+	//for debug
+	//SendScintilla(SCI_SETFOLDFLAGS, SC_FOLDFLAG_LEVELNUMBERS);
 
 	SendScintilla(SCI_PRIVATELEXERCALL, 0, &global_bke_info);
 	//SendScintilla(SCI_PRIVATELEXERCALL, 1, pdata);

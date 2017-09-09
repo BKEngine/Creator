@@ -41,14 +41,19 @@ int _tmain(int argc, TCHAR *argv[])
 void SetAssociate()
 {
 	HKEY    hKey;
+	LSTATUS status;
 
-	if (ERROR_SUCCESS == RegCreateKey(HKEY_CLASSES_ROOT, szKeyExt1, &hKey))
+	status = RegCreateKey(HKEY_CLASSES_ROOT, szKeyExt1, &hKey);
+
+	if (ERROR_SUCCESS == status)
 	{
 		RegSetValueEx(hKey, NULL, 0, REG_SZ, (const BYTE *)szKeyEnter, sizeof(szKeyEnter));
 		RegCloseKey(hKey);
 	}
 
-	if (ERROR_SUCCESS == RegCreateKey(HKEY_CLASSES_ROOT, szKeyExt2, &hKey))
+	status = RegCreateKey(HKEY_CLASSES_ROOT, szKeyExt2, &hKey);
+
+	if (ERROR_SUCCESS == status)
 	{
 		TCHAR    szFileName[MAX_PATH] = _T("\"");
 		GetModuleFileName(NULL, szFileName + 1, sizeof(szFileName) - 1 * sizeof(TCHAR));
