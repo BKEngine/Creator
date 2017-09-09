@@ -1855,15 +1855,8 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERMIDTAIL, 0xa0a0a0);
 	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERTAIL, 0xa0a0a0);
 
-	//Fold Margin
-	SendScintilla(SCI_SETMARGINTYPEN, 1, SC_MARGIN_SYMBOL);
-	SendScintilla(SCI_SETMARGINMASKN, 1, SC_MASK_FOLDERS);
-	SendScintilla(SCI_SETMARGINWIDTHN, 1, 20);
-	SendScintilla(SCI_SETMARGINSENSITIVEN, 1, 1);
-
-	SendScintilla(SCI_SETFOLDFLAGS, SC_FOLDFLAG_LINEBEFORE_CONTRACTED | SC_FOLDFLAG_LINEAFTER_CONTRACTED); //如果折叠就在折叠行的上下各画一条横线
-
 	setFolding(FoldStyle::BoxedTreeFoldStyle, 1);
+	SendScintilla(SCI_SETFOLDFLAGS, SC_FOLDFLAG_LEVELNUMBERS);
 
 	SendScintilla(SCI_PRIVATELEXERCALL, 0, &global_bke_info);
 	//SendScintilla(SCI_PRIVATELEXERCALL, 1, pdata);

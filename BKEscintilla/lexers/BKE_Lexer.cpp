@@ -61,6 +61,7 @@ private:
 
 	//something for fold
 	int lineCurrent;
+	int firstLine;
 	int levelPrev;	//实际是当前行的level
 	int levelCurrent;	//实际是下一行的level
 
@@ -140,13 +141,26 @@ private:
 
 	void stopAndStartNewBlock()
 	{
-		if (levelPrev == SC_FOLDLEVELBASE)
+		if (levelPrev == SC_FOLDLEVELBASE || lineCurrent == firstLine)
 		{
 			levelCurrent++;
 		}
 		else
 		{
 			levelPrev--;
+		}
+	}
+
+	void stopBlock()
+	{
+		if (levelPrev == SC_FOLDLEVELBASE || lineCurrent == firstLine)
+		{
+			//donothing
+		}
+		else
+		{
+			levelPrev--;
+			levelCurrent = levelPrev;
 		}
 	}
 
@@ -951,8 +965,7 @@ void BKE_Lexer::DoCommand()
 	}
 	if (currentDeIndent.contains(cmdName))
 	{
-		levelPrev--;
-		levelCurrent = levelPrev;
+		stopBlock();
 	}
 	if (stopAndStart.contains(cmdName))
 	{
@@ -1046,8 +1059,7 @@ void BKE_Lexer::DoAtCommand()
 	}
 	if (currentDeIndent.contains(cmdName))
 	{
-		levelPrev--;
-		levelCurrent = levelPrev;
+		stopBlock();
 	}
 	if (stopAndStart.contains(cmdName))
 	{
@@ -1373,7 +1385,9 @@ void SCI_METHOD BKE_Lexer::Lex(unsigned int startPos, int lengthDoc, int initSty
 
 	//fold info
 	lineCurrent = accessor.GetLine(startPos);
+	firstLine = lineCurrent;
 	levelPrev = accessor.LevelAt(lineCurrent) & SC_FOLDLEVELNUMBERMASK;
+	//qDebug("line:%d, level:%d", lineCurrent, levelCurrent);
 	levelCurrent = levelPrev;
 
 	while (styler->More())
