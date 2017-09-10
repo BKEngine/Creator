@@ -656,6 +656,17 @@ void BkeScintilla::showComplete()
 	if ((style & 63) == SCE_BKE_LABEL_IN_PARSER)
 	{
 		completeType = SHOW_LABEL;
+		beginPos--;
+		style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+		while (beginPos > 0 && ((style & 63) == SCE_BKE_LABEL_IN_PARSER))
+		{
+			beginPos--;
+			style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+		}
+		beginPos++;
+		char *buf = new char[pos + 2 - beginPos];
+		SendScintilla(SCI_GETTEXTRANGE, beginPos, pos + 1, buf);
+		context = buf;
 	}
 	else if (style & 64 /*BEGAL_MASK*/)
 	{
@@ -828,10 +839,14 @@ void BkeScintilla::showComplete()
 		{
 			auto p = analysis->lockFile(FileName);
 			auto ls = p->getLabels();
+			for (auto &s : ls)
+			{
+				s = "*" + s;
+			}
 			analysis->unlockFile();
 			completeList = ls.join(' ');
 			if (!completeList.isEmpty())
-				SendScintilla(SCI_AUTOCSHOW, 0UL, completeList.toUtf8().data());
+				SendScintilla(SCI_AUTOCSHOW, context.length(), completeList.toUtf8().data());
 		}
 		break;
 	default:
@@ -853,7 +868,7 @@ void BkeScintilla::UiChange(int updated)
 	}
 
 	//if (ChangeType & SC_PERFORMED_USER)
-	if (ChangeType & SC_MOD_INSERTTEXT)
+	if (ChangeType & SC_MOD_INSERTTEXT || ChangeType & SC_MOD_DELETETEXT)
 	{
 		//自动补全
 		showComplete();
@@ -1253,6 +1268,7 @@ void BkeScintilla::AutoListChoose(const char* text, int pos)
 {
 	ChangeIgnore++;
 	BkeStartUndoAction();
+	int i = SendScintilla(SCI_AUTOCGETCURRENT);
 	SendScintilla(SCI_AUTOCCANCEL);  //取消自动完成，手动填充
 	ChooseComplete(text, pos);
 	BkeEndUndoAction();
@@ -1263,7 +1279,7 @@ void BkeScintilla::AutoListChoose(const char* text, int pos)
 
 void BkeScintilla::ChooseComplete(const char *text, int pos)
 {
-	int i = SendScintilla(SCI_AUTOCGETCURRENT);
+	//int i = SendScintilla(SCI_AUTOCGETCURRENT);
 	QString temp(text);
 	if (pos < 0)
 		pos = SendScintilla(SCI_GETCURRENTPOS);

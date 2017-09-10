@@ -44,8 +44,8 @@ public slots:
     void ReplaceText() ;
     void ReplaceAllText() ;
 	void FindAll();
-    void Show_() ;
 private:
+	void Show();
     QVBoxLayout *h1 ;
     QVBoxLayout *h2 ;
     QHBoxLayout *v1 ;
@@ -69,7 +69,8 @@ private:
     QString fstr ;
     bool firstshow ;
 protected:
-    void closeEvent(QCloseEvent *event);
+	virtual void closeEvent(QCloseEvent *event) override;
+	virtual bool eventFilter(QObject *watched, QEvent *event) override;
 };
 
 #endif // SEARCHBOX_H

@@ -28,6 +28,8 @@ QDockWidget(parent)
 	sciedit = 0;
 	firstshow = true;
 
+	edit->installEventFilter(this);
+
 	connect(edit, SIGNAL(returnPressed()), this, SLOT(onReturn1()));
 	connect(edit1, SIGNAL(returnPressed()), this, SLOT(onReturn2()));
 
@@ -190,6 +192,23 @@ void SearchBox::closeEvent(QCloseEvent *event)
 	sciedit->ClearIndicators(BkeScintilla::BKE_INDICATOR_FIND);
 }
 
+bool SearchBox::eventFilter(QObject *watched, QEvent *event)
+{
+	if (watched == edit)
+	{
+		if (event->type() == QEvent::KeyRelease)
+		{
+			QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+			if (keyEvent->key() == Qt::Key_Escape)
+			{
+				close();
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void SearchBox::SearchModel()
 {
 	btnreplacemodel->setText("替换>>");
@@ -201,7 +220,7 @@ void SearchBox::SearchModel()
 	//如果有选中部分，自动填入edit
 	edit->setText(sciedit->selectedText());
 	if (sciedit == 0) return;
-	Show_();
+	Show();
 }
 
 void SearchBox::ReplaceModel()
@@ -214,7 +233,7 @@ void SearchBox::ReplaceModel()
 	edit1->setEnabled(true);
 	edit->setText(sciedit->selectedText());
 	if (sciedit == 0) return;
-	Show_();
+	Show();
 }
 
 void SearchBox::ChangeModel()
@@ -273,7 +292,7 @@ void SearchBox::ReplaceAllText()
 	}
 }
 
-void SearchBox::Show_()
+void SearchBox::Show()
 {
 	if (!isFloating()) setFloating(true);
 	/*

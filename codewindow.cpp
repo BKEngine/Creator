@@ -1731,6 +1731,7 @@ void CodeWindow::GotoLabelList()
 	QStringList qs;
 	currentedit->analysis->getLabels(currentedit->FileName, qs);
 	OpenLabelDialog *dialog = new OpenLabelDialog(qs, this);
+	dialog->setModal(true);
 	connect(dialog, &OpenLabelDialog::GotoLabel, this, (void(QObject::*)(QString))&CodeWindow::GotoLabel);
 	dialog->show();
 }
@@ -1743,6 +1744,7 @@ void CodeWindow::GotoFile()
 	}
 	QStringList qs = workpro->AllScriptFiles();
 	GotoFileDialog *dialog = new GotoFileDialog(qs, this);
+	dialog->setModal(true);
 	connect(dialog, &GotoFileDialog::GotoFile, projectedit, &ProjectWindow::OpenProjectFile);
 	dialog->show();
 }
