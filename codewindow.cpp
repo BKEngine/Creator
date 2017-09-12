@@ -1424,15 +1424,6 @@ void CodeWindow::CheckMarks(BkeScintilla *edit, BkeMarkList *list)
 void CodeWindow::RunBKE()
 {
 	QString ndir;
-	/*if (!currentproject->config->live2DKey.isEmpty())
-#ifdef Q_OS_WIN
-		ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Live2D_Dev.exe";
-#elif defined(Q_OS_MAC)
-		ndir = BKE_CURRENT_DIR+"/BKEngine_Dev.app"; // Mac上没有Live2D
-#else
-		ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev"; // Linux上没有Live2D
-#endif
-	else*/
 #ifdef Q_OS_WIN
 		ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev.exe";
 #elif defined(Q_OS_MAC)
@@ -1441,7 +1432,7 @@ void CodeWindow::RunBKE()
 		ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev";
 #endif
 #ifdef Q_OS_MAC
-	QProcess::startDetached( "open",QStringList() << ndir << "--args" << "-dir" << workpro->ProjectDir() << "-nologo") ;
+    QProcess::startDetached( "open",QStringList() << ndir << "--args" << workpro->ProjectDir() << "-nologo") ;
 #else
 	QProcess::startDetached(ndir, QStringList() << "-nologo", workpro->ProjectDir());
 #endif
@@ -1450,15 +1441,6 @@ void CodeWindow::RunBKE()
 void CodeWindow::RunBKEWithArgs()
 {
 	QString ndir;
-	/*if (!currentproject->config->live2DKey.isEmpty())
-	#ifdef Q_OS_WIN
-	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Live2D_Dev.exe";
-	#elif defined(Q_OS_MAC)
-	ndir = BKE_CURRENT_DIR+"/BKEngine_Dev.app"; // Mac上没有Live2D
-	#else
-	ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev"; // Linux上没有Live2D
-	#endif
-	else*/
 #ifdef Q_OS_WIN
 	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev.exe";
 #elif defined(Q_OS_MAC)
@@ -1468,7 +1450,7 @@ void CodeWindow::RunBKEWithArgs()
 #endif
 	QStringList args;
 #ifdef Q_OS_MAC
-	args << ndir << "--args" << "-dir" << workpro->ProjectDir() << "-nologo";
+    args << ndir << "--args" << workpro->ProjectDir() << "-nologo";
 	for (auto &s : BKE_extraArgs)
 		args << s;
 	QProcess::startDetached("open", args);
