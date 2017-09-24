@@ -3,6 +3,7 @@
 #include <QVector>
 #include <QSet>
 #include "ParserHelper/parser/parser.h"
+#include <set>
 
 using namespace std;
 
@@ -224,7 +225,7 @@ public:
 
 	QList<QMap<int, BaseNode*>::iterator> labels;
 
-	QStringList getLabels();
+	void getLabels(set<QString> &l);
 
 	//void insertChars(Pos p, Pos offset);
 

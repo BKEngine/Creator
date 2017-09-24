@@ -111,7 +111,8 @@ void BkeScintilla::onTimer()
 		return;
 	}
 	p->refresh = false;
-	QStringList l = p->getLabels();
+	std::set<QString> l;
+	p->getLabels(l);
 	emit refreshLabel(l);
 	//clear indicator
 	int len = length();
@@ -392,13 +393,15 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 				else if (it->argFlags[it2] & PT_LABEL)
 				{
 					auto p = analysis->lockFile(FileName);
-					auto ls = p->getLabels();
+					std::set<QString> ls;
+					p->getLabels(ls);
 					analysis->unlockFile();
+					QStringList l;
 					for (auto &s : ls)
 					{
-						s = "\"*" + s + "\"";
+						l.push_back("\"*" + s + "\"");
 					}
-					return ls.join(' ');
+					return l.join(' ');
 				}
 			}
 			return res;
@@ -488,13 +491,15 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 						else if (info->argFlags[it2] & PT_LABEL)
 						{
 							auto p = analysis->lockFile(FileName);
-							auto ls = p->getLabels();
+							std::set<QString> ls;
+							p->getLabels(ls);
 							analysis->unlockFile();
+							QStringList l;
 							for (auto &s : ls)
 							{
-								s = "\"*" + s + "\"";
+								l.push_back("\"*" + s + "\"");
 							}
-							return ls.join(' ');
+							return l.join(' ');
 						}
 					}
 					return res;
@@ -838,13 +843,15 @@ void BkeScintilla::showComplete()
 	case SHOW_LABEL:	//show label in parser, without "
 		{
 			auto p = analysis->lockFile(FileName);
-			auto ls = p->getLabels();
+			std::set<QString> ls;
+			p->getLabels(ls);
+			analysis->unlockFile();
+			QStringList l;
 			for (auto &s : ls)
 			{
-				s = "*" + s;
+				l.push_back("*" + s);
 			}
-			analysis->unlockFile();
-			completeList = ls.join(' ');
+			completeList = l.join(' ');
 			if (!completeList.isEmpty())
 				SendScintilla(SCI_AUTOCSHOW, context.length(), completeList.toUtf8().data());
 		}

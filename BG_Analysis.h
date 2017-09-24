@@ -3,6 +3,7 @@
 #include "QThread"
 #include "ParseData.h"
 #include <QMutex>
+#include <QSet>
 #include <atomic>
 #include <algorithm>
 #include "ParserHelper/parser/parser.h"
@@ -277,7 +278,7 @@ public:
 	/// <param name="file">The file.</param>
 	/// <param name="l">Lables.</param>
 	/// <returns>whether success</returns>
-	bool getLabels(const QString &file, QStringList &l)
+	bool getLabels(const QString &file, std::set<QString> &l)
 	{
 		bool res = false;
 		msgmutex.lock();
@@ -285,7 +286,7 @@ public:
 		if (d)
 		{
 			res = true;
-			l = d->getLabels();
+			d->getLabels(l);
 		}
 		msgmutex.unlock();
 		return res;

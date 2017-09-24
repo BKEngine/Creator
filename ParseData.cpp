@@ -71,14 +71,12 @@ ParseData::ParseData(QByteArray &file, BKE_VarClosure *clo)
 	fileclo->assignStructure(clo, pMap, true);
 }
 
-QStringList ParseData::getLabels()
+void ParseData::getLabels(set<QString> &l)
 {
-	QStringList ls;
 	for (auto &it : labels)
 	{
-		ls << (*it)->name;
+		l.insert((*it)->name);
 	}
-	return ls;
 }
 
 /*

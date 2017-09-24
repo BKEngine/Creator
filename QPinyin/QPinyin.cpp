@@ -1,6 +1,14 @@
 #include "QPinyin.h"
 #include "PinyinHelper.h"
 
+void QPinyin::ExtractPinyinToMap(const std::set<QString> &qs, QHash<QString, QString> &map)
+{
+	for (auto &&s : qs)
+	{
+		ExtractPinyinToMap(s, map);
+	}
+}
+
 void QPinyin::ExtractPinyinToMap(const QStringList &qs, QHash<QString, QString> &map)
 {
 	for (auto &&s : qs)

@@ -6,7 +6,7 @@
 #include <QKeyEvent>
 #include <QHeaderView>
 
-OpenLabelDialog::OpenLabelDialog(const QStringList &labels, QWidget *parent /*= 0*/) :
+OpenLabelDialog::OpenLabelDialog(const std::set<QString> &labels, QWidget *parent /*= 0*/) :
 	QDialog(parent, Qt::WindowCloseButtonHint | Qt::MSWindowsFixedSizeDialogHint),
 	ui(new Ui::OpenLabelDialog)
 {
@@ -30,7 +30,7 @@ OpenLabelDialog::~OpenLabelDialog()
     delete ui;
 }
 
-void OpenLabelDialog::setLabels(const QStringList &labels)
+void OpenLabelDialog::setLabels(const std::set<QString> &labels)
 {
 	this->labels = labels;
 	QPinyin::ExtractPinyinToMap(labels, map);
@@ -47,7 +47,8 @@ void OpenLabelDialog::LineEditTextChanged(QString s)
 	QStringList qs;
 	if (s.isEmpty())
 	{
-		qs = labels;
+		for (auto &i : labels)
+			qs.append(i);
 	}
 	else
 	{

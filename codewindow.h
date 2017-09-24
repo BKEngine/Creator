@@ -210,7 +210,7 @@ public slots:
 	void replaceAllFile(const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen);
 	void resetLexer();
 	void refreshLabel(BkeScintilla *sci);
-	void refreshLabel(QStringList &l);
+	void refreshLabel(std::set<QString> &l);
 	void SwitchFold();
 	void jumpToDefFunc();
 	void jumpToCodeFunc();

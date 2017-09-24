@@ -1496,12 +1496,12 @@ void CodeWindow::ChangeCodec()
 
 void CodeWindow::refreshLabel(BkeScintilla *sci)
 {
-	QStringList l;
+	std::set<QString> l;
 	sci->analysis->getLabels(sci->FileName, l);
 	refreshLabel(l);
 }
 
-void CodeWindow::refreshLabel(QStringList &l)
+void CodeWindow::refreshLabel(std::set<QString> &l)
 {
 	slablelist->clear();
 	labelbanned = true;
@@ -1710,7 +1710,7 @@ void CodeWindow::GotoLabelList()
 	{
 		return;
 	}
-	QStringList qs;
+	std::set<QString> qs;
 	currentedit->analysis->getLabels(currentedit->FileName, qs);
 	OpenLabelDialog *dialog = new OpenLabelDialog(qs, this);
 	dialog->setModal(true);
