@@ -10,7 +10,9 @@ QDockWidget(parent)
 	h2 = new QVBoxLayout;
 	v1 = new QHBoxLayout;
 	btnsearchlast = new QPushButton("查找上一个", this);
+	btnsearchlast->setShortcut(Qt::SHIFT + Qt::Key_F3);
 	btnsearchnext = new QPushButton("查找下一个", this);
+	btnsearchnext->setShortcut(Qt::Key_F3);
 	btnsearchall = new QPushButton("查找全部", this);
 	btnreplacemodel = new QPushButton("替换>>", this);
 	btnreplace = new QPushButton("替换", this);
@@ -105,7 +107,6 @@ void SearchBox::onSearcAllConditionChange()
 		btnsearchnext->setEnabled(false);
 		btnreplacemodel->setEnabled(false);
 		btnreplace->setEnabled(false);
-		//btnreplaceall->setEnabled(false);
 	}
 	else
 	{
@@ -113,15 +114,6 @@ void SearchBox::onSearcAllConditionChange()
 		btnsearchnext->setEnabled(true);
 		btnreplacemodel->setEnabled(true);
 		btnreplace->setEnabled(true);
-		btnreplaceall->setEnabled(true);
-		if (this->windowTitle() == "替换")
-		{
-			ReplaceModel();
-		}
-		else
-		{
-			SearchModel();
-		}
 	}
 }
 
@@ -209,8 +201,10 @@ bool SearchBox::eventFilter(QObject *watched, QEvent *event)
 	return false;
 }
 
-void SearchBox::SearchModel()
+void SearchBox::_SearchModel(bool all)
 {
+	searchMode = true;
+	findallpro->setChecked(all);
 	btnreplacemodel->setText("替换>>");
 	this->setWindowTitle("查找");
 	lable2->setEnabled(false);
@@ -219,12 +213,25 @@ void SearchBox::SearchModel()
 	edit1->setEnabled(false);
 	//如果有选中部分，自动填入edit
 	edit->setText(sciedit->selectedText());
+	onSearcAllConditionChange();
 	if (sciedit == 0) return;
 	Show();
 }
 
-void SearchBox::ReplaceModel()
+void SearchBox::SearchModel()
 {
+	_SearchModel(false);
+}
+
+void SearchBox::SearchAllModel()
+{
+	_SearchModel(true);
+}
+
+void SearchBox::_ReplaceModel(bool all)
+{
+	searchMode = false;
+	findallpro->setChecked(all);
 	btnreplacemodel->setText("查找>>");
 	this->setWindowTitle("替换");
 	lable2->setEnabled(true);
@@ -232,13 +239,24 @@ void SearchBox::ReplaceModel()
 	btnreplaceall->setEnabled(true);
 	edit1->setEnabled(true);
 	edit->setText(sciedit->selectedText());
+	onSearcAllConditionChange();
 	if (sciedit == 0) return;
 	Show();
 }
 
+void SearchBox::ReplaceModel()
+{
+	_ReplaceModel(false);
+}
+
+void SearchBox::ReplaceAllModel()
+{
+	_ReplaceModel(true);
+}
+
 void SearchBox::ChangeModel()
 {
-	if (btnreplacemodel->text() == "替换>>") ReplaceModel();
+	if (searchMode) ReplaceModel();
 	else SearchModel();
 }
 
@@ -314,10 +332,17 @@ void SearchBox::Show()
 
 void SearchBox::onReturn1()
 {
-	if (edit1->isEnabled())
-		edit1->setFocus();
+	if (searchMode)
+	{
+		if (findallpro->isChecked())
+			FindAll();
+		else
+			FindNext();
+	}
 	else
-		FindNext();
+	{
+		edit1->setFocus(Qt::ShortcutFocusReason);
+	}
 }
 
 void SearchBox::onReturn2()

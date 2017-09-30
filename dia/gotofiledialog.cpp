@@ -21,6 +21,7 @@ GotoFileDialog::GotoFileDialog(const QStringList &files, QWidget *parent /*= 0*/
 	connect(ui->okButton, &QPushButton::clicked, this, &GotoFileDialog::OnOK);
 	connect(ui->cancelButton, &QPushButton::clicked, this, &GotoFileDialog::reject);
 	connect(ui->lineEdit, &QLineEdit::textChanged, this, &GotoFileDialog::LineEditTextChanged);
+	connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &GotoFileDialog::CellDoubleClicked);
 	ui->lineEdit->installEventFilter(this);
 	setFiles(files);
 }
@@ -97,6 +98,13 @@ void GotoFileDialog::OnOK()
 		return;
 	}
 	this->accept();
+}
+
+void GotoFileDialog::CellDoubleClicked(int row, int)
+{
+	emit GotoFile(tableContents[row]);
+	this->accept();
+	return;
 }
 
 bool GotoFileDialog::eventFilter(QObject *obj, QEvent *event)

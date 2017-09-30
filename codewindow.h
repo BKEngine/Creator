@@ -123,7 +123,9 @@ public:
 	QAction *btndebugact;
 	QAction *btncloseact;
 	QAction *btnfindact;
+	QAction *btnfindactall;
 	QAction *btnreplaceact;
+	QAction *btnreplaceallact;
 	QAction *btnbookmarkact;
 	QAction *btnmarkact;
 	QAction *btnrunfromlabel;
@@ -217,6 +219,7 @@ public slots:
 	void jumpToLabelFunc();
 	void AddNavigation(const QString &file, int line);
 	void RemoveNavigation(const QString &file);
+	void CreateAndGotoLabel(QString label);
 
 private slots:
 	void ShouldAddToNavigation();

@@ -21,6 +21,7 @@ OpenLabelDialog::OpenLabelDialog(const std::set<QString> &labels, QWidget *paren
 	connect(ui->okButton, &QPushButton::clicked, this, &OpenLabelDialog::OnOK);
 	connect(ui->cancelButton, &QPushButton::clicked, this, &OpenLabelDialog::reject);
 	connect(ui->lineEdit, &QLineEdit::textChanged, this, &OpenLabelDialog::LineEditTextChanged);
+	connect(ui->tableWidget, &QTableWidget::cellDoubleClicked, this, &OpenLabelDialog::CellDoubleClicked);
 	ui->lineEdit->installEventFilter(this);
 	setLabels(labels);
 }
@@ -90,6 +91,13 @@ void OpenLabelDialog::OnOK()
 		return;
 	}
 	this->reject();
+}
+
+void OpenLabelDialog::CellDoubleClicked(int row, int)
+{
+	emit GotoLabel(tableContents[row]);
+	this->accept();
+	return;
 }
 
 bool OpenLabelDialog::eventFilter(QObject *obj, QEvent *event)

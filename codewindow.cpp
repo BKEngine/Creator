@@ -51,7 +51,9 @@ CodeWindow::CodeWindow(QWidget *parent)
 	connect(btnbookmarkact, SIGNAL(triggered()), this, SLOT(AddBookMark()));
 	//查找
 	connect(btnfindact, SIGNAL(triggered()), diasearch, SLOT(SearchModel()));
+	connect(btnfindactall, SIGNAL(triggered()), diasearch, SLOT(SearchAllModel()));
 	connect(btnreplaceact, SIGNAL(triggered()), diasearch, SLOT(ReplaceModel()));
+	connect(btnreplaceallact, SIGNAL(triggered()), diasearch, SLOT(ReplaceAllModel()));
 	connect(diasearch, SIGNAL(searchOne(const QString &, const QString &, bool, bool, bool)), this, SLOT(searchOneFile(const QString &, const QString &, bool, bool, bool)));
 	connect(diasearch, SIGNAL(searchAll(const QString &, bool, bool, bool)), this, SLOT(searchAllFile(const QString &, bool, bool, bool)));
 	connect(diasearch, SIGNAL(replaceAll(const QString &, const QString &, bool, bool, bool, bool)), this, SLOT(replaceAllFile(const QString &, const QString &, bool, bool, bool, bool)));
@@ -128,7 +130,9 @@ void CodeWindow::CreateBtn()
 	btndebugact = new QAction(QIcon(":/cedit/source/debug.png"), "调试", this);
 	btncloseact = new QAction(QIcon(":/cedit/source/close.png"), "关闭", this);
 	btnfindact = new QAction(QIcon(":/cedit/source/find.png"), "查找", this);
+	btnfindactall = new QAction(QIcon(":/cedit/source/find.png"), "查找全部", this);
 	btnreplaceact = new QAction(QIcon(":/cedit/source/replace(2).png"), "替换", this);
+	btnreplaceallact = new QAction(QIcon(":/cedit/source/replace(2).png"), "替换全部", this);
 	btnbookmarkact = new QAction(QIcon(":/cedit/source/Bookmark.png"), "添加书签", this);
 	btnmarkact = new QAction(QIcon(":/cedit/source/pin.png"), "添加标记", this);
 	btnrunfromlabel = new QAction("从本标签处运行", this);
@@ -161,7 +165,11 @@ void CodeWindow::CreateBtn()
 	//btnundoact->setShortcut(Qt::CTRL + Qt::Key_Z);
 	//btnredoact->setShortcut(Qt::CTRL + Qt::Key_Y);
 	btnfindact->setShortcut(Qt::CTRL + Qt::Key_F);
+	btnfindactall->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_F);
+	addAction(btnfindactall);
 	btnreplaceact->setShortcut(Qt::CTRL + Qt::Key_H);
+	btnreplaceallact->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_H);
+	addAction(btnreplaceallact);
 	btncompileact->setShortcut(Qt::CTRL + Qt::Key_B);
 	//btnselectall->setShortcut(Qt::CTRL + Qt::Key_A);
 	btnfly->setShortcut(Qt::CTRL + Qt::Key_G);
@@ -1854,6 +1862,26 @@ void CodeWindow::RemoveNavigation(const QString &file)
 		currentNavigation = 0;
 	}*/
 	RefreshNavigation();
+}
+
+void CodeWindow::CreateAndGotoLabel(QString label)
+{
+	if (label.startsWith("*"))
+		label = label.right(label.size() - 1);
+	if (currentedit->analysis->findLabel(currentedit->FileName, label) < 0)
+	{
+		int line, index;
+		currentedit->lineIndexFromPosition(currentedit->GetTextLength(), &line, &index);
+		QString content1 = "\n*" + label + "\n";
+		QString content2 = "\n[return]\n";
+		currentedit->insertAt(content1, line, index);
+		currentedit->SetCurrentPosition(currentedit->GetTextLength());
+		currentedit->insert(content2);
+	}
+	else
+	{
+		GotoLabel(label);
+	}
 }
 
 void CodeWindow::RefreshNavigation()

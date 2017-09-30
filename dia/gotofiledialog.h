@@ -27,6 +27,7 @@ signals:
 private slots:
 	void LineEditTextChanged(QString);
 	void OnOK();
+	void CellDoubleClicked(int row, int);
 
 protected:
 	bool eventFilter(QObject *, QEvent *) override;

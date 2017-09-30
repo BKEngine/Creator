@@ -57,7 +57,6 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	SendScintilla(SCI_AUTOCSTOPS, "", " ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
 	SendScintilla(SCI_SETUSETABS, true);
 	SendScintilla(SCI_SETINDENT, 0);
-	SendScintilla(SCI_AUTOCSETORDER, SC_ORDER_CUSTOM);
 
 	//setIndentationGuides(true) ;
 	Separate = QString(" ~!@#$%^&*()-+/|{}[]:;/=.,?><\\\n\r");
@@ -218,7 +217,6 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 	}
 	else if (mtype & SC_MOD_BEFOREDELETE)
 	{
-		ChangeType = SC_MOD_DELETETEXT;
 		modfieddata.pos = pos;
 		modfieddata.type = mtype;
 		modfieddata.line = xline;
@@ -228,7 +226,6 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 		char *buf = new char[len + 1];
 		SendScintilla(SCI_GETTEXTRANGE, pos, pos + len, buf);
 		modfieddata.text = buf;
-
 		ChangeType = mtype;
 	}
 }
@@ -633,7 +630,7 @@ QString BkeScintilla::getGlobalList(const QString &ls, const QString &alltext)
 void BkeScintilla::showComplete()
 {
 	int pos = modfieddata.pos + modfieddata.text.length() - 1;
-	if (ChangeType & SC_MOD_DELETETEXT)
+	if (ChangeType & SC_MOD_DELETETEXT || ChangeType & SC_MOD_BEFOREDELETE)
 		pos = modfieddata.pos - 1;
 	if (pos < 0)
 		return;
@@ -753,7 +750,7 @@ void BkeScintilla::showComplete()
 			oldStyle = style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
 			pp++;
 			QString tmp;
-			while (pp < pos)
+			while (pp <= pos)
 			{
 				style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
 				if (style == SCE_BKE_DEFAULT && oldStyle == SCE_BKE_ATTRIBUTE)
@@ -875,7 +872,7 @@ void BkeScintilla::UiChange(int updated)
 	}
 
 	//if (ChangeType & SC_PERFORMED_USER)
-	if (ChangeType & SC_MOD_INSERTTEXT || ChangeType & SC_MOD_DELETETEXT)
+	if (ChangeType & SC_PERFORMED_USER && (ChangeType & SC_MOD_INSERTTEXT || ChangeType & SC_MOD_DELETETEXT || ChangeType & SC_MOD_BEFOREDELETE))
 	{
 		//自动补全
 		showComplete();
@@ -1159,68 +1156,6 @@ out:
 	//defparser->showtype = BkeParser::SHOW_NULL;
 	ChangeType = 0;
 	modfieddata.clear();
-}
-
-
-
-
-//自动补全
-void BkeScintilla::CompliteFromApi(int type)
-{
-	//int word_end;
-	//QString context = apiContext2(SendScintilla(SCI_GETCURRENTPOS), StartWordPos, word_end);
-	//if (defparser->showtype == BkeParser::SHOW_AUTOVALLIST && context.length() < 3) return;
-	//else if (defparser->showtype == BkeParser::SHOW_LABEL && context.length() < 2) return;
-
-	//SendScintilla(SCI_AUTOCSETIGNORECASE, false);
-
-	//comss = defparser->GetList(context);
-
-	//if (comss == 0) return;
-
-	//if (context.isEmpty()){
-	//	SendScintilla(SCI_USERLISTSHOW, 1, comss);
-	//}
-	//else{
-	//	SendScintilla(SCI_AUTOCSHOW, context.length(), comss);
-	//}
-}
-
-void BkeScintilla::CompliteFromApi2(int lest)
-{
-	//int word_end, nowpos = SendScintilla(SCI_GETCURRENTPOS);
-	//QString context = apiContext2(nowpos, StartWordPos, word_end);
-	//if (context.length() < lest) return;
-
-	//const char *ks = defparser->GetValList(context);
-	//SendScintilla(SCI_AUTOCSETIGNORECASE, true);
-
-	//if (ks == 0) return;
-	//else if (context.isEmpty()){
-	//	SendScintilla(SCI_USERLISTSHOW, 1, ks);
-	//}
-	//else{
-	//	SendScintilla(SCI_AUTOCSHOW, context.length(), ks);
-	//}
-}
-
-
-//获取上下文
-QString BkeScintilla::apiContext2(int pos, int &word_start, int &word_end)
-{
-	int ch, beginpos = pos;
-	QString word;
-
-	while (pos > 0)
-	{
-		ch = GetByte(--pos);
-		if (ch == 0 || IsSeparate(ch))  break; //不应该出现\0
-		word.prepend(ch);
-
-	}
-	word_start = pos;
-	word_end = beginpos;
-	return word;
 }
 
 //是否分割符
@@ -1715,6 +1650,11 @@ void BkeScintilla::setSelection(BkeIndicatorBase &p)
 	//    SendScintilla(SCI_SETSELECTIONEND,p.End()) ;
 }
 
+int BkeScintilla::GetTextLength()
+{
+	return SendScintilla(SCI_GETTEXTLENGTH);
+}
+
 BkeIndicatorBase BkeScintilla::findIndicatorLast(int id, int from)
 {
 	BkeIndicatorBase abc;
@@ -1877,6 +1817,10 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERSUB, 0xa0a0a0);
 	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERMIDTAIL, 0xa0a0a0);
 	SendScintilla(SCI_MARKERSETBACK, SC_MARKNUM_FOLDERTAIL, 0xa0a0a0);
+
+	// 自动补全设置
+	SendScintilla(SCI_AUTOCSETORDER, SC_ORDER_CUSTOM);
+	SendScintilla(SCI_AUTOCSETIGNORECASE, true);
 
 	setFolding(FoldStyle::BoxedTreeFoldStyle, 1);
 	//for debug

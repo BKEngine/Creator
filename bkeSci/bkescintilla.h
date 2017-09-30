@@ -47,7 +47,6 @@ public:
 	BkeIndicatorBase findlast;
 	QString FileName;
 
-	QString apiContext2(int pos , int &word_start , int &word_end) ;
 	QString GetLatstError(){ return errorinfo; }
 	void    DefineIndicators(int id,int intype) ;
 	void    ClearIndicators(int id) ;
@@ -72,6 +71,7 @@ public:
 	void SetCurrentPosition(int pos);
 	void setLexer(QsciLexer *lex = 0);
 	void setSelection(BkeIndicatorBase &p);
+	int GetTextLength();
 
 	int findcount ;
 
@@ -113,8 +113,6 @@ private slots:
 	void UseListChoose(const char* text ,int id ) ;
 	void AutoListChoose(const char* text ,int pos ) ;
 	void ChooseComplete(const char *text,int pos) ;
-	void CompliteFromApi(int type = 0) ;
-	void CompliteFromApi2(int lest = 3) ;
 	void InsertAndMove(const QString &text);
 	void CurrentPosChanged(int line , int index );
 	void CharHandle(int cc) ;

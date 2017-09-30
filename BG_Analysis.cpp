@@ -378,6 +378,7 @@ void BG_Analysis::parseMacro(const QString &file)
 						else if (std::find(backup_macrofiles.begin(), backup_macrofiles.end(), f) == backup_macrofiles.end())
 						{
 							backup_macrofiles.push_back(f);
+							qDebug() << f;
 							parseMacro(f);
 						}
 					}
@@ -550,121 +551,6 @@ void BG_Analysis::run()
 
 					parseMacro("macro.bkscr");
 
-					//while (!cancel && m_it != backup_macrofiles.end())
-					//{
-					//	//analysis one by one
-					//	msgmutex.lock();
-					//	QString thisfile = *m_it;
-					//	auto p = data[thisfile];
-					//	//backup_macrofiles.pop_front();
-					//	msgmutex.unlock();
-					//	if (p->fileNodes.empty())
-					//	{
-					//		p->infos2_mutex.lock();
-					//		p->infos2.push_back({ 2, 14, 0, 1 });
-					//		p->infos2_mutex.unlock();
-					//		continue;
-					//	}
-					//	auto node = p->fileNodes.begin();
-					//	if (!(*node)->isLabel() || (*node)->name != "register")
-					//	{
-					//		p->infos2_mutex.lock();
-					//		p->infos2.push_back({ 2, 14, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
-					//		p->infos2_mutex.unlock();
-					//		continue;
-					//	}
-					//	node++;
-					//	while (!cancel && node != p->fileNodes.end())
-					//	{
-					//		if ((*node)->isCommand() && (*node)->name == "return")
-					//			break;
-					//		if ((*node)->isCommand() && (*node)->name == "import")
-					//		{
-					//			auto n = (*node)->findIndex("file", 0);
-					//			if (!n || n->name.isEmpty())
-					//			{
-					//				p->infos2_mutex.lock();
-					//				p->infos2.push_back({ 2, 15, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
-					//				p->infos2_mutex.unlock();
-					//			}
-					//			else
-					//			{
-					//				PAModule pa(n->name);
-					//				bool suc;
-					//				QString mname = pa.getStringValue(&suc);
-					//				if (suc)
-					//				{
-					//					auto f = searchFile(mname);
-					//					if (f.isEmpty())
-					//					{
-					//						p->infos2_mutex.lock();
-					//						p->infos2.push_back({ 2, 16, n->startPos, n->endPos + 1 - n->startPos });
-					//						p->infos2_mutex.unlock();
-					//					}
-					//					else if (std::find(backup_macrofiles.begin(), backup_macrofiles.end(), f) == backup_macrofiles.end())
-					//					{
-					//						backup_macrofiles.push_back(f);
-					//					}
-					//				}
-					//			}
-					//		}
-					//		else if ((*node)->isCommand() && (*node)->name == "macro")
-					//		{
-					//			auto n = (*node)->findIndex("name", 0);
-					//			if (!n || n->name.isEmpty())
-					//			{
-					//				p->infos2_mutex.lock();
-					//				p->infos2.push_back({ 2, 17, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
-					//				p->infos2_mutex.unlock();
-					//			}
-					//			else
-					//			{
-					//				PAModule pa(n->name);
-					//				bool suc;
-					//				QString mname = pa.getStringValue(&suc);
-					//				if (suc)
-					//				{
-					//					if (CmdList.find(mname) != CmdList.end() || SpecialCmdList.find(mname) != SpecialCmdList.end())
-					//					{
-					//						p->infos2_mutex.lock();
-					//						p->infos2.push_back({ 2, 18, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
-					//						p->infos2_mutex.unlock();
-					//					}
-					//					else
-					//					{
-					//						auto &m = backup_macrodata[mname];
-					//						m.name = mname;
-					//						m.definefile = thisfile;
-					//						m.comment = (*node)->comment;
-					//						m.pos = (*node)->startPos;
-					//						for (int i = 0; i < (*node)->cmdParam.size(); i++)
-					//						{
-					//							if ((*node)->cmdParam[i] && (*node)->cmdParam[i]->name == "name")
-					//								continue;
-					//							if (!(*node)->cmdParam[i] || (*node)->cmdParam[i]->name.isEmpty())
-					//								m.paramqueue.push_back({ (*node)->cmdValue[i]->name, QString("") });
-					//							else
-					//								m.paramqueue.push_back({ (*node)->cmdParam[i]->name, (*node)->cmdValue[i]->name });
-					//						}
-					//					}
-					//				}
-					//				else
-					//				{
-					//					p->infos2_mutex.lock();
-					//					p->infos2.push_back({ 2, 19, (*node)->startPos, (*node)->endPos + 1 - (*node)->startPos });
-					//					p->infos2_mutex.unlock();
-					//				}
-					//			}
-					//		}
-					//		else if ((*node)->isExp())
-					//		{
-					//			PAModule pa((*node)->name);
-					//			pa.analysisToClosure(backup_topclo, false);
-					//		}
-					//		node++;
-					//	}
-					//	m_it++;
-					//}
 					try
 					{
 						if (!cancel)

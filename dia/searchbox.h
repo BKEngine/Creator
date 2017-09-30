@@ -38,13 +38,18 @@ public slots :
 public slots:
     void FindNext() ;
     void FindLast() ;
-    void SearchModel() ;
-    void ReplaceModel() ;
+	void SearchModel();
+	void SearchAllModel();
+	void ReplaceModel();
+	void ReplaceAllModel();
     void ChangeModel() ;
     void ReplaceText() ;
     void ReplaceAllText() ;
 	void FindAll();
+
 private:
+	void _SearchModel(bool all);
+	void _ReplaceModel(bool all);
 	void Show();
     QVBoxLayout *h1 ;
     QVBoxLayout *h2 ;
@@ -68,6 +73,7 @@ private:
     BkeScintilla *sciedit ;
     QString fstr ;
     bool firstshow ;
+	bool searchMode = true;
 protected:
 	virtual void closeEvent(QCloseEvent *event) override;
 	virtual bool eventFilter(QObject *watched, QEvent *event) override;

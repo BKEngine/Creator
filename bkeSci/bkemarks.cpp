@@ -22,7 +22,7 @@ void BkeMarkSupport::ProblemsFromText(const QString &dir, const QString &text)
     for( int i = 0 ; i < tk.size() ; i++){
         temp = tk.at(i) ;
         if( temp.endsWith(".bkscr") || temp.endsWith(".bkpsr")){
-            SetFile(dir+"/"+temp);
+            SetFile(dir+temp);
         }
         else if( temp.startsWith("error" )  ){
             AddProblem(temp);

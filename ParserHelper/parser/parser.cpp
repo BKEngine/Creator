@@ -3264,6 +3264,8 @@ NUD_FUNC(global2)
 
 NUD_FUNC(dot2)
 {
+	if(_this == nullptr)
+		throw Var_Except(L".前必须输入变量");
 	const BKE_String &str = tree->childs[0]->Node.var.asBKEStr();
 	auto v = _this->getWithVar();
 	if (!v)
