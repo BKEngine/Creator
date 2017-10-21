@@ -35,6 +35,13 @@ ProjectWindow::ProjectWindow(QWidget *parent)
 		connect(btns[i], SIGNAL(triggered()), this, SLOT(ActionAdmin()));
 	}
 
+	//del键
+	action_del = new QAction(this);
+	connect(action_del, SIGNAL(triggered()), this, SLOT(DeleteCurrentFile()));
+	action_del->setShortcutContext(Qt::WidgetShortcut);
+	action_del->setShortcut(Qt::Key_Delete);
+	addAction(action_del);
+
 	workpro = NULL;
 }
 
@@ -311,6 +318,13 @@ void ProjectWindow::RunBKEFromFile(const ItemInfo & f)
 }
 
 #undef DeleteFile
+void ProjectWindow::DeleteCurrentFile()
+{
+	ItemInfo info;
+	if (!ReadItemInfo(currentItem(), info)) return;
+	DeleteFile(info);
+}
+
 void ProjectWindow::DeleteFile(const ItemInfo &f)
 {
 	//是文件的话将询问是否移除文件
@@ -343,7 +357,7 @@ void ProjectWindow::AddFiles(const ItemInfo &f)
 	{
 		ReadItemInfo(f.Root->parent(), info);
 	}
-	QString path = workpro->ProjectDir() + f.getDir();
+	QString path = workpro->ProjectDir() + f.getFullName();
 	if (f.RootName == "宏" || f.RootName == "脚本"){
 		ls = QFileDialog::getOpenFileNames(this, "添加文件", path, "bkscr脚本(*.bkscr)");
 	}

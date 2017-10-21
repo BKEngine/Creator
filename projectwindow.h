@@ -72,8 +72,8 @@ private:
 	//BkeProject *temppro ;
 	ItemInfo info;
 
-
 	QAction *btns[BTN_COUNT];
+	QAction *action_del;
 
 	bool ReadItemInfo(QTreeWidgetItem *dest, ItemInfo &f);
 	void BkeChangeCurrentProject(/*BkeProject *p*/);
@@ -91,6 +91,9 @@ private:
 	void ExportScenario(const ItemInfo &f);
 	QTreeWidgetItem *findFileInProject(const QString &name);
 	void RunBKEFromFile(const ItemInfo &f);
+
+private slots:
+	void DeleteCurrentFile();
 
 public:
 	void ReleaseCurrentGame();

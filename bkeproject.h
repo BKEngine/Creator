@@ -16,7 +16,6 @@ class ItemInfo
 {
 public:
 	QTreeWidgetItem *Root ;  //所属目录树，工程下的导入、脚本、资源
-	QTreeWidgetItem *_this;
 	qint64  IconKey ;   //图标hash码，用于标识文件类型
 	QString Dirs ;  //相对路径
 	QString Name ;  //名称

@@ -731,6 +731,7 @@ void BkeProject::AddFiles(const QStringList &ls, const ItemInfo &f)
 	{
 		FindItem(f.Root, s);
 	}
+	SortTree(f.Root);
 	WriteBkpFile();
 }
 

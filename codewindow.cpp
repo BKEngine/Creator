@@ -157,7 +157,8 @@ void CodeWindow::CreateBtn()
 	connect(btngotolabellist, SIGNAL(triggered()), this, SLOT(GotoLabelList()));
 	connect(btngotofile, SIGNAL(triggered()), this, SLOT(GotoFile()));
 
-
+	btnlastact->setShortcut(Qt::ALT + Qt::Key_Left);
+	btnnextact->setShortcut(Qt::ALT + Qt::Key_Right);
 	btnsaveact->setShortcut(Qt::CTRL + Qt::Key_S);
 	//btncopyact->setShortcut(Qt::CTRL + Qt::Key_C);
 	//btnpasteact->setShortcut(Qt::CTRL + Qt::Key_V);
