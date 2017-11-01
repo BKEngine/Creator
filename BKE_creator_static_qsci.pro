@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-QT += network
+QT += network websocket
 
 greaterThan(QT_MAJOR_VERSION, 4): {
 QT += widgets
