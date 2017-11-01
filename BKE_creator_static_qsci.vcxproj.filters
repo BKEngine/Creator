@@ -1104,6 +1104,9 @@
     <ClInclude Include="GeneratedFiles\ui_gotofiledialog.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="qsortedset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\Setoptiondia.ui">
@@ -1356,6 +1359,9 @@
     </None>
     <None Include="QPinyin\pinyin.txt.compress">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="QSortedSet">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

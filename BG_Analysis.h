@@ -278,7 +278,7 @@ public:
 	/// <param name="file">The file.</param>
 	/// <param name="l">Lables.</param>
 	/// <returns>whether success</returns>
-	bool getLabels(const QString &file, std::set<QString> &l)
+	bool getLabels(const QString &file, QSortedSet<QString> &l)
 	{
 		bool res = false;
 		msgmutex.lock();

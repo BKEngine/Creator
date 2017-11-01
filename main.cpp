@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
 #else
     BKE_CURRENT_DIR = QFileInfo( exeDir ).path();
     //qt has a bug in 5.2.1(windows)? so I use setLibraryPaths
-    QApplication::addLibraryPath( BKE_CURRENT_DIR ) ;
+	QApplication::addLibraryPath(BKE_CURRENT_DIR);
 #endif
 #endif
 
@@ -152,6 +152,7 @@ int main(int argc, char *argv[])
 #ifdef QT_DEBUG
 #ifdef WIN32
 	BKE_CURRENT_DIR = QDir::currentPath() ;
+	QApplication::addLibraryPath(BKE_CURRENT_DIR);
 #endif
 #endif
 

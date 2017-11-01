@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QHash>
-#include <set>
+#include <QSortedSet>
 #include <QStandardItemModel>
 #include <QPointer>
 #include <memory>
@@ -18,9 +18,9 @@ class OpenLabelDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit OpenLabelDialog(const std::set<QString> &labels, QWidget *parent = 0);
+    explicit OpenLabelDialog(const QSortedSet<QString> &labels, QWidget *parent = 0);
     ~OpenLabelDialog();
-	void setLabels(const std::set<QString> &labels);
+	void setLabels(const QSortedSet<QString> &labels);
 
 signals:
 	void GotoLabel(QString label);
@@ -36,7 +36,7 @@ protected:
 private:
     Ui::OpenLabelDialog *ui;
 
-	std::set<QString> labels;
+	QSortedSet<QString> labels;
 	QHash<QString, QString> map;
 	std::unique_ptr<QFuzzyMatcher> matcher;
 	MatcherOptions options;

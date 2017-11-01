@@ -1,9 +1,8 @@
 ﻿#pragma once
 
 #include <QVector>
-#include <QSet>
+#include <QSortedSet>
 #include "ParserHelper/parser/parser.h"
-#include <set>
 
 using namespace std;
 
@@ -225,7 +224,7 @@ public:
 
 	QList<QMap<int, BaseNode*>::iterator> labels;
 
-	void getLabels(set<QString> &l);
+	void getLabels(QSortedSet<QString> &l);
 
 	//void insertChars(Pos p, Pos offset);
 
@@ -383,7 +382,7 @@ inline bool isVarName(const QString &s)
 	return r;
 }
 
-inline void getAllMembers(BKE_VarClass *cla, set<QString> &params)
+inline void getAllMembers(BKE_VarClass *cla, QSet<QString> &params)
 {
 	for (int i = 0; i < cla->parents.size(); i++)
 		getAllMembers(cla->parents[i], params);
@@ -396,7 +395,7 @@ inline void getAllMembers(BKE_VarClass *cla, set<QString> &params)
 	}
 }
 
-inline void getAllMembers(BKE_VarClosure *clo, set<QString> &params)
+inline void getAllMembers(BKE_VarClosure *clo, QSet<QString> &params)
 {
 	if (clo->parent)
 		getAllMembers(clo->parent, params);

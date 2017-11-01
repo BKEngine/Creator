@@ -5,7 +5,7 @@
 #include <Qsci/qsciscintilla.h>
 #include <QMessageBox>
 #include <QToolTip>
-#include <QSet>
+#include <QSortedSet>
 #include "bkeSci/qscilexerbkescript.h"
 #include "bkeSci/BkeIndicatorBase.h"
 #include <weh.h>
@@ -99,7 +99,7 @@ signals:
 	void Undoready(bool is) ;
 	void Redoready(bool is) ;
 	void refreshLabel(BkeScintilla *sci);
-	void refreshLabel(std::set<QString> &l);
+	void refreshLabel(QSortedSet<QString> &l);
 	void ShouldAddToNavigation();
 
 public slots:

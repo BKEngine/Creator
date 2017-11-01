@@ -71,7 +71,7 @@ ParseData::ParseData(QByteArray &file, BKE_VarClosure *clo)
 	fileclo->assignStructure(clo, pMap, true);
 }
 
-void ParseData::getLabels(set<QString> &l)
+void ParseData::getLabels(QSortedSet<QString> &l)
 {
 	for (auto &it : labels)
 	{

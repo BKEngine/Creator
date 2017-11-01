@@ -6,7 +6,7 @@
 #include <QKeyEvent>
 #include <QHeaderView>
 
-OpenLabelDialog::OpenLabelDialog(const std::set<QString> &labels, QWidget *parent /*= 0*/) :
+OpenLabelDialog::OpenLabelDialog(const QSortedSet<QString> &labels, QWidget *parent /*= 0*/) :
 	QDialog(parent, Qt::WindowCloseButtonHint | Qt::MSWindowsFixedSizeDialogHint),
 	ui(new Ui::OpenLabelDialog)
 {
@@ -31,7 +31,7 @@ OpenLabelDialog::~OpenLabelDialog()
     delete ui;
 }
 
-void OpenLabelDialog::setLabels(const std::set<QString> &labels)
+void OpenLabelDialog::setLabels(const QSortedSet<QString> &labels)
 {
 	this->labels = labels;
 	QPinyin::ExtractPinyinToMap(labels, map);

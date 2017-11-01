@@ -110,7 +110,7 @@ void BkeScintilla::onTimer()
 		return;
 	}
 	p->refresh = false;
-	std::set<QString> l;
+	QSortedSet<QString> l;
 	p->getLabels(l);
 	emit refreshLabel(l);
 	//clear indicator
@@ -390,13 +390,13 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 				else if (it->argFlags[it2] & PT_LABEL)
 				{
 					auto p = analysis->lockFile(FileName);
-					std::set<QString> ls;
+					QSortedSet<QString> ls;
 					p->getLabels(ls);
 					analysis->unlockFile();
 					QStringList l;
 					for (auto &s : ls)
 					{
-						l.push_back("\"*" + s + "\"");
+						l.push_back("*" + s);
 					}
 					return l.join(' ');
 				}
@@ -488,7 +488,7 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 						else if (info->argFlags[it2] & PT_LABEL)
 						{
 							auto p = analysis->lockFile(FileName);
-							std::set<QString> ls;
+							QSortedSet<QString> ls;
 							p->getLabels(ls);
 							analysis->unlockFile();
 							QStringList l;
@@ -539,7 +539,7 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		}
 		idx++;
 	}
-	std::set<QString> params;
+	QSet<QString> params;
 	BKE_Variable vv;
 	switch (v.getType())
 	{
@@ -611,7 +611,7 @@ QString BkeScintilla::getGlobalList(const QString &ls, const QString &alltext)
 		analysis->unlockFile();
 		return QString();
 	}
-	std::set<QString> params;
+	QSet<QString> params;
 	getAllMembers(p->fileclo, params);
 	analysis->unlockFile();
 	for (auto &it : global_bke_info.BagelWords)
@@ -840,7 +840,7 @@ void BkeScintilla::showComplete()
 	case SHOW_LABEL:	//show label in parser, without "
 		{
 			auto p = analysis->lockFile(FileName);
-			std::set<QString> ls;
+			QSortedSet<QString> ls;
 			p->getLabels(ls);
 			analysis->unlockFile();
 			QStringList l;

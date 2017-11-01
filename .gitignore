@@ -6,3 +6,5 @@
 /BKE_creator_static_qsci.vcxproj.user
 /ipch/
 /.vs/
+*.VC.db
+*.VC.VC.opendb

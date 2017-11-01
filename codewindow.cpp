@@ -157,7 +157,8 @@ void CodeWindow::CreateBtn()
 	connect(btngotolabellist, SIGNAL(triggered()), this, SLOT(GotoLabelList()));
 	connect(btngotofile, SIGNAL(triggered()), this, SLOT(GotoFile()));
 
-
+	btnlastact->setShortcut(Qt::ALT + Qt::Key_Left);
+	btnnextact->setShortcut(Qt::ALT + Qt::Key_Right);
 	btnsaveact->setShortcut(Qt::CTRL + Qt::Key_S);
 	//btncopyact->setShortcut(Qt::CTRL + Qt::Key_C);
 	//btnpasteact->setShortcut(Qt::CTRL + Qt::Key_V);
@@ -1504,12 +1505,12 @@ void CodeWindow::ChangeCodec()
 
 void CodeWindow::refreshLabel(BkeScintilla *sci)
 {
-	std::set<QString> l;
+	QSortedSet<QString> l;
 	sci->analysis->getLabels(sci->FileName, l);
 	refreshLabel(l);
 }
 
-void CodeWindow::refreshLabel(std::set<QString> &l)
+void CodeWindow::refreshLabel(QSortedSet<QString> &l)
 {
 	slablelist->clear();
 	labelbanned = true;
@@ -1718,7 +1719,7 @@ void CodeWindow::GotoLabelList()
 	{
 		return;
 	}
-	std::set<QString> qs;
+	QSortedSet<QString> qs;
 	currentedit->analysis->getLabels(currentedit->FileName, qs);
 	OpenLabelDialog *dialog = new OpenLabelDialog(qs, this);
 	dialog->setModal(true);
