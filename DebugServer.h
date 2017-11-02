@@ -15,8 +15,11 @@ class DebugServer : public QObject
 	QList<QWebSocket *> connections;
 
 public:
-	DebugServer();
+	DebugServer(QObject *parent = nullptr);
 	~DebugServer();
+
+signals:
+	void logReceived(int32_t level, QString log);
 
 private slots:
 	void onNewConnection();

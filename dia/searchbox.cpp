@@ -119,19 +119,19 @@ void SearchBox::onSearcAllConditionChange()
 
 void SearchBox::FindAll()
 {
-	otheredit->clearSearch();
+	otheredit->ClearSearch();
 	bool all = findallpro->isChecked();
 	if (!all)
 	{
 		fstr = edit->text();
 		emit searchOne(sciedit->basedoc->FullName(), fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
-		otheredit->IfShow(otheredit->btnsearch, true);
+		otheredit->switchToSearchWidget();
 	}
 	else
 	{
 		fstr = edit->text();
 		emit searchAll(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
-		otheredit->IfShow(otheredit->btnsearch, true);
+		otheredit->switchToSearchWidget();
 	}
 	close();
 }

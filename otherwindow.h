@@ -6,6 +6,7 @@
 
 //打开文件视窗
 
+class QToolBar;
 class OtherWindow : public TopBarWindow
 {
     Q_OBJECT
@@ -16,52 +17,69 @@ public:
         WIN_COMPILE ,
         WIN_BOOKMARK ,
         WIN_MARK
-    };
+	};
 
+	OtherWindow(QWidget *parent = 0);
+	~OtherWindow();
+
+private:
     QPushButton *btnproblem ;
     QPushButton *btnsearch ;
     QPushButton *btncompiletext ;
     QPushButton *btnbookmark ;
     QPushButton *btnmark ;
+	QPushButton *btnruntimeproblem;
 	QLineEdit *lewords;
 
     QStackedWidget *stackw ;
-    QListWidget *ProblemList ;
+    QListWidget *problemList ;
     QListWidget *searchlist ;
     QsciScintilla *compileedit ;
     QListWidget *bookmarklist ;
-    QListWidget *marklist ;
-
-    OtherWindow(QWidget *parent = 0);
-	~OtherWindow();
+	QListWidget *marklist;
+	QListWidget *runtimeProblemList;
 
     int ErrorCount(){ return errorcount ; }
-    void ShowProblem(BkeMarkList *list,const QString &dir) ;
-    void IfShow(QPushButton *btn,bool must = false) ;
-    void RefreshBookMark(BkeMarkList *b) ;
-	void clearSearch();
+    void checkShow(QPushButton *btn,bool must = false) ;
+
+public:
+	void feedDownBar(QToolBar *);
+	void setTextCount(int count);
+	void ClearSearch();
+	void AddSearchItem(const QString &label);
+	void SetProblemList(BkeMarkList *list, const QString &dir);
+	void SetCompileResult(const QString &label);
+	void RefreshBookMark(BkeMarkList *b);
+	void SetRuntimeProblemList(BkeMarkList *list, const QString &dir);
+
 
 signals:
     void Location(BkeMarkerBase *mark,const QString &prodir) ;
 
-public slots:
+private slots:
 	void SearchDoubleClicked(QListWidgetItem * item);
 	void ProblemDoubleClicked(QListWidgetItem * item);
-    void BookMarkDoubleClicked(QListWidgetItem * item) ;
-    void MarkDoubleClicked(QListWidgetItem * item) ;
-    void WINproblem() ;
-    void WINsearch() ;
-    void WINcomile() ;
-    void WINbookmark() ;
-    void WINmark() ;
+	void BookMarkDoubleClicked(QListWidgetItem * item);
+	void MarkDoubleClicked(QListWidgetItem * item);
+	void RuntimeProblemDoubleClicked(QListWidgetItem * item);
+
+public slots:
+    void switchToProblemWidget(bool force = false) ;
+    void switchToSearchWidget(bool force = false) ;
+    void switchToCompileWidget(bool force = false) ;
+    void switchToBookmarkWidget(bool force = false) ;
+	void switchToMarkWidget(bool force = false);
+	void switchToRuntimeProblemWidget(bool force = false);
 	void onSearchOne(const QString &file, const QString &fullfile, int line, int start, int end);
 
 private:
     QPushButton *lastbtn ;
     int errorcount ;
+	int runtimeerrorcount;
 
     QIcon *icoerror ;
-    QIcon *icowarning ;
+	QIcon *icowarning;
+	QIcon *iconlog;
     QIcon *icobookmark ;
 
     QColor bc1 ;
@@ -69,14 +87,13 @@ private:
 
     BkeMarkList membookmark ;
     BkeMarkList memmark ;
-    BkeMarkList memproblem ;
+	BkeMarkList memproblem;
+	BkeMarkList memruntimeproblem;
 	BkeMarkList memsearch;
 	QString problemdir;
+	QString runtimeproblemdir;
 
     QHash<QPushButton*,QWidget*> emap ;
-    void BuildBookMarker() ;
-    void BuildProblem() ;
-    void BuildMarker() ;
     void AddItem(BkeMarkerBase *marker, QIcon *ico,QListWidget* w) ;
 
 };

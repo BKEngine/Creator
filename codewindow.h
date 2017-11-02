@@ -13,6 +13,7 @@
 #include <QFileSystemWatcher>
 #include "dia/searchbox.h"
 #include "dia/bkeleftfilewidget.h"
+#include "DebugServer.h"
 
 class BkeDocBase
 {
@@ -88,22 +89,19 @@ class CodeWindow : public QMainWindow
 
 public:
 
-	friend class SearchThread;
-
 	~CodeWindow();
 	CodeWindow(QWidget *parent = 0);
+
 	QSize sizeHint() const;
-	void OtherWinStartX(ProjectWindow *p, OtherWindow *win, BkeLeftFileWidget *flist);
-	void OtherWinOtherwin(OtherWindow *win);
-	void OtherWinProject(ProjectWindow *p);
-	void OtherwinFileList(BkeLeftFileWidget *flist);
+	void BindOtherWindow(OtherWindow *win);
+	void BindProjectWindow(ProjectWindow *p);
+	void BindFileListWidget(BkeLeftFileWidget *flist);
 	enum{
 		ERROR_NO,
 		ERROR_SAVE
 	};
 
 	BkeLeftFileWidget *filewidget;
-
 
 	QAction *jumpToDef;
 	QAction *jumpToCode;
@@ -293,12 +291,18 @@ private:
 	void CurrentConnect(bool c);
 	//bool ReadyCompile(const QString &file) ;
 	void CheckProblemMarks(BkeScintilla *edit, BkeMarkList *list);
+	void CheckRuntimeProblemMarks(BkeScintilla *edit, BkeMarkList *list);
 	void CheckBookMarks(BkeScintilla *edit, BkeMarkList *list);
 	void CheckMarks(BkeScintilla *edit, BkeMarkList *list);
 	void AddMarksToEdit();
 	void FileIOclose(const QStringList &list);
 	void DrawLine(bool isClear);
 	bool WriteOpenFile(const QString &dir);
+
+	/////////////Debug Component///////////////
+	DebugServer *debugServer;
+private slots:
+	void DebugLogReceived(int32_t, QString);
 };
 
 #endif // CODEWINDOW_H

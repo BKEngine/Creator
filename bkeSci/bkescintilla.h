@@ -187,6 +187,24 @@ protected:
 	QString getEnums(const QString &name, const QString &attr, const QString &alltext);
 	QString getValList(const QStringList &ls, const QString &alltext);
 	QString getGlobalList(const QString &ls, const QString &alltext);
+public:
+	enum AnnotationType
+	{
+		PROBLEM,
+		RUNTIME_PROBLEM,
+	};
+
+private:
+	QMultiHash<int, AnnotationType> annotations;
+
+public:
+	
+	void clearAnnotations(AnnotationType type);
+	void clearAnnotationsAll();
+	void annotate(int line, const QString &text, int style, AnnotationType type);
+	void annotate(int line, const QString &text, const QsciStyle &style, AnnotationType type);
+	void annotate(int line, const QsciStyledText &text, AnnotationType type);
+	void annotate(int line, const QList<QsciStyledText> &text, AnnotationType type);
 };
 
 #endif // BKESCINTILLA_H

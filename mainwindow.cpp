@@ -88,9 +88,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	CreateMenu();
 
 	//绑定其他窗口，并连接信号
-	codeedit->OtherWinOtherwin(otheredit);
-	codeedit->OtherWinProject(projectedit);
-	codeedit->OtherwinFileList(fileListWidget);
+	codeedit->BindOtherWindow(otheredit);
+	codeedit->BindProjectWindow(projectedit);
+	codeedit->BindFileListWidget(fileListWidget);
 	//改变标题
 	connect(codeedit,SIGNAL(CurrentFileChange(QString,QString)),this,SLOT(CurrentFileChange(QString,QString))) ;
 
@@ -207,13 +207,7 @@ void MainWindow::CreateDownBar()
 	temp11->setFixedWidth(240);
 	downbar->addWidget(temp11) ;
 
-	downbar->addWidget(otheredit->btnproblem) ;
-	downbar->addWidget(otheredit->btnsearch) ;
-	downbar->addWidget(otheredit->btncompiletext) ;
-	downbar->addWidget(otheredit->btnbookmark) ;
-	downbar->addWidget(otheredit->btnmark) ;
-	downbar->addSeparator();
-	downbar->addWidget(otheredit->lewords);
+	otheredit->feedDownBar(downbar);
 
 	btnbar = new QToolBar(this) ;
 	btnbar->setFixedHeight(24);

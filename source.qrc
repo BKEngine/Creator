@@ -69,12 +69,13 @@
         <file>source/alert.png</file>
         <file>source/error.png</file>
         <file>source/errorsmall.png</file>
-        <file>source/wainningsmall.png</file>
         <file>source/Bookmarksmall.png</file>
         <file>source/pinsmall.png</file>
         <file>source/textarea.png</file>
         <file>source/terminal.png</file>
         <file>source/product-design.png</file>
+        <file>source/log.png</file>
+        <file>source/warningsmall.png</file>
     </qresource>
     <qresource prefix="/auto">
         <file>source/auto_key.png</file>

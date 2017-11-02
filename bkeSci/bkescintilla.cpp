@@ -23,14 +23,18 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	completeType = SHOW_NULL;
 
 	setUtf8(true);
-	setMarginWidth(0, "012345678");
-	setMarginWidth(1, 20);
+	setMarginLineNumbers(0, false);
+	setMarginWidth(0, 48);
+	setMarginLineNumbers(1, true);
+	setMarginWidth(1, 24);
 	markerDefine(QImage(":/info/source/errorsmall.png"), 1);
-	markerDefine(QImage(":/info/source/wainningsmall.png"), 2);
+	markerDefine(QImage(":/info/source/warningsmall.png"), 2);
 	markerDefine(QImage(":/info/source/Bookmarksmall.png"), 3);
 	markerDefine(QImage(":/info/source/pinsmall.png"), 4);
-	markerDefine(QsciScintilla::LeftRectangle, 5);
-	SendScintilla(SCI_MARKERSETBACK, 5, QColor(0, 159, 60));
+	markerDefine(QImage(":/info/source/errorsmall.png"), 5);
+	markerDefine(QImage(":/info/source/warningsmall.png"), 6);
+	setMarginMarkerMask(0, 0b01111111);
+	setMarginMarkerMask(1, 0);
 
 	//error
 	SendScintilla(SCI_INDICSETSTYLE, BKE_INDICATOR_ERROR, INDIC_SQUIGGLEPIXMAP);
@@ -625,6 +629,50 @@ QString BkeScintilla::getGlobalList(const QString &ls, const QString &alltext)
 	}
 	res.remove(0, 1);
 	return res;
+}
+
+void BkeScintilla::clearAnnotations(AnnotationType type)
+{
+	for (auto it = annotations.begin(); it != annotations.end();)
+	{
+		if (it.value() == type)
+		{
+			QsciScintilla::clearAnnotations(it.key());
+			it = annotations.erase(it);
+		}
+		else
+			it++;
+	}
+}
+
+void BkeScintilla::clearAnnotationsAll()
+{
+	QsciScintilla::clearAnnotations();
+	annotations.clear();
+}
+
+void BkeScintilla::annotate(int line, const QString & text, int style, AnnotationType type)
+{
+	QsciScintilla::annotate(line, text, style);
+	annotations.insert(line, type);
+}
+
+void BkeScintilla::annotate(int line, const QString & text, const QsciStyle & style, AnnotationType type)
+{
+	QsciScintilla::annotate(line, text, style);
+	annotations.insert(line, type);
+}
+
+void BkeScintilla::annotate(int line, const QsciStyledText & text, AnnotationType type)
+{
+	QsciScintilla::annotate(line, text);
+	annotations.insert(line, type);
+}
+
+void BkeScintilla::annotate(int line, const QList<QsciStyledText>& text, AnnotationType type)
+{
+	QsciScintilla::annotate(line, text);
+	annotations.insert(line, type);
 }
 
 void BkeScintilla::showComplete()
@@ -1822,7 +1870,7 @@ void BkeScintilla::setLexer(QsciLexer *lex)
 	SendScintilla(SCI_AUTOCSETORDER, SC_ORDER_CUSTOM);
 	SendScintilla(SCI_AUTOCSETIGNORECASE, true);
 
-	setFolding(FoldStyle::BoxedTreeFoldStyle, 1);
+	setFolding(FoldStyle::BoxedTreeFoldStyle, 2);
 	//for debug
 	//SendScintilla(SCI_SETFOLDFLAGS, SC_FOLDFLAG_LEVELNUMBERS);
 

@@ -98,6 +98,10 @@ CodeWindow::CodeWindow(QWidget *parent)
 	connect(&tm, SIGNAL(timeout()), this, SLOT(onTimer()));
 	float interval = BKE_CLOSE_SETTING->value("autosavetime", 1).toFloat();
 	tm.start((int)(60000 * interval));
+
+	//////////////////////DEBUG COMPONENT/////////////////////
+	debugServer = new DebugServer(this);
+	connect(debugServer, SIGNAL(logReceived(int32_t, QString)), this, SLOT(DebugLogReceived(int32_t, QString)));
 }
 
 CodeWindow::~CodeWindow()
@@ -238,7 +242,7 @@ void CodeWindow::CreateBtn()
 
 }
 
-void CodeWindow::OtherWinOtherwin(OtherWindow *win)
+void CodeWindow::BindOtherWindow(OtherWindow *win)
 {
 	othwin = win;
 	//定位文件
@@ -246,7 +250,7 @@ void CodeWindow::OtherWinOtherwin(OtherWindow *win)
 	connect(this, SIGNAL(searchOne(const QString &, const QString &, int, int, int)), othwin, SLOT(onSearchOne(const QString &, const QString &, int, int, int)));
 }
 
-void CodeWindow::OtherWinProject(ProjectWindow *p)
+void CodeWindow::BindProjectWindow(ProjectWindow *p)
 {
 	prowin = p;
 	//rename
@@ -267,7 +271,7 @@ void CodeWindow::OtherWinProject(ProjectWindow *p)
 	//connect(p->btnnewfileact,SIGNAL(triggered()),this,SLOT(NewEmptyFile())) ;
 }
 
-void CodeWindow::OtherwinFileList(BkeLeftFileWidget *flist)
+void CodeWindow::BindFileListWidget(BkeLeftFileWidget *flist)
 {
 	filewidget = flist;
 	//改变文件
@@ -318,9 +322,9 @@ QString CodeWindow::getScenarioTextFromCode(QString text)
 	return text.remove(le1).remove(le2).remove(le3);
 }
 
-void calcWords(QString text, QLineEdit *edit)
+void calcWords(QString text)
 {
-	edit->setText("文本字数：" + QString::number(CodeWindow::getScenarioTextFromCode(text).remove(QRegExp("[\r\n]")).count()));
+	otheredit->setTextCount(CodeWindow::getScenarioTextFromCode(text).remove(QRegExp("[\t\r\n]")).count());
 }
 
 //改变正在编辑的文档，文件列表选项是同步改变的
@@ -354,7 +358,7 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 	currentedit->setLexer(currentedit->deflex);
 	//连接文档改变信号
 	CurrentConnect(true);
-	currentedit->clearAnnotations();
+	currentedit->clearAnnotationsAll();
 	currentedit->restoreTopLine();
 
 	diasearch->SetSci(currentedit); //查找管理
@@ -377,7 +381,7 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 
 	AddMarksToEdit();
 	refreshLabel(currentedit);
-	calcWords(currentedit->text(), this->othwin->lewords);
+	calcWords(currentedit->text());
 	//BackstageSearchLable(currentedit);
 
 	// 导航
@@ -507,7 +511,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 		}
 		int offset = p.Start() - linestart;
 		//实际行号从1开始
-		othwin->searchlist->addItem(loli->edit->FileName + QString("(%1, %2)").arg(line + 1).arg(offset) + ":\t" + buf);
+		othwin->AddSearchItem(loli->edit->FileName + QString("(%1, %2)").arg(line + 1).arg(offset) + ":\t" + buf);
 		emit searchOne(loli->edit->FileName, loli->FullName(), line, p.Start(), p.End());
 		delete[] buf;
 	}
@@ -1037,29 +1041,16 @@ void CodeWindow::CompileAll(bool release /*= false*/)
 	//当前编辑项不是工程的话，什么也不会发生
 	if (workpro == 0) return;
 
+	markadmin.ClearRuntimeProblems();
+	if (currentedit)
+		CheckRuntimeProblemMarks(currentedit, nullptr);
+	othwin->SetRuntimeProblemList(nullptr, workpro->ProjectDir());
+
 	//设置按钮
 	btncompileact->setEnabled(false);
 	btncompilerunact->setEnabled(false);
 	btnrunact->setEnabled(false);
-	////清理上次编译的工程
-	//deleteCompileFile(ComList, cosdir);
-
-	////拷贝文件
-	//if( !WriteOpenFile(currentproject->FileDir()) ){
-	//    btncompileact->setEnabled(true);
-	//    btncompilerunact->setEnabled(true);
-	//    btnrunact->setEnabled(true);
-	//    return ;
-	//}
-	//QStringList ls = ListDirsCopy(ComList,cosdir,BKE_CURRENT_DIR+"/temp") ;
-
-	//if( ls.size() > 0){
-	//    QMessageBox msg ;
-	//    msg.setText("以下文件复制失败：\r\n" + ls.join("\r\n") );
-	//    msg.addButton(QMessageBox::Ok);
-	//    msg.exec() ;
-	//    return ;
-	//}
+	
 	QStringList ls = workpro->AllScriptFiles();
 	kag->setMaximum(ls.size());
 	kag->setValue(0);
@@ -1225,18 +1216,17 @@ void CodeWindow::CompileFinish()
 	BkeMarkList *problemslist;
 	if (stackwidget->count() > 0){
 		//给当前文件标记错误信息
-		BkeMarkList templs = *(markadmin.GetPrombleMark(currentbase->FullName(), false));
-		problemslist = markadmin.GetPrombleMark(currentbase->FullName(), true);
+		BkeMarkList templs = *(markadmin.GetProblemMark(currentbase->FullName(), false));
+		problemslist = markadmin.GetProblemMark(currentbase->FullName(), true);
 		CheckProblemMarks(currentedit, &templs);
 		currentedit->update();
 	}
 	else{
-		problemslist = markadmin.GetPrombleMark("", true);
+		problemslist = markadmin.GetProblemMark("", true);
 	}
 
-    othwin->compileedit->setText(comResult);
-	othwin->compileedit->setReadOnly(true);
-	othwin->ShowProblem(problemslist, workpro->ProjectDir());
+    othwin->SetCompileResult(comResult);
+	othwin->SetProblemList(problemslist, workpro->ProjectDir());
 
 	//按钮可用
 	btncompileact->setEnabled(true);
@@ -1368,14 +1358,16 @@ void CodeWindow::AddMarksToEdit()
 {
 	CheckBookMarks(currentedit, markadmin.GetBookMark(currentbase->FullName(), false));
 	CheckMarks(currentedit, markadmin.GetMarks(currentbase->FullName(), false));
-	CheckProblemMarks(currentedit, markadmin.GetPrombleMark(currentbase->FullName(), false));
+	CheckProblemMarks(currentedit, markadmin.GetProblemMark(currentbase->FullName(), false));
+	CheckRuntimeProblemMarks(currentedit, markadmin.GetRuntimeProblemMark(currentbase->FullName(), false));
+
 	currentedit->update();
 }
 
 //标记更新完后使用 updata
 void CodeWindow::CheckProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 {
-	edit->clearAnnotations();
+	edit->clearAnnotations(BkeScintilla::PROBLEM);
 	edit->markerDeleteAll(1);
 	edit->markerDeleteAll(2);
 
@@ -1392,11 +1384,11 @@ void CodeWindow::CheckProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 		else info += "\r\n" + LOLI_AUTONEXT_QSTRING(abc->Information);
 
 		if (abc->Type == 1){
-			edit->annotate(abc->Atpos - 1, info, ks1);
+			edit->annotate(abc->Atpos - 1, info, ks1, BkeScintilla::PROBLEM);
 			edit->markerAdd(abc->Atpos - 1, 1);
 		}
 		else{
-			edit->annotate(abc->Atpos - 1, info, ks2);
+			edit->annotate(abc->Atpos - 1, info, ks2, BkeScintilla::PROBLEM);
 			edit->markerAdd(abc->Atpos - 1, 2);
 		}
 	}
@@ -1427,6 +1419,37 @@ void CodeWindow::CheckMarks(BkeScintilla *edit, BkeMarkList *list)
 		edit->markerAdd(abc->Atpos, 4);
 	}
 }
+
+//标记更新完后使用 updata
+void CodeWindow::CheckRuntimeProblemMarks(BkeScintilla *edit, BkeMarkList *list)
+{
+	edit->clearAnnotations(BkeScintilla::RUNTIME_PROBLEM);
+	edit->markerDeleteAll(5);
+	edit->markerDeleteAll(6);
+
+	if (list == nullptr || list->isEmpty()) return;
+
+	BkeMarkerBase *abc;
+	QString info;
+
+	for (int i = 0; i < list->size(); i++) {
+		abc = list->at(i);
+		info = edit->annotation(abc->Atpos - 1);
+
+		if (info.isEmpty()) info = abc->Information;
+		else info += "\r\n" + LOLI_AUTONEXT_QSTRING(abc->Information);
+
+		if (abc->Type == 1) {
+			edit->annotate(abc->Atpos - 1, info, ks1, BkeScintilla::RUNTIME_PROBLEM);
+			edit->markerAdd(abc->Atpos - 1, 5);
+		}
+		else {
+			edit->annotate(abc->Atpos - 1, info, ks2, BkeScintilla::RUNTIME_PROBLEM);
+			edit->markerAdd(abc->Atpos - 1, 6);
+		}
+	}
+}
+
 
 
 //运行BKEngine.exe
@@ -1767,7 +1790,7 @@ void CodeWindow::ActCurrentChange()
 {
 	btnundoact->setEnabled(currentedit->isUndoAvailable());
 	btnredoact->setEnabled(currentedit->isRedoAvailable());
-	calcWords(currentedit->text(), this->othwin->lewords);
+	calcWords(currentedit->text());
 }
 
 //剪切
@@ -1889,4 +1912,25 @@ void CodeWindow::RefreshNavigation()
 {
 	btnlastact->setEnabled(currentNavigation > 0);
 	btnnextact->setEnabled(currentNavigation < navigationList.size() - 1);
+}
+
+void CodeWindow::DebugLogReceived(int32_t level, QString log)
+{
+	if (!workpro)
+		return;
+	markadmin.AddRuntimeProblem(workpro->ProjectDir(), level, log);
+
+	BkeMarkList *runtimeproblemslist;
+	if (stackwidget->count() > 0) {
+		//给当前文件标记错误信息
+		BkeMarkList templs = *(markadmin.GetRuntimeProblemMark(currentbase->FullName(), false));
+		runtimeproblemslist = markadmin.GetRuntimeProblemMark(currentbase->FullName(), true);
+		CheckRuntimeProblemMarks(currentedit, &templs);
+		currentedit->update();
+	}
+	else {
+		runtimeproblemslist = markadmin.GetRuntimeProblemMark("", true);
+	}
+
+	othwin->SetRuntimeProblemList(runtimeproblemslist, workpro->ProjectDir());
 }
