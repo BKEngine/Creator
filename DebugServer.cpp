@@ -1,31 +1,8 @@
-﻿#include "DebugServer.h"
+﻿#include "weh.h"
+#include "DebugServer.h"
 #include <QWebSocket>
 #include <QString>
-
-enum SocketDataType : int32_t
-{
-	UNKNOWN,
-	CONNECT_CLOSE,	//unused
-	RETURN_SUCCESS,	//datalen=0
-	RETURN_FAIL,	//datalen=0
-	NEW_BREAKPOINT,	//data=fullfilename:lineNo
-	DEL_BREAKPOINT,	//data=fullfilename:lineNo
-	NEW_BREAKPOINTONCE,	//data=fullfilename:lineNo
-	QUERY_VAR,		//data=variable name expression
-	QUERY_SP,		//datalen=2,data=(int32_t)spIndex
-	QUERY_SCREEN,	//datalen=0
-	QUERY_AUDIO,	//datalen=2, data=(int32_t)audio_index
-	STEP_NEXT,		//datalen=0
-	STEP_INTO,		//datalen=0
-	STEP_OUT,		//datalen=0
-	RUN,			//datalen=0
-	PAUSE,			//datalen=0
-	EXECUTE_BAGEL,	//data=bagel expression
-	RET_NOTFOUND,	//datalen=0
-	RET_BAGEL,		//data=serialized bagel data
-	RET_EXCEPT,		//data=serialized bagel data
-	LOG,			//data=[int32]level [string]msg
-};
+#include <QDir>
 
 DebugServer::DebugServer(QObject *parent/* = nullptr*/)
 	: QObject(parent)
@@ -57,19 +34,33 @@ void DebugServer::processBinaryMessage(const QByteArray & message)
 	QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
 	if (message.length() >= 8)
 	{
-		auto type = *(SocketDataType *)(&message.constData()[0]);
+		auto protocol = *(int32_t *)(&message.constData()[0]);
+		auto type = (SocketDataType)protocol & 0xFF;
+		auto taskmask = protocol & 0xFFFFFF00;
 		auto datalen = *(int32_t *)(&message.constData()[4]);
-		switch (type & 0xFF)
+		switch (type)
 		{
-		case SocketDataType::LOG:
-		{
-			auto level = *(int32_t *)(&message.constData()[8]);
-			QString log = QString::fromUtf16((const char16_t *)&message.constData()[12], (datalen - 4) / 2);
-			emit logReceived(level, log);
-		}
-			break;
-		default:
-			break;
+			case SocketDataType::LOG:
+			{
+				auto level = *(int32_t *)(&message.constData()[8]);
+				QString log = QString::fromUtf16((const char16_t *)&message.constData()[12], (datalen - 4) / 2);
+				emit logReceived(level, log);
+				break;
+			}
+			case SocketDataType::CONNECT_CONFIRM:
+			{
+				bool flag = workpro != nullptr;
+				if (flag)
+				{
+					QString path = QString::fromUtf16((const char16_t *)&message.constData()[8], datalen / 2);
+					QDir dir1(path);
+					QDir dir2(workpro->ProjectDir());
+					flag = dir1 == dir2;
+				}
+				reply(pClient, flag ? SocketDataType::RETURN_SUCCESS : SocketDataType::RETURN_FAIL, taskmask);
+			}
+			default:
+				break;
 		}
 	}
 }
@@ -81,6 +72,19 @@ void DebugServer::socketDisconnected()
 		connections.removeAll(pClient);
 		pClient->deleteLater();
 	}
+}
+
+void DebugServer::reply(QWebSocket *client, SocketDataType type, int32_t taskmask)
+{
+	char buffer[8];
+	*(int32_t *)&buffer[0] = type | taskmask;
+	*(int32_t *)&buffer[4] = 0;
+	client->sendBinaryMessage(QByteArray(buffer, 8));
+}
+
+void DebugServer::WorkproChanged(BkeProject *pro)
+{
+	workpro = pro;
 }
 
 void DebugServer::onNewConnection()

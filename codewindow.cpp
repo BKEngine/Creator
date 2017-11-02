@@ -85,7 +85,6 @@ CodeWindow::CodeWindow(QWidget *parent)
 
 
 	btnDisable();
-	ChangeProject(0);
 	ignoreflag = false;
 	isRun = false;
 	isSearLable = false; //是否在查找标签，如果是，刷新文件队列
@@ -102,6 +101,8 @@ CodeWindow::CodeWindow(QWidget *parent)
 	//////////////////////DEBUG COMPONENT/////////////////////
 	debugServer = new DebugServer(this);
 	connect(debugServer, SIGNAL(logReceived(int32_t, QString)), this, SLOT(DebugLogReceived(int32_t, QString)));
+
+	ChangeProject(0);
 }
 
 CodeWindow::~CodeWindow()
@@ -1572,18 +1573,21 @@ void CodeWindow::ChangeProject(BkeProject *p)
 		navigationList.clear();
 		currentNavigation = -1;
 
-		if (p == 0) {
+		if (p == 0)
+		{
 			btncompileact->setEnabled(false);  //编译按钮只有当工程出现时才可用
 			btncompilerunact->setEnabled(false);
 			btnrunact->setEnabled(false);
 			btndebugact->setEnabled(false);
-			workpro = 0;
-			return;
+		}
+		else 
+		{
+			btncompileact->setEnabled(true);  //工程出现后编译按钮都是可用的
+			btncompilerunact->setEnabled(true);
 		}
 
 		workpro = p;
-		btncompileact->setEnabled(true);  //工程出现后编译按钮都是可用的
-		btncompilerunact->setEnabled(true);
+		debugServer->WorkproChanged(p);
 	}
 }
 
