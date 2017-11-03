@@ -1,18 +1,20 @@
-#pragma once
+﻿#pragma once
 
 #include "bkeproject.h"
 #include <QObject>
 #include <QWebSocketServer>
 #include <QWebSocket>
 #include <QList>
+#include <QMap>
+#include <functional>
 
 #define DEBUGPORT 54321
 namespace details
 {
 	enum SocketDataType : int32_t
 	{
-		UNKNOWN,
-		CONNECT_CONFIRM,//data=��ǰ����Ŀ¼u16string
+		ERROR, //异常值
+		CONNECT_CONFIRM,//data=当前工作目录u16string
 		RETURN_SUCCESS,	//datalen=0
 		RETURN_FAIL,	//datalen=0
 		NEW_BREAKPOINT,	//data=fullfilename:lineNo
@@ -40,15 +42,32 @@ class DebugServer : public QObject
 {
 	Q_OBJECT
 
+public:
+	typedef std::function<void(SocketDataType, const unsigned char *data, int32_t len)> Callback;
+private:
 	QWebSocketServer *server;
 	QList<QWebSocket *> connections;
+	QWebSocket *debugClient = nullptr;
+	QMap<QWebSocket *, QMap<int32_t, Callback>> callbacks;
+	void Send(QByteArray &data);
+	void Send(QByteArray &data, Callback &&callback);
 
 public:
 	DebugServer(QObject *parent = nullptr);
 	~DebugServer();
 
+	bool IsValid();
+	void Send(SocketDataType type);
+	void Send(SocketDataType type, Callback &&callback);
+	void Send(SocketDataType type, const QString &msg);
+	void Send(SocketDataType type, const QString &msg, Callback &&callback);
+	void Send(SocketDataType type, const QByteArray &msg);
+	void Send(SocketDataType type, const QByteArray &msg, Callback &&callback);
+	
 signals:
 	void logReceived(int32_t level, QString log);
+	void onDebugClientConnected();
+	void onDebugClientDisconnected();
 
 public slots:
 	void WorkproChanged(BkeProject *);

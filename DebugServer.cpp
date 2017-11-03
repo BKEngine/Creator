@@ -20,6 +20,80 @@ DebugServer::~DebugServer()
 {
 }
 
+bool DebugServer::IsValid()
+{
+	return debugClient != nullptr;
+}
+
+void DebugServer::Send(QByteArray &data)
+{
+	*(int32_t *)&data.data()[0] |= taskcode;
+	taskcode += 0x100;
+	debugClient->sendBinaryMessage(data);
+}
+
+void DebugServer::Send(QByteArray &data, Callback && callback)
+{
+	callbacks[debugClient].insert(taskcode, std::move(callback));
+	Send(data);
+}
+
+void DebugServer::Send(SocketDataType type)
+{
+	QByteArray data(8, Qt::Initialization());
+	*(int32_t *)&data.data()[0] = type;
+	*(int32_t *)&data.data()[4] = 0;
+	Send(data);
+}
+
+void DebugServer::Send(SocketDataType type, Callback && callback)
+{
+	if (debugClient == nullptr)
+	{
+		callback(SocketDataType::ERROR, 0, 0);
+		return;
+	}
+	callbacks[debugClient].insert(taskcode, std::move(callback));
+	Send(type);
+}
+
+void DebugServer::Send(SocketDataType type, const QString &msg)
+{
+	QByteArray data((char *)msg.data(), msg.length() * 2);
+	Send(type, data);
+}
+
+void DebugServer::Send(SocketDataType type, const QString &msg, Callback && callback)
+{
+	if (debugClient == nullptr)
+	{
+		callback(SocketDataType::ERROR, 0, 0);
+		return;
+	}
+	callbacks[debugClient].insert(taskcode, std::move(callback));
+	Send(type, msg);
+}
+
+void DebugServer::Send(SocketDataType type, const QByteArray & msg)
+{
+	QByteArray data(8 + msg.length(), Qt::Initialization());
+	*(int32_t *)&data.data()[0] = type;
+	*(int32_t *)&data.data()[4] = msg.length();
+	memcpy(&data.data()[8], msg.constData(), msg.length());
+	Send(data);
+}
+
+void DebugServer::Send(SocketDataType type, const QByteArray & msg, Callback && callback)
+{
+	if (debugClient == nullptr)
+	{
+		callback(SocketDataType::ERROR, 0, 0);
+		return;
+	}
+	callbacks[debugClient].insert(taskcode, std::move(callback));
+	Send(type, msg);
+}
+
 void DebugServer::closed()
 {
 }
@@ -38,6 +112,9 @@ void DebugServer::processBinaryMessage(const QByteArray & message)
 		auto type = (SocketDataType)protocol & 0xFF;
 		auto taskmask = protocol & 0xFFFFFF00;
 		auto datalen = *(int32_t *)(&message.constData()[4]);
+		// 在debugClient未指定或者Client不是debugClient的时候，除了CONNECT_CONFIRM以外的所有消息都不处理
+		if ((debugClient == nullptr || debugClient != pClient) && type != SocketDataType::CONNECT_CONFIRM)
+			return;
 		switch (type)
 		{
 			case SocketDataType::LOG:
@@ -57,6 +134,15 @@ void DebugServer::processBinaryMessage(const QByteArray & message)
 					QDir dir2(workpro->ProjectDir());
 					flag = dir1 == dir2;
 				}
+				if (flag)
+				{
+					flag = debugClient == nullptr;
+				}
+				if (flag)
+				{
+					debugClient = pClient;
+					emit onDebugClientConnected();
+				}
 				reply(pClient, flag ? SocketDataType::RETURN_SUCCESS : SocketDataType::RETURN_FAIL, taskmask);
 			}
 			default:
@@ -70,7 +156,13 @@ void DebugServer::socketDisconnected()
 	QWebSocket *pClient = qobject_cast<QWebSocket *>(sender());
 	if (pClient) {
 		connections.removeAll(pClient);
+		callbacks.remove(pClient);
 		pClient->deleteLater();
+		if (pClient == debugClient)
+		{
+			debugClient = nullptr;
+			emit onDebugClientDisconnected();
+		}
 	}
 }
 
@@ -96,4 +188,5 @@ void DebugServer::onNewConnection()
 	connect(pSocket, &QWebSocket::disconnected, this, &DebugServer::socketDisconnected);
 
 	connections << pSocket;
+	callbacks.insert(pSocket, {});
 }

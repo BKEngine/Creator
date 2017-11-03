@@ -125,13 +125,13 @@ void SearchBox::FindAll()
 	{
 		fstr = edit->text();
 		emit searchOne(sciedit->basedoc->FullName(), fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
-		otheredit->switchToSearchWidget();
+		otheredit->switchToSearchWidget(true);
 	}
 	else
 	{
 		fstr = edit->text();
 		emit searchAll(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
-		otheredit->switchToSearchWidget();
+		otheredit->switchToSearchWidget(true);
 	}
 	close();
 }

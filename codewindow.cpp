@@ -722,6 +722,7 @@ void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 	//文字
 	loli->edit->setText(t);
 	loli->edit->setModified(false);  //没有改变
+	loli->edit->SetCurrentPosition(0);
 
 	//文件被改变
 	connect(loli->edit, SIGNAL(modificationChanged(bool)), this, SLOT(DocChange(bool)));
@@ -1451,28 +1452,18 @@ void CodeWindow::CheckRuntimeProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 	}
 }
 
-
-
-//运行BKEngine.exe
-void CodeWindow::RunBKE()
+void CodeWindow::StartBKEProcess(const QStringList &args)
 {
-	QString ndir;
-#ifdef Q_OS_WIN
-		ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev.exe";
-#elif defined(Q_OS_MAC)
-		ndir = BKE_CURRENT_DIR+"/BKEngine_Dev.app";
-#else
-		ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev";
-#endif
-#ifdef Q_OS_MAC
-    QProcess::startDetached( "open",QStringList() << ndir << "--args" << workpro->ProjectDir() << "-nologo") ;
-#else
-	QProcess::startDetached(ndir, QStringList() << "-nologo", workpro->ProjectDir());
-#endif
-}
-
-void CodeWindow::RunBKEWithArgs()
-{
+	if(bkeprocess)
+	{
+		bkeprocess->kill();
+		bkeprocess->waitForFinished();
+	}
+	bkeprocess = new QProcess(this);
+	connect(bkeprocess, (void (QProcess::*)(int))&QProcess::finished, [this](int) {
+		bkeprocess->deleteLater();
+		bkeprocess = nullptr;
+	});
 	QString ndir;
 #ifdef Q_OS_WIN
 	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev.exe";
@@ -1481,18 +1472,27 @@ void CodeWindow::RunBKEWithArgs()
 #else
 	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev";
 #endif
-	QStringList args;
+
 #ifdef Q_OS_MAC
-    args << ndir << "--args" << workpro->ProjectDir() << "-nologo";
-	for (auto &s : BKE_extraArgs)
-		args << s;
-	QProcess::startDetached("open", args);
+	bkeprocess->setProgram("open");
+	bkeprocess->setArguments(QStringList() << ndir << "--args" << workpro->ProjectDir() << args);
 #else
-	args << "-nologo";
-	for (auto &s : BKE_extraArgs)
-		args << s;
-	QProcess::startDetached(ndir, args, workpro->ProjectDir());
+	bkeprocess->setProgram(ndir);
+	bkeprocess->setArguments(args);
+	bkeprocess->setWorkingDirectory(workpro->ProjectDir());
 #endif
+	bkeprocess->start();
+}
+
+//运行BKEngine.exe
+void CodeWindow::RunBKE()
+{
+	StartBKEProcess(QStringList() << "-nologo");
+}
+
+void CodeWindow::RunBKEWithArgs()
+{
+	StartBKEProcess(QStringList() << "-nologo" << BKE_extraArgs);
 }
 
 void CodeWindow::AnnotateSelect()

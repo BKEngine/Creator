@@ -2,6 +2,7 @@
 #define CODEWINDOW_H
 #include "weh.h"
 #include <QDockWidget>
+#include <QProcess>
 #include "topbarwindow.h"
 #include "bkeSci/bkescintilla.h"
 #include "projectwindow.h"
@@ -298,6 +299,8 @@ private:
 	void FileIOclose(const QStringList &list);
 	void DrawLine(bool isClear);
 	bool WriteOpenFile(const QString &dir);
+	void StartBKEProcess(const QStringList &args);
+	QProcess *bkeprocess = nullptr;
 
 	/////////////Debug Component///////////////
 	DebugServer *debugServer;
