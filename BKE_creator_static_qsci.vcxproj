@@ -263,6 +263,9 @@
     <ClCompile Include="Debug\moc_qsearchlineedit.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Debug\moc_QSpoiler.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Debug\moc_SciClasses.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -394,6 +397,7 @@
     <ClCompile Include="QPinyin\PinyinHelper.cpp" />
     <ClCompile Include="QPinyin\QPinyin.cpp" />
     <ClCompile Include="QPinyin\ResourceHelper.cpp" />
+    <ClCompile Include="QSpoiler.cpp" />
     <ClCompile Include="Release\moc_BG_Analysis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -491,6 +495,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Release\moc_qsearchlineedit.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\moc_QSpoiler.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Release\moc_SciClasses.cpp">
@@ -1283,6 +1290,16 @@ endlocal
     <ClInclude Include="QPinyin\QPinyin.h" />
     <ClInclude Include="QPinyin\ResourceHelper.h" />
     <ClInclude Include="qsortedset.h" />
+    <CustomBuild Include="QSpoiler.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing QSpoiler.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing QSpoiler.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
+    </CustomBuild>
     <ClInclude Include="ScriptEnums.h" />
     <ClInclude Include="weh.h" />
     <ClInclude Include="paper\wordsupport.h" />

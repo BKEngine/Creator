@@ -173,7 +173,6 @@ void OtherWindow::RuntimeProblemDoubleClicked(QListWidgetItem * item)
 	emit Location(memruntimeproblem.at(runtimeProblemList->currentRow()), runtimeproblemdir);
 }
 
-
 void OtherWindow::SetProblemList(BkeMarkList *list, const QString &dir)
 {
 	problemdir = dir;
@@ -211,6 +210,7 @@ void OtherWindow::SetRuntimeProblemList(BkeMarkList * list, const QString & dir)
 		for (int i = 0; i < list->size(); i++) {
 			akb = list->at(i);
 			if (akb->Type == 1) AddItem(akb, icoerror, runtimeProblemList);
+			else if(akb->Type == 0) AddItem(akb, iconlog, runtimeProblemList);
 			else AddItem(akb, icowarning, runtimeProblemList);
 		}
 
@@ -240,17 +240,16 @@ void OtherWindow::SetCompileResult(const QString & label)
 
 void OtherWindow::AddItem(BkeMarkerBase *marker, QIcon *ico, QListWidget* w)
 {
-	QString temp;
 	QListWidgetItem *le = new QListWidgetItem;
 	le->setIcon(*ico);
-	temp.setNum(marker->Atpos);
-	if (marker->Name.isEmpty()) {
-		QString a = marker->FullName;
-		a = a.right(a.length() - a.lastIndexOf('/') - 1);
-		temp.prepend("【 &_" + a + "】 第");
+	QString temp;
+	if (!marker->Name.isEmpty()) {
+		temp.append("【" + marker->Name + "】");
 	}
-	else temp.prepend("【" + marker->Name + "】 第");
-	temp.append("行：" + marker->Information);
+	if (marker->Atpos >= 0) {
+		temp.append("第" + QString::number(marker->Atpos) +  "行：");
+	}
+	temp.append(marker->Information);
 	le->setText(temp);
 	w->addItem(le);
 }

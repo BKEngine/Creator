@@ -78,6 +78,7 @@ private:
 	BkeMarkList outbookmarkerlist;
 	BkeMarkList outmarklist;
 	BkeMarkList outruntimeproblemlist;
+	BkeMarkList totalruntimeproblemlist;
 
 	BkeMarkList* MarkListOf(QString &file, int type);
 	BkeMarkHash* HashFromType(int type);

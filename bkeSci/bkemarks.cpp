@@ -73,6 +73,8 @@ void BkeMarkSupport::AddRuntimeProblem(const QString &dir, int32_t level, const 
 		c->Type = 1;
 	else if (level == 2) 
 		c->Type = 2;
+	else if (level == 0)
+		c->Type = 0;
 	else
 		return;
 	SetRuntimeProblemFile(dir, text);
@@ -85,8 +87,8 @@ void BkeMarkSupport::AddRuntimeProblem(const QString &dir, int32_t level, const 
 	else
 		c->Name = Name.right(Name.length() - k - 1);
 	c->Information = ReadRuntimeProblem(c->Atpos, text);
-	if(c->Atpos >= 0)
-		currentruntimeproblemlist->append(c);
+	currentruntimeproblemlist->append(c);
+	totalruntimeproblemlist.append(c);
 }
 
 bool BkeMarkSupport::SetRuntimeProblemFile(const QString & dir, const QString & problem)
@@ -129,7 +131,14 @@ QString BkeMarkSupport::ReadRuntimeProblem(int & pos, const QString & problem)
 	b = problem.indexOf("\n", b);
 	if (b >= 0)
 		temp += problem.right(problem.length() - b);
-	return temp;
+	temp.remove(QRegExp("[\r\t]"));
+	QStringList list = temp.split('\n', QString::SkipEmptyParts);
+	for (auto &s : list)
+	{
+		s.remove(QRegExp("^【错误】"));
+		s.remove(QRegExp("^【警告】"));
+	}
+	return list.join('\n');
 }
 
 void BkeMarkSupport::AddBookMark(const QString &info, int pos, const QString &dir)
@@ -217,7 +226,9 @@ BkeMarkList *BkeMarkSupport::GetMarks(const QString &file, bool all)
 
 BkeMarkList * BkeMarkSupport::GetRuntimeProblemMark(const QString & file, bool all)
 {
-	return GetFileMarker(file, BKE_MARK_RUNTIME_PROBLEM, all);
+	if(!all)
+		return GetFileMarker(file, BKE_MARK_RUNTIME_PROBLEM, all);
+	return &totalruntimeproblemlist;
 }
 
 void BkeMarkSupport::ClearMarks(int type)
@@ -258,5 +269,6 @@ void BkeMarkSupport::BookMarksFromText(const QString &text, const QString &dir)
 void BkeMarkSupport::ClearRuntimeProblems()
 {
 	ClearMarks(BKE_MARK_RUNTIME_PROBLEM);
+	totalruntimeproblemlist.clear();
 }
 

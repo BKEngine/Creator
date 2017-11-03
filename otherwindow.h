@@ -94,7 +94,7 @@ private:
 	QString runtimeproblemdir;
 
     QHash<QPushButton*,QWidget*> emap ;
-    void AddItem(BkeMarkerBase *marker, QIcon *ico,QListWidget* w) ;
+	void AddItem(BkeMarkerBase *marker, QIcon *ico, QListWidget* w);
 
 };
 
