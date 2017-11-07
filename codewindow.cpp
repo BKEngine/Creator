@@ -348,7 +348,7 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 		QMessageBox::critical(this, "", "致命错误：没有找到匹配的QWidget！", QMessageBox::Ok);
 		return;
 	}
-
+	leaveClickGotoMode();
 	//改变工程
 	//ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
 	if(currentedit)
@@ -395,33 +395,21 @@ void CodeWindow::CurrentConnect(bool c)
 	if (c){
 		connect(currentedit, SIGNAL(copyAvailable(bool)), btncopyact, SLOT(setEnabled(bool)));
 		connect(currentedit, SIGNAL(copyAvailable(bool)), btncutact, SLOT(setEnabled(bool)));
-		//        connect(currentedit,SIGNAL(Undoready(bool)),btnundoact,SLOT(setEnabled(bool))) ;
-		//        connect(currentedit,SIGNAL(Redoready(bool)),btnredoact,SLOT(setEnabled(bool))) ;
-		//        connect(btncopyact,SIGNAL(triggered()),currentedit,SLOT(copy())) ;
-		//        connect(btncutact,SIGNAL(triggered()),currentedit,SLOT(cut())) ;
-		//        connect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
-		//        connect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
-		//        connect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
 		//工程被改变，需要从下层传递信号
 		connect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		connect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
-		connect(currentedit, SIGNAL(refreshLabel(QStringList &)), this, SLOT(refreshLabel(QStringList &)));
+		connect(currentedit, SIGNAL(refreshLabel(QSortedSet &)), this, SLOT(refreshLabel(QSortedSet &)));
 		connect(currentedit, SIGNAL(ShouldAddToNavigation()), this, SLOT(ShouldAddToNavigation()));
+		connect(currentedit, SIGNAL(indicatorReleased(int, int, Qt::KeyboardModifiers)), this, SLOT(indicatorReleased(int, int, Qt::KeyboardModifiers)));
 	}
 	else{
 		disconnect(currentedit, SIGNAL(copyAvailable(bool)), btncopyact, SLOT(setEnabled(bool)));
 		disconnect(currentedit, SIGNAL(copyAvailable(bool)), btncutact, SLOT(setEnabled(bool)));
-		//        disconnect(currentedit,SIGNAL(Undoready(bool)),btnundoact,SLOT(setEnabled(bool))) ;
-		//        disconnect(currentedit,SIGNAL(Redoready(bool)),btnredoact,SLOT(setEnabled(bool))) ;
-		//        disconnect(btncopyact,SIGNAL(triggered()),currentedit,SLOT(copy())) ;
-		//        disconnect(btncutact,SIGNAL(triggered()),currentedit,SLOT(cut())) ;
-		//        disconnect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
-		//        disconnect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
-		//        disconnect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
 		disconnect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		disconnect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
-		disconnect(currentedit, SIGNAL(refreshLabel(QStringList &)), this, SLOT(refreshLabel(QStringList &)));
+		disconnect(currentedit, SIGNAL(refreshLabel(QSortedSet &)), this, SLOT(refreshLabel(QSortedSet &)));
 		disconnect(currentedit, SIGNAL(ShouldAddToNavigation()), this, SLOT(ShouldAddToNavigation()));
+		disconnect(currentedit, SIGNAL(indicatorReleased(int, int, Qt::KeyboardModifiers)), this, SLOT(indicatorReleased(int, int, Qt::KeyboardModifiers)));
 	}
 }
 
@@ -708,6 +696,7 @@ void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 	ignoreflag = true; //忽略改变，在所有准备工作完成以后才改变
 
 	loli->edit = new BkeScintilla(this);
+	loli->edit->installEventFilter(this);
 	if (workpro)
 		loli->edit->analysis = workpro->analysis;
 	loli->edit->workpro = workpro;
@@ -1937,4 +1926,140 @@ void CodeWindow::DebugLogReceived(int32_t level, QString log)
 	}
 
 	othwin->SetRuntimeProblemList(runtimeproblemslist, workpro->ProjectDir());
+}
+
+bool CodeWindow::eventFilter(QObject * watched, QEvent *e)
+{
+	if (watched != currentedit)
+		return false;
+	if (e->type() == QEvent::ToolTip)
+	{
+		currentedit->ShowToolTip(((QHelpEvent*)e)->pos());
+		return true;
+	}
+	else if (e->type() == QEvent::KeyPress)
+	{
+		QKeyEvent *event = (QKeyEvent *)e;
+		if (event->key() == Qt::Key_Control && !event->isAutoRepeat())
+		{
+			enterClickGotoMode();
+		}
+	}
+	else if (e->type() == QEvent::KeyRelease)
+	{
+		QKeyEvent *event = (QKeyEvent *)e;
+		if (event->key() == Qt::Key_Control && !event->isAutoRepeat())
+		{
+			leaveClickGotoMode();
+		}
+	}
+	else if (e->type() == QEvent::HoverMove)
+	{
+		QHoverEvent *event = (QHoverEvent *)e;
+		if (event->modifiers() & Qt::ControlModifier)
+		{
+			onHoverMove(event->pos());
+		}
+	}
+	return false;
+}
+
+void CodeWindow::enterClickGotoMode()
+{
+	if (clickGotoMode)
+		return;
+	clickGotoMode = true;
+	//currentedit->setMouseTracking(true);
+	currentedit->setAttribute(Qt::WA_Hover, true);
+	onHoverMove(currentedit->mapFromGlobal(QCursor::pos()));
+}
+
+void CodeWindow::leaveClickGotoMode()
+{
+	if (!clickGotoMode)
+		return;
+	clickGotoMode = false;
+	currentedit->ClearIndicator(lastClickIndicatorType, lastClickIndicator);
+	lastClickIndicator.Clear();
+	lastClickIndicatorType = 0;
+	currentedit->setAttribute(Qt::WA_Hover, false);
+}
+
+void CodeWindow::setClickIndicator(const BkeIndicatorBase &indicator, int id)
+{
+	if (lastClickIndicator != indicator || id != lastClickIndicatorType)
+	{
+		currentedit->ClearIndicator(lastClickIndicatorType, lastClickIndicator);
+		lastClickIndicator = indicator;
+		lastClickIndicatorType = id;
+		currentedit->SetIndicator(id, indicator);
+	}
+}
+
+void CodeWindow::onHoverMove(QPoint pos)
+{
+	int position = currentedit->PositionAt(pos);
+	BkeIndicatorBase indicator = currentedit->GetRangeForStyle(position, SCE_BKE_COMMAND);
+	if (!indicator.IsNull())
+	{
+		if (currentedit->GetByte(indicator.Start()) == '@')
+		{
+			indicator.SetStart(indicator.Start() + 1);
+		}
+		setClickIndicator(indicator, BkeScintilla::BKE_INDICATOR_CLICK_COMMAND);
+		return;
+	}
+	indicator = currentedit->GetRangeForStyle(position, SCE_BKE_COMMAND2);
+	if (!indicator.IsNull())
+	{
+		if (currentedit->GetByte(indicator.Start()) == '[')
+		{
+			indicator.SetStart(indicator.Start() + 1);
+		}
+		else if (currentedit->GetByte(indicator.Start()) != ']')
+		{
+			setClickIndicator(indicator, BkeScintilla::BKE_INDICATOR_CLICK_COMMAND);
+			return;
+		}
+	}
+	indicator = currentedit->GetRangeForStyle(position, SCE_BKE_LABEL_IN_PARSER);
+	if (!indicator.IsNull())
+	{
+		setClickIndicator(indicator, BkeScintilla::BKE_INDICATOR_CLICK_LABEL);
+		return;
+	}
+	setClickIndicator(BkeIndicatorBase(), 0);
+	return;
+}
+
+void CodeWindow::indicatorReleased(int line, int index, Qt::KeyboardModifiers state)
+{
+	BkeScintilla *edit = (BkeScintilla *)sender();
+	auto pos = edit->positionFromLineIndex(line, index);
+	if (lastClickIndicatorType != 0 && edit->IsIndicator(lastClickIndicatorType, pos))
+	{
+		QString content = edit->TextForRange(lastClickIndicator);
+		switch (lastClickIndicatorType)
+		{
+		case BkeScintilla::BKE_INDICATOR_CLICK_COMMAND:
+		{
+			BKEMacros macro;
+			if (edit->analysis->findMacro(content, &macro))
+			{
+				AddFile(workpro->ProjectDir() + macro.definefile);
+				if (currentedit->FileName != macro.definefile)
+					return;
+				emit GotoLabel(macro.name);
+			}
+			break;
+		}
+		case BkeScintilla::BKE_INDICATOR_CLICK_LABEL:
+		{
+			emit GotoLabel(content);
+			break;
+		}
+		default:
+			break;
+		}
+	}
 }

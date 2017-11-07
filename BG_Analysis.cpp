@@ -267,6 +267,7 @@ QString BG_Analysis::getCmdList()
 }
 
 BG_Analysis::BG_Analysis(const QString &p)
+	: msgmutex(QMutex::Recursive)
 {
 	stop = false;
 	cancel = false;

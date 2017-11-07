@@ -6,20 +6,21 @@
 class BkeIndicatorBase
 {
 public:
-    BkeIndicatorBase(){ start = -1 ; end = -1 ; len = -1 ; }
-    BkeIndicatorBase(int s,int e){ start = s ; end = e ; len = end-start ; }
+    BkeIndicatorBase(){ start = -1 ; end = -1 ; }
+    BkeIndicatorBase(int s,int e){ start = s ; end = e ; }
     void PosChange(int i){ start += i ; end += i ; }
-    void SetStart(int i){ start = i ; len = end - start ; }
-    void SetEnd(int i){ end = i ; len = end - start ; }
-    int Start(){ return start ; }
-    int End(){ return end ; }
-    int Len(){ return len ; }
-    bool IsNull(){ return (start < 0 || end < 0 || len < 0) ; }
-    void Clear(){ start = -1 ; end = -1 ; len = -1 ; }
+    void SetStart(int i){ start = i ;}
+    void SetEnd(int i){ end = i ;  }
+    int Start() const { return start ; }
+    int End() const { return end ; }
+    int Len() const { return start >=0 && end >=0 ? end - start : -1; }
+    bool IsNull() const { return (start < 0 || end < 0) ; }
+    void Clear(){ start = -1 ; end = -1 ; }
+	bool operator == (const BkeIndicatorBase &r) const { return start == r.start && end == r.end; }
+	bool operator != (const BkeIndicatorBase &r) const { return start != r.start || end != r.end; }
 private:
     int start ;
     int end ;
-    int len ;
 };
 class BkeModifiedBase
 {

@@ -37,6 +37,8 @@ public:
 		BKE_INDICATOR_FIND = 1,
 		BKE_INDICATOR_ERROR,
 		BKE_INDICATOR_WARNING,
+		BKE_INDICATOR_CLICK_COMMAND,
+		BKE_INDICATOR_CLICK_LABEL,
 	};
 	enum{
 		BKE_CHANGE_REPLACE = 0x1
@@ -50,7 +52,7 @@ public:
 	QString GetLatstError(){ return errorinfo; }
 	void    DefineIndicators(int id,int intype) ;
 	void    ClearIndicators(int id) ;
-	void ClearIndicator(BkeIndicatorBase &p) ;
+	void ClearIndicator(int id, const BkeIndicatorBase &p) ;
 	int findFirst1(const QString fstr,bool cs,bool exp,bool word,bool mark = true) ;
 	void ReplaceAllFind(const QString &rstr) ;
 	bool ReplaceText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word);
@@ -63,7 +65,7 @@ public:
 	bool FindBack(int pos = -1) ;
 	bool HasFind(){ return findcount > 0 ; }
 	void clearSelection(int pos = -1) ;
-	void SetIndicator(int id, BkeIndicatorBase &p) ;
+	void SetIndicator(int id, const BkeIndicatorBase &p) ;
 	void BkeAnnotateSelect() ;
 	BkeIndicatorBase findIndicator(int id,int postion) ;
 	int GetCurrentLine();
@@ -72,6 +74,10 @@ public:
 	void setLexer(QsciLexer *lex = 0);
 	void setSelection(BkeIndicatorBase &p);
 	int GetTextLength();
+	int PositionAt(const QPoint &point);
+	bool IsIndicator(int id, int pos);
+	int GetByte(int pos) const;
+	QString TextForRange(const BkeIndicatorBase &range);
 
 	int findcount ;
 
@@ -82,7 +88,6 @@ public:
 	QsciLexerBkeScript *deflex;
 	//ParseData *pdata;
 	BG_Analysis *analysis;
-	bool isMacroFile;
 
 	int positionFromLineIndexByte(int line, int index) const
 	{
@@ -93,6 +98,11 @@ public:
 	{
 		*line = SendScintilla(SCI_LINEFROMPOSITION, position);
 		*index = position - SendScintilla(SCI_POSITIONFROMLINE, *line);
+	}
+
+	int lineFromPosition(int position) const
+	{
+		return SendScintilla(SCI_LINEFROMPOSITION, position);
 	}
 
 signals:
@@ -116,6 +126,7 @@ private slots:
 	void InsertAndMove(const QString &text);
 	void CurrentPosChanged(int line , int index );
 	void CharHandle(int cc) ;
+	QFont GetAnnotationFont();
 	void onTimer();
 
 public:
@@ -153,18 +164,14 @@ private:
 	QString errorinfo ;
 
 	bool IsSeparate(int ch) ;
-	bool IsIndicator(int id,int pos) ;
-	int  GetByte(int pos) ;
 	void RemoveDou() ;
 	void BkeStartUndoAction(bool newUndo = true) ;//记录Undo，如果当前正在记录，那么newUndo决定是记录一个新的还是继续当前记录
 	void BkeEndUndoAction() ;
 	int GetActualIndentCharLength(int lineID) ;
-	void ShowInfomation(QPoint pos) ;
 
 	BkeIndicatorBase simpleFind(const char *ss , int flag,int from,int to) ;
 
 protected:
-	bool event(QEvent *e) ;
 
 	//补全相关
 	enum{
@@ -187,24 +194,34 @@ protected:
 	QString getEnums(const QString &name, const QString &attr, const QString &alltext);
 	QString getValList(const QStringList &ls, const QString &alltext);
 	QString getGlobalList(const QString &ls, const QString &alltext);
+
+	//Annotations管理
 public:
+
 	enum AnnotationType
 	{
-		PROBLEM,
-		RUNTIME_PROBLEM,
+		PROBLEM = 1,
+		RUNTIME_PROBLEM = 2,
+		MACRO_DEFINE = 3,
 	};
 
 private:
+
 	QMultiHash<int, AnnotationType> annotations;
 
 public:
-	
+
 	void clearAnnotations(AnnotationType type);
 	void clearAnnotationsAll();
 	void annotate(int line, const QString &text, int style, AnnotationType type);
 	void annotate(int line, const QString &text, const QsciStyle &style, AnnotationType type);
 	void annotate(int line, const QsciStyledText &text, AnnotationType type);
 	void annotate(int line, const QList<QsciStyledText> &text, AnnotationType type);
+
+	// 悬浮信息显示
+public:
+	void ShowToolTip(QPoint pos);
+	BkeIndicatorBase GetRangeForStyle(int position, unsigned char style);
 };
 
 #endif // BKESCINTILLA_H

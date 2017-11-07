@@ -152,7 +152,6 @@ signals:
 	void searchOne(const QString &file, const QString &fullfile, int line, int start, int end);
 
 public slots:
-	void onTimer();
 	bool CloseAll();
 	void ChangeCurrentEdit(int pos);
 	void SetCurrentEdit(int pos);
@@ -221,6 +220,7 @@ public slots:
 	void CreateAndGotoLabel(QString label);
 
 private slots:
+	void onTimer();
 	void ShouldAddToNavigation();
 	void RefreshNavigation();
 	void NavigateTo(const QPair<QString, int> &target);
@@ -306,6 +306,23 @@ private:
 	DebugServer *debugServer;
 private slots:
 	void DebugLogReceived(int32_t, QString);
+
+	// 事件劫持
+protected:
+	virtual bool eventFilter(QObject *watched, QEvent *event) override;
+
+	//Ctrl+点击 Goto宏定义/标签 管理
+private:
+	BkeIndicatorBase lastClickIndicator;
+	int lastClickIndicatorType = 0;
+	int lastMouseHoverPosition = -1;
+	bool clickGotoMode = false;
+	void enterClickGotoMode();
+	void leaveClickGotoMode();
+	void onHoverMove(QPoint pos);
+	void setClickIndicator(const BkeIndicatorBase &indicator, int id);
+private slots:
+	void indicatorReleased(int line, int index, Qt::KeyboardModifiers state);
 };
 
 #endif // CODEWINDOW_H

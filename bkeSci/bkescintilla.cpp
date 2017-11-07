@@ -23,6 +23,9 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	completeType = SHOW_NULL;
 
 	setUtf8(true);
+
+	deflex = new QsciLexerBkeScript(this);
+
 	setMarginLineNumbers(0, false);
 	setMarginWidth(0, 48);
 	setMarginLineNumbers(1, true);
@@ -50,6 +53,14 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	SendScintilla(SCI_INDICSETALPHA, BKE_INDICATOR_FIND, 255);
 	SendScintilla(SCI_INDICSETUNDER, BKE_INDICATOR_FIND, true);
 
+	DefineIndicators(BKE_INDICATOR_CLICK_COMMAND, INDIC_PLAIN);  //标记搜索的风格指示器
+	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_CLICK_COMMAND, deflex->defaultColor(SCE_BKE_COMMAND));
+	SendScintilla(SCI_INDICSETALPHA, BKE_INDICATOR_CLICK_COMMAND, 255);
+
+	DefineIndicators(BKE_INDICATOR_CLICK_LABEL, INDIC_PLAIN);  //标记搜索的风格指示器
+	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_CLICK_LABEL, deflex->defaultColor(SCE_BKE_LABEL_IN_PARSER));
+	SendScintilla(SCI_INDICSETALPHA, BKE_INDICATOR_CLICK_LABEL, 255);
+
 	registerImage(0, BKE_AUTOIMAGE_NORMAL);
 	registerImage(3, BKE_AUTOIMAGE_FUNCTION);
 	registerImage(9, BKE_AUTOIMAGE_KEY);
@@ -72,9 +83,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	ChangeStateFlag = 0;
 	IsNewLine = false;
 	IsWorkingUndo = false;
-	isMacroFile = false;
 
-	deflex = new QsciLexerBkeScript(this);
 	//pdata = new ParseData(this);
 	setLexer(deflex);
 
@@ -137,6 +146,35 @@ void BkeScintilla::onTimer()
 		SendScintilla(BkeScintilla::SCI_INDICATORFILLRANGE, it.from, it.len);
 	}
 	p->infos2_mutex.unlock();
+
+	// macro file的annotation
+	if (analysis->isMacroFile(FileName))
+	{
+		clearAnnotations(AnnotationType::MACRO_DEFINE);
+		BKEMacros macro;
+		for (auto && label : l)
+		{
+			if (analysis->findMacro(label, &macro) && macro.definefile == FileName)
+			{
+				QString info = "//";
+				QString params;
+				for (int i = 0; i < macro.paramqueue.size(); i++)
+				{
+					params += " " + macro.paramqueue[i].first;
+					if(!macro.paramqueue[i].second.isEmpty())
+						params += "=" + macro.paramqueue[i].second;
+				}
+				if (!params.isEmpty())
+					params.remove(0, 1);
+				if (!params.isEmpty())
+					info += "参数:" + params;
+				if (!macro.comment.isEmpty())
+					info += "\n" + macro.comment;
+				static QsciStyle ks3(-1, "Macro Define", QColor(0, 0x80, 0), QColor(0xe0, 0xff, 0xe0), GetAnnotationFont());
+				annotate(lineFromPosition(p->findLabel(label)) - 1, info, ks3, MACRO_DEFINE);
+			}
+		}
+	}
 	analysis->unlockFile();
 }
 
@@ -236,6 +274,13 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 
 void BkeScintilla::CharHandle(int cc)
 {
+}
+
+QFont BkeScintilla::GetAnnotationFont()
+{
+	QFont font = deflex->font(0);
+	font.setPointSize(12);
+	return font;
 }
 
 QString BkeScintilla::getAttrs(const QString &name, const QStringList &attrs, const QString &alltext)
@@ -1215,11 +1260,23 @@ bool BkeScintilla::IsSeparate(int ch)
 	return false;
 }
 
-int BkeScintilla::GetByte(int pos)
+int BkeScintilla::GetByte(int pos) const
 {
 	unsigned char s;
 	s = SendScintilla(SCI_GETCHARAT, pos);
 	return s;
+}
+
+QString BkeScintilla::TextForRange(const BkeIndicatorBase &range)
+{
+	if (range.IsNull())
+		return QString();
+	auto len = range.Len();
+	auto buf = new char[len + 1];
+	SendScintilla(SCI_GETTEXTRANGE, range.Start(), range.End(), buf);
+	QString dst = QString::fromUtf8(buf);
+	delete[] buf;
+	return dst;
 }
 
 //用户列表被选择
@@ -1449,7 +1506,7 @@ bool BkeScintilla::FindForward(int pos)
 	//    SetIndicator(BKE_INDICATOR_FIND,abc);
 	//}
 	//abc.SetEnd(abc.Start() + findstr_length);
-	ClearIndicator(abc);
+	ClearIndicator(BKE_INDICATOR_FIND,abc);
 	SendScintilla(SCI_GOTOPOS, abc.Start());
 	setSelection(abc);
 	findlast = abc;
@@ -1491,7 +1548,7 @@ bool BkeScintilla::FindBack(int pos)
 	{
 		abc = simpleFind(fstrdata.constData(), findflag, abc.End(), abc2.End());
 	} while (abc.End() < abc2.End());
-	ClearIndicator(abc);
+	ClearIndicator(BKE_INDICATOR_FIND,abc);
 	SendScintilla(SCI_GOTOPOS, abc.Start());
 	setSelection(abc);
 	findlast = abc;
@@ -1670,7 +1727,7 @@ BkeIndicatorBase BkeScintilla::simpleFind(const char *ss, int flag, int from, in
 	return abc;
 }
 
-void BkeScintilla::SetIndicator(int id, BkeIndicatorBase &p)
+void BkeScintilla::SetIndicator(int id, const BkeIndicatorBase &p)
 {
 	if (p.IsNull()) return;
 	SendScintilla(SCI_SETINDICATORCURRENT, id);
@@ -1703,6 +1760,12 @@ int BkeScintilla::GetTextLength()
 	return SendScintilla(SCI_GETTEXTLENGTH);
 }
 
+int BkeScintilla::PositionAt(const QPoint & point)
+{
+	long chpos = SendScintilla(SCI_POSITIONFROMPOINTCLOSE, point.x(), point.y());
+	return (int)chpos;
+}
+
 BkeIndicatorBase BkeScintilla::findIndicatorLast(int id, int from)
 {
 	BkeIndicatorBase abc;
@@ -1716,13 +1779,13 @@ BkeIndicatorBase BkeScintilla::findIndicatorLast(int id, int from)
 
 bool BkeScintilla::IsIndicator(int id, int pos)
 {
-	return  SendScintilla(SCI_INDICATORVALUEAT, id, pos) > 0;
+	return SendScintilla(SCI_INDICATORVALUEAT, id, pos) > 0;
 }
 
-void BkeScintilla::ClearIndicator(BkeIndicatorBase &p)
+void BkeScintilla::ClearIndicator(int id, const BkeIndicatorBase &p)
 {
 	if (p.IsNull()) return;
-	SendScintilla(SCI_SETINDICATORCURRENT, BKE_INDICATOR_FIND);
+	SendScintilla(SCI_SETINDICATORCURRENT, id);
 	SendScintilla(SCI_INDICATORCLEARRANGE, p.Start(), p.Len());
 }
 
@@ -1889,19 +1952,8 @@ int BkeScintilla::GetActualIndentCharLength(int lineID)
 	return length;
 }
 
-
-bool BkeScintilla::event(QEvent *e)
-{
-	if (e->type() == QEvent::ToolTip){
-		ShowInfomation(((QHelpEvent*)e)->pos());
-		return true;
-	}
-	return QsciScintilla::event(e);
-}
-
-
 //显示鼠标悬浮位置的信息
-void BkeScintilla::ShowInfomation(QPoint pos)
+void BkeScintilla::ShowToolTip(QPoint pos)
 {
 	int n_pos = SendScintilla(BkeScintilla::SCI_POSITIONFROMPOINT, pos.x(), pos.y());
 
@@ -2019,13 +2071,42 @@ void BkeScintilla::ShowInfomation(QPoint pos)
 		QToolTip::hideText();
 		return;
 	}
+}
 
-
-	//QString t = defparser->GetInfo(this->text(line).trimmed());;
-	//if (t.isEmpty())
-	//{
-	//	QToolTip::hideText();
-	//	return;
-	//}
-	//QToolTip::showText(QCursor::pos(), t);
+BkeIndicatorBase BkeScintilla::GetRangeForStyle(int position, unsigned char style)
+{
+	BkeIndicatorBase indicator;
+	unsigned char st = SendScintilla(SCI_GETSTYLEAT, position) & 63;
+	if (st != style)
+	{
+		return indicator;
+	}
+	{
+		int pos = position;
+		do 
+		{
+			pos--;
+			st = SendScintilla(SCI_GETSTYLEAT, pos) & 63;
+			if (st != style)
+			{
+				indicator.SetStart(pos + 1);
+				break;
+			}
+		} while (pos > 0);
+	}
+	{
+		int pos = position;
+		int len = this->length();
+		do
+		{
+			pos++;
+			st = SendScintilla(SCI_GETSTYLEAT, pos) & 63;
+			if (st != style)
+			{
+				indicator.SetEnd(pos);
+				break;
+			}
+		} while (pos < len);
+	}
+	return indicator;
 }
