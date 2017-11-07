@@ -34,7 +34,7 @@ public:
 		P_AUTO_START
 	} ;
 	enum{
-		BKE_INDICATOR_FIND = 1,
+		BKE_INDICATOR_FIND = 8,
 		BKE_INDICATOR_ERROR,
 		BKE_INDICATOR_WARNING,
 		BKE_INDICATOR_CLICK_COMMAND,
@@ -49,7 +49,7 @@ public:
 	BkeIndicatorBase findlast;
 	QString FileName;
 
-	QString GetLatstError(){ return errorinfo; }
+	QString GetLastError(){ return errorinfo; }
 	void    DefineIndicators(int id,int intype) ;
 	void    ClearIndicators(int id) ;
 	void ClearIndicator(int id, const BkeIndicatorBase &p) ;

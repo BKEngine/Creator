@@ -107,6 +107,10 @@ CodeWindow::CodeWindow(QWidget *parent)
 
 CodeWindow::~CodeWindow()
 {
+	if (bkeprocess)
+	{
+		bkeprocess->kill();
+	}
 }
 
 void CodeWindow::onTimer()
@@ -1372,7 +1376,7 @@ void CodeWindow::CheckProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 		info = edit->annotation(abc->Atpos - 1);
 
 		if (info.isEmpty()) info = abc->Information;
-		else info += "\r\n" + LOLI_AUTONEXT_QSTRING(abc->Information);
+		else info += "\n\n" + abc->Information;
 
 		if (abc->Type == 1){
 			edit->annotate(abc->Atpos - 1, info, ks1, BkeScintilla::PROBLEM);
@@ -1428,7 +1432,7 @@ void CodeWindow::CheckRuntimeProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 		info = edit->annotation(abc->Atpos - 1);
 
 		if (info.isEmpty()) info = abc->Information;
-		else info += "\r\n" + LOLI_AUTONEXT_QSTRING(abc->Information);
+		else info += "\n\n" + abc->Information;
 
 		if (abc->Type == 1) {
 			edit->annotate(abc->Atpos - 1, info, ks1, BkeScintilla::RUNTIME_PROBLEM);
@@ -1470,7 +1474,10 @@ void CodeWindow::StartBKEProcess(const QStringList &args)
 	bkeprocess->setArguments(args);
 	bkeprocess->setWorkingDirectory(workpro->ProjectDir());
 #endif
-	bkeprocess->start();
+	bkeprocess->start(QIODevice::NotOpen);
+	bkeprocess->closeReadChannel(QProcess::StandardOutput);
+	bkeprocess->closeReadChannel(QProcess::StandardError);
+	bkeprocess->closeWriteChannel();
 }
 
 //运行BKEngine.exe

@@ -39,6 +39,8 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	setMarginMarkerMask(0, 0b01111111);
 	setMarginMarkerMask(1, 0);
 
+	SendScintilla(SCI_SETSCROLLWIDTHTRACKING, true);
+
 	//error
 	SendScintilla(SCI_INDICSETSTYLE, BKE_INDICATOR_ERROR, INDIC_SQUIGGLEPIXMAP);
 	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_ERROR, 0x0000FF);//BGR
@@ -103,7 +105,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 
 	tm.setTimerType(Qt::TimerType::CoarseTimer);
 	connect(&tm, SIGNAL(timeout()), this, SLOT(onTimer()));
-	tm.start(500);
+	tm.start(100);
 }
 
 BkeScintilla::~BkeScintilla()
@@ -128,9 +130,9 @@ void BkeScintilla::onTimer()
 	emit refreshLabel(l);
 	//clear indicator
 	int len = length();
-	SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, 2);
+	SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, BKE_INDICATOR_ERROR);
 	SendScintilla(BkeScintilla::SCI_INDICATORCLEARRANGE, 0, len);
-	SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, 3);
+	SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, BKE_INDICATOR_WARNING);
 	SendScintilla(BkeScintilla::SCI_INDICATORCLEARRANGE, 0, len);
 	for (auto &it : p->infos)
 	{
@@ -1959,8 +1961,8 @@ void BkeScintilla::ShowToolTip(QPoint pos)
 
 	auto node = analysis->findNode(FileName, n_pos);
 	//test indicator
-	int v2 = SendScintilla(SCI_INDICATORVALUEAT, 2, n_pos);
-	int v3 = SendScintilla(SCI_INDICATORVALUEAT, 3, n_pos);
+	int v2 = SendScintilla(SCI_INDICATORVALUEAT, BKE_INDICATOR_ERROR, n_pos);
+	int v3 = SendScintilla(SCI_INDICATORVALUEAT, BKE_INDICATOR_WARNING, n_pos);
 
 	int v = v2 ? v2 - 1 : v3 - 1;
 

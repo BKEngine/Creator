@@ -241,6 +241,10 @@ void OtherWindow::SetCompileResult(const QString & label)
 void OtherWindow::AddItem(BkeMarkerBase *marker, QIcon *ico, QListWidget* w)
 {
 	QListWidgetItem *le = new QListWidgetItem;
+	if (w->count() % 2 == 1)
+		le->setBackgroundColor(QColor(0xDD, 0xDD, 0xDD));
+	else
+		le->setBackgroundColor(QColor(0xEE, 0xEE, 0xEE));
 	le->setIcon(*ico);
 	QString temp;
 	if (!marker->Name.isEmpty()) {
@@ -250,7 +254,7 @@ void OtherWindow::AddItem(BkeMarkerBase *marker, QIcon *ico, QListWidget* w)
 		temp.append("第" + QString::number(marker->Atpos) +  "行：");
 	}
 	temp.append(marker->Information);
-	le->setText(temp);
+	le->setText(temp.trimmed());
 	w->addItem(le);
 }
 
