@@ -1747,12 +1747,25 @@ void CodeWindow::GotoOrCreateLabel(QString l)
 	int pos = currentedit->analysis->findLabel(currentedit->FileName, l);
 	if (pos < 0)
 	{
-
+		CreateLabel(l);
+		return;
 	}
+	int line, index;
+	currentedit->lineIndexFromPositionByte(pos, &line, &index);
+	currentedit->setFirstVisibleLine(line);
 }
 
-void CodeWindow::CreateLabel(QString label)
+void CodeWindow::CreateLabel(QString l)
 {
+	if (l.startsWith("*"))
+	{
+		l = l.right(l.length() - 1);
+	}
+	QString text = "\n*" + l + "\n\n[return]\n";
+	int line = currentedit->lines();
+	QByteArray data = currentedit->TextAsBytes(text);
+	currentedit->AppendText(data);
+	currentedit->SetCurrentPosition(currentedit->PositionByLine(line + 1));
 }
 
 void CodeWindow::GotoLabelList()
@@ -1943,7 +1956,7 @@ void CodeWindow::AutoFix()
 			if (firstAction == nullptr)
 				firstAction = action;
 			connect(action, &QAction::triggered, [this, content]() {
-				GotoLabel(content);
+				GotoOrCreateLabel(content);
 			});
 		}
 	}

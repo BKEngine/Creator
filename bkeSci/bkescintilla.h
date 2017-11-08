@@ -80,6 +80,10 @@ public:
 	bool IsIndicator(int id, int pos);
 	int GetByte(int pos) const;
 	QString TextForRange(const BkeIndicatorBase &range);
+	void AppendText(const QString &text);
+	void AppendText(const QByteArray &text);
+	QByteArray TextAsBytes(const QString &text);
+	int PositionByLine(int line);
 
 	int findcount ;
 
@@ -125,7 +129,6 @@ private slots:
 	void ChooseComplete(const char *text,int pos) ;
 	void InsertAndMove(const QString &text);
 	void CurrentPosChanged(int line , int index );
-	void CharHandle(int cc) ;
 	QFont GetAnnotationFont();
 	void onTimer();
 
@@ -148,7 +151,7 @@ private:
 	int IndentCount ;
 	bool UseCallApi ;
 	bool IsNewLine ;
-	bool IsWorkingUndo ;
+	int WorkingUndoDepth ;
 	int LastLine ;
 	int SectionPos ;
 	int findstr_length;
@@ -189,7 +192,7 @@ protected:
 	QString completeList;
 
 	QStringList getScriptList();
-	void showComplete();
+	void showComplete(int mtype, int pos, const QString &qtext);
 	QString getAttrs(const QString &name, const QStringList &attrs, const QString &alltext);
 	QString getEnums(const QString &name, const QString &attr, const QString &alltext);
 	QString getValList(const QStringList &ls, const QString &alltext);

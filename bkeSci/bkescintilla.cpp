@@ -86,7 +86,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	LastLine = -1;
 	ChangeStateFlag = 0;
 	IsNewLine = false;
-	IsWorkingUndo = false;
+	WorkingUndoDepth = 0;
 
 	//pdata = new ParseData(this);
 	setLexer(deflex);
@@ -103,7 +103,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	//光标位置被改变
 	connect(this, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(CurrentPosChanged(int, int)));
 	//输入单个字符
-	connect(this, SIGNAL(SCN_CHARADDED(int)), this, SLOT(CharHandle(int)));
+	//connect(this, SIGNAL(SCN_CHARADDED(int)), this, SLOT(CharHandle(int)));
 
 	tm.setTimerType(Qt::TimerType::CoarseTimer);
 	connect(&tm, SIGNAL(timeout()), this, SLOT(onTimer()));
@@ -207,27 +207,23 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 	int xline, xindex;
 	lineIndexFromPosition(pos, &xline, &xindex);
 
-	if (mtype & SC_PERFORMED_USER)
+	if (mtype & (SC_MOD_BEFOREINSERT | SC_MOD_BEFOREDELETE))
 	{
-		if (mtype & (SC_MOD_BEFOREINSERT | SC_MOD_BEFOREDELETE))
+		if (mtype & SC_PERFORMED_USER)
 		{
 			BkeStartUndoAction();
 		}
-		else if (mtype & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT))
-		{
-			ChangeType = mtype;
-			modfieddata.pos = pos;
-			modfieddata.type = mtype;
-			modfieddata.line = xline;
-			modfieddata.index = xindex;
-			modfieddata.lineadd = added;
-			modfieddata.text = QString(text);
-		}
 	}
-}
-
-void BkeScintilla::CharHandle(int cc)
-{
+	else if (mtype & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT))
+	{
+		ChangeType = mtype;
+		modfieddata.pos = pos;
+		modfieddata.type = mtype;
+		modfieddata.line = xline;
+		modfieddata.index = xindex;
+		modfieddata.lineadd = added;
+		modfieddata.text = QString(text);
+	}
 }
 
 QFont BkeScintilla::GetAnnotationFont()
@@ -665,9 +661,12 @@ void BkeScintilla::annotate(int line, const QList<QsciStyledText>& text, Annotat
 	annotations.insert(line, type);
 }
 
-void BkeScintilla::showComplete()
+void BkeScintilla::showComplete(int mtype, int pos, const QString &qtext)
 {
-	int pos = modfieddata.pos + modfieddata.text.length() - 1;
+	if (mtype & SC_MOD_INSERTTEXT)
+		pos = pos + qtext.length() - 1;
+	else
+		pos = pos - 1;
 	if (pos < 0)
 		return;
 	unsigned char style = SendScintilla(SCI_GETSTYLEAT, pos);
@@ -705,6 +704,7 @@ void BkeScintilla::showComplete()
 		char *buf = new char[pos + 2 - beginPos];
 		SendScintilla(SCI_GETTEXTRANGE, beginPos, pos + 1, buf);
 		context = buf;
+		delete[] buf;
 	}
 	else if (style & 64 /*BEGAL_MASK*/)
 	{
@@ -900,15 +900,9 @@ void BkeScintilla::UiChange(int updated)
 	int tabWidth = SendScintilla(SCI_GETTABWIDTH);
 
 	ChangeIgnore++;
+
 	if (ChangeType & SC_PERFORMED_USER)
 	{
-		//BkeStartUndoAction();
-
-		if (ChangeType & SC_MOD_INSERTTEXT || ChangeType & SC_MOD_DELETETEXT)
-		{
-			//自动补全
-			showComplete();
-		}
 
 		if ((ChangeType & SC_MOD_INSERTTEXT) && (modfieddata.text == "]" || modfieddata.text == "}"))
 		{
@@ -1157,6 +1151,13 @@ void BkeScintilla::UiChange(int updated)
 	out:;
 		BkeEndUndoAction();
 	}
+
+	//	如果是用户行为或者最后一次UNDO REDO修改的话
+	if (ChangeType & (SC_PERFORMED_USER | SC_LASTSTEPINUNDOREDO))
+	{
+		//自动补全
+		showComplete(ChangeType, modfieddata.pos, modfieddata.text);
+	}
 	
 	ChangeIgnore--;
 
@@ -1191,6 +1192,28 @@ QString BkeScintilla::TextForRange(const BkeIndicatorBase &range)
 	QString dst = QString::fromUtf8(buf);
 	delete[] buf;
 	return dst;
+}
+
+void BkeScintilla::AppendText(const QString & text)
+{
+	AppendText(textAsBytes(text));
+}
+
+void BkeScintilla::AppendText(const QByteArray &text)
+{
+	BkeStartUndoAction();
+	SendScintilla(SCI_APPENDTEXT, text.length(), text.constData());
+	BkeEndUndoAction();
+}
+
+QByteArray BkeScintilla::TextAsBytes(const QString & text)
+{
+	return textAsBytes(text);
+}
+
+int BkeScintilla::PositionByLine(int line)
+{
+	return SendScintilla(SCI_POSITIONFROMLINE, line);
 }
 
 //用户列表被选择
@@ -1228,11 +1251,11 @@ void BkeScintilla::UseListChoose(const char* text, int id)
 void BkeScintilla::AutoListChoose(const char* text, int pos)
 {
 	ChangeIgnore++;
-	//BkeStartUndoAction();
+	BkeStartUndoAction();
 	int i = SendScintilla(SCI_AUTOCGETCURRENT);
 	SendScintilla(SCI_AUTOCCANCEL);  //取消自动完成，手动填充
 	ChooseComplete(text, pos);
-	//BkeEndUndoAction();
+	BkeEndUndoAction();
 	ChangeIgnore--;
 	completeList.clear();
 }
@@ -1764,7 +1787,8 @@ void BkeScintilla::BkeAnnotateSelect()
 
 void BkeScintilla::BkeStartUndoAction(bool newUndo/* = true*/)
 {
-	if (IsWorkingUndo)
+	WorkingUndoDepth++;
+	if (WorkingUndoDepth > 1)
 	{
 		if (newUndo)
 		{
@@ -1773,15 +1797,14 @@ void BkeScintilla::BkeStartUndoAction(bool newUndo/* = true*/)
 		}
 		return;
 	}
-	IsWorkingUndo = true;
 	QsciScintilla::beginUndoAction();
 }
 
 void BkeScintilla::BkeEndUndoAction()
 {
-	if (!IsWorkingUndo)
+	WorkingUndoDepth--;
+	if (WorkingUndoDepth)
 		return;
-	IsWorkingUndo = false;
 	QsciScintilla::endUndoAction();
 }
 
@@ -2014,7 +2037,10 @@ BkeIndicatorBase BkeScintilla::GetRangeForStyle(int position, unsigned char styl
 	unsigned char st = SendScintilla(SCI_GETSTYLEAT, position) & 63;
 	if (st != style)
 	{
-		return indicator;
+		position--;
+		st = SendScintilla(SCI_GETSTYLEAT, position) & 63;
+		if (st != style)
+			return indicator;
 	}
 	{
 		int pos = position;
