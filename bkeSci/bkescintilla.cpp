@@ -1504,6 +1504,8 @@ void BkeScintilla::ReplaceAllFind(const QString &rstr)
 
 bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word)
 {
+	ChangeIgnore++;
+	BkeStartUndoAction();
 	int flag = (cs ? SCFIND_MATCHCASE : 0) |
 		(word ? SCFIND_WHOLEWORD : 0) |
 		(exp ? SCFIND_REGEXP : 0);
@@ -1550,13 +1552,17 @@ bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr, bool cs
 	} while (0);
 
 	ChangeStateFlag &= (~BKE_CHANGE_REPLACE);
+
+	BkeEndUndoAction();
+	ChangeIgnore--;
 	return true;
 }
 
 void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word)
 {
 	//关闭补全，自动提示等等
-	ChangeIgnore = true;
+	ChangeIgnore++;
+	BkeStartUndoAction();
 
 	int flag = (cs ? SCFIND_MATCHCASE : 0) |
 		(word ? SCFIND_WHOLEWORD : 0) |
@@ -1600,7 +1606,8 @@ void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool
 
 	ChangeStateFlag &= (~BKE_CHANGE_REPLACE);
 
-	ChangeIgnore = false;
+	BkeEndUndoAction();
+	ChangeIgnore--;
 }
 
 BkeIndicatorBase BkeScintilla::ReplaceFind(const QString &rstr)

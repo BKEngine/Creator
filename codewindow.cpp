@@ -567,6 +567,7 @@ void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, c
 			//加到各种列表里去
 			//BkeCreator::AddRecentFile(loli->FullName());
 			//为了恢复当前文档的currentpos
+			loli->edit->installEventFilter(this);
 			QString curopenfile = ItemTextList.at(currentpos);
 			int pos = LOLI_SORT_INSERT(ItemTextList, loli->Name() + "*");
 			currentpos = ItemTextList.indexOf(curopenfile);
