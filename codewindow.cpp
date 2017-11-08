@@ -1,4 +1,5 @@
 ﻿#include <weh.h>
+#include <QGuiApplication>
 #include "codewindow.h"
 #include "dia/lablesuredialog.h"
 #include "dia/WaitWindow.h"
@@ -154,6 +155,7 @@ void CodeWindow::CreateBtn()
 	btngotolabellist = new QAction("转到标签", this);
 	btngotofile = new QAction("转到文件", this);
 	btnswitchfold = new QAction("全部折叠", this);
+	btnautofix = new QAction("自动修正", this);
 
 	//右键菜单
 	jumpToDef = new QAction(this);
@@ -165,6 +167,7 @@ void CodeWindow::CreateBtn()
 	connect(gotoLabel, SIGNAL(triggered()), this, SLOT(jumpToLabelFunc()));
 	connect(btngotolabellist, SIGNAL(triggered()), this, SLOT(GotoLabelList()));
 	connect(btngotofile, SIGNAL(triggered()), this, SLOT(GotoFile()));
+	connect(btnautofix, SIGNAL(triggered()), this, SLOT(AutoFix()));
 
 	btnlastact->setShortcut(Qt::ALT + Qt::Key_Left);
 	btnnextact->setShortcut(Qt::ALT + Qt::Key_Right);
@@ -187,6 +190,8 @@ void CodeWindow::CreateBtn()
 	btngotolabellist->setShortcut(Qt::CTRL + Qt::Key_L);
 	btngotofile->setShortcut(Qt::CTRL + Qt::Key_P);
 	btnswitchfold->setShortcut(Qt::CTRL + Qt::Key_M);
+	btnautofix->setShortcut(Qt::ALT + Qt::Key_Return);
+	addAction(btnautofix);
 
 	toolbar->addAction(btnlastact);
 	toolbar->addAction(btnnextact);
@@ -215,16 +220,12 @@ void CodeWindow::CreateBtn()
 	toolbar->addAction(btngotofile);
 	toolbar->addSeparator();
 
-
-
 	slablelist = new QComboBox;
 	slablelist->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	slablelist->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT + "/codecombox").toString());
 	slablelist->setView(new QListView());
 	toolbar->addWidget(slablelist);
 	toolbar->addAction(btncloseact);
-
-
 
 	//下边工具栏
 	toolbar2 = new QToolBar(this);
@@ -700,6 +701,7 @@ void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 	ignoreflag = true; //忽略改变，在所有准备工作完成以后才改变
 
 	loli->edit = new BkeScintilla(this);
+	loli->edit->ChangeIgnore++;
 	loli->edit->installEventFilter(this);
 	if (workpro)
 		loli->edit->analysis = workpro->analysis;
@@ -724,7 +726,7 @@ void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 	//文件有改动
 	connect(loli->edit, SIGNAL(textChanged()), diasearch, SLOT(onDocChanged()));
 	connect(loli->edit, SIGNAL(selectionChanged()), diasearch, SLOT(onSelectionChanged()));
-
+	loli->edit->ChangeIgnore--;
 	ignoreflag = false;
 }
 
@@ -1729,11 +1731,28 @@ void CodeWindow::GotoLabel(QString l)
 		l = l.right(l.length() - 1);
 	}
 	int pos = currentedit->analysis->findLabel(currentedit->FileName, l);
+	if (pos < 0)
+		return;
 	int line, index;
 	currentedit->lineIndexFromPositionByte(pos, &line, &index);
-	if (line < 0)
-		return;
 	currentedit->setFirstVisibleLine(line);
+}
+
+void CodeWindow::GotoOrCreateLabel(QString l)
+{
+	if (l.startsWith("*"))
+	{
+		l = l.right(l.length() - 1);
+	}
+	int pos = currentedit->analysis->findLabel(currentedit->FileName, l);
+	if (pos < 0)
+	{
+
+	}
+}
+
+void CodeWindow::CreateLabel(QString label)
+{
 }
 
 void CodeWindow::GotoLabelList()
@@ -1908,6 +1927,34 @@ void CodeWindow::CreateAndGotoLabel(QString label)
 	}
 }
 
+void CodeWindow::AutoFix()
+{
+	if (currentedit == nullptr)
+		return;
+	QMenu menu;
+	QAction *firstAction = nullptr;
+	//测试Label
+	{
+		BkeIndicatorBase base = currentedit->GetRangeForStyle(currentedit->GetCurrentPosition(), SCE_BKE_LABEL_IN_PARSER);
+		if (base)
+		{
+			QString content = currentedit->TextForRange(base);
+			QAction *action = menu.addAction(QIcon(":/auto/source/hint.png"), "跳转或创建标签");
+			if (firstAction == nullptr)
+				firstAction = action;
+			connect(action, &QAction::triggered, [this, content]() {
+				GotoLabel(content);
+			});
+		}
+	}
+	if (firstAction != nullptr)
+	{
+		menu.setActiveAction(firstAction);
+		QPoint pos = currentedit->mapToGlobal(currentedit->PointByPosition(currentedit->GetCurrentPosition()));
+		menu.exec(pos + QPoint(0, 20));
+	}
+}
+
 void CodeWindow::RefreshNavigation()
 {
 	btnlastact->setEnabled(currentNavigation > 0);
@@ -1979,6 +2026,8 @@ void CodeWindow::enterClickGotoMode()
 	//currentedit->setMouseTracking(true);
 	currentedit->setAttribute(Qt::WA_Hover, true);
 	onHoverMove(currentedit->mapFromGlobal(QCursor::pos()));
+	QMouseEvent event(QEvent::MouseMove, QPointF(currentedit->viewport()->mapFromGlobal(QCursor::pos())), Qt::NoButton, 0, 0);
+	QGuiApplication::sendEvent(currentedit->viewport(), &event);
 }
 
 void CodeWindow::leaveClickGotoMode()
@@ -1990,6 +2039,8 @@ void CodeWindow::leaveClickGotoMode()
 	lastClickIndicator.Clear();
 	lastClickIndicatorType = 0;
 	currentedit->setAttribute(Qt::WA_Hover, false);
+	QMouseEvent event(QEvent::MouseMove, QPointF(currentedit->viewport()->mapFromGlobal(QCursor::pos())), Qt::NoButton, 0, 0);
+	QGuiApplication::sendEvent(currentedit->viewport(), &event);
 }
 
 void CodeWindow::setClickIndicator(const BkeIndicatorBase &indicator, int id)
@@ -2006,6 +2057,8 @@ void CodeWindow::setClickIndicator(const BkeIndicatorBase &indicator, int id)
 void CodeWindow::onHoverMove(QPoint pos)
 {
 	int position = currentedit->PositionAt(pos);
+	if (position < 0)
+		return;
 	BkeIndicatorBase indicator = currentedit->GetRangeForStyle(position, SCE_BKE_COMMAND);
 	if (!indicator.IsNull())
 	{

@@ -8,6 +8,8 @@
 #include "quazip/JlCompress.h"
 #include "codewindow.h"
 #include "qmacopenfileapplication.h"
+#include <QStyle>
+#include <QStyleFactory>
 
 QString title = "BKE Creator - ";
 uint32_t titlehash = 0;

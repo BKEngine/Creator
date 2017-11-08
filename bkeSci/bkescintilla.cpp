@@ -55,11 +55,13 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	SendScintilla(SCI_INDICSETALPHA, BKE_INDICATOR_FIND, 255);
 	SendScintilla(SCI_INDICSETUNDER, BKE_INDICATOR_FIND, true);
 
-	DefineIndicators(BKE_INDICATOR_CLICK_COMMAND, INDIC_PLAIN);  //标记搜索的风格指示器
+	DefineIndicators(BKE_INDICATOR_CLICK_COMMAND, INDIC_HIDDEN);
+	SendScintilla(SCI_INDICSETHOVERSTYLE, BKE_INDICATOR_CLICK_COMMAND, INDIC_PLAIN);
 	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_CLICK_COMMAND, deflex->defaultColor(SCE_BKE_COMMAND));
 	SendScintilla(SCI_INDICSETALPHA, BKE_INDICATOR_CLICK_COMMAND, 255);
 
-	DefineIndicators(BKE_INDICATOR_CLICK_LABEL, INDIC_PLAIN);  //标记搜索的风格指示器
+	DefineIndicators(BKE_INDICATOR_CLICK_LABEL, INDIC_HIDDEN);
+	SendScintilla(SCI_INDICSETHOVERSTYLE, BKE_INDICATOR_CLICK_LABEL, INDIC_PLAIN);
 	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_CLICK_LABEL, deflex->defaultColor(SCE_BKE_LABEL_IN_PARSER));
 	SendScintilla(SCI_INDICSETALPHA, BKE_INDICATOR_CLICK_LABEL, 255);
 
@@ -121,7 +123,6 @@ void BkeScintilla::onTimer()
 	auto p = analysis->lockFile(FileName);
 	if (!p || !p->refresh)
 	{
-		analysis->unlockFile();
 		return;
 	}
 	p->refresh = false;
@@ -177,7 +178,6 @@ void BkeScintilla::onTimer()
 			}
 		}
 	}
-	analysis->unlockFile();
 }
 
 void BkeScintilla::saveTopLine()
@@ -206,21 +206,14 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 
 	int xline, xindex;
 	lineIndexFromPosition(pos, &xline, &xindex);
-	Pos st, off;
-	st.line = xline;
-	st.pos = xindex;
-	lineIndexFromPosition(pos + len, &off.line, &off.pos);
-	off -= st;
 
-	//QSci新版的输入法处理会导致内部Undo计数和我们这记的不一样
-	//注释掉后Undo，Redo似乎工作正常，于是注释掉吧
-	//if (ChangeType & SC_PERFORMED_USER)
-	//{
-	//	BkeStartUndoAction();
-	//}
-	if (mtype & SC_MOD_INSERTTEXT)
-	{  //文字被插入
-		if (!FileName.isEmpty())
+	if (mtype & SC_PERFORMED_USER)
+	{
+		if (mtype & (SC_MOD_BEFOREINSERT | SC_MOD_BEFOREDELETE))
+		{
+			BkeStartUndoAction();
+		}
+		else if (mtype & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT))
 		{
 			ChangeType = mtype;
 			modfieddata.pos = pos;
@@ -229,48 +222,7 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 			modfieddata.index = xindex;
 			modfieddata.lineadd = added;
 			modfieddata.text = QString(text);
-
-			int buflen = length() + 1;
-			char *buf = new char[buflen];
-			SendScintilla(SCI_GETTEXT, buflen, buf);
-			analysis->pushFile(FileName, buf);
-			delete[] buf;
 		}
-		//pdata->insertChars(st, off);
-	}
-	else if (mtype & SC_MOD_DELETETEXT)
-	{
-		//if( xindex < LastKeywordEnd) CheckLine(xline); //一旦删除超过关键点，则需要重新进行解析
-		//ChangeType = mtype;
-		//modfieddata.pos = pos;
-		//modfieddata.type = mtype;
-		//modfieddata.line = xline;
-		//modfieddata.index = xindex;
-		//modfieddata.lineadd = added;
-		//modfieddata.text = QString(text);
-
-		if (!FileName.isEmpty())
-		{
-			int buflen = length() + 1;
-			char *buf = new char[buflen];
-			SendScintilla(SCI_GETTEXT, buflen, buf);
-			analysis->pushFile(FileName, buf);
-			delete[] buf;
-		}
-		//pdata->deleteChars(st, off);
-	}
-	else if (mtype & SC_MOD_BEFOREDELETE)
-	{
-		modfieddata.pos = pos;
-		modfieddata.type = mtype;
-		modfieddata.line = xline;
-		modfieddata.index = xindex;
-		modfieddata.lineadd = added;
-		int l = 0;
-		char *buf = new char[len + 1];
-		SendScintilla(SCI_GETTEXTRANGE, pos, pos + len, buf);
-		modfieddata.text = buf;
-		ChangeType = mtype;
 	}
 }
 
@@ -440,10 +392,8 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 				}
 				else if (it->argFlags[it2] & PT_LABEL)
 				{
-					auto p = analysis->lockFile(FileName);
 					QSortedSet<QString> ls;
-					p->getLabels(ls);
-					analysis->unlockFile();
+					analysis->getLabels(FileName, ls);
 					QStringList l;
 					for (auto &s : ls)
 					{
@@ -538,10 +488,8 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 						}
 						else if (info->argFlags[it2] & PT_LABEL)
 						{
-							auto p = analysis->lockFile(FileName);
 							QSortedSet<QString> ls;
-							p->getLabels(ls);
-							analysis->unlockFile();
+							analysis->getLabels(FileName, ls);
 							QStringList l;
 							for (auto &s : ls)
 							{
@@ -565,7 +513,6 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 	auto p = analysis->lockFile(FileName);
 	if (!p)
 	{
-		analysis->unlockFile();
 		return QString();
 	}
 	BKE_Variable v;
@@ -585,7 +532,6 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		}
 		else
 		{
-			analysis->unlockFile();
 			return res;
 		}
 		idx++;
@@ -598,7 +544,6 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
 		if (vv.getType() != VAR_CLASS)
 		{
-			analysis->unlockFile();
 			return res;
 		}
 		getAllMembers((BKE_VarClass*)vv.obj, params);
@@ -606,7 +551,7 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		{
 			params.insert(QString::fromStdWString(it.first.getConstStr() + L"?0"));
 		}
-		analysis->unlockFile();
+		p.release();
 		for (auto &it2 : params)
 		{
 			res += ' ';
@@ -616,7 +561,7 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		return res;
 	case VAR_CLO:
 		getAllMembers((BKE_VarClosure*)v.obj, params);
-		analysis->unlockFile();
+		p.release();
 		for (auto &it2 : params)
 		{
 			res += ' ';
@@ -626,7 +571,7 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		return res;
 	case VAR_CLASS:
 		getAllMembers((BKE_VarClass*)v.obj, params);
-		analysis->unlockFile();
+		p.release();
 		for (auto &it2 : params)
 		{
 			res += ' ';
@@ -638,11 +583,10 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
 		if (vv.getType() != VAR_CLASS)
 		{
-			analysis->unlockFile();
 			return res;
 		}
 		getAllMembers((BKE_VarClass*)vv.obj, params);
-		analysis->unlockFile();
+		p.release();
 		for (auto &it2 : params)
 		{
 			res += ' ';
@@ -659,12 +603,11 @@ QString BkeScintilla::getGlobalList(const QString &ls, const QString &alltext)
 	auto p = analysis->lockFile(FileName);
 	if (!p)
 	{
-		analysis->unlockFile();
 		return QString();
 	}
 	QSet<QString> params;
 	getAllMembers(p->fileclo, params);
-	analysis->unlockFile();
+	p.release();
 	for (auto &it : global_bke_info.BagelWords)
 	{
 		params.insert(it + "?9");
@@ -725,8 +668,6 @@ void BkeScintilla::annotate(int line, const QList<QsciStyledText>& text, Annotat
 void BkeScintilla::showComplete()
 {
 	int pos = modfieddata.pos + modfieddata.text.length() - 1;
-	if (ChangeType & SC_MOD_DELETETEXT || ChangeType & SC_MOD_BEFOREDELETE)
-		pos = modfieddata.pos - 1;
 	if (pos < 0)
 		return;
 	unsigned char style = SendScintilla(SCI_GETSTYLEAT, pos);
@@ -934,10 +875,8 @@ void BkeScintilla::showComplete()
 		break;
 	case SHOW_LABEL:	//show label in parser, without "
 		{
-			auto p = analysis->lockFile(FileName);
 			QSortedSet<QString> ls;
-			p->getLabels(ls);
-			analysis->unlockFile();
+			analysis->getLabels(FileName, ls);
 			QStringList l;
 			for (auto &s : ls)
 			{
@@ -961,291 +900,264 @@ void BkeScintilla::UiChange(int updated)
 	int tabWidth = SendScintilla(SCI_GETTABWIDTH);
 
 	ChangeIgnore++;
-	if ((ChangeType & SC_PERFORMED_USER) && modfieddata.lineadd == 0)
+	if (ChangeType & SC_PERFORMED_USER)
 	{
-		BkeStartUndoAction();
-	}
+		//BkeStartUndoAction();
 
-	//if (ChangeType & SC_PERFORMED_USER)
-	if (ChangeType & SC_PERFORMED_USER && (ChangeType & SC_MOD_INSERTTEXT || ChangeType & SC_MOD_DELETETEXT || ChangeType & SC_MOD_BEFOREDELETE))
-	{
-		//自动补全
-		showComplete();
-		//defparser->TextBeChange(&modfieddata, this);
-		//CompliteFromApi();
-	}
-
-	//if (IsWorkingUndo && !ChangeIgnore) BkeEndUndoAction();
-
-	//缩进
-	//额外处理]和}
-
-	////根据fold判断缩进
-	//if(modfieddata.line > 0)
-	//{
-	//	int prevFold = SendScintilla(SCI_GETFOLDLEVEL, modfieddata.line - 1) & SC_FOLDLEVELNUMBERMASK;
-	//	int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line - 1);
-	//	for (int l = modfieddata.line; l <= modfieddata.line + modfieddata.lineadd; l++)
-	//	{
-	//		int curFold = SendScintilla(SCI_GETFOLDLEVEL, l) & SC_FOLDLEVELNUMBERMASK;
-	//		int count2 = count + (curFold - prevFold) * tabWidth;
-	//		if (count2 < 0)
-	//			count2 = 0;
-	//		SendScintilla(SCI_SETLINEINDENTATION, l, count2);
-	//	}
-	//	SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + modfieddata.lineadd));
-	//}
-	
-	if ((ChangeType & SC_MOD_INSERTTEXT) && (modfieddata.text == "]" || modfieddata.text == "}"))
-	{
-		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
-		if (style & 64)
+		if (ChangeType & SC_MOD_INSERTTEXT || ChangeType & SC_MOD_DELETETEXT)
 		{
+			//自动补全
+			showComplete();
+		}
+
+		if ((ChangeType & SC_MOD_INSERTTEXT) && (modfieddata.text == "]" || modfieddata.text == "}"))
+		{
+			unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
+			if (style & 64)
+			{
+				int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
+				int len = lineLength(modfieddata.line);
+				char *buf = new char[len + 1];
+				SendScintilla(SCI_GETLINE, modfieddata.line, buf);
+				buf[len] = 0;
+				len--;
+				while (len >= 0 && buf[len] == '\n' || buf[len] == '\r')
+					len--;
+				buf[++len] = 0;
+				//如果本行只有}或]
+				int start = 0;
+				while (isspace((unsigned char)buf[start]))
+					start++;
+				if (start == len - 1)
+				{
+					//那么往回缩
+					if (count < tabWidth)
+						count = tabWidth;
+					else
+						modfieddata.pos--;
+					SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
+					SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count());
+				}
+			}
+		}
+		if (modfieddata.lineadd == 1 && (modfieddata.text == "\n" || modfieddata.text == "\r\n"))
+		{
+			char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
+			char chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + modfieddata.text.count());
 			int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
-			int len = lineLength(modfieddata.line);
-			char *buf = new char[len + 1];
-			SendScintilla(SCI_GETLINE, modfieddata.line, buf);
-			buf[len] = 0;
-			len--;
-			while (len >= 0 && buf[len] == '\n' || buf[len] == '\r')
-				len--;
-			buf[++len] = 0;
-			//如果本行只有}或]
-			int start = 0;
-			while (isspace((unsigned char)buf[start]))
-				start++;
-			if (start == len - 1)
-			{
-				//那么往回缩
-				if (count < tabWidth)
-					count = tabWidth;
-				else
-					modfieddata.pos--;
-				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
-				SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count());
-			}
-		}
-	}
-	if (modfieddata.lineadd == 1 && (modfieddata.text == "\n" || modfieddata.text == "\r\n"))
-	{
-		char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
-		char chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + modfieddata.text.count());
-		int count = SendScintilla(SCI_GETLINEINDENTATION, modfieddata.line);
-		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
+			unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
 
-		if ((chPrev == '{' && chNext == '}') ||
-			(chPrev == '[' && chNext == ']')// ||
-			//小括号还是算了
-			//(chPrev == '(' && chNext == ')')
-			)
-		{
-			SendScintilla(SCI_INSERTTEXT, modfieddata.pos, modfieddata.text.toLatin1().data());
-			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
-			SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 2, count);
-		}
-		else if (style & 64)	//parser
-		{
-			int len = lineLength(modfieddata.line);
-			char *buf = new char[len + 1];
-			SendScintilla(SCI_GETLINE, modfieddata.line, buf);
-			buf[len] = 0;
-			len--;
-			while (len >= 0 && buf[len] == '\n' || buf[len] == '\r')
-				len--;
-			buf[++len] = 0;
-			if (len && (buf[len - 1] == '[' || buf[len - 1] == '{'))
+			if ((chPrev == '{' && chNext == '}') ||
+				(chPrev == '[' && chNext == ']')// ||
+												//小括号还是算了
+												//(chPrev == '(' && chNext == ')')
+				)
 			{
+				SendScintilla(SCI_INSERTTEXT, modfieddata.pos, modfieddata.text.toLatin1().data());
 				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
+				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 2, count);
 			}
-			else
+			else if (style & 64)	//parser
 			{
-				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
-			}
-			//if (!len || buf[len - 1] == ';' || buf[len - 1] == '}')
-			//{
+				int len = lineLength(modfieddata.line);
+				char *buf = new char[len + 1];
+				SendScintilla(SCI_GETLINE, modfieddata.line, buf);
+				buf[len] = 0;
+				len--;
+				while (len >= 0 && buf[len] == '\n' || buf[len] == '\r')
+					len--;
+				buf[++len] = 0;
+				if (len && (buf[len - 1] == '[' || buf[len - 1] == '{'))
+				{
+					SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
+				}
+				else
+				{
+					SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+				}
+				//if (!len || buf[len - 1] == ';' || buf[len - 1] == '}')
+				//{
 				//沿用上一行的缩进
 				//SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
-			//}
-			//else
-			//{
-			//	SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
-			//}
-			delete[] buf;
-			//int ly = defparser->GetIndentLayer(this, modfieddata.line);
-			//if (ly < 0)
-			//{
-			//	count += SendScintilla(SCI_GETTABWIDTH) * ly;
-			//	SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count);
-			//	modfieddata.pos--; //我也不知道为啥会这样，总之偏移了一个字节
-			//}
-			//else if (ly > 0)
-			//{
-			//	count += SendScintilla(SCI_GETTABWIDTH);
-			//}
-			//SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
-			//SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
-		}
-		else
-		{
-			//认为是command域
-			int len = lineLength(modfieddata.line);
-			char *buf = new char[len + 1];
-			SendScintilla(SCI_GETLINE, modfieddata.line, buf);
-			buf[len] = 0;
-			len--;
-			while (len >= 0 && buf[len] == '\n' || buf[len] == '\r')
-				len--;
-			buf[++len] = 0;
-			int Pos = positionFromLineIndexByte(modfieddata.line, len - 1);
-			unsigned char style = SendScintilla(SCI_GETSTYLEAT, Pos);
-
-			if (!(style & 128))
-			{
-				SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+				//}
+				//else
+				//{
+				//	SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
+				//}
+				delete[] buf;
+				//int ly = defparser->GetIndentLayer(this, modfieddata.line);
+				//if (ly < 0)
+				//{
+				//	count += SendScintilla(SCI_GETTABWIDTH) * ly;
+				//	SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count);
+				//	modfieddata.pos--; //我也不知道为啥会这样，总之偏移了一个字节
+				//}
+				//else if (ly > 0)
+				//{
+				//	count += SendScintilla(SCI_GETTABWIDTH);
+				//}
+				//SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+				//SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
 			}
 			else
 			{
-				while (style & 128)
-				{
-					style = SendScintilla(SCI_GETSTYLEAT, --Pos);
-				}
-				unsigned char ch = SendScintilla(SCI_GETCHARAT, Pos);
-				if (ch != '@' && ch != '[')
+				//认为是command域
+				int len = lineLength(modfieddata.line);
+				char *buf = new char[len + 1];
+				SendScintilla(SCI_GETLINE, modfieddata.line, buf);
+				buf[len] = 0;
+				len--;
+				while (len >= 0 && buf[len] == '\n' || buf[len] == '\r')
+					len--;
+				buf[++len] = 0;
+				int Pos = positionFromLineIndexByte(modfieddata.line, len - 1);
+				unsigned char style = SendScintilla(SCI_GETSTYLEAT, Pos);
+
+				if (!(style & 128))
 				{
 					SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
 				}
 				else
 				{
-					//find command name
-					QString cmd;
-					++Pos;
-					ch = SendScintilla(SCI_GETCHARAT, Pos);
-					if (ch == '_' || isalpha(ch) || ch >= 0x80)
+					while (style & 128)
 					{
-						do
-						{
-							cmd.push_back(ch);
-							++Pos;
-							ch = SendScintilla(SCI_GETCHARAT, Pos);
-						} while (ch == '_' || isalnum(ch) || ch >= 0x80);
+						style = SendScintilla(SCI_GETSTYLEAT, --Pos);
 					}
-					if (cmd == "if" || cmd == "for")
+					unsigned char ch = SendScintilla(SCI_GETCHARAT, Pos);
+					if (ch != '@' && ch != '[')
 					{
-						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
-					}
-					else if (cmd == "else" || cmd == "elseif")
-					{
-						if (count < tabWidth)
-							count = tabWidth;
-						else
-							modfieddata.pos--;
-						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
 						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
-					}
-					else if (cmd == "endif" || cmd == "next")
-					{
-						if (count < tabWidth)
-							count = tabWidth;
-						else
-							modfieddata.pos--;
-						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
-						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count - tabWidth);
 					}
 					else
 					{
-						SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+						//find command name
+						QString cmd;
+						++Pos;
+						ch = SendScintilla(SCI_GETCHARAT, Pos);
+						if (ch == '_' || isalpha(ch) || ch >= 0x80)
+						{
+							do
+							{
+								cmd.push_back(ch);
+								++Pos;
+								ch = SendScintilla(SCI_GETCHARAT, Pos);
+							} while (ch == '_' || isalnum(ch) || ch >= 0x80);
+						}
+						if (cmd == "if" || cmd == "for")
+						{
+							SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count + tabWidth);
+						}
+						else if (cmd == "else" || cmd == "elseif")
+						{
+							if (count < tabWidth)
+								count = tabWidth;
+							else
+								modfieddata.pos--;
+							SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
+							SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+						}
+						else if (cmd == "endif" || cmd == "next")
+						{
+							if (count < tabWidth)
+								count = tabWidth;
+							else
+								modfieddata.pos--;
+							SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line, count - tabWidth);
+							SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count - tabWidth);
+						}
+						else
+						{
+							SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
+						}
 					}
 				}
 			}
+			SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
 		}
-		SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));
-	}
-	
 
-	//括号，引号补全
-	if (modfieddata.text.length() == 1 && (modfieddata.text == "(" || modfieddata.text == "[" || modfieddata.text == "{" || modfieddata.text == "\"" || modfieddata.text == "'" || modfieddata.text == ")" || modfieddata.text == "]" || modfieddata.text == "}"))
-	{
-		unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos - 1);
-		unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
-		unsigned char style2 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
-		//首先不要在字符串内，否则忽略
-		if ((style & 63) == SCE_BKE_STRING || (style & 63) == SCE_BKE_STRING2 || (style & 63) == SCE_BKE_TRANS)
-			goto out;
 
-		QString lefts = "([{\"\'";
-		QString rights = ")]}\"\'";
-		//unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
-		char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
-		char ch = SendScintilla(SCI_GETCHARAT, modfieddata.pos);
-		char chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + 1);
-		if (ChangeType & SC_MOD_INSERTTEXT)
+		//括号，引号补全
+		if (modfieddata.text.length() == 1 && (modfieddata.text == "(" || modfieddata.text == "[" || modfieddata.text == "{" || modfieddata.text == "\"" || modfieddata.text == "'" || modfieddata.text == ")" || modfieddata.text == "]" || modfieddata.text == "}"))
 		{
-			char match[2];
-			bool caret = false;
-			int rawstyle = style & 63;
-			switch (ch)
+			unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos - 1);
+			unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);
+			unsigned char style2 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
+			//首先不要在字符串内，否则忽略
+			if ((style & 63) == SCE_BKE_STRING || (style & 63) == SCE_BKE_STRING2 || (style & 63) == SCE_BKE_TRANS)
+				goto out;
+
+			QString lefts = "([{\"\'";
+			QString rights = ")]}\"\'";
+			//unsigned char style3 = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos + 1);
+			char chPrev = SendScintilla(SCI_GETCHARAT, modfieddata.pos - 1);
+			char ch = SendScintilla(SCI_GETCHARAT, modfieddata.pos);
+			char chNext = SendScintilla(SCI_GETCHARAT, modfieddata.pos + 1);
+			if (ChangeType & SC_MOD_INSERTTEXT)
 			{
-			case '(':
-				if ((rawstyle == SCE_BKE_STRING) || (rawstyle == SCE_BKE_STRING2))
+				char match[2];
+				bool caret = false;
+				int rawstyle = style & 63;
+				switch (ch)
+				{
+				case '(':
+					if ((rawstyle == SCE_BKE_STRING) || (rawstyle == SCE_BKE_STRING2))
+						break;
+					match[0] = ')';
 					break;
-				match[0] = ')';
-				break;
-			case '[':
-				if ((rawstyle == SCE_BKE_STRING) || (rawstyle == SCE_BKE_STRING2))
+				case '[':
+					if ((rawstyle == SCE_BKE_STRING) || (rawstyle == SCE_BKE_STRING2))
+						break;
+					match[0] = ']';
 					break;
-				match[0] = ']';
-				break;
-			case '{':
-				if ((rawstyle == SCE_BKE_STRING) || (rawstyle == SCE_BKE_STRING2))
+				case '{':
+					if ((rawstyle == SCE_BKE_STRING) || (rawstyle == SCE_BKE_STRING2))
+						break;
+					match[0] = '}';
 					break;
-				match[0] = '}';
-				break;
-			case '\"':
-				match[0] = '\"';
-				//判断是leading还是ending的"'
-				if (ch == chNext)
-					caret = true;
-				break;
-			case '\'':
-				match[0] = '\'';
-				//判断是leading还是ending的"'
-				if (ch == chNext)
-					caret = true;
-				break;
-			default:
-				if (ch==chNext)
-					caret = true;	//光标前进一格，同时忽略本次输入
-				match[0] = 0;
-				break;
-			}
-			match[1] = 0;
-			if (caret)
-			{
-				SendScintilla(SCI_GOTOPOS, modfieddata.pos + 2);
-				SendScintilla(SCI_DELETERANGE, modfieddata.pos, 1);
-			}
-			else if (style != style2 || modfieddata.text[0] != chNext)
-			{
-				SendScintilla(SCI_INSERTTEXT, modfieddata.pos + 1, match);
-			}
-		}
-		else if (ChangeType & SC_MOD_DELETETEXT)
-		{
-			char del = modfieddata.text[0].toLatin1();
-			if (lefts.indexOf(del) >= 0 && lefts.indexOf(del) == rights.indexOf(ch))
-			{
-				if ((del != '\"' && del != '\'') || (style2 & 63) == SCE_BKE_ERROR)
+				case '\"':
+					match[0] = '\"';
+					//判断是leading还是ending的"'
+					if (ch == chNext)
+						caret = true;
+					break;
+				case '\'':
+					match[0] = '\'';
+					//判断是leading还是ending的"'
+					if (ch == chNext)
+						caret = true;
+					break;
+				default:
+					if (ch == chNext)
+						caret = true;	//光标前进一格，同时忽略本次输入
+					match[0] = 0;
+					break;
+				}
+				match[1] = 0;
+				if (caret)
+				{
+					SendScintilla(SCI_GOTOPOS, modfieddata.pos + 2);
 					SendScintilla(SCI_DELETERANGE, modfieddata.pos, 1);
+				}
+				else if (style != style2 || modfieddata.text[0] != chNext)
+				{
+					SendScintilla(SCI_INSERTTEXT, modfieddata.pos + 1, match);
+				}
+			}
+			else if (ChangeType & SC_MOD_DELETETEXT)
+			{
+				char del = modfieddata.text[0].toLatin1();
+				if (lefts.indexOf(del) >= 0 && lefts.indexOf(del) == rights.indexOf(ch))
+				{
+					if ((del != '\"' && del != '\'') || (style2 & 63) == SCE_BKE_ERROR)
+						SendScintilla(SCI_DELETERANGE, modfieddata.pos, 1);
+				}
 			}
 		}
-	}
 
-out:
-
-	if (ChangeType & SC_PERFORMED_USER)
-	{
+	out:;
 		BkeEndUndoAction();
 	}
+	
 	ChangeIgnore--;
 
 	//defparser->showtype = BkeParser::SHOW_NULL;
@@ -1285,7 +1197,7 @@ QString BkeScintilla::TextForRange(const BkeIndicatorBase &range)
 void BkeScintilla::UseListChoose(const char* text, int id)
 {
 	ChangeIgnore++;
-	BkeStartUndoAction();
+	//BkeStartUndoAction();
 	//我们需要检测重复字符
 	int line, index;
 	getCursorPosition(&line, &index);
@@ -1307,7 +1219,7 @@ void BkeScintilla::UseListChoose(const char* text, int id)
 		ChooseComplete(text, positionFromLineIndex(line, index) - i);
 	else
 		ChooseComplete(text, positionFromLineIndex(line, index));
-	BkeEndUndoAction();
+	//BkeEndUndoAction();
 	ChangeIgnore--;
 	completeList.clear();
 }
@@ -1316,11 +1228,11 @@ void BkeScintilla::UseListChoose(const char* text, int id)
 void BkeScintilla::AutoListChoose(const char* text, int pos)
 {
 	ChangeIgnore++;
-	BkeStartUndoAction();
+	//BkeStartUndoAction();
 	int i = SendScintilla(SCI_AUTOCGETCURRENT);
 	SendScintilla(SCI_AUTOCCANCEL);  //取消自动完成，手动填充
 	ChooseComplete(text, pos);
-	BkeEndUndoAction();
+	//BkeEndUndoAction();
 	ChangeIgnore--;
 	completeList.clear();
 }
@@ -1762,10 +1674,21 @@ int BkeScintilla::GetTextLength()
 	return SendScintilla(SCI_GETTEXTLENGTH);
 }
 
-int BkeScintilla::PositionAt(const QPoint & point)
+int BkeScintilla::ClosedPositionAt(const QPoint & point)
 {
 	long chpos = SendScintilla(SCI_POSITIONFROMPOINTCLOSE, point.x(), point.y());
 	return (int)chpos;
+}
+
+int BkeScintilla::PositionAt(const QPoint & point)
+{
+	long chpos = SendScintilla(SCI_POSITIONFROMPOINT, point.x(), point.y());
+	return (int)chpos;
+}
+
+QPoint BkeScintilla::PointByPosition(int position)
+{
+	return QPoint(SendScintilla(SCI_POINTXFROMPOSITION, 0, position), SendScintilla(SCI_POINTYFROMPOSITION, 0, position));
 }
 
 BkeIndicatorBase BkeScintilla::findIndicatorLast(int id, int from)
@@ -1846,7 +1769,6 @@ void BkeScintilla::BkeStartUndoAction(bool newUndo/* = true*/)
 		if (newUndo)
 		{
 			QsciScintilla::endUndoAction();
-			emit Undoready(isUndoAvailable());
 			QsciScintilla::beginUndoAction();
 		}
 		return;
@@ -1861,7 +1783,6 @@ void BkeScintilla::BkeEndUndoAction()
 		return;
 	IsWorkingUndo = false;
 	QsciScintilla::endUndoAction();
-	emit Undoready(isUndoAvailable());
 }
 
 //void BkeScintilla::undo()
@@ -1959,28 +1880,40 @@ void BkeScintilla::ShowToolTip(QPoint pos)
 {
 	int n_pos = SendScintilla(BkeScintilla::SCI_POSITIONFROMPOINT, pos.x(), pos.y());
 
-	auto node = analysis->findNode(FileName, n_pos);
+	auto d = analysis->lockFile(FileName);
+	auto node = d->findNode(n_pos);
 	//test indicator
-	int v2 = SendScintilla(SCI_INDICATORVALUEAT, BKE_INDICATOR_ERROR, n_pos);
-	int v3 = SendScintilla(SCI_INDICATORVALUEAT, BKE_INDICATOR_WARNING, n_pos);
-
-	int v = v2 ? v2 - 1 : v3 - 1;
-
-	if (v >= 0)
 	{
-		QString arg1;
-		if (node)
-			arg1 = node->name;
-		QString arg2;
-		BaseNode* node2 = NULL;
-		if (node)
-			node2 = node->findChild(n_pos - node->startPos);
-		if (node2)
-			arg2 = node2->name;
-		QString inform(InidicatorMSG[v]);
-		inform = inform.arg(arg1, arg2);
-		QToolTip::showText(QCursor::pos(), inform);
-		return;
+		int v2 = SendScintilla(SCI_INDICATORVALUEAT, BKE_INDICATOR_ERROR, n_pos);
+		int v3 = SendScintilla(SCI_INDICATORVALUEAT, BKE_INDICATOR_WARNING, n_pos);
+
+		int v = v2 ? v2 - 1 : v3 - 1;
+
+		if (v >= 0)
+		{
+			QString arg1;
+			if (node)
+				arg1 = node->name;
+			QString arg2;
+			BaseNode* node2 = NULL;
+			if (node)
+				node2 = node->findChild(n_pos - node->startPos);
+			if (node2)
+				arg2 = node2->name;
+			QString inform(InidicatorMSG[v]);
+			inform = inform.arg(arg1, arg2);
+			QToolTip::showText(QCursor::pos(), inform);
+			return;
+		}
+	}
+	//测试label_in_parser
+	{
+		BkeIndicatorBase indicator = GetRangeForStyle(n_pos, SCE_BKE_LABEL_IN_PARSER);
+		if (!indicator.IsNull())
+		{
+			QToolTip::showText(QCursor::pos(), "Ctrl+点击可以跳转到本文件内该标签;\n按Alt+Enter可以在本文件内创建该标签。");
+			return;
+		}
 	}
 
 	//获取鼠标所在位置的位置（相当于文档）

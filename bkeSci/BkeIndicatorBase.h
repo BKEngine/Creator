@@ -18,6 +18,7 @@ public:
     void Clear(){ start = -1 ; end = -1 ; }
 	bool operator == (const BkeIndicatorBase &r) const { return start == r.start && end == r.end; }
 	bool operator != (const BkeIndicatorBase &r) const { return start != r.start || end != r.end; }
+	operator bool() const { return !IsNull(); }
 private:
     int start ;
     int end ;

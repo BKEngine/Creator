@@ -74,7 +74,9 @@ public:
 	void setLexer(QsciLexer *lex = 0);
 	void setSelection(BkeIndicatorBase &p);
 	int GetTextLength();
-	int PositionAt(const QPoint &point);
+	int ClosedPositionAt(const QPoint &point);
+	int PositionAt(const QPoint & point);
+	QPoint PointByPosition(int position);
 	bool IsIndicator(int id, int pos);
 	int GetByte(int pos) const;
 	QString TextForRange(const BkeIndicatorBase &range);
@@ -106,8 +108,6 @@ public:
 	}
 
 signals:
-	void Undoready(bool is) ;
-	void Redoready(bool is) ;
 	void refreshLabel(BkeScintilla *sci);
 	void refreshLabel(QSortedSet<QString> &l);
 	void ShouldAddToNavigation();
@@ -130,7 +130,8 @@ private slots:
 	void onTimer();
 
 public:
-	int ChangeStateFlag ;
+	int ChangeStateFlag;
+	int ChangeIgnore;
 	bool refind;
 
 	void saveTopLine();
@@ -141,11 +142,10 @@ private:
 	int AutoState;
 	int vautostate ;
 	int StartWordPos ;
-	int ChangeType ;
+	int ChangeType;
 	int LastKeywordEnd ;
 	int ComPleteLeast ;
 	int IndentCount ;
-	int ChangeIgnore ;
 	bool UseCallApi ;
 	bool IsNewLine ;
 	bool IsWorkingUndo ;

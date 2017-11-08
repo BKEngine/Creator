@@ -1125,6 +1125,9 @@
     <ClInclude Include="qsortedset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ScopePointer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\Setoptiondia.ui">

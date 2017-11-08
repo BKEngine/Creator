@@ -81,6 +81,7 @@
         <file>source/auto_key.png</file>
         <file>source/auto_normal.png</file>
         <file>source/auto_function.png</file>
+        <file>source/hint.png</file>
     </qresource>
     <qresource prefix="/newversioninfo">
         <file>source/728.GIF</file>

@@ -137,6 +137,7 @@ public:
 	QAction *btngotolabellist;
 	QAction *btngotofile;
 	QAction *btnswitchfold;	//	全部折叠/全部展开
+	QAction *btnautofix; //自动纠正系统，类似于VS的Ctrl+.
 	QToolBar *toolbar;
 	QComboBox *slablelist;
 	QStringList slablels;
@@ -195,6 +196,8 @@ public slots:
 	void GotoLine();
 	void GotoLabel(int i);
 	void GotoLabel(QString label);
+	void GotoOrCreateLabel(QString label);
+	void CreateLabel(QString label);
 	void ActUndo();
 	void ActRedo();
 	void ActCurrentChange();
@@ -218,6 +221,7 @@ public slots:
 	void AddNavigation(const QString &file, int line);
 	void RemoveNavigation(const QString &file);
 	void CreateAndGotoLabel(QString label);
+	void AutoFix();
 
 private slots:
 	void onTimer();

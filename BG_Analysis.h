@@ -7,6 +7,7 @@
 #include <atomic>
 #include <algorithm>
 #include "ParserHelper/parser/parser.h"
+#include "ScopePointer.h"
 
 using std::atomic_bool;
 
@@ -240,7 +241,7 @@ public:
 	/// <param name="file">The file.</param>
 	/// <param name="p">position.</param>
 	/// <returns>Nodes finded.</returns>
-	BaseNode *findNode(const QString &file, int p)
+	ScopePointer<BaseNode> findNode(const QString &file, int p)
 	{
 		BaseNode *n = NULL;
 		msgmutex.lock();
@@ -249,8 +250,7 @@ public:
 		{
 			n = d->findNode(p);
 		}
-		msgmutex.unlock();
-		return n;
+		return ScopePointer<BaseNode>(n, [this](BaseNode *) {msgmutex.unlock(); });
 	}
 
 	/// <summary>
@@ -259,7 +259,7 @@ public:
 	/// <param name="file">The file.</param>
 	/// <param name="p">position.</param>
 	/// <returns>Last label nodes finded.</returns>
-	BaseNode *findLastLabelNode(const QString &file, int p)
+	ScopePointer<BaseNode> findLastLabelNode(const QString &file, int p)
 	{
 		BaseNode *n = NULL;
 		msgmutex.lock();
@@ -268,8 +268,7 @@ public:
 		{
 			n = d->findLastLabelNode(p);
 		}
-		msgmutex.unlock();
-		return n;
+		return ScopePointer<BaseNode>(n, [this](BaseNode *) {msgmutex.unlock(); });
 	}
 
 	/// <summary>
@@ -297,21 +296,21 @@ public:
 	/// </summary>
 	/// <param name="file">The file.</param>
 	/// <returns></returns>
-	ParseData* lockFile(const QString &file)
+	ScopePointer<ParseData> lockFile(const QString &file)
 	{
 		msgmutex.lock();
-		ParseData *res = data[file];
-		return res;
+		ScopePointer<ParseData> res(data[file], [this](ParseData *) {msgmutex.unlock(); });
+		return std::move(res);
 	}
 
 	/// <summary>
 	/// Unlocks the file.
 	/// </summary>
 	/// <param name="file">The file.</param>
-	void unlockFile()
-	{
-		msgmutex.unlock();
-	}
+	//void unlockFile()
+	//{
+	//	msgmutex.unlock();
+	//}
 
 	/// <summary>
 	/// Gets all the commands and macros.
