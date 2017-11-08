@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-QT += network websocket
+QT += network websockets
 
 greaterThan(QT_MAJOR_VERSION, 4): {
 QT += widgets
@@ -147,7 +147,9 @@ SOURCES += ./main.cpp \
     QPinyin/ResourceHelper.cpp \
     dia/qnofocusitemdelegate.cpp \
     dia/gotofiledialog.cpp \
-    qmacopenfileapplication.cpp
+    qmacopenfileapplication.cpp \
+    dia/autocompletelist.cpp \
+    DebugServer.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -284,7 +286,9 @@ HEADERS  += \
     QPinyin/ResourceHelper.h \
     dia/qnofocusitemdelegate.h \
     dia/gotofiledialog.h \
-    qmacopenfileapplication.h
+    qmacopenfileapplication.h \
+    dia/autocompletelist.h \
+    DebugServer.h
 
 RESOURCES += \
     source.qrc \
@@ -306,7 +310,8 @@ FORMS += \
     dia/doubleinput.ui \
     dia/ParserEditor.ui \
     dia/openlabeldialog.ui \
-    dia/gotofiledialog.ui
+    dia/gotofiledialog.ui \
+    dia/autocompletelist.ui
 
 mac{
     QMAKE_INFO_PLIST = info-mac.plist

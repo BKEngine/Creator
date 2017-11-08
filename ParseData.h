@@ -206,17 +206,11 @@ struct BaseNode
 
 class ParseData
 {
+	QByteArray qba;
 public:
-	ParseData(QByteArray &file, BKE_VarClosure *clo);
+	ParseData(const QByteArray &file, BKE_VarClosure *clo);
 
-	~ParseData()
-	{
-		delete[] textbuf;
-		fileclo->clear();
-		fileclo->release();
-		for (auto &it : fileNodes)
-			delete it;
-	}
+	~ParseData();
 
 	//BkeScintilla *scifile;
 
@@ -287,7 +281,7 @@ public:
 	
 	bool refresh;
 
-	char *textbuf;
+	const char *textbuf;
 
 	bool isLineStart;
 

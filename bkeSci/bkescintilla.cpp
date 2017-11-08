@@ -1158,6 +1158,13 @@ void BkeScintilla::UiChange(int updated)
 		//自动补全
 		showComplete(ChangeType, modfieddata.pos, modfieddata.text);
 	}
+
+	{
+		int len = length() + 1;
+		QByteArray a(len, Qt::Initialization());
+		SendScintilla(SCI_GETTEXT, len, a.data());
+		analysis->pushFile(FileName, &a);
+	}
 	
 	ChangeIgnore--;
 

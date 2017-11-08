@@ -151,7 +151,7 @@ public:
 	/// If the file is analysising, abort it and analysis immediately.
 	/// </summary>
 	/// <param name="file">The file.</param>
-	void pushFile(const QString &file, const char *buffer = NULL)
+	void pushFile(const QString &file, const QByteArray *buffer = nullptr)
 	{
 		msgmutex.lock();
 		if (curfile == file)
@@ -166,7 +166,7 @@ public:
 		if (buffer)
 		{
 			//update buffer
-			filebuf[file] = buffer;
+			filebuf[file] = *buffer;
 		}
 		if (file == "macro.bkscr" || std::find(macrofiles.begin(), macrofiles.end(), file) != macrofiles.end())
 		{

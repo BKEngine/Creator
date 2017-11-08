@@ -2113,27 +2113,29 @@ void CodeWindow::indicatorReleased(int line, int index, Qt::KeyboardModifiers st
 	if (lastClickIndicatorType != 0 && edit->IsIndicator(lastClickIndicatorType, pos))
 	{
 		QString content = edit->TextForRange(lastClickIndicator);
-		switch (lastClickIndicatorType)
-		{
-		case BkeScintilla::BKE_INDICATOR_CLICK_COMMAND:
-		{
-			BKEMacros macro;
-			if (edit->analysis->findMacro(content, &macro))
+		QTimer::singleShot(0, [content, this, edit]() {
+			switch (lastClickIndicatorType)
 			{
-				AddFile(workpro->ProjectDir() + macro.definefile);
-				if (currentedit->FileName != macro.definefile)
-					return;
-				emit GotoLabel(macro.name);
+				case BkeScintilla::BKE_INDICATOR_CLICK_COMMAND:
+				{
+					BKEMacros macro;
+					if (edit->analysis->findMacro(content, &macro))
+					{
+						AddFile(workpro->ProjectDir() + macro.definefile);
+						if (currentedit->FileName != macro.definefile)
+							return;
+						emit GotoLabel(macro.name);
+					}
+					break;
+				}
+				case BkeScintilla::BKE_INDICATOR_CLICK_LABEL:
+				{
+					emit GotoLabel(content);
+					break;
+				}
+				default:
+					break;
 			}
-			break;
-		}
-		case BkeScintilla::BKE_INDICATOR_CLICK_LABEL:
-		{
-			emit GotoLabel(content);
-			break;
-		}
-		default:
-			break;
-		}
+		});
 	}
 }

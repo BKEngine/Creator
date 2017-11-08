@@ -20,6 +20,7 @@ extern CodeWindow *codeedit;
 #ifdef WIN32
 #include <Windows.h>
 #include <DbgHelp.h>
+#pragma comment(lib,"user32.lib")
 
 BOOL CALLBACK EnumWndProc(HWND hwnd, LPARAM lParam)
 {

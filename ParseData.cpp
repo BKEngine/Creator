@@ -55,13 +55,10 @@ void erase(Pos p, Pos &org, Pos off)
 	}
 }
 
-ParseData::ParseData(QByteArray &file, BKE_VarClosure *clo)
+ParseData::ParseData(const QByteArray &file, BKE_VarClosure *clo)
+	: qba(file)
 {
-	int len = file.length();
-	textbuf = new char[len + 1];
-	//textbuf = file.data();
-	memcpy(textbuf, file.data(), len);
-	textbuf[len] = 0;
+	textbuf = qba.constData();
 	isLineStart = true;
 	refresh = true;
 	fileclo = new BKE_VarClosure();
@@ -69,6 +66,14 @@ ParseData::ParseData(QByteArray &file, BKE_VarClosure *clo)
 	BKE_hashmap<void*, void*> pMap;
 	pMap[BKE_VarClosure::global()] = BKE_VarClosure::global();
 	fileclo->assignStructure(clo, pMap, true);
+}
+
+ParseData::~ParseData()
+{
+	fileclo->clear();
+	fileclo->release();
+	for (auto &it : fileNodes)
+		delete it;
 }
 
 void ParseData::getLabels(QSortedSet<QString> &l)
@@ -262,7 +267,7 @@ char ParseData::fetchNextOne()
 	{
 		int rawidx = idx + 2;
 		skipLineComment();
-		lastComment = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
+		lastComment = QString::fromUtf8(textbuf + rawidx, idx - rawidx);
 		return textbuf[idx];
 	}
 	else if (ch == '/' && ch2 == '*')
@@ -270,7 +275,7 @@ char ParseData::fetchNextOne()
 		int rawidx = idx + 2;
 		if (skipBlockComment())
 		{
-			lastComment = QString::fromStdString(string(textbuf + rawidx, idx - 2 - rawidx));
+			lastComment = QString::fromUtf8(textbuf + rawidx, idx - 2 - rawidx);
 		}
 		return textbuf[idx];
 	}
@@ -996,7 +1001,7 @@ repos:
 			{
 				int rawidx = idx;
 				skipLineComment();
-				lastComment = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
+				lastComment = QString::fromUtf8(textbuf + rawidx, idx - rawidx);
 				delete node;
 				continue;
 			}
@@ -1125,7 +1130,7 @@ repos:
 			{
 				rawidx = idx;
 				skipLineComment();
-				node->name = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
+				node->name = QString::fromUtf8(textbuf + rawidx, idx - rawidx);
 				node->endPos = idx - 1;
 				fileNodes.insert(node->startPos, node);
 			}
@@ -1144,7 +1149,7 @@ repos:
 					skipSpace();
 					ch = textbuf[idx];
 				}
-				node->name = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
+				node->name = QString::fromUtf8(textbuf + rawidx, idx - rawidx);
 				node->endPos = ch ? idx + 1 : idx - 1;
 				if (!ch)
 				{
