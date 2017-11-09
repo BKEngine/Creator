@@ -5,10 +5,7 @@
 #include "CmdListLoader.h"
 #include "loli/loli_island.h"
 #include <Qsci/qscicommandset.h>
-
-QImage BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_function.png");
-QImage BKE_AUTOIMAGE_NORMAL(":/auto/source/auto_normal.png");
-QImage BKE_AUTOIMAGE_KEY(":/auto/source/auto_key.png");
+#include "dia/autocompletelist.h"
 
 BkeScintilla::BkeScintilla(QWidget *parent)
 	:QsciScintilla(parent)
@@ -18,9 +15,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	//setStyleSheet("QsciScintilla{border:0px solid red ;}");
 	this->setContextMenuPolicy(Qt::CustomContextMenu); //使用用户右键菜单
 	this->setAttribute(Qt::WA_InputMethodEnabled, true);
-	findstr_length = 0;
 	analysis = NULL;
-	completeType = SHOW_NULL;
 
 	setUtf8(true);
 
@@ -65,27 +60,18 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	SendScintilla(SCI_INDICSETFORE, BKE_INDICATOR_CLICK_LABEL, deflex->defaultColor(SCE_BKE_LABEL_IN_PARSER));
 	SendScintilla(SCI_INDICSETALPHA, BKE_INDICATOR_CLICK_LABEL, 255);
 
-	registerImage(0, BKE_AUTOIMAGE_NORMAL);
-	registerImage(3, BKE_AUTOIMAGE_FUNCTION);
-	registerImage(9, BKE_AUTOIMAGE_KEY);
-
 	setMarginsForegroundColor(QColor(100, 100, 100));
 	setMarginsBackgroundColor(QColor(240, 240, 240));
 	//setAutoIndent(true);
 	
-	SendScintilla(SCI_AUTOCSTOPS, "", " ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
 	SendScintilla(SCI_SETUSETABS, true);
 	SendScintilla(SCI_SETINDENT, 0);
 
 	//setIndentationGuides(true) ;
 	Separate = QString(" ~!@#$%^&*()-+/|{}[]:;/=.,?><\\\n\r");
-	AutoState = AUTO_NULL;
 	ChangeIgnore = 0;
-	UseCallApi = false;
-	LastKeywordEnd = -1;
 	LastLine = -1;
 	ChangeStateFlag = 0;
-	IsNewLine = false;
 	WorkingUndoDepth = 0;
 
 	//pdata = new ParseData(this);
@@ -93,13 +79,30 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 
 	standardCommands()->find(QsciCommand::LineCut)->setKey(0);
 
+	//自动补全
+	static QIcon BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_function.png");
+	static QIcon BKE_AUTOIMAGE_NORMAL(":/auto/source/auto_normal.png");
+	static QIcon BKE_AUTOIMAGE_KEY(":/auto/source/auto_key.png");
+	aclist = new AutoCompleteList(this);
+	aclist->DefineIcon(1, BKE_AUTOIMAGE_NORMAL);
+	aclist->DefineIcon(3, BKE_AUTOIMAGE_FUNCTION);
+	aclist->DefineIcon(9, BKE_AUTOIMAGE_KEY);
+	aclist->hide();
+	connect(this, &BkeScintilla::AutoCompleteStart, [this](auto v1, auto v2) {
+		aclist->SetList(v1);
+		aclist->Start(this->PointByPosition(this->GetCurrentPosition() - v2.toUtf8().length()) + QPoint(0, 20));
+		aclist->Match(v2);
+	});
+	connect(this, &BkeScintilla::AutoCompleteCancel, aclist, &AutoCompleteList::Cancel);
+	connect(this, &BkeScintilla::AutoCompleteMatch, aclist, &AutoCompleteList::Match);
+	connect(aclist, &AutoCompleteList::OnCanceled, this, &BkeScintilla::OnAutoCompleteCanceled);
+	connect(aclist, &AutoCompleteList::OnSelected, this, &BkeScintilla::OnAutoCompleteSelected);
+	aclist->SetFont(deflex->font(0));
+	aclist->SetStops(" ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
+
 	connect(this, SIGNAL(SCN_MODIFIED(int, int, const char *, int, int, int, int, int, int, int)),
 		SLOT(EditModified(int, int, const char *, int, int, int, int, int, int, int)));
 	connect(this, SIGNAL(SCN_UPDATEUI(int)), this, SLOT(UiChange(int)));
-	//用户列表被选择
-	connect(this, SIGNAL(SCN_USERLISTSELECTION(const char*, int)), this, SLOT(UseListChoose(const char*, int)));
-	//自动完成列表被选择
-	connect(this, SIGNAL(SCN_AUTOCSELECTION(const char*, int)), this, SLOT(AutoListChoose(const char*, int)));
 	//光标位置被改变
 	connect(this, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(CurrentPosChanged(int, int)));
 	//输入单个字符
@@ -114,6 +117,15 @@ BkeScintilla::~BkeScintilla()
 {
 	tm.stop();
 	//delete Selfparser;
+}
+
+void BkeScintilla::Detach()
+{
+	aclist->Cancel();
+}
+
+void BkeScintilla::Attach()
+{
 }
 
 void BkeScintilla::onTimer()
@@ -196,6 +208,10 @@ void BkeScintilla::CurrentPosChanged(int line, int index)
 	LastLine = line;
 	if (lineChanged >= 3)
 		emit ShouldAddToNavigation();
+	if (IgnorePosChanged)
+		return;
+	if(autoCompleteType != SHOW_NULL)
+		emit AutoCompleteCancel();
 }
 
 void BkeScintilla::EditModified(int pos, int mtype, const char *text,
@@ -209,6 +225,7 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 
 	if (mtype & (SC_MOD_BEFOREINSERT | SC_MOD_BEFOREDELETE))
 	{
+		IgnorePosChanged++;
 		if (mtype & SC_PERFORMED_USER)
 		{
 			BkeStartUndoAction();
@@ -222,7 +239,8 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 		modfieddata.line = xline;
 		modfieddata.index = xindex;
 		modfieddata.lineadd = added;
-		modfieddata.text = QString(text);
+		modfieddata.bytes = text;
+		modfieddata.text = QString::fromUtf8(text);
 	}
 }
 
@@ -233,9 +251,61 @@ QFont BkeScintilla::GetAnnotationFont()
 	return font;
 }
 
-QString BkeScintilla::getAttrs(const QString &name, const QStringList &attrs, const QString &alltext)
+static bool isVarName(const QString &s)
 {
-	QStringList params;
+	if (s.isEmpty())
+		return false;
+	bool r = true;
+	QByteArray ba = s.toUtf8();
+	for (int i = 0; i < ba.length(); i++)
+	{
+		unsigned char c = ba[i];
+		if (i == 0 && isalpha(c))
+			continue;
+		if (i > 0 && isalnum(c))
+			continue;
+		if (c == '_' || c >= 0x80)
+			continue;
+		r = false;
+		break;
+	}
+	return r;
+}
+
+static void getAllMembers(const BKE_hashmap<BKE_String, BKE_Variable> &map, QList<QPair<QString, int>> &result)
+{
+	for (auto &it : map)
+	{
+		//TODO func def
+		if (it.second.getType() == VAR_FUNC)
+			result << qMakePair(QString::fromStdWString(it.first.getConstStr()) + "()", 3);
+		else
+			result << qMakePair(QString::fromStdWString(it.first.getConstStr()), 1);
+	}
+}
+
+static void getAllMembers(BKE_VarClass *cla, QList<QPair<QString, int>> &result)
+{
+	for (int i = 0; i < cla->parents.size(); i++)
+		getAllMembers(cla->parents[i], result);
+	getAllMembers(cla->varmap, result);
+}
+
+static void getAllMembers(BKE_VarClosure *clo, QList<QPair<QString, int>> &result)
+{
+	if (clo->parent)
+		getAllMembers(clo->parent, result);
+	getAllMembers(clo->varmap, result);
+}
+
+static void getAllMembers(BKE_VarDic *dic, QList<QPair<QString, int>> &result)
+{
+	getAllMembers(dic->varmap, result);
+}
+
+QList<QPair<QString, int>> BkeScintilla::GetAttrs(const QString &name, const QStringList &attrs, const QString &alltext)
+{
+	QList<QPair<QString, int>> result;
 	//test macro first
 	{
 		BKEMacros macro;
@@ -247,10 +317,10 @@ QString BkeScintilla::getAttrs(const QString &name, const QStringList &attrs, co
 				QString &attr = macro.paramqueue[i].first;
 				if (!attrs.contains(attr) && !attrs.contains(QString::number(i)))
 				{
-					params.push_back(attr);
+					result.push_back(qMakePair(attr, 0));
 				}
 			}
-			return params.join(' ');
+			return result;
 		}
 	}
 	{
@@ -258,16 +328,16 @@ QString BkeScintilla::getAttrs(const QString &name, const QStringList &attrs, co
 		if (it != CmdList.end())
 		{
 			if (it->argNames.empty())
-				return QString();
+				return result;
 			for (int i = 0; i < it->argNames.size(); i++)
 			{
 				QString &attr = it->argNames[i];
 				if (!attrs.contains(attr) && !attrs.contains(QString::number(i)))
 				{
-					params.push_back(attr);
+					result.push_back(qMakePair(attr, 0));
 				}
 			}
-			return params.join(' ');
+			return result;
 		}
 	}
 	//test specialcmd
@@ -310,24 +380,26 @@ QString BkeScintilla::getAttrs(const QString &name, const QStringList &attrs, co
 				if (info)
 				{
 					if (info->argNames.isEmpty())
-						return QString();
+						return result;
 					for (int i = 0; i < info->argNames.size(); i++)
 					{
 						QString &attr = info->argNames[i];
 						if (!attrs.contains(attr) && !attrs.contains(QString::number(i)))
 						{
-							params.push_back(attr);
+							result.push_back(qMakePair(attr, 0));
 						}
 					}
-					return params.join(' ');
+					return result;
 				}
 			}
 			else
-				return "mode";
-			return QString();
+			{
+				result.push_back(qMakePair(QString("mode"), 0));
+			}
+			return result;
 		}
 	}
-	return QString();
+	return result;
 }
 
 //static struct  
@@ -339,23 +411,32 @@ QString BkeScintilla::getAttrs(const QString &name, const QStringList &attrs, co
 //	{"animate", "loop", &CmdAnimateLoopModeEnumList},
 //};
 
-QStringList BkeScintilla::getScriptList()
+QList<QPair<QString, int>> BkeScintilla::GetScriptList()
 {
 	auto ls = workpro->AllScriptFiles();
-	QStringList list;
+	QList<QPair<QString, int>> result;
 	for (QString &s : ls)
 	{
-		list << '\"' + s + '\"';
-		list << '\"' + QFileInfo(s).fileName() + '\"';
-		list << '\"' + QFileInfo(s).baseName() + '\"';
+		result << qMakePair('\"' + QFileInfo(s).baseName() + '\"' , 0);
 	}
-	ls.removeDuplicates();
-	return list;
+	return result;
 }
 
-QString BkeScintilla::getEnums(const QString &name, const QString &attr, const QString &alltext)
+QList<QPair<QString, int>> BkeScintilla::GetLabelList()
 {
-	QString res;
+	QList<QPair<QString, int>> result;
+	QSortedSet<QString> ls;
+	analysis->getLabels(FileName, ls);
+	for (auto &s : ls)
+	{
+		result.push_back(qMakePair("*" + s, 0));
+	}
+	return result;
+}
+
+QList<QPair<QString, int>> BkeScintilla::GetEnums(const QString &name, const QString &attr, const QString &alltext)
+{
+	QList<QPair<QString, int>> result;
 	{
 		auto it = CmdList.find(name);
 		if (it != CmdList.end())
@@ -376,29 +457,30 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 				//		return ls.join(' ');
 				//	}
 				//}
-				auto argEnums = it->argEnums[it2];
-				if (argEnums != NULL)
-					return argEnums;
-				else if (it->argFlags[it2] & PT_BOOL)
-					return "false true";
-				else if (it->argFlags[it2] & PT_SCRIPT)
+				QBkeCmdInfo *info = &it.value();
+				auto argEnums = info->argEnums[it2];
+				if (!argEnums.isEmpty())
 				{
-					auto ls = getScriptList();
-					return ls.join(' ');
-				}
-				else if (it->argFlags[it2] & PT_LABEL)
-				{
-					QSortedSet<QString> ls;
-					analysis->getLabels(FileName, ls);
-					QStringList l;
-					for (auto &s : ls)
+					QStringList qs = argEnums.split(" ");
+					for(auto &&s : qs)
 					{
-						l.push_back("*" + s);
+						result << qMakePair(s, 0);
 					}
-					return l.join(' ');
+				}
+				else if (info->argFlags[it2] & PT_BOOL)
+				{
+					return result << qMakePair(QString("true"), 0) << qMakePair(QString("false") ,0);
+				}
+				else if (info->argFlags[it2] & PT_SCRIPT)
+				{
+					return GetScriptList();
+				}
+				else if (info->argFlags[it2] & PT_LABEL)
+				{
+					return GetLabelList();
 				}
 			}
-			return res;
+			return result;
 		}
 	}
 	{
@@ -417,11 +499,11 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 						return l > r;
 					return false;
 				});
-				for (auto &it3 : ls)
+				for (auto &&it3 : ls)
 				{
-					it3 = '\"' + it3 + '\"';
+					result << qMakePair('\"' + it3 + '\"', 0);
 				}
-				return ls.join(' ');
+				return result;
 			}
 			QRegExp reg("\\smode=([^ ]*)");
 			auto modeidx = alltext.indexOf(reg);
@@ -473,43 +555,43 @@ QString BkeScintilla::getEnums(const QString &name, const QString &attr, const Q
 						//	}
 						//}
 						auto argEnums = info->argEnums[it2];
-						if (argEnums != NULL)
-							return argEnums;
+						if (!argEnums.isEmpty())
+						{
+							QStringList qs = argEnums.split(" ");
+							for (auto &&s : qs)
+							{
+								result << qMakePair(s, 0);
+							}
+						}
 						else if (info->argFlags[it2] & PT_BOOL)
-							return "false true";
+						{
+							return result << qMakePair(QString("true"), 0) << qMakePair(QString("false"), 0);
+						}
 						else if (info->argFlags[it2] & PT_SCRIPT)
 						{
-							auto ls = getScriptList();
-							return ls.join(' ');
+							return GetScriptList();
 						}
 						else if (info->argFlags[it2] & PT_LABEL)
 						{
-							QSortedSet<QString> ls;
-							analysis->getLabels(FileName, ls);
-							QStringList l;
-							for (auto &s : ls)
-							{
-								l.push_back("\"*" + s + "\"");
-							}
-							return l.join(' ');
+							return GetLabelList();
 						}
 					}
-					return res;
+					return result;
 				}
 			}
-			return res;
+			return result;
 		}
 	}
-	return res;
+	return result;
 }
 
-QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
+QList<QPair<QString, int>> BkeScintilla::GetValList(const QStringList &ls, const QString &alltext)
 {
-	QString res;
+	QList<QPair<QString, int>> result;
 	auto p = analysis->lockFile(FileName);
 	if (!p)
 	{
-		return QString();
+		return result;
 	}
 	BKE_Variable v;
 	auto idx = 0;
@@ -528,11 +610,10 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		}
 		else
 		{
-			return res;
+			return result;
 		}
 		idx++;
 	}
-	QSet<QString> params;
 	BKE_Variable vv;
 	switch (v.getType())
 	{
@@ -540,81 +621,42 @@ QString BkeScintilla::getValList(const QStringList &ls, const QString &alltext)
 		vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
 		if (vv.getType() != VAR_CLASS)
 		{
-			return res;
+			return result;
 		}
-		getAllMembers((BKE_VarClass*)vv.obj, params);
-		for (auto &it : ((BKE_VarDic*)v.obj)->varmap)
-		{
-			params.insert(QString::fromStdWString(it.first.getConstStr() + L"?0"));
-		}
-		p.release();
-		for (auto &it2 : params)
-		{
-			res += ' ';
-			res += it2;
-		}
-		res.remove(0, 1);
-		return res;
+		getAllMembers((BKE_VarClass*)vv.obj, result);
+		getAllMembers((BKE_VarDic*)v.obj, result);
+		return result;
 	case VAR_CLO:
-		getAllMembers((BKE_VarClosure*)v.obj, params);
-		p.release();
-		for (auto &it2 : params)
-		{
-			res += ' ';
-			res += it2;
-		}
-		res.remove(0, 1);
-		return res;
+		getAllMembers((BKE_VarClosure*)v.obj, result);
+		return result;
 	case VAR_CLASS:
-		getAllMembers((BKE_VarClass*)v.obj, params);
-		p.release();
-		for (auto &it2 : params)
-		{
-			res += ' ';
-			res += it2;
-		}
-		res.remove(0, 1);
-		return res;
+		getAllMembers((BKE_VarClass*)v.obj, result);
+		return result;
 	default:
 		vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
 		if (vv.getType() != VAR_CLASS)
 		{
-			return res;
+			return result;
 		}
-		getAllMembers((BKE_VarClass*)vv.obj, params);
-		p.release();
-		for (auto &it2 : params)
-		{
-			res += ' ';
-			res += it2;
-		}
-		res.remove(0, 1);
-		return res;
+		getAllMembers((BKE_VarClass*)vv.obj, result);
+		return result;
 	}
 }
 
-QString BkeScintilla::getGlobalList(const QString &ls, const QString &alltext)
+QList<QPair<QString, int>> BkeScintilla::GetGlobalList(const QString &ls, const QString &alltext)
 {
-	QString res;
+	QList<QPair<QString, int>> result;
 	auto p = analysis->lockFile(FileName);
 	if (!p)
 	{
-		return QString();
+		return result;
 	}
-	QSet<QString> params;
-	getAllMembers(p->fileclo, params);
-	p.release();
+	getAllMembers(p->fileclo, result);
 	for (auto &it : global_bke_info.BagelWords)
 	{
-		params.insert(it + "?9");
+		result << qMakePair(it, 9);
 	}
-	for (auto &it2 : params)
-	{
-		res += ' ';
-		res += it2;
-	}
-	res.remove(0, 1);
-	return res;
+	return result;
 }
 
 void BkeScintilla::clearAnnotations(AnnotationType type)
@@ -661,241 +703,312 @@ void BkeScintilla::annotate(int line, const QList<QsciStyledText>& text, Annotat
 	annotations.insert(line, type);
 }
 
-void BkeScintilla::showComplete(int mtype, int pos, const QString &qtext)
+void BkeScintilla::UpdateAutoComplete()
 {
-	if (mtype & SC_MOD_INSERTTEXT)
-		pos = pos + qtext.length() - 1;
-	else
-		pos = pos - 1;
-	if (pos < 0)
-		return;
-	unsigned char style = SendScintilla(SCI_GETSTYLEAT, pos);
-	unsigned char ch = SendScintilla(SCI_GETCHARAT, pos);
-	unsigned char curstyle = style;
-	QString context;
-	QString cmdname;
-	QString attrContext;
-	QString lastContext;
-	QStringList attrs;
-	int beginPos = pos;
-	unsigned int lastStyle = 0;
-	unsigned char st = style & 63;
-
-	if (st == SCE_BKE_STRING || st == SCE_BKE_STRING2 || st == SCE_BKE_TRANS || st == SCE_BKE_ANNOTATE || st == SCE_BKE_COMMENT || st == SCE_BKE_LABEL_DEFINE || st == SCE_BKE_TEXT)
-		return;
-
-	bool l = SendScintilla(SCI_AUTOCACTIVE);
-	if (l != 0)
-		return;
-	completeType = SHOW_NULL;
-
-	//handle label in parser
-	if ((style & 63) == SCE_BKE_LABEL_IN_PARSER)
+	//当前不存在AutoComplete的Context，则尝试找一个新的AutoComplete
+	if (autoCompleteType == SHOW_NULL)
 	{
-		completeType = SHOW_LABEL;
-		beginPos--;
-		style = SendScintilla(SCI_GETSTYLEAT, beginPos);
-		while (beginPos > 0 && ((style & 63) == SCE_BKE_LABEL_IN_PARSER))
-		{
-			beginPos--;
-			style = SendScintilla(SCI_GETSTYLEAT, beginPos);
-		}
-		beginPos++;
-		char *buf = new char[pos + 2 - beginPos];
-		SendScintilla(SCI_GETTEXTRANGE, beginPos, pos + 1, buf);
-		context = buf;
-		delete[] buf;
-	}
-	else if (style & 64 /*BEGAL_MASK*/)
-	{
-		beginPos--;
-		style = SendScintilla(SCI_GETSTYLEAT, beginPos);
-		while (beginPos > 0 && (style & 64))
-		{
-			beginPos--;
-			style = SendScintilla(SCI_GETSTYLEAT, beginPos);
-		}
-		//now we find the beginning the @ or [ command
-		char *buf = new char[pos + 2 - beginPos];
-		SendScintilla(SCI_GETTEXTRANGE, beginPos, pos + 1, buf);
-		context = buf;
-		delete[] buf;
-		while (isalnum(ch) || ch == '.' || ch == '_')
-		{
-			attrContext.push_front(ch);
-			ch = SendScintilla(SCI_GETCHARAT, --pos);
-		}
-		while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
-			attrContext.remove(0, 1);
-		if (attrContext.isEmpty())
-			return;
-		QStringList ls = attrContext.split('.');
-		if (ls.size() == 1 && ls[0].length() <= 2)
-			return;
-		else if (ls.size() == 1)
-		{
-			completeList = getGlobalList(ls[0], context);
-		}
+		int pos = modfieddata.pos;
+		if (ChangeType & SC_MOD_INSERTTEXT)
+			pos = pos + modfieddata.bytes.length() - 1;
 		else
+			pos = pos - 1;
+		unsigned char style = SendScintilla(SCI_GETSTYLEAT, pos);
+		unsigned char ch = SendScintilla(SCI_GETCHARAT, pos);
+		unsigned char curstyle = style;
+		int beginPos = pos;
+		unsigned int lastStyle = 0;
+		unsigned char st = style & 63;
+		QString context;
+		QList<QPair<QString, int>> completeList;
+
+		if (st == SCE_BKE_STRING || st == SCE_BKE_STRING2 || st == SCE_BKE_TRANS || st == SCE_BKE_ANNOTATE || st == SCE_BKE_COMMENT || st == SCE_BKE_LABEL_DEFINE || st == SCE_BKE_TEXT)
+			return;
+		//handle label in parser
+		if ((style & 63) == SCE_BKE_LABEL_IN_PARSER)
 		{
-			completeList = getValList(ls, context);
-		}
-		lastContext = ls.back();
-		completeType = SHOW_AUTOVALLIST;
-	}
-	else if (style & 128 /*CMD_MASK*/)
-	{
-		beginPos--;
-		style = SendScintilla(SCI_GETSTYLEAT, beginPos);
-		QByteArray qba;
-		qba.push_front(style);
-		while (beginPos > 0 && (style & 128))
-		{
-			beginPos--;
-			style = SendScintilla(SCI_GETSTYLEAT, beginPos);
-			qba.push_front(style);
-		}
-		//now we find the beginning the @ or [ command
-		char *buf = new char[pos + 2 - beginPos];
-		SendScintilla(SCI_GETTEXTRANGE, beginPos, pos + 1, buf);
-		context = buf;
-		delete[] buf;
-		int p = context.indexOf(' ');
-		cmdname = context;
-		if (p >= 0)
-			cmdname.truncate(p);
-		int p2 = context.lastIndexOf(' ');
-		attrContext = context.right(context.length() - p2 - 1);
-		int p3 = attrContext.indexOf('=');
-		if (p3 >= 0)
-			attrContext.truncate(p3);
-		if (p < 0 && (cmdname[0] == '@' || cmdname[0] == '['))
-		{
-			completeType = SHOW_AUTOCOMMANDLIST;
-		}
-		else if (ch == '=' && isVarName(attrContext))
-		{
-			completeType = SHOW_ENUMLIST;
-		}
-		else if (isspace(ch) || (isVarName(attrContext) && p3 < 0))
-		{
-			completeType = SHOW_ATTR;
-			bool hasAttr = false;
-			unsigned char oldStyle;
-			int pp = beginPos + p;
-			oldStyle = style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
-			pp++;
-			QString tmp;
-			while (pp <= pos)
+			do 
 			{
-				style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
-				if (style == SCE_BKE_DEFAULT && oldStyle == SCE_BKE_ATTRIBUTE)
-				{
-					attrs << tmp;
-					tmp.clear();
-					hasAttr = true;
-				}
-				else if (style == SCE_BKE_DEFAULT && hasAttr)
-				{
-					hasAttr = false;
-				}
-				else if (oldStyle != SCE_BKE_DEFAULT && oldStyle != SCE_BKE_ATTRIBUTE && style == SCE_BKE_DEFAULT && !hasAttr)
-				{
-					attrs << QString::number(attrs.size());
-				}
-				else if (style == SCE_BKE_ATTRIBUTE)
-				{
-                    tmp.push_back((char)SendScintilla(SCI_GETCHARAT, pp));
-				}
-				oldStyle = style;
-				pp++;
-			}
+				beginPos--;
+				style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+			} while (beginPos > 0 && ((style & 63) == SCE_BKE_LABEL_IN_PARSER));
+			beginPos++;
+			autoCompleteContext = TextForRange({ beginPos, pos + 1 });
+			autoCompleteType = SHOW_LABEL;
+			completeList = GetLabelList();
 		}
-		else
+		else if (style & 64 /*BEGAL_MASK*/)
 		{
-			attrContext.clear();
-			while (isalnum(ch) || ch == '.' || ch == '_')
+			do
 			{
-				attrContext.push_front(ch);
+				beginPos--;
+				style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+			} while (beginPos > 0 && (style & 64));
+			context = TextForRange({ beginPos, pos + 1 });
+			QByteArray valexpBytes;
+			while (isalnum(ch) || ch == '.' || ch == '_' || ch >= 0x80)
+			{
+				valexpBytes.push_front(ch);
 				ch = SendScintilla(SCI_GETCHARAT, --pos);
 			}
-			while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
-				attrContext.remove(0, 1);
-			if (attrContext.isEmpty())
+			//while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
+			//	attrContext.remove(0, 1);
+			if (valexpBytes.isEmpty())
 				return;
-			QStringList ls = attrContext.split('.');
-			if (ls.size() == 1 && ls[0].length() <= 2)
+			if (valexpBytes[0] >= '0' && valexpBytes[0] <= '9')
 				return;
-			else if (ls.size() == 1)
+			QString tmp = QString::fromUtf8(valexpBytes);
+			QStringList ls = tmp.split('.');
+			if (ls.size() == 1)
 			{
-				completeList = getGlobalList(ls[0], context);
+				completeList = GetGlobalList(ls[0], tmp);
 			}
 			else
 			{
-				completeList = getValList(ls, context);
+				completeList = GetValList(ls, tmp);
 			}
-			lastContext = ls.back();
-			completeType = SHOW_AUTOVALLIST;
+			autoCompleteContext = ls.back();
+			autoCompleteType = SHOW_AUTOVALLIST;
 		}
-		cmdname.remove(0, 1);
+		else if (style & 128 /*CMD_MASK*/ || style == SCE_BKE_COMMAND || style == SCE_BKE_COMMAND2)
+		{
+			if (!(((style & 63) == SCE_BKE_COMMAND && ch == '@') || ((style & 63) == SCE_BKE_COMMAND2 && ch == '[')))
+			{
+				unsigned char ch2;
+				do
+				{
+					beginPos--;
+					style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+					ch2 = SendScintilla(SCI_GETCHARAT, beginPos);
+				} while (beginPos > 0 && (style & 128) && !(((style & 63) == SCE_BKE_COMMAND && ch2 == '@') || ((style & 63) == SCE_BKE_COMMAND2 && ch2 == '[')));
+			}
+			//now we find the beginning the @ or [ command
+			context = TextForRange({ beginPos + 1, pos + 1 });
+			int p = context.indexOf(' ');
+			QString cmdname = context;
+			if (p < 0)
+			{
+				autoCompleteContext = cmdname;
+				autoCompleteType = SHOW_AUTOCOMMANDLIST;
+				completeList = analysis->getCmdList();
+			}
+			else
+			{
+				cmdname.truncate(p);
+				int p2 = context.lastIndexOf(' ');
+				QString attrContext = context.right(context.length() - p2 - 1);
+				int p3 = attrContext.indexOf('=');
+				if (p3 >= 0)
+					attrContext.truncate(p3);
+				if (isspace(ch) || (isVarName(attrContext) && p3 < 0))
+				{
+					autoCompleteType = SHOW_ATTR;
+					bool hasAttr = false;
+					unsigned char oldStyle;
+					int pp = beginPos + p + 1;
+					oldStyle = style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
+					pp++;
+					QStringList attrs;
+					QString tmp;
+					while (pp <= pos)
+					{
+						style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
+						if (style == SCE_BKE_DEFAULT && oldStyle == SCE_BKE_ATTRIBUTE)
+						{
+							attrs << tmp;
+							tmp.clear();
+							hasAttr = true;
+						}
+						else if (style == SCE_BKE_DEFAULT && hasAttr)
+						{
+							hasAttr = false;
+						}
+						else if (oldStyle != SCE_BKE_DEFAULT && oldStyle != SCE_BKE_ATTRIBUTE && style == SCE_BKE_DEFAULT && !hasAttr)
+						{
+							attrs << QString::number(attrs.size());
+						}
+						else if (style == SCE_BKE_ATTRIBUTE)
+						{
+							tmp.push_back((char)SendScintilla(SCI_GETCHARAT, pp));
+						}
+						oldStyle = style;
+						pp++;
+					}
+					completeList = GetAttrs(cmdname, attrs, context);
+					autoCompleteContext = attrContext;
+				}
+				else if (ch == '=' && isVarName(attrContext))
+				{
+					autoCompleteContext = "";
+					autoCompleteType = SHOW_ENUMLIST;
+					completeList = GetEnums(cmdname, attrContext, "");
+				}
+				else
+				{
+					QByteArray valexpBytes;
+					while (isalnum(ch) || ch == '.' || ch == '_' || ch >= 0x80)
+					{
+						valexpBytes.push_front(ch);
+						ch = SendScintilla(SCI_GETCHARAT, --pos);
+					}
+					//while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
+					//	attrContext.remove(0, 1);
+					if (valexpBytes.isEmpty())
+						return;
+					if (valexpBytes[0] >= '0' && valexpBytes[0] <= '9')
+						return;
+					QString tmp = QString::fromUtf8(valexpBytes);
+					QStringList ls = tmp.split('.');
+					if (ls.size() == 1)
+					{
+						completeList = GetEnums(cmdname, attrContext, tmp);
+						if (completeList.size())
+						{
+							autoCompleteContext = tmp;
+							autoCompleteType = SHOW_ENUMLIST;
+						}
+						else
+						{
+							autoCompleteContext = ls[0];
+							completeList = GetGlobalList(context, tmp);
+							autoCompleteType = SHOW_AUTOVALLIST;
+						}
+					}
+					else
+					{
+						autoCompleteContext = ls.back();
+						completeList = GetValList(ls, tmp);
+						autoCompleteType = SHOW_AUTOVALLIST;
+					}
+				}
+			}
+		}
+		if (autoCompleteType != SHOW_NULL && !completeList.empty())
+		{
+			emit AutoCompleteStart(completeList, autoCompleteContext);
+		}
+		else
+		{
+			autoCompleteType = SHOW_NULL;
+			autoCompleteContext.clear();
+		}
 	}
 	else
 	{
-		if (ch == '@' || ch == '[')
+		if (ChangeType & SC_MOD_INSERTTEXT)
 		{
-			//begin of cmd
-			context = ch;
-			completeType = SHOW_AUTOCOMMANDLIST;
+			autoCompleteContext.append(modfieddata.text);
 		}
 		else
-			completeType = SHOW_NULL;
-	}
-
-	switch (completeType)
-	{
-	case SHOW_AUTOCOMMANDLIST:
-		completeList = analysis->getCmdList();
-		if (!completeList.isEmpty())
-			SendScintilla(SCI_AUTOCSHOW, cmdname.length(), completeList.toUtf8().data());
-		break;
-	case SHOW_ATTR:
-		completeList = getAttrs(cmdname, attrs, context);
-		if (!completeList.isEmpty())
-			SendScintilla(SCI_AUTOCSHOW, attrContext.length(), completeList.toUtf8().data());
-		break;
-	case SHOW_ENUMLIST:
-		completeList = getEnums(cmdname, attrContext, context);
-		if (!completeList.isEmpty())
-			SendScintilla(SCI_AUTOCSHOW, 0UL, completeList.toUtf8().data());
-		break;
-	case SHOW_AUTOVALLIST:
-		//completeList is set before
-		if (!completeList.isEmpty())
-			SendScintilla(SCI_AUTOCSHOW, lastContext.length(), completeList.toUtf8().data());
-		break;
-	case SHOW_LABEL:	//show label in parser, without "
 		{
-			QSortedSet<QString> ls;
-			analysis->getLabels(FileName, ls);
-			QStringList l;
-			for (auto &s : ls)
+			if (modfieddata.text.length() > autoCompleteContext.size())
 			{
-				l.push_back("*" + s);
+				emit AutoCompleteCancel();
+				return;
 			}
-			completeList = l.join(' ');
-			if (!completeList.isEmpty())
-				SendScintilla(SCI_AUTOCSHOW, context.length(), completeList.toUtf8().data());
+			else
+			{
+				autoCompleteContext.remove(autoCompleteContext.size() - modfieddata.text.length(), modfieddata.text.length());
+			}
+		}
+		//	如果是用户行为或者最后一次UNDO REDO修改的话，更新AutoComplete
+		if (ChangeType & (SC_PERFORMED_USER | SC_LASTSTEPINUNDOREDO))
+			emit AutoCompleteMatch(autoCompleteContext);
+	}
+}
+
+void BkeScintilla::OnAutoCompleteCanceled()
+{
+	autoCompleteContext.clear();
+	autoCompleteType = SHOW_NULL;
+}
+
+//自动完成列表被选择
+void BkeScintilla::OnAutoCompleteSelected(QString text)
+{
+	this->setFocus();
+	ChangeIgnore++;
+	BkeStartUndoAction();
+	ChooseComplete(text);
+	BkeEndUndoAction();
+	ChangeIgnore--;
+	OnAutoCompleteCanceled();
+}
+
+
+void BkeScintilla::ChooseComplete(const QString &text)
+{
+	//int i = SendScintilla(SCI_AUTOCGETCURRENT);
+	int pos = SendScintilla(SCI_GETCURRENTPOS);
+	int autoCompleteStartPos = pos - autoCompleteContext.toUtf8().length();
+	
+	SendScintilla(SCI_SETSELECTIONSTART, autoCompleteStartPos);
+	SendScintilla(SCI_SETSELECTIONEND, pos);
+	removeSelectedText();
+	InsertAndMove(text);
+
+	switch (autoCompleteType)
+	{
+		case BkeScintilla::SHOW_AUTOCOMMANDLIST:
+			QTimer::singleShot(0 ,[this]() {
+				InsertAndMove(" ");
+			});
+			break;
+		case BkeScintilla::SHOW_AUTOVALLIST:
+			//如果最后是(),光标回移一格
+			if (text.endsWith("()"))
+			{
+				SendScintilla(SCI_GOTOPOS, SendScintilla(SCI_GETCURRENTPOS) - 1);
+			}
+			break;
+		case BkeScintilla::SHOW_ENUMLIST:
+		{
+			int pos = SendScintilla(SCI_GETCURRENTPOS);
+			unsigned char a = GetByte(pos - 1);
+			unsigned char b = GetByte(pos);
+			if (a == b && a == '"')
+			{
+				SendScintilla(SCI_DELETERANGE, pos, 1);
+			}
+			QTimer::singleShot(0, [this]() {
+				InsertAndMove(" ");
+			});
 		}
 		break;
-	default:
-		break;
-	} 
+		case BkeScintilla::SHOW_LABEL:
+			break;
+		case BkeScintilla::SHOW_ATTR:
+			QTimer::singleShot(0, [this]() {
+				InsertAndMove("=");
+			});
+			break;
+		case BkeScintilla::SHOW_SYS:
+			break;
+		default:
+			break;
+	}
+
+}
+
+bool BkeScintilla::event(QEvent *e)
+{
+	if (e->type() == QEvent::KeyPress)
+	{
+		QKeyEvent *event = (QKeyEvent *)e;
+		if (aclist->isVisible())
+		{
+			if (aclist->OnKeyPress(event->key()))
+				return true;
+		}
+	}
+	return QsciScintilla::event(e);
 }
 
 //文字或样式被改变后
 void BkeScintilla::UiChange(int updated)
 {
 	if (ChangeIgnore) return;
+	if (ChangeType == 0) return;
 
 	int tabWidth = SendScintilla(SCI_GETTABWIDTH);
 
@@ -1151,12 +1264,12 @@ void BkeScintilla::UiChange(int updated)
 	out:;
 		BkeEndUndoAction();
 	}
-
+	IgnorePosChanged--;
 	//	如果是用户行为或者最后一次UNDO REDO修改的话
-	if (ChangeType & (SC_PERFORMED_USER | SC_LASTSTEPINUNDOREDO))
+	//if (ChangeType & (SC_PERFORMED_USER | SC_LASTSTEPINUNDOREDO))
 	{
 		//自动补全
-		showComplete(ChangeType, modfieddata.pos, modfieddata.text);
+		UpdateAutoComplete();
 	}
 
 	{
@@ -1168,7 +1281,6 @@ void BkeScintilla::UiChange(int updated)
 	
 	ChangeIgnore--;
 
-	//defparser->showtype = BkeParser::SHOW_NULL;
 	ChangeType = 0;
 	modfieddata.clear();
 }
@@ -1182,7 +1294,7 @@ bool BkeScintilla::IsSeparate(int ch)
 	return false;
 }
 
-int BkeScintilla::GetByte(int pos) const
+unsigned char BkeScintilla::GetByte(int pos) const
 {
 	unsigned char s;
 	s = SendScintilla(SCI_GETCHARAT, pos);
@@ -1223,153 +1335,11 @@ int BkeScintilla::PositionByLine(int line)
 	return SendScintilla(SCI_POSITIONFROMLINE, line);
 }
 
-//用户列表被选择
-void BkeScintilla::UseListChoose(const char* text, int id)
-{
-	ChangeIgnore++;
-	//BkeStartUndoAction();
-	//我们需要检测重复字符
-	int line, index;
-	getCursorPosition(&line, &index);
-	int length = lineLength(line);
-	char *buf = new char[length + 1];
-	SendScintilla(SCI_GETLINE, line, buf);
-	buf[index] = 0;	//截断在index
-	QString t(text);
-	int maxre = min(t.length(), index);
-	int i = 1;
-	while (i <= maxre)
-	{
-		QString tmp(buf + index - i);
-		if (t.startsWith(tmp))
-			break;
-		i++;
-	}
-	if (i<=maxre)
-		ChooseComplete(text, positionFromLineIndex(line, index) - i);
-	else
-		ChooseComplete(text, positionFromLineIndex(line, index));
-	//BkeEndUndoAction();
-	ChangeIgnore--;
-	completeList.clear();
-}
-
-//自动完成列表被选择
-void BkeScintilla::AutoListChoose(const char* text, int pos)
-{
-	ChangeIgnore++;
-	BkeStartUndoAction();
-	int i = SendScintilla(SCI_AUTOCGETCURRENT);
-	SendScintilla(SCI_AUTOCCANCEL);  //取消自动完成，手动填充
-	ChooseComplete(text, pos);
-	BkeEndUndoAction();
-	ChangeIgnore--;
-	completeList.clear();
-}
-
-
-void BkeScintilla::ChooseComplete(const char *text, int pos)
-{
-	//int i = SendScintilla(SCI_AUTOCGETCURRENT);
-	QString temp(text);
-	if (pos < 0)
-		pos = SendScintilla(SCI_GETCURRENTPOS);
-	bool iscommand = (GetByte(pos - 1) == ';');
-
-	//if (!temp.endsWith("\"") && iscommand && !defparser->HasTheChileOf(temp))
-	//	temp.append("=");
-	//if (completeType == SHOW_ATTR)
-	//	temp.append("=");
-
-	if (iscommand)
-	{
-		SendScintilla(SCI_SETSELECTIONSTART, pos - 1); //移除逗号
-		if (GetByte(pos - 2) != ' ') temp.prepend(" "); //逗号之前不是空格，增加空格
-	}
-	else 
-		SendScintilla(SCI_SETSELECTIONSTART, pos);
-
-	//defparser->showtype = BkeParser::SHOW_NULL;
-	modfieddata.clear();
-	SendScintilla(SCI_SETSELECTIONEND, SendScintilla(SCI_GETCURRENTPOS));
-	removeSelectedText();
-	InsertAndMove(temp);
-
-	switch (completeType)
-	{
-	case BkeScintilla::SHOW_USECOMMANDLIST:
-		break;
-	case BkeScintilla::SHOW_AUTOCOMMANDLIST:
-		QTimer::singleShot(0, [this]() {
-			InsertAndMove(" ");
-		});
-		break;
-	case BkeScintilla::SHOW_AUTOVALLIST:
-		break;
-	case BkeScintilla::SHOW_ENUMLIST:
-		{
-			int pos = SendScintilla(SCI_GETCURRENTPOS);
-			unsigned char a = GetByte(pos - 1);
-			unsigned char b = GetByte(pos);
-			if (a == b && a == '"')
-			{
-				SendScintilla(SCI_DELETERANGE, pos, 1);
-			}
-			QTimer::singleShot(0, [this]() {
-				InsertAndMove(" ");
-			});
-		}
-		break;
-	case BkeScintilla::SHOW_USEVALLIST:
-		break;
-	case BkeScintilla::SHOW_LABEL:
-		break;
-	case BkeScintilla::SHOW_ATTR:
-		QTimer::singleShot(0, [this]() {
-			InsertAndMove("=");
-		});
-		break;
-	case BkeScintilla::SHOW_SYS:
-		break;
-	default:
-		break;
-	}
-
-	//如果最后是(),光标回移一格
-	if (temp.endsWith("()"))
-	{
-		SendScintilla(SCI_GOTOPOS, SendScintilla(SCI_GETCURRENTPOS) - 1);
-	}
-}
-
-
 //插入并移动光标位置
 void BkeScintilla::InsertAndMove(const QString &text)
 {
 	insert(text);
-	int line, index;
-	getCursorPosition(&line, &index);
-	setCursorPosition(line, index + text.length());
-}
-
-//移除前面的;号
-void BkeScintilla::RemoveDou()
-{
-	unsigned char s = 'a';
-	bool m = false;
-	int pos = SendScintilla(SCI_GETCURRENTPOS);
-	while (!IsSeparate(s) && pos > 0){
-		s = GetByte(--pos);
-		if (s == ';'){
-			m = true;
-			break;
-		}
-	}
-
-	if (!m) return;
-	SendScintilla(SCI_SETSELECTIONSTART, pos);
-	SendScintilla(SCI_SETSELECTIONEND, pos + 1);
-	removeSelectedText();
+	SetCurrentPosition(GetCurrentPosition() + text.toUtf8().length());
 }
 
 //定义指示器
@@ -1386,7 +1356,6 @@ int BkeScintilla::findFirst1(const QString fstr, bool cs, bool exp, bool word, b
 	if (ss[0] == 0)
 		return 0;
 	testlist.clear();
-	findstr_length = fstrdata.length();
 	findflag = (cs ? SCFIND_MATCHCASE : 0) |
 		(word ? SCFIND_WHOLEWORD : 0) |
 		(exp ? SCFIND_CXX11REGEX | SCFIND_REGEXP : 0);

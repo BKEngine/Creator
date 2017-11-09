@@ -32,6 +32,7 @@ public:
     int index ;
     int lineadd ;
     QString text ;
+	QByteArray bytes;
     BkeModifiedBase(){clear();}
 
     void clear(){

@@ -316,7 +316,7 @@ public:
 	/// Gets all the commands and macros.
 	/// </summary>
 	/// <returns></returns>
-	QString getCmdList();
+	QList<QPair<QString, int>> getCmdList();
 
 	bool findMacro(const QString &name, BKEMacros *m)
 	{

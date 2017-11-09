@@ -229,9 +229,9 @@ void BG_Analysis::notifyExit()
 	this->exit(0);
 }
 
-QString BG_Analysis::getCmdList()
+QList<QPair<QString, int>> BG_Analysis::getCmdList()
 {
-	QStringList ls;
+	QList<QPair<QString, int>> result;
 	{
 		QStringList tmp;
 		for (auto &it : CmdList)
@@ -249,21 +249,21 @@ QString BG_Analysis::getCmdList()
 		});
 		for (auto &it : tmp)
 		{
-			ls.push_back(it + "?0");
+			result << qMakePair(it, 1);
 		}
 	}
 	
 	for (auto &it : SpecialCmdList.keys())
 	{
-		ls.push_back(it + "?0");
+		result << qMakePair(it, 1);
 	}
 	msgmutex.lock();
 	for (auto it = macrodata.begin(); it != macrodata.end(); it++)
 	{
-		ls.push_back(it.key() + "?3");
+		result << qMakePair(it.key(), 3);
 	}
 	msgmutex.unlock();
-	return ls.join(' ');
+	return result;
 }
 
 BG_Analysis::BG_Analysis(const QString &p)

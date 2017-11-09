@@ -11,7 +11,7 @@ CodeWindow::CodeWindow(QWidget *parent)
 {
 	diasearch = new SearchBox(this);
 	addDockWidget(Qt::BottomDockWidgetArea, diasearch);
-	currentedit = 0;
+	currentedit = nullptr;
 	labelbanned = false;
 
 	QSize fff = parent->size();
@@ -91,7 +91,7 @@ CodeWindow::CodeWindow(QWidget *parent)
 	isSearLable = false; //是否在查找标签，如果是，刷新文件队列
 	ignoreActive = false;
 
-	searchlablelater = 0;
+	searchlablelater = nullptr;
 	isCompileNotice = _NOTICE_ALWAYS;
 
 	tm.setTimerType(Qt::TimerType::VeryCoarseTimer);
@@ -103,7 +103,7 @@ CodeWindow::CodeWindow(QWidget *parent)
 	debugServer = new DebugServer(this);
 	connect(debugServer, SIGNAL(logReceived(int32_t, QString)), this, SLOT(DebugLogReceived(int32_t, QString)));
 
-	ChangeProject(0);
+	ChangeProject(nullptr);
 }
 
 CodeWindow::~CodeWindow()
@@ -348,16 +348,19 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 	//释放文档改变信号
 	if (currentpos > 0) CurrentConnect(false);
 
-	currentbase = docWidgetHash.value(stackwidget->currentWidget(), 0);
-	if (currentbase == 0){
+	currentbase = docWidgetHash.value(stackwidget->currentWidget(), nullptr);
+	if (currentbase == nullptr){
 		QMessageBox::critical(this, "", "致命错误：没有找到匹配的QWidget！", QMessageBox::Ok);
 		return;
 	}
 	leaveClickGotoMode();
 	//改变工程
 	//ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
-	if(currentedit)
+	if (currentedit)
+	{
 		currentedit->saveTopLine();
+		currentedit->Detach();
+	}
 	currentedit = currentbase->edit;
 	//reset lexer
 	currentedit->deflex->ReadConfig(currentedit->deflex->ConfigName());
@@ -392,6 +395,7 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 
 	// 导航
 	AddNavigation(currentbase->Name(), currentedit->GetCurrentPosition());
+	currentedit->Attach();
 }
 
 //断开、连接当前文档信号
@@ -441,7 +445,7 @@ void CodeWindow::btnDisable()
 
 void CodeWindow::Rename(const QString &old, const QString &now)
 {
-	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(old), 0);
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(old), nullptr);
 	docStrHash.remove(LOLI_OS_QSTRING(old));
 	docStrHash.insert(LOLI_OS_QSTRING(now), loli);
 	if (loli)
@@ -459,7 +463,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 {
 	if (!workpro)
 		return;
-	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), nullptr);
 	bool close = !loli;
 	if (!loli)
 	{
@@ -495,7 +499,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 		int line = loli->edit->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION, p.Start());
 		int linestart = loli->edit->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line);
 		int linelen = loli->edit->SendScintilla(QsciScintilla::SCI_LINELENGTH, line);
-		char *buf = new char[linelen + 1];
+		auto *buf = new char[linelen + 1];
 		loli->edit->SendScintilla(QsciScintilla::SCI_GETLINE, line, buf);
 		buf[linelen] = 0;
 		linelen--;
@@ -521,7 +525,7 @@ void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, c
 {
 	if (!workpro)
 		return;
-	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), nullptr);
 	bool close = !loli;
 	if (!loli)
 	{
@@ -658,10 +662,10 @@ void CodeWindow::replaceAllFile(const QString &searchstr, const QString &replace
 //打开文件，文件列表是自动维护的
 void CodeWindow::AddFile(const QString &file)
 {
-	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), nullptr);
 
 	//如果为空，则创建
-	if (loli == 0){
+	if (loli == nullptr){
 		loli = new BkeDocBase;
 		loli->SetFileName(file);
 		if (!loli->File()->exists()){
@@ -718,7 +722,6 @@ void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 	//文字
 	loli->edit->setText(t);
 	loli->edit->setModified(false);  //没有改变
-	loli->edit->SetCurrentPosition(0);
 
 	//文件被改变
 	connect(loli->edit, SIGNAL(modificationChanged(bool)), this, SLOT(DocChange(bool)));
@@ -821,13 +824,11 @@ void CodeWindow::backupAll()
 	jo.insert("files", QJsonArray::fromStringList(files));
 	jd.setObject(jo);
 	LOLI::AutoWrite(userdir + "pro", jd.toJson());
-	return;
 }
 
 void CodeWindow::SaveFile()
 {
 	simpleSave(currentbase);
-	return;
 }
 
 bool CodeWindow::simpleBackup(BkeDocBase *loli)
@@ -883,7 +884,7 @@ void CodeWindow::SaveAs()
 void CodeWindow::CloseFile()
 {
 	if (currentedit->isModified()){
-		QMessageBox *msg = new QMessageBox(this);
+		auto *msg = new QMessageBox(this);
 		msg->addButton("保存", QMessageBox::AcceptRole);
 		msg->addButton("关闭", QMessageBox::RejectRole);
 		msg->addButton("取消", QMessageBox::DestructiveRole);
@@ -910,9 +911,7 @@ bool CodeWindow::CloseAll()
 {
 	QList<BkeDocBase*> ls = docWidgetHash.values();
 
-	BkeDocBase *ptr;
-	for (int i = 0; i < ls.size(); i++){
-		ptr = ls.at(i);
+	for (auto ptr : ls){
 		if (ptr->edit->isModified()){
 			SetCurrentEdit(ptr->edit);
 			auto btn = QMessageBox::information(this, "", "文件:\r\n" + ptr->FullName() + "\r\n已经修改，是否保存？", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
@@ -963,9 +962,9 @@ void CodeWindow::FileIOclose(const QStringList &list)
 	BkeDocBase *llm;
 	QList<BkeDocBase*> doclist;
 	for (int i = 0; i < list.size(); i++){
-		llm = docStrHash.value(list.at(i), 0);
+		llm = docStrHash.value(list.at(i), nullptr);
 		//已经被打开的文件
-		if (llm != 0){
+		if (llm != nullptr){
 			ls.append(list.at(i));
 			doclist.append(llm);
 		}
@@ -993,7 +992,7 @@ void CodeWindow::CompileLang(bool release /*= false*/)
 {
 	LOLI_CLEAR_TEMP(BKE_CURRENT_DIR + "/temp");
 	//当前编辑项不是工程的话，什么也不会发生
-	if (workpro == 0) return;
+	if (workpro == nullptr) return;
 
 	//设置按钮
 	btncompileact->setEnabled(false);
@@ -1037,7 +1036,7 @@ void CodeWindow::CompileAll(bool release /*= false*/)
 {
 	LOLI_CLEAR_TEMP(BKE_CURRENT_DIR + "/temp");
 	//当前编辑项不是工程的话，什么也不会发生
-	if (workpro == 0) return;
+	if (workpro == nullptr) return;
 
 	markadmin.ClearRuntimeProblems();
 	if (currentedit)
@@ -1073,14 +1072,14 @@ bool CodeWindow::WriteOpenFile(const QString &dir)
 	QList<BkeDocBase*> ks;
 	QStringList ns;
 
-	for (int i = 0; i < ls.size(); i++){
-		if (LOLI_OS_QSTRING(ls.at(i)->ProjectDir()) != LOLI_OS_QSTRING(dir)) continue;
-		if (!ls.at(i)->edit->isModified()) continue;
-		ks.append(ls.at(i));
-		ns.append(ls.at(i)->Name());
+	for (auto l : ls){
+		if (LOLI_OS_QSTRING(l->ProjectDir()) != LOLI_OS_QSTRING(dir)) continue;
+		if (!l->edit->isModified()) continue;
+		ks.append(l);
+		ns.append(l->Name());
 	}
 
-	if (ns.size() < 1) return true;
+	if (ns.empty()) return true;
 
 	if (isCompileNotice == _NOTICE_ALWAYS){
 
@@ -1088,7 +1087,7 @@ bool CodeWindow::WriteOpenFile(const QString &dir)
 		msg.SetLable("以下文件已经修改，是否保存？");
 		msg.SetBtn(QStringList() << "取消" << "不要保存" << "全部保存");
 		msg.SetCheckbox(QStringList() << "不再提示");
-		QListWidget *tls = new QListWidget(&msg);
+		auto *tls = new QListWidget(&msg);
 		tls->addItems(ns);
 		msg.SetCenterWidget(tls);
 		msg.SetDefaultBtn(2);
@@ -1103,7 +1102,7 @@ bool CodeWindow::WriteOpenFile(const QString &dir)
 
 	}
 
-	for (int i = 0; i < ks.size(); i++) simpleSave(ks.at(i));
+	for (auto k : ks) simpleSave(k);
 
 	return true;
 }
@@ -1133,9 +1132,8 @@ QStringList fileEntries(const QString &dir, const QStringList &suffixes)
 	QStringList l;
 	QDir d(dir);
 	QFileInfoList a = d.entryInfoList();
-	for (int i = 0; i < a.size(); i++)
+	for (QFileInfo &info : a)
 	{
-		QFileInfo &info = a[i];
 		if (info.isDir())
 		{
 			if (info.fileName() != ".." && info.fileName() != ".")
@@ -1158,7 +1156,7 @@ QStringList fileEntries(const QString &dir, const QStringList &suffixes)
 //删除编译过的文件
 void CodeWindow::deleteCompileFile()
 {
-	if (workpro == 0)
+	if (workpro == nullptr)
 		return;
 	QStringList l = fileEntries(workpro->ProjectDir(), QStringList() << ".bkbin");
 	for (auto i : l)
@@ -1339,7 +1337,7 @@ void CodeWindow::AddBookMark()
 	if (info.isEmpty()) return;
 
 	int line = currentedit->GetCurrentLine();
-	if (currentbase != 0){
+	if (currentbase != nullptr){
 		//markadmin.AddBookMark(info, line ,BkeFullnameToName(currentbase->fullname,currentproject->FileDir()) );
 		workpro->WriteMarkFile(&markadmin);
 	}
@@ -1374,8 +1372,8 @@ void CodeWindow::CheckProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 	BkeMarkerBase *abc;
 	QString info;
 
-	for (int i = 0; i < list->size(); i++){
-		abc = list->at(i);
+	for (auto i : *list){
+		abc = i;
 		info = edit->annotation(abc->Atpos - 1);
 
 		if (info.isEmpty()) info = abc->Information;
@@ -1399,8 +1397,8 @@ void CodeWindow::CheckBookMarks(BkeScintilla *edit, BkeMarkList *list)
 	if (list->isEmpty()) return;
 
 	BkeMarkerBase *abc;
-	for (int i = 0; i < list->size(); i++){
-		abc = list->at(i);
+	for (auto i : *list){
+		abc = i;
 		edit->markerAdd(abc->Atpos, 3);
 	}
 }
@@ -1412,8 +1410,8 @@ void CodeWindow::CheckMarks(BkeScintilla *edit, BkeMarkList *list)
 	if (list->isEmpty()) return;
 
 	BkeMarkerBase *abc;
-	for (int i = 0; i < list->size(); i++){
-		abc = list->at(i);
+	for (auto i : *list){
+		abc = i;
 		edit->markerAdd(abc->Atpos, 4);
 	}
 }
@@ -1430,8 +1428,8 @@ void CodeWindow::CheckRuntimeProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 	BkeMarkerBase *abc;
 	QString info;
 
-	for (int i = 0; i < list->size(); i++) {
-		abc = list->at(i);
+	for (auto i : *list) {
+		abc = i;
 		info = edit->annotation(abc->Atpos - 1);
 
 		if (info.isEmpty()) info = abc->Information;
@@ -1572,7 +1570,7 @@ void CodeWindow::ChangeProject(BkeProject *p)
 		navigationList.clear();
 		currentNavigation = -1;
 
-		if (p == 0)
+		if (p == nullptr)
 		{
 			btncompileact->setEnabled(false);  //编译按钮只有当工程出现时才可用
 			btncompilerunact->setEnabled(false);
@@ -1600,7 +1598,7 @@ void CodeWindow::TextToMarks(const QString &text, const QString &dir, int type)
 
 void CodeWindow::NewEmptyFile()
 {
-	BkeDocBase *llm = new BkeDocBase;
+	auto *llm = new BkeDocBase;
 	llm->SetFileName("New");
 	simpleNew(llm, "");
 	llm->edit->FileName = "New";
@@ -1620,8 +1618,8 @@ void CodeWindow::QfileChange(const QString &path)
 	BkeDocBase *tempbase = currentbase;
 
 	if (!path.isEmpty()){
-		tempbase = docStrHash.value(LOLI_OS_QSTRING(path), 0);
-		if (tempbase == 0) return;
+		tempbase = docStrHash.value(LOLI_OS_QSTRING(path), nullptr);
+		if (tempbase == nullptr) return;
 		SetCurrentEdit(tempbase->edit);
 	}
 
@@ -1639,7 +1637,7 @@ void CodeWindow::QfileChange(const QString &path)
 		if (i == QMessageBox::Close){
 			//BkeProject *pro = prowin->FindProjectFromDir(tempbase->ProjectDir());
 			BkeProject *pro = workpro;
-			if (pro != 0) pro->RemoveItem(tempbase->FullName());
+			if (pro != nullptr) pro->RemoveItem(tempbase->FullName());
 			simpleClose(tempbase);
 		}
 		else if (i == QMessageBox::Save)
@@ -1790,7 +1788,7 @@ void CodeWindow::GotoFile()
 		return;
 	}
 	QStringList qs = workpro->AllScriptFiles();
-	GotoFileDialog *dialog = new GotoFileDialog(qs, this);
+	auto *dialog = new GotoFileDialog(qs, this);
 	dialog->setModal(true);
 	connect(dialog, &GotoFileDialog::GotoFile, projectedit, &ProjectWindow::OpenProjectFile);
 	dialog->show();
@@ -1845,7 +1843,7 @@ void CodeWindow::ActCopy()
 
 void CodeWindow::jumpToDefFunc()
 {
-	QAction *act = (QAction*)sender();
+	auto *act = (QAction*)sender();
 	QStringList ls = act->data().toString().split('|');
 	int pos = ls[1].toInt();
 	AddFile(workpro->ProjectDir() + ls[0]);
@@ -1858,7 +1856,7 @@ void CodeWindow::jumpToDefFunc()
 
 void CodeWindow::jumpToCodeFunc()
 {
-	QAction *act = (QAction*)sender();
+	auto *act = (QAction*)sender();
 	QStringList ls = act->data().toString().split('|');
 	AddFile(workpro->ProjectDir() + ls[0]);
 	if (currentedit->FileName != ls[0])
@@ -1883,7 +1881,7 @@ void CodeWindow::AddNavigation(const QString &file, int pos)
 {
 	if (navigationLocker)
 		return;
-	if (navigationList.size() && navigationList[currentNavigation].first == file && navigationList[currentNavigation].second == pos)
+	if (!navigationList.empty() && navigationList[currentNavigation].first == file && navigationList[currentNavigation].second == pos)
 		return;
 	if (currentNavigation != navigationList.size() - 1)
 	{
@@ -2007,7 +2005,7 @@ bool CodeWindow::eventFilter(QObject * watched, QEvent *e)
 	}
 	else if (e->type() == QEvent::KeyPress)
 	{
-		QKeyEvent *event = (QKeyEvent *)e;
+		auto *event = (QKeyEvent *)e;
 		if (event->key() == Qt::Key_Control && !event->isAutoRepeat())
 		{
 			enterClickGotoMode();
@@ -2015,7 +2013,7 @@ bool CodeWindow::eventFilter(QObject * watched, QEvent *e)
 	}
 	else if (e->type() == QEvent::KeyRelease)
 	{
-		QKeyEvent *event = (QKeyEvent *)e;
+		auto *event = (QKeyEvent *)e;
 		if (event->key() == Qt::Key_Control && !event->isAutoRepeat())
 		{
 			leaveClickGotoMode();
@@ -2023,7 +2021,7 @@ bool CodeWindow::eventFilter(QObject * watched, QEvent *e)
 	}
 	else if (e->type() == QEvent::HoverMove)
 	{
-		QHoverEvent *event = (QHoverEvent *)e;
+		auto *event = (QHoverEvent *)e;
 		if (event->modifiers() & Qt::ControlModifier)
 		{
 			onHoverMove(event->pos());
@@ -2040,7 +2038,7 @@ void CodeWindow::enterClickGotoMode()
 	//currentedit->setMouseTracking(true);
 	currentedit->setAttribute(Qt::WA_Hover, true);
 	onHoverMove(currentedit->mapFromGlobal(QCursor::pos()));
-	QMouseEvent event(QEvent::MouseMove, QPointF(currentedit->viewport()->mapFromGlobal(QCursor::pos())), Qt::NoButton, 0, 0);
+	QMouseEvent event(QEvent::MouseMove, QPointF(currentedit->viewport()->mapFromGlobal(QCursor::pos())), Qt::NoButton, nullptr, nullptr);
 	QGuiApplication::sendEvent(currentedit->viewport(), &event);
 }
 
@@ -2053,7 +2051,7 @@ void CodeWindow::leaveClickGotoMode()
 	lastClickIndicator.Clear();
 	lastClickIndicatorType = 0;
 	currentedit->setAttribute(Qt::WA_Hover, false);
-	QMouseEvent event(QEvent::MouseMove, QPointF(currentedit->viewport()->mapFromGlobal(QCursor::pos())), Qt::NoButton, 0, 0);
+	QMouseEvent event(QEvent::MouseMove, QPointF(currentedit->viewport()->mapFromGlobal(QCursor::pos())), Qt::NoButton, nullptr, nullptr);
 	QGuiApplication::sendEvent(currentedit->viewport(), &event);
 }
 
@@ -2103,12 +2101,11 @@ void CodeWindow::onHoverMove(QPoint pos)
 		return;
 	}
 	setClickIndicator(BkeIndicatorBase(), 0);
-	return;
 }
 
 void CodeWindow::indicatorReleased(int line, int index, Qt::KeyboardModifiers state)
 {
-	BkeScintilla *edit = (BkeScintilla *)sender();
+	auto *edit = (BkeScintilla *)sender();
 	auto pos = edit->positionFromLineIndex(line, index);
 	if (lastClickIndicatorType != 0 && edit->IsIndicator(lastClickIndicatorType, pos))
 	{

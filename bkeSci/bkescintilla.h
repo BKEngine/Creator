@@ -13,6 +13,7 @@
 
 class BkeDocBase;
 class BkeProject;
+class AutoCompleteList;
 
 class BkeScintilla : public QsciScintilla
 {
@@ -21,18 +22,11 @@ public:
 	BkeScintilla(QWidget *parent=0 ) ;
 	~BkeScintilla() ;
 
-	//填充状态
-	enum{
-		AUTO_NULL ,
-		AUTO_COMMAND ,
-		AUTO_ATRRIBUTE ,
-		AUTO_FINISH ,
-		AUTO_LINEERROR ,
-		AUTO_WAIT ,
-		P_AUTO_NORMAL ,
-		P_AUTO_NULL ,
-		P_AUTO_START
-	} ;
+	//本文档被CodeWindow隐藏或释放
+	void Detach();
+	//本文档被CodeWindow显示
+	void Attach();
+
 	enum{
 		BKE_INDICATOR_FIND = 8,
 		BKE_INDICATOR_ERROR,
@@ -49,7 +43,6 @@ public:
 	BkeIndicatorBase findlast;
 	QString FileName;
 
-	QString GetLastError(){ return errorinfo; }
 	void    DefineIndicators(int id,int intype) ;
 	void    ClearIndicators(int id) ;
 	void ClearIndicator(int id, const BkeIndicatorBase &p) ;
@@ -78,16 +71,17 @@ public:
 	int PositionAt(const QPoint & point);
 	QPoint PointByPosition(int position);
 	bool IsIndicator(int id, int pos);
-	int GetByte(int pos) const;
+	unsigned char GetByte(int pos) const;
 	QString TextForRange(const BkeIndicatorBase &range);
 	void AppendText(const QString &text);
 	void AppendText(const QByteArray &text);
 	QByteArray TextAsBytes(const QString &text);
 	int PositionByLine(int line);
+	BkeIndicatorBase GetRangeForStyle(int position, unsigned char style);
 
 	int findcount ;
 
-	int topLine;
+	int topLine = 0;
 
 	BkeDocBase *basedoc;
 	BkeProject *workpro;
@@ -123,10 +117,7 @@ private slots:
 	void EditModified(int pos, int mtype, const char *text,
 									int len, int added, int line, int foldNow, int foldPrev, int token,
 									int annotationLinesAdded) ;
-	void UiChange(int updated) ;
-	void UseListChoose(const char* text ,int id ) ;
-	void AutoListChoose(const char* text ,int pos ) ;
-	void ChooseComplete(const char *text,int pos) ;
+	void UiChange(int updated);
 	void InsertAndMove(const QString &text);
 	void CurrentPosChanged(int line , int index );
 	QFont GetAnnotationFont();
@@ -142,32 +133,15 @@ public:
 
 private:
 	QTimer tm;
-	int AutoState;
-	int vautostate ;
-	int StartWordPos ;
-	int ChangeType;
-	int LastKeywordEnd ;
-	int ComPleteLeast ;
-	int IndentCount ;
-	bool UseCallApi ;
-	bool IsNewLine ;
+	int ChangeType = 0;
 	int WorkingUndoDepth ;
 	int LastLine ;
-	int SectionPos ;
-	int findstr_length;
 	BkeModifiedBase modfieddata ;
-	BkeModifiedBase indentdate ;
 	int findflag ;
-	const char *comss ;
 	QByteArray fstrdata ;
 	QString Separate ;
-	QString LaterInsertWord ;   //Ui更新后插入
-
-	QFile fileIO ;
-	QString errorinfo ;
 
 	bool IsSeparate(int ch) ;
-	void RemoveDou() ;
 	void BkeStartUndoAction(bool newUndo = true) ;//记录Undo，如果当前正在记录，那么newUndo决定是记录一个新的还是继续当前记录
 	void BkeEndUndoAction() ;
 	int GetActualIndentCharLength(int lineID) ;
@@ -175,28 +149,38 @@ private:
 	BkeIndicatorBase simpleFind(const char *ss , int flag,int from,int to) ;
 
 protected:
-
 	//补全相关
-	enum{
+	AutoCompleteList *aclist;
+	void UpdateAutoComplete();
+	QList<QPair<QString, int>> GetLabelList();
+	QList<QPair<QString, int>> GetScriptList();
+	QList<QPair<QString, int>> GetAttrs(const QString &name, const QStringList &attrs, const QString &alltext);
+	QList<QPair<QString, int>> GetEnums(const QString &name, const QString &attr, const QString &alltext);
+	QList<QPair<QString, int>> GetValList(const QStringList &ls, const QString &alltext);
+	QList<QPair<QString, int>> GetGlobalList(const QString &ls, const QString &alltext);
+	void ChooseComplete(const QString &text);
+	int IgnorePosChanged = 0;
+	virtual bool event(QEvent *) override;
+
+	enum {
 		SHOW_NULL,
-		SHOW_USECOMMANDLIST,
 		SHOW_AUTOCOMMANDLIST,
 		SHOW_AUTOVALLIST,
 		SHOW_ENUMLIST,
-		SHOW_USEVALLIST,
 		SHOW_LABEL,
 		SHOW_ATTR,
 		SHOW_SYS
-	}completeType;
+	}autoCompleteType = SHOW_NULL;
+	QString autoCompleteContext;
 
-	QString completeList;
+signals:
+	void AutoCompleteStart(QList<QPair<QString, int>>, QString);
+	void AutoCompleteMatch(QString);
+	void AutoCompleteCancel();
 
-	QStringList getScriptList();
-	void showComplete(int mtype, int pos, const QString &qtext);
-	QString getAttrs(const QString &name, const QStringList &attrs, const QString &alltext);
-	QString getEnums(const QString &name, const QString &attr, const QString &alltext);
-	QString getValList(const QStringList &ls, const QString &alltext);
-	QString getGlobalList(const QString &ls, const QString &alltext);
+public slots:
+	void OnAutoCompleteCanceled();
+	void OnAutoCompleteSelected(QString s);
 
 	//Annotations管理
 public:
@@ -209,11 +193,9 @@ public:
 	};
 
 private:
-
 	QMultiHash<int, AnnotationType> annotations;
 
 public:
-
 	void clearAnnotations(AnnotationType type);
 	void clearAnnotationsAll();
 	void annotate(int line, const QString &text, int style, AnnotationType type);
@@ -224,7 +206,6 @@ public:
 	// 悬浮信息显示
 public:
 	void ShowToolTip(QPoint pos);
-	BkeIndicatorBase GetRangeForStyle(int position, unsigned char style);
 };
 
 #endif // BKESCINTILLA_H

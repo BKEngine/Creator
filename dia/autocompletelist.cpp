@@ -17,7 +17,8 @@ AutoCompleteList::~AutoCompleteList()
 
 void AutoCompleteList::ItemClicked(QListWidgetItem *)
 {
-
+	emit OnSelected(matches[ui->listWidget->currentRow()]);
+	this->hide();
 }
 
 void AutoCompleteList::SetList(const QList<QPair<QString, int>> &list)
@@ -25,7 +26,6 @@ void AutoCompleteList::SetList(const QList<QPair<QString, int>> &list)
 	typeList.clear();
 	map.clear();
 	QStringList alternatives;
-	this->alternatives = alternatives;
 	for (auto &&pair : list)
 	{
 		alternatives << pair.first;
@@ -33,6 +33,7 @@ void AutoCompleteList::SetList(const QList<QPair<QString, int>> &list)
 	}
 	QPinyin::ExtractPinyinToMap(alternatives, map);
 	matcher.reset(new QFuzzyMatcher(map.keys()));
+	this->alternatives = alternatives;
 }
 
 void AutoCompleteList::DefineIcon(int id, const QIcon & icon)
@@ -40,9 +41,46 @@ void AutoCompleteList::DefineIcon(int id, const QIcon & icon)
 	icons.insert(id, icon);
 }
 
+void AutoCompleteList::SetFont(const QFont & font)
+{
+	ui->listWidget->setFont(font);
+}
+
+void AutoCompleteList::SetStops(const QString & stops)
+{
+	this->stops = stops;
+}
+
+bool AutoCompleteList::OnKeyPress(int key)
+{
+	if (key == Qt::Key_Escape)
+	{
+		Cancel();
+	}
+	else if (key == Qt::Key_Return || key == Qt::Key_Enter)
+	{
+		emit OnSelected(matches[ui->listWidget->currentRow()]);
+		this->hide();
+	}
+	else if (key == Qt::Key_Down)
+	{
+		ui->listWidget->setCurrentRow(ui->listWidget->currentRow() + 1);
+	}
+	else if (key == Qt::Key_Up)
+	{
+		ui->listWidget->setCurrentRow(ui->listWidget->currentRow() -1);
+	}
+	else
+	{
+		return false;
+	}
+	return true;
+}
+
 void AutoCompleteList::Cancel()
 {
 	this->hide();
+	emit OnCanceled();
 }
 
 void AutoCompleteList::Start(const QPoint &pos)
@@ -53,6 +91,12 @@ void AutoCompleteList::Start(const QPoint &pos)
 
 void AutoCompleteList::Match(const QString &str)
 {
+	if (!str.isEmpty() && stops.contains(str.right(1)))
+	{
+		this->hide();
+		emit OnCanceled();
+		return;
+	}
 	QStringList qs;
 	if (str.isEmpty())
 	{
@@ -70,25 +114,38 @@ void AutoCompleteList::Match(const QString &str)
 			}
 		}
 	}
-	int rows = ui->listWidget->count();
-	for (int i = 0; i < qs.length(); i++)
+	if (qs.empty())
+		this->hide();
+	else if (qs.size() == 1 && qs[0] == str)
+		this->hide();
+	else
 	{
-		QListWidgetItem *item;
-		if (i < rows)
+		this->show();
+		int rows = ui->listWidget->count();
+		for (int i = 0; i < qs.length(); i++)
 		{
-			item = ui->listWidget->item(i);
+			QListWidgetItem *item;
+			if (i < rows)
+			{
+				item = ui->listWidget->item(i);
+			}
+			else
+			{
+				item = new QListWidgetItem();
+				ui->listWidget->addItem(item);
+			}
+			int type = typeList.value(qs[i]);
+			if (type > 0)
+				item->setIcon(icons.value(type));
+			else
+				item->setIcon(QIcon());
+			item->setText(qs[i]);
 		}
-		else
+		for (int i = qs.length(); i < rows; i++)
 		{
-			item = new QListWidgetItem();
+			delete ui->listWidget->takeItem(qs.length());
 		}
-		int type = typeList.value(qs[i]);
-		if (type >= 0)
-			item->setIcon(icons.value(type));
-		else
-			item->setIcon(QIcon());
-		item->setText(qs[i]);
+		ui->listWidget->setCurrentRow(0);
 	}
-	ui->listWidget->setCurrentRow(0);
 	matches = qs;
 }
