@@ -36,12 +36,14 @@ public slots:
 signals:
 	void OnSelected(QString);
 	void OnCanceled();
+	void RequestRestart();
 
 private slots:
 	void ItemClicked(QListWidgetItem *);
 
 private:
     Ui::AutoCompleteList *ui;
+	int minWidth;
 	QString stops;
 	QMap<int, QIcon> icons;
 	QStringList alternatives;

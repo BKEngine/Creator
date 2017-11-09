@@ -97,6 +97,9 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	connect(this, &BkeScintilla::AutoCompleteMatch, aclist, &AutoCompleteList::Match);
 	connect(aclist, &AutoCompleteList::OnCanceled, this, &BkeScintilla::OnAutoCompleteCanceled);
 	connect(aclist, &AutoCompleteList::OnSelected, this, &BkeScintilla::OnAutoCompleteSelected);
+	connect(aclist, &AutoCompleteList::RequestRestart, [this]() {
+		this->UpdateAutoComplete();
+	});
 	aclist->SetFont(deflex->font(0));
 	aclist->SetStops(" ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
 

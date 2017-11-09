@@ -1,6 +1,7 @@
 #include "autocompletelist.h"
 #include "ui_autocompletelist.h"
 #include <QPinyin/QPinyin.h>
+#include <QScrollBar>
 
 AutoCompleteList::AutoCompleteList(QWidget *parent) :
     QWidget(parent),
@@ -8,6 +9,7 @@ AutoCompleteList::AutoCompleteList(QWidget *parent) :
 {
     ui->setupUi(this);
 	connect(ui->listWidget, &QListWidget::itemClicked, this, &AutoCompleteList::ItemClicked);
+	minWidth = this->width();
 }
 
 AutoCompleteList::~AutoCompleteList()
@@ -93,8 +95,7 @@ void AutoCompleteList::Match(const QString &str)
 {
 	if (!str.isEmpty() && stops.contains(str.right(1)))
 	{
-		this->hide();
-		emit OnCanceled();
+		Cancel();
 		return;
 	}
 	QStringList qs;
@@ -120,8 +121,10 @@ void AutoCompleteList::Match(const QString &str)
 		this->hide();
 	else
 	{
+		QFontMetrics fm(ui->listWidget->font());
 		this->show();
 		int rows = ui->listWidget->count();
+		int maxWidth = minWidth;
 		for (int i = 0; i < qs.length(); i++)
 		{
 			QListWidgetItem *item;
@@ -140,11 +143,14 @@ void AutoCompleteList::Match(const QString &str)
 			else
 				item->setIcon(QIcon());
 			item->setText(qs[i]);
+			maxWidth = qMax(fm.width(qs[i]), maxWidth);
 		}
 		for (int i = qs.length(); i < rows; i++)
 		{
 			delete ui->listWidget->takeItem(qs.length());
 		}
+		
+		this->resize(maxWidth + ui->listWidget->verticalScrollBar()->sizeHint().width() + 10, this->height());
 		ui->listWidget->setCurrentRow(0);
 	}
 	matches = qs;
