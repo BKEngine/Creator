@@ -34,15 +34,16 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 	info.Root = dest;
 	if (list.size() == 0){  //工程文件本身
 		info.RootName = "";
+		info.FullName = info.Dirs + info.Name;
 	}
 	else if (list.size() == 1){  //导入，脚本，资源
 		info.RootName = info.Name;
+		info.FullName = info.Dirs;
 	}
 	else{
 		info.RootName = list.at(1);
+		info.FullName = info.Dirs + info.Name;
 	}
-
-	info.FullName = info.Dirs + info.Name;
 }
 
 //新建一个工程
