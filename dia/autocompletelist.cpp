@@ -5,7 +5,7 @@
 #include <QDesktopWidget>
 
 AutoCompleteList::AutoCompleteList(QWidget *parent) :
-	QWidget(parent, Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus),
+	QFrame(parent, Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus),
     ui(new Ui::AutoCompleteList),
 	fm(font())
 {

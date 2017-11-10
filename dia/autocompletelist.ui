@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>AutoCompleteList</class>
- <widget class="QWidget" name="AutoCompleteList">
+ <widget class="QFrame" name="AutoCompleteList">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,10 +23,16 @@
    </size>
   </property>
   <property name="focusPolicy">
-   <enum>Qt::ClickFocus</enum>
+   <enum>Qt::NoFocus</enum>
   </property>
   <property name="windowTitle">
    <string/>
+  </property>
+  <property name="frameShape">
+   <enum>QFrame::StyledPanel</enum>
+  </property>
+  <property name="frameShadow">
+   <enum>QFrame::Raised</enum>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="sizeConstraint">

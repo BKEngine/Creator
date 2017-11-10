@@ -1,7 +1,7 @@
 #ifndef AUTOCOMPLETELIST_H
 #define AUTOCOMPLETELIST_H
 
-#include <QWidget>
+#include <QFrame>
 #include <memory>
 #include <QImage>
 #include <QIcon>
@@ -14,7 +14,7 @@ class AutoCompleteList;
 }
 class QListWidgetItem;
 
-class AutoCompleteList : public QWidget
+class AutoCompleteList : public QFrame
 {
     Q_OBJECT
 
