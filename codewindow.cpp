@@ -5,18 +5,24 @@
 #include "dia/WaitWindow.h"
 #include "dia/openlabeldialog.h"
 #include "dia/gotofiledialog.h"
+#include "dia/autocompletelist.h"
 
 CodeWindow::CodeWindow(QWidget *parent)
 	:QMainWindow(parent)
 {
 	diasearch = new SearchBox(this);
+
+	//自动补全初始化
+	aclist = new AutoCompleteList(this);
+	aclist->DefineIcon(1, QIcon(":/auto/source/auto_function.png"));
+	aclist->DefineIcon(3, QIcon(":/auto/source/auto_normal.png"));
+	aclist->DefineIcon(9, QIcon(":/auto/source/auto_key.png"));
+	aclist->hide();
+	aclist->SetStops(" ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
+
 	addDockWidget(Qt::BottomDockWidgetArea, diasearch);
 	currentedit = nullptr;
 	labelbanned = false;
-
-	QSize fff = parent->size();
-	hint.setWidth(fff.width() * 0.8);
-	hint.setHeight(fff.height() - 50);
 
 	ks1.setColor(QColor(0x80, 0, 0));
 	ks1.setPaper(QColor(0xff, 0xf0, 0xf0));
@@ -83,7 +89,6 @@ CodeWindow::CodeWindow(QWidget *parent)
 	connect(btncopyact, SIGNAL(triggered()), this, SLOT(ActCopy()));
 	//切换折叠
 	connect(btnswitchfold, SIGNAL(triggered()), this, SLOT(SwitchFold()));
-
 
 	btnDisable();
 	ignoreflag = false;
@@ -333,6 +338,31 @@ void calcWords(QString text)
 	otheredit->setTextCount(CodeWindow::getScenarioTextFromCode(text).remove(QRegExp("[\t\r\n]")).count());
 }
 
+void CodeWindow::AttachCurrentEdit()
+{
+	CurrentConnect(true);
+	ConnectAutoComplete(currentedit);
+	currentedit->clearAnnotationsAll();
+	currentedit->restoreTopLine();
+
+	AddMarksToEdit();
+	refreshLabel(currentedit);
+	calcWords(currentedit->text());
+
+	// 导航
+	AddNavigation(currentbase->Name(), currentedit->GetCurrentPosition());
+}
+
+void CodeWindow::DetachCurrentEdit()
+{
+	aclist->Cancel();
+	DisconnectAutoComplete(currentedit);
+	CurrentConnect(false);
+	leaveClickGotoMode();
+	currentedit->saveTopLine();
+	currentedit->Detach();
+}
+
 //改变正在编辑的文档，文件列表选项是同步改变的
 void CodeWindow::ChangeCurrentEdit(int pos)
 {
@@ -341,35 +371,25 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 	currentpos = pos;  //当前位置
 	if (currentedit == stackwidget->currentWidget()) return;
 
-	currentpos = pos;  //当前位置
 	btncopyact->setEnabled(false);
-	
-
-	//释放文档改变信号
-	if (currentpos > 0) CurrentConnect(false);
 
 	currentbase = docWidgetHash.value(stackwidget->currentWidget(), nullptr);
 	if (currentbase == nullptr){
 		QMessageBox::critical(this, "", "致命错误：没有找到匹配的QWidget！", QMessageBox::Ok);
 		return;
 	}
-	leaveClickGotoMode();
-	//改变工程
-	//ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
 	if (currentedit)
 	{
-		currentedit->saveTopLine();
-		currentedit->Detach();
+		DetachCurrentEdit();
 	}
+	
+	//改变工程
+	//ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
 	currentedit = currentbase->edit;
 	//reset lexer
 	currentedit->deflex->ReadConfig(currentedit->deflex->ConfigName());
 	currentedit->setLexer(currentedit->deflex);
 	//连接文档改变信号
-	CurrentConnect(true);
-	currentedit->clearAnnotationsAll();
-	currentedit->restoreTopLine();
-
 	diasearch->SetSci(currentedit); //查找管理
 	markadmin.SetFile(currentbase->FullName());  //标记管理器
 	btnsaveact->setEnabled(currentedit->isModified());
@@ -387,15 +407,7 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 
 	emit CurrentFileChange(currentbase->FullName());
 	emit CurrentFileChange(currentbase->Name(), currentbase->ProjectDir());
-
-	AddMarksToEdit();
-	refreshLabel(currentedit);
-	calcWords(currentedit->text());
-	//BackstageSearchLable(currentedit);
-
-	// 导航
-	AddNavigation(currentbase->Name(), currentedit->GetCurrentPosition());
-	currentedit->Attach();
+	AttachCurrentEdit();
 }
 
 //断开、连接当前文档信号
@@ -407,7 +419,7 @@ void CodeWindow::CurrentConnect(bool c)
 		//工程被改变，需要从下层传递信号
 		connect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		connect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
-		connect(currentedit, SIGNAL(refreshLabel(QSortedSet &)), this, SLOT(refreshLabel(QSortedSet &)));
+		connect(currentedit, SIGNAL(refreshLabel(QSortedSet<QString> &)), this, SLOT(refreshLabel(QSortedSet<QString> &)));
 		connect(currentedit, SIGNAL(ShouldAddToNavigation()), this, SLOT(ShouldAddToNavigation()));
 		connect(currentedit, SIGNAL(indicatorReleased(int, int, Qt::KeyboardModifiers)), this, SLOT(indicatorReleased(int, int, Qt::KeyboardModifiers)));
 	}
@@ -416,7 +428,7 @@ void CodeWindow::CurrentConnect(bool c)
 		disconnect(currentedit, SIGNAL(copyAvailable(bool)), btncutact, SLOT(setEnabled(bool)));
 		disconnect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		disconnect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
-		disconnect(currentedit, SIGNAL(refreshLabel(QSortedSet &)), this, SLOT(refreshLabel(QSortedSet &)));
+		disconnect(currentedit, SIGNAL(refreshLabel(QSortedSet<QString> &)), this, SLOT(refreshLabel(QSortedSet<QString> &)));
 		disconnect(currentedit, SIGNAL(ShouldAddToNavigation()), this, SLOT(ShouldAddToNavigation()));
 		disconnect(currentedit, SIGNAL(indicatorReleased(int, int, Qt::KeyboardModifiers)), this, SLOT(indicatorReleased(int, int, Qt::KeyboardModifiers)));
 	}
@@ -701,6 +713,29 @@ void CodeWindow::AddFile(const QString &file)
 	//QfileChange("");
 }
 
+void CodeWindow::ConnectAutoComplete(BkeScintilla *edit)
+{
+	aclist->SetFont(edit->deflex->font(0));
+	connect(edit, &BkeScintilla::AutoCompleteStart, [this, edit](auto v1, auto v2) {
+		aclist->SetList(v1);
+		aclist->Start(edit->mapToGlobal(edit->PointByPosition(edit->GetCurrentPosition() - v2.toUtf8().length())));
+		aclist->Match(v2);
+	});
+	connect(edit, &BkeScintilla::AutoCompleteCancel, aclist, &AutoCompleteList::Cancel);
+	connect(edit, &BkeScintilla::AutoCompleteMatch, aclist, &AutoCompleteList::Match);
+	connect(aclist, &AutoCompleteList::OnCanceled, edit, &BkeScintilla::OnAutoCompleteCanceled);
+	connect(aclist, &AutoCompleteList::OnSelected, edit, &BkeScintilla::OnAutoCompleteSelected);
+	connect(aclist, &AutoCompleteList::RequestRestart, [edit]() {
+		edit->UpdateAutoComplete();
+	});
+}
+
+void CodeWindow::DisconnectAutoComplete(BkeScintilla *edit)
+{
+	aclist->disconnect(edit);
+	edit->disconnect(aclist);
+}
+
 void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 {
 	ignoreflag = true; //忽略改变，在所有准备工作完成以后才改变
@@ -931,6 +966,10 @@ bool CodeWindow::CloseAll()
 
 QSize CodeWindow::sizeHint() const
 {
+	auto fff = ((QWidget *)this->parent())->size();
+	QSize hint;
+	hint.setWidth(fff.width() * 0.8);
+	hint.setHeight(fff.height() - 50);
 	return hint;
 }
 
@@ -2006,6 +2045,10 @@ bool CodeWindow::eventFilter(QObject * watched, QEvent *e)
 	else if (e->type() == QEvent::KeyPress)
 	{
 		auto *event = (QKeyEvent *)e;
+		if (aclist->isVisible() && aclist->OnKeyPress(event->key()))
+		{
+			return true;
+		}
 		if (event->key() == Qt::Key_Control && !event->isAutoRepeat())
 		{
 			enterClickGotoMode();
@@ -2025,6 +2068,15 @@ bool CodeWindow::eventFilter(QObject * watched, QEvent *e)
 		if (event->modifiers() & Qt::ControlModifier)
 		{
 			onHoverMove(event->pos());
+		}
+	}
+	else if (e->type() == QEvent::MouseButtonPress)
+	{
+		auto *event = (QMouseEvent *)e;
+		if (event->button() == Qt::LeftButton)
+		{
+			if(aclist->isVisible())
+				aclist->Cancel();
 		}
 	}
 	return false;

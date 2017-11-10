@@ -83,7 +83,7 @@ private:
 	QFileInfo info;
 };
 
-
+class AutoCompleteList;
 class CodeWindow : public QMainWindow
 {
 	Q_OBJECT
@@ -97,6 +97,7 @@ public:
 	void BindOtherWindow(OtherWindow *win);
 	void BindProjectWindow(ProjectWindow *p);
 	void BindFileListWidget(BkeLeftFileWidget *flist);
+
 	enum{
 		ERROR_NO,
 		ERROR_SAVE
@@ -151,6 +152,10 @@ signals:
 	void CompileFinish(int errors);
 signals:
 	void searchOne(const QString &file, const QString &fullfile, int line, int start, int end);
+
+private:
+	void AttachCurrentEdit();
+	void DetachCurrentEdit();
 
 public slots:
 	bool CloseAll();
@@ -260,6 +265,9 @@ private:
 	QAction *pdeletemark;
 	QAction *pannote;
 	SearchBox *diasearch;
+	AutoCompleteList *aclist;
+	void ConnectAutoComplete(BkeScintilla *doc);
+	void DisconnectAutoComplete(BkeScintilla *doc);
 	QProgressBar *kag;
 	BkeScintilla *searchlablelater;
 
@@ -272,7 +280,6 @@ private:
 	int isCompileNotice;
 	bool labelbanned;
 
-	QSize hint;
 	QsciStyle ks1;
 	QsciStyle ks2;
 

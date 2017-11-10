@@ -42,8 +42,14 @@ private slots:
 	void ItemClicked(QListWidgetItem *);
 
 private:
+	void UpdateWidgetSize();
+
+private:
     Ui::AutoCompleteList *ui;
 	int minWidth;
+	int maxHeight;
+	QFontMetrics fm;
+	QPoint pos;
 	QString stops;
 	QMap<int, QIcon> icons;
 	QStringList alternatives;

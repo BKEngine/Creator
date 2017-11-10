@@ -5,7 +5,6 @@
 #include "CmdListLoader.h"
 #include "loli/loli_island.h"
 #include <Qsci/qscicommandset.h>
-#include "dia/autocompletelist.h"
 
 BkeScintilla::BkeScintilla(QWidget *parent)
 	:QsciScintilla(parent)
@@ -79,30 +78,6 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 
 	standardCommands()->find(QsciCommand::LineCut)->setKey(0);
 
-	//自动补全
-	static QIcon BKE_AUTOIMAGE_FUNCTION(":/auto/source/auto_function.png");
-	static QIcon BKE_AUTOIMAGE_NORMAL(":/auto/source/auto_normal.png");
-	static QIcon BKE_AUTOIMAGE_KEY(":/auto/source/auto_key.png");
-	aclist = new AutoCompleteList(this);
-	aclist->DefineIcon(1, BKE_AUTOIMAGE_NORMAL);
-	aclist->DefineIcon(3, BKE_AUTOIMAGE_FUNCTION);
-	aclist->DefineIcon(9, BKE_AUTOIMAGE_KEY);
-	aclist->hide();
-	connect(this, &BkeScintilla::AutoCompleteStart, [this](auto v1, auto v2) {
-		aclist->SetList(v1);
-		aclist->Start(this->PointByPosition(this->GetCurrentPosition() - v2.toUtf8().length()) + QPoint(0, 20));
-		aclist->Match(v2);
-	});
-	connect(this, &BkeScintilla::AutoCompleteCancel, aclist, &AutoCompleteList::Cancel);
-	connect(this, &BkeScintilla::AutoCompleteMatch, aclist, &AutoCompleteList::Match);
-	connect(aclist, &AutoCompleteList::OnCanceled, this, &BkeScintilla::OnAutoCompleteCanceled);
-	connect(aclist, &AutoCompleteList::OnSelected, this, &BkeScintilla::OnAutoCompleteSelected);
-	connect(aclist, &AutoCompleteList::RequestRestart, [this]() {
-		this->UpdateAutoComplete();
-	});
-	aclist->SetFont(deflex->font(0));
-	aclist->SetStops(" ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
-
 	connect(this, SIGNAL(SCN_MODIFIED(int, int, const char *, int, int, int, int, int, int, int)),
 		SLOT(EditModified(int, int, const char *, int, int, int, int, int, int, int)));
 	connect(this, SIGNAL(SCN_UPDATEUI(int)), this, SLOT(UiChange(int)));
@@ -124,7 +99,7 @@ BkeScintilla::~BkeScintilla()
 
 void BkeScintilla::Detach()
 {
-	aclist->Cancel();
+	//aclist->Cancel();
 }
 
 void BkeScintilla::Attach()
@@ -900,7 +875,15 @@ void BkeScintilla::UpdateAutoComplete()
 	{
 		if (ChangeType & SC_MOD_INSERTTEXT)
 		{
-			autoCompleteContext.append(modfieddata.text);
+			if (modfieddata.text == "\n" || modfieddata.text == "\r\n")
+			{
+				emit AutoCompleteCancel();
+				return;
+			}
+			else
+			{
+				autoCompleteContext.append(modfieddata.text);
+			}
 		}
 		else
 		{
@@ -993,18 +976,20 @@ void BkeScintilla::ChooseComplete(const QString &text)
 
 }
 
-bool BkeScintilla::event(QEvent *e)
+// 鼠标点击，取消自动补全
+void BkeScintilla::mousePressEvent(QMouseEvent * e)
 {
-	if (e->type() == QEvent::KeyPress)
-	{
-		QKeyEvent *event = (QKeyEvent *)e;
-		if (aclist->isVisible())
-		{
-			if (aclist->OnKeyPress(event->key()))
-				return true;
-		}
-	}
-	return QsciScintilla::event(e);
+	if(autoCompleteType != SHOW_NULL)
+		emit AutoCompleteCancel();
+	QsciScintilla::mousePressEvent(e);
+}
+
+// focusOut，取消自动补全
+void BkeScintilla::focusOutEvent(QFocusEvent * e)
+{
+	if (autoCompleteType != SHOW_NULL)
+		emit AutoCompleteCancel();
+	QsciScintilla::focusOutEvent(e);
 }
 
 //文字或样式被改变后
@@ -1019,7 +1004,6 @@ void BkeScintilla::UiChange(int updated)
 
 	if (ChangeType & SC_PERFORMED_USER)
 	{
-
 		if ((ChangeType & SC_MOD_INSERTTEXT) && (modfieddata.text == "]" || modfieddata.text == "}"))
 		{
 			unsigned char style = SendScintilla(SCI_GETSTYLEAT, modfieddata.pos);

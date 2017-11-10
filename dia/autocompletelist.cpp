@@ -2,14 +2,18 @@
 #include "ui_autocompletelist.h"
 #include <QPinyin/QPinyin.h>
 #include <QScrollBar>
+#include <QDesktopWidget>
 
 AutoCompleteList::AutoCompleteList(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::AutoCompleteList)
+	QWidget(parent, Qt::Tool | Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus),
+    ui(new Ui::AutoCompleteList),
+	fm(font())
 {
+	setAttribute(Qt::WA_ShowWithoutActivating);
     ui->setupUi(this);
 	connect(ui->listWidget, &QListWidget::itemClicked, this, &AutoCompleteList::ItemClicked);
 	minWidth = this->width();
+	maxHeight = this->height();
 }
 
 AutoCompleteList::~AutoCompleteList()
@@ -46,6 +50,7 @@ void AutoCompleteList::DefineIcon(int id, const QIcon & icon)
 void AutoCompleteList::SetFont(const QFont & font)
 {
 	ui->listWidget->setFont(font);
+	fm = QFontMetrics(font);
 }
 
 void AutoCompleteList::SetStops(const QString & stops)
@@ -88,6 +93,7 @@ void AutoCompleteList::Cancel()
 void AutoCompleteList::Start(const QPoint &pos)
 {
 	this->move(pos);
+	this->pos = pos;
 	this->show();
 }
 
@@ -121,7 +127,6 @@ void AutoCompleteList::Match(const QString &str)
 		this->hide();
 	else
 	{
-		QFontMetrics fm(ui->listWidget->font());
 		this->show();
 		int rows = ui->listWidget->count();
 		int maxWidth = minWidth;
@@ -143,15 +148,33 @@ void AutoCompleteList::Match(const QString &str)
 			else
 				item->setIcon(QIcon());
 			item->setText(qs[i]);
+			item->setSizeHint(QSize(fm.width(qs[i]), fm.height() + 3));
 			maxWidth = qMax(fm.width(qs[i]), maxWidth);
 		}
 		for (int i = qs.length(); i < rows; i++)
 		{
 			delete ui->listWidget->takeItem(qs.length());
 		}
-		
-		this->resize(maxWidth + ui->listWidget->verticalScrollBar()->sizeHint().width() + 10, this->height());
 		ui->listWidget->setCurrentRow(0);
+		matches = qs;
+		UpdateWidgetSize();
 	}
-	matches = qs;
+}
+
+void AutoCompleteList::UpdateWidgetSize()
+{
+	auto width = qMax(minWidth, ui->listWidget->sizeHintForColumn(0) + ui->listWidget->verticalScrollBar()->sizeHint().width() + 10);
+	ui->listWidget->setFixedWidth(width);
+	auto height = qMin(10, ui->listWidget->count()) * ui->listWidget->sizeHintForRow(0) + 4;
+	ui->listWidget->setFixedHeight(height);
+
+	auto desktop = QApplication::desktop();
+	if (pos.y() + height > desktop->height() - 50)
+	{
+		this->move(this->pos - QPoint(0, height));
+	}
+	else
+	{
+		this->move(this->pos + QPoint(0, fm.height()));
+	}
 }

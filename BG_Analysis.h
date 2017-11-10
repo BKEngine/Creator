@@ -15,7 +15,7 @@ class BkeScintilla;
 
 struct BKEMacros
 {
-	QString name;
+    QString name;
 	QString definefile;
 	QString comment;
 	bkplong pos;

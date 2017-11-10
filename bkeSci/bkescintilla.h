@@ -13,7 +13,6 @@
 
 class BkeDocBase;
 class BkeProject;
-class AutoCompleteList;
 
 class BkeScintilla : public QsciScintilla
 {
@@ -148,10 +147,11 @@ private:
 
 	BkeIndicatorBase simpleFind(const char *ss , int flag,int from,int to) ;
 
-protected:
 	//补全相关
-	AutoCompleteList *aclist;
+public:
 	void UpdateAutoComplete();
+
+protected:
 	QList<QPair<QString, int>> GetLabelList();
 	QList<QPair<QString, int>> GetScriptList();
 	QList<QPair<QString, int>> GetAttrs(const QString &name, const QStringList &attrs, const QString &alltext);
@@ -160,7 +160,8 @@ protected:
 	QList<QPair<QString, int>> GetGlobalList(const QString &ls, const QString &alltext);
 	void ChooseComplete(const QString &text);
 	int IgnorePosChanged = 0;
-	virtual bool event(QEvent *) override;
+	virtual void mousePressEvent(QMouseEvent *e) override;
+	virtual void focusOutEvent(QFocusEvent *e) override;
 
 	enum {
 		SHOW_NULL,
