@@ -45,3 +45,4 @@ public:
 };
 
 #endif // NEWVERSIONDATAWIZARD_H
+

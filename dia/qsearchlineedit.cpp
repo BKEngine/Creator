@@ -9,7 +9,7 @@ QSearchLineEdit::QSearchLineEdit(const QString &backtext , QWidget *parent) :
     BackText = backtext ;
 
     btns = new QToolButton(this) ;
-    btns->setIcon(QIcon(":/pedit/source/search1.png"));
+    btns->setIcon(QIcon(":/pedit/search1.png"));
     btns->setText("历史记录");
     setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/lineedit").toString());
     connect(this,SIGNAL(returnPressed()),this,SLOT(CheckText())) ;

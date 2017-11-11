@@ -22,6 +22,7 @@ public:
 	};
 
     explicit ParserEditorTreeItem(const QString &key, Type type, const QString &value);
+	explicit ParserEditorTreeItem();
     ~ParserEditorTreeItem();
 
     void appendChild(ParserEditorTreeItem *child);
@@ -42,6 +43,7 @@ public:
 	ParserEditorTreeItem *duplicate() const;
 
 	QString typeString() const;
+	const QString &key() const { return _key; }
 	void setKey(const QString &key) { _key = key; }
 	Type type() const { return _type; }
 	void setType(Type type) { _type = type; }

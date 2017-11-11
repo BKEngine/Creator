@@ -26,10 +26,10 @@ OtherWindow::OtherWindow(QWidget *parent)
 	SetCentreWidget(stackw);
 	lastbtn = 0;
 
-	icoerror = new QIcon(":/info/source/error.png");
-	icowarning = new QIcon(":/info/source/alert.png");
-	iconlog = new QIcon(":/info/source/log.png");
-	icobookmark = new QIcon(":/cedit/source/Bookmark.png");
+	icoerror = new QIcon(":/info/error.png");
+	icowarning = new QIcon(":/info/alert.png");
+	iconlog = new QIcon(":/info/log.png");
+	icobookmark = new QIcon(":/cedit/Bookmark.png");
 
 	btnproblem = new QPushButton("问题", this);
 	btnsearch = new QPushButton("搜索结果", this);

@@ -14,9 +14,9 @@ CodeWindow::CodeWindow(QWidget *parent)
 
 	//自动补全初始化
 	aclist = new AutoCompleteList(this);
-	aclist->DefineIcon(1, QIcon(":/auto/source/auto_function.png"));
-	aclist->DefineIcon(3, QIcon(":/auto/source/auto_normal.png"));
-	aclist->DefineIcon(9, QIcon(":/auto/source/auto_key.png"));
+	aclist->DefineIcon(1, QIcon(":/auto/auto_function.png"));
+	aclist->DefineIcon(3, QIcon(":/auto/auto_normal.png"));
+	aclist->DefineIcon(9, QIcon(":/auto/auto_key.png"));
 	aclist->hide();
 	aclist->SetStops(" ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
 
@@ -130,33 +130,33 @@ void CodeWindow::CreateBtn()
 	toolbar->setFixedHeight(24);
 	toolbar->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT + "/codetoolbar").toString());
 
-	btnlastact = new QAction(QIcon(":/cedit/source/btnlast.png"), "返回", this);
-	btnnextact = new QAction(QIcon(":/cedit/source/btnnext.png"), "前进", this);
-	btnsaveact = new QAction(QIcon(":/cedit/source/save.png"), "保存", this);
-	btnsaveasact = new QAction(QIcon(":/cedit/source/saveas.png"), "另存为...", this);
-	btncodeact = new QAction(QIcon(":/cedit/source/code.png"), "改变源文件的编码", this);
-	btncopyact = new QAction(QIcon(":/cedit/source/copy.png"), "复制", this);
-	btncutact = new QAction(QIcon(":/cedit/source/edit_cut.png"), "剪切", this);
-	btnpasteact = new QAction(QIcon(":/cedit/source/paste.png"), "粘贴", this);
-	btncompileact = new QAction(QIcon(":/cedit/source/compile.png"), "编译成bkbin脚本", this);
-	btncompilelang = new QAction(QIcon(":/cedit/source/compile.png"), "编译并生成语言文件", this);
-	btncompilerunact = new QAction(QIcon(":/cedit/source/compile_run.png"), "编译并运行", this);
-	btnrunact = new QAction(QIcon(":/cedit/source/run.png"), "运行", this);
-	btndebugact = new QAction(QIcon(":/cedit/source/debug.png"), "调试", this);
-	btncloseact = new QAction(QIcon(":/cedit/source/close.png"), "关闭", this);
-	btnfindact = new QAction(QIcon(":/cedit/source/find.png"), "查找", this);
-	btnfindactall = new QAction(QIcon(":/cedit/source/find.png"), "查找全部", this);
-	btnreplaceact = new QAction(QIcon(":/cedit/source/replace(2).png"), "替换", this);
-	btnreplaceallact = new QAction(QIcon(":/cedit/source/replace(2).png"), "替换全部", this);
-	btnbookmarkact = new QAction(QIcon(":/cedit/source/Bookmark.png"), "添加书签", this);
-	btnmarkact = new QAction(QIcon(":/cedit/source/pin.png"), "添加标记", this);
+	btnlastact = new QAction(QIcon(":/cedit/btnlast.png"), "返回", this);
+	btnnextact = new QAction(QIcon(":/cedit/btnnext.png"), "前进", this);
+	btnsaveact = new QAction(QIcon(":/cedit/save.png"), "保存", this);
+	btnsaveasact = new QAction(QIcon(":/cedit/saveas.png"), "另存为...", this);
+	btncodeact = new QAction(QIcon(":/cedit/code.png"), "改变源文件的编码", this);
+	btncopyact = new QAction(QIcon(":/cedit/copy.png"), "复制", this);
+	btncutact = new QAction(QIcon(":/cedit/edit_cut.png"), "剪切", this);
+	btnpasteact = new QAction(QIcon(":/cedit/paste.png"), "粘贴", this);
+	btncompileact = new QAction(QIcon(":/cedit/compile.png"), "编译成bkbin脚本", this);
+	btncompilelang = new QAction(QIcon(":/cedit/compile.png"), "编译并生成语言文件", this);
+	btncompilerunact = new QAction(QIcon(":/cedit/compile_run.png"), "编译并运行", this);
+	btnrunact = new QAction(QIcon(":/cedit/run.png"), "运行", this);
+	btndebugact = new QAction(QIcon(":/cedit/debug.png"), "调试", this);
+	btncloseact = new QAction(QIcon(":/cedit/close.png"), "关闭", this);
+	btnfindact = new QAction(QIcon(":/cedit/find.png"), "查找", this);
+	btnfindactall = new QAction(QIcon(":/cedit/find.png"), "查找全部", this);
+	btnreplaceact = new QAction(QIcon(":/cedit/replace(2).png"), "替换", this);
+	btnreplaceallact = new QAction(QIcon(":/cedit/replace(2).png"), "替换全部", this);
+	btnbookmarkact = new QAction(QIcon(":/cedit/Bookmark.png"), "添加书签", this);
+	btnmarkact = new QAction(QIcon(":/cedit/pin.png"), "添加标记", this);
 	btnrunfromlabel = new QAction("从本标签处运行", this);
-	btnredoact = new QAction(QIcon(":/cedit/source/redo.png"), "重做", this);
-	btnundoact = new QAction(QIcon(":/cedit/source/undo.png"), "撤销", this);
-	btnclearact = new QAction(QIcon(":/cedit/source/clear.png"), "清理编译工程", this);
+	btnredoact = new QAction(QIcon(":/cedit/redo.png"), "重做", this);
+	btnundoact = new QAction(QIcon(":/cedit/undo.png"), "撤销", this);
+	btnclearact = new QAction(QIcon(":/cedit/clear.png"), "清理编译工程", this);
 	pannote = new QAction("选中部分注释/反注释", this);
 	btnselectall = new QAction("全选", this);
-	btnfly = new QAction(QIcon(":/cedit/source/flay.png"), "转到行...", this);
+	btnfly = new QAction(QIcon(":/cedit/flay.png"), "转到行...", this);
 	btngotolabellist = new QAction("转到标签", this);
 	btngotofile = new QAction("转到文件", this);
 	btnswitchfold = new QAction("全部折叠", this);
@@ -1990,7 +1990,7 @@ void CodeWindow::AutoFix()
 		if (base)
 		{
 			QString content = currentedit->TextForRange(base);
-			QAction *action = menu.addAction(QIcon(":/auto/source/hint.png"), "跳转或创建标签");
+			QAction *action = menu.addAction(QIcon(":/auto/hint.png"), "跳转或创建标签");
 			if (firstAction == nullptr)
 				firstAction = action;
 			connect(action, &QAction::triggered, [this, content]() {

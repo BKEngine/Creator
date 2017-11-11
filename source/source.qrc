@@ -1,0 +1,78 @@
+<RCC>
+    <qresource prefix="/pedit">
+        <file>bianji.png</file>
+        <file>hiddenleft.png</file>
+        <file>close2.png</file>
+        <file>column.png</file>
+        <file>search1.png</file>
+        <file>+.png</file>
+        <file>edit.png</file>
+        <file>x.png</file>
+    </qresource>
+    <qresource prefix="/cedit">
+        <file>btnnext.png</file>
+        <file>btnlast.png</file>
+        <file>save.png</file>
+        <file>saveas.png</file>
+        <file>copy.png</file>
+        <file>paste.png</file>
+        <file>compile.png</file>
+        <file>debug.png</file>
+        <file>run.png</file>
+        <file>close.png</file>
+        <file>find.png</file>
+        <file>replace(2).png</file>
+        <file>pin.png</file>
+        <file>redo.png</file>
+        <file>undo.png</file>
+        <file>edit_cut.png</file>
+        <file>compile_run.png</file>
+        <file>clear.png</file>
+        <file>code.png</file>
+        <file>flay.png</file>
+        <file>bookmark.png</file>
+    </qresource>
+    <qresource prefix="/project">
+        <file>newproject.png</file>
+        <file>doc.png</file>
+        <file>file.png</file>
+        <file>import.png</file>
+        <file>database.png</file>
+        <file>music.png</file>
+        <file>image.png</file>
+        <file>movie.png</file>
+        <file>bksfile.png</file>
+        <file>bksdoc.png</file>
+        <file>sourcedoc.png</file>
+        <file>open_file.png</file>
+        <file>openfile.png</file>
+        <file>newfile.png</file>
+    </qresource>
+    <qresource prefix="/info">
+        <file>alert.png</file>
+        <file>error.png</file>
+        <file>textarea.png</file>
+        <file>terminal.png</file>
+        <file>product-design.png</file>
+        <file>log.png</file>
+        <file>bookmarksmall.png</file>
+        <file>errorsmall.png</file>
+        <file>pinsmall.png</file>
+        <file>warningsmall.png</file>
+    </qresource>
+    <qresource prefix="/auto">
+        <file>auto_key.png</file>
+        <file>auto_normal.png</file>
+        <file>auto_function.png</file>
+        <file>hint.png</file>
+    </qresource>
+    <qresource prefix="/newversioninfo">
+        <file>728.GIF</file>
+        <file>error_big.png</file>
+        <file>check_big.png</file>
+    </qresource>
+    <qresource prefix="/qtreeview">
+        <file>branch-closed.png</file>
+        <file>branch-open.png</file>
+    </qresource>
+</RCC>

@@ -291,7 +291,7 @@ HEADERS  += \
     DebugServer.h
 
 RESOURCES += \
-    source.qrc \
+    source/source.qrc \
     QPinyin/res.qrc
 
 INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKEscintilla/src ./BKEscintilla/Qt4Qt5 ./

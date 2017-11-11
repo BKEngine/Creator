@@ -54,16 +54,16 @@ BkeProject::BkeProject(QObject *parent)
 	currentptr = 0;
 	analysis = 0;
 
-	fileico = new QIcon(":/project/source/file.png");
-	dirsico = new QIcon(":/project/source/doc.png");
-	baseico = new QIcon(":/project/source/database.png");
-	importico = new QIcon(":/project/source/import.png");
-	bksdocico = new QIcon(":/project/source/bksdoc.png");
-	sourcedocico = new QIcon(":/project/source/sourcedoc.png");
-	bksfileico = new QIcon(":/project/source/bksfile.png");
-	imgfileico = new QIcon(":/project/source/image.png");
-	volfileico = new QIcon(":/project/source/music.png");
-	movfileico = new QIcon(":/project/source/movie.png");
+	fileico = new QIcon(":/project/file.png");
+	dirsico = new QIcon(":/project/doc.png");
+	baseico = new QIcon(":/project/database.png");
+	importico = new QIcon(":/project/import.png");
+	bksdocico = new QIcon(":/project/bksdoc.png");
+	sourcedocico = new QIcon(":/project/sourcedoc.png");
+	bksfileico = new QIcon(":/project/bksfile.png");
+	imgfileico = new QIcon(":/project/image.png");
+	volfileico = new QIcon(":/project/music.png");
+	movfileico = new QIcon(":/project/movie.png");
 	config = nullptr;
 }
 

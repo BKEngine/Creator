@@ -47,6 +47,7 @@
 
 class ParserEditorTreeItem;
 class QBkeVariable;
+class QUndoStack;
 //! [0]
 class ParserEditorTreeModel : public QAbstractItemModel
 {
@@ -57,6 +58,7 @@ public:
     ~ParserEditorTreeModel();
 
     QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
+	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) Q_DECL_OVERRIDE;
     Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
     QVariant headerData(int section, Qt::Orientation orientation,
                         int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
@@ -68,6 +70,8 @@ public:
 
 	bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
 	bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
+	bool insertRows(int row, const QList<ParserEditorTreeItem *> &items, const QModelIndex &parent = QModelIndex());
+
 	bool duplicate(int row, const QModelIndex &parent = QModelIndex());
 
 	/**
@@ -92,11 +96,28 @@ public:
 	void clear();
 
 	void buildRoot(const QBkeVariable &var);
+	QUndoStack *undoStack() const { return _undoStack; }
+
+private:
 	ParserEditorTreeItem *add(const QBkeVariable &var, ParserEditorTreeItem *parent);
 	ParserEditorTreeItem *itemFromVariable(const QBkeVariable &var);
+
+	//UndoCommand实现，以下接口只有UndoCommand才能调用，真正的修改数据
+private:
+	void insertRowsInternal(int row, int count, const QModelIndex &parent);
+	void insertDataInternal(int row, const QList<ParserEditorTreeItem *> &items, const QModelIndex &parent);
+	void removeRowsInternal(int row, int count, const QModelIndex &parent);
+	void setDataInternal(const QModelIndex &index, const QVariant &data);
+	QList<ParserEditorTreeItem *> itemsForRows(int row, int count, const QModelIndex &parent) const;
+	friend class InsertRowsCommand;
+	friend class RemoveRowsCommand;
+	friend class InsertDataCommand;
+	friend class ModifyDataCommand;
+
 private:
     ParserEditorTreeItem *root;
 	QStringList header;
+	QUndoStack *_undoStack;
 };
 //! [0]
 

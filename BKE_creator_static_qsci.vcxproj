@@ -299,6 +299,7 @@
     <ClCompile Include="dia\ParserEditor.cpp" />
     <ClCompile Include="dia\ParserEditorTreeItem.cpp" />
     <ClCompile Include="dia\ParserEditorTreeModel.cpp" />
+    <ClCompile Include="dia\ParserEditorUndoCommand.cpp" />
     <ClCompile Include="dia\qnofocusitemdelegate.cpp" />
     <ClCompile Include="GeneratedFiles\qrc_res.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -653,6 +654,7 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
+    <ClInclude Include="dia\ParserEditorUndoCommand.h" />
     <ClInclude Include="dia\qnofocusitemdelegate.h" />
     <ClInclude Include="EnumsComponent.h" />
     <ClInclude Include="GeneratedFiles\ui_autocompletelist.h" />
@@ -1334,6 +1336,7 @@ endlocal
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <SubType>Designer</SubType>
     </CustomBuild>
     <CustomBuild Include="dia\WaitWindow.ui">
       <FileType>Document</FileType>
@@ -1433,6 +1436,7 @@ endlocal
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <SubType>Designer</SubType>
     </CustomBuild>
     <CustomBuild Include="dia\doubleinput.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
@@ -1707,16 +1711,15 @@ endlocal
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
-    <CustomBuild Include="source.qrc">
-      <FileType>Document</FileType>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FullPath);.\source\bianji.png;.\source\hiddenleft.png;.\source\close2.png;.\source\column.png;.\source\search1.png;.\source\+.png;.\source\edit.png;.\source\x.png;.\source\close2%402x.png;.\source\column%402x.png;.\source\hiddenleft%402x.png;.\source\btnnext.png;.\source\btnlast.png;.\source\save.png;.\source\saveas.png;.\source\copy.png;.\source\paste.png;.\source\compile.png;.\source\debug.png;.\source\run.png;.\source\close.png;.\source\find.png;.\source\replace(2).png;.\source\Bookmark.png;.\source\pin.png;.\source\redo.png;.\source\undo.png;.\source\edit_cut.png;.\source\compile_run.png;.\source\clear.png;.\source\code.png;.\source\flay.png;.\source\btnlast%402x.png;.\source\btnnext%402x.png;.\source\clear%402x.png;.\source\compile%402x.png;.\source\compile_run%402x.png;.\source\debug%402x.png;.\source\replace(2)%402x.png;.\source\run%402x.png;.\source\save%402x.png;.\source\saveas%402x.png;.\source\code%402x.png;.\source\redo%402x.png;.\source\undo%402x.png;.\source\edit_cut%402x.png;.\source\newproject.png;.\source\doc.png;.\source\file.png;.\source\import.png;.\source\database.png;.\source\music.png;.\source\image.png;.\source\movie.png;.\source\bksfile.png;.\source\bksdoc.png;.\source\sourcedoc.png;.\source\open_file.png;.\source\openfile.png;.\source\newfile.png;.\source\alert.png;.\source\error.png;.\source\errorsmall.png;.\source\wainningsmall.png;.\source\Bookmarksmall.png;.\source\pinsmall.png;.\source\textarea.png;.\source\terminal.png;.\source\product-design.png;.\source\auto_key.png;.\source\auto_nomal.png;.\source\auto_diction.png;.\source\auto_funcotin.png;.\source\auto_math.png;.\source\728.GIF;.\source\error_big.png;.\source\check_big.png;%(AdditionalInputs)</AdditionalInputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
+    <CustomBuild Include="source\source.qrc">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FullPath);.\source\bianji.png;.\source\hiddenleft.png;.\source\close2.png;.\source\column.png;.\source\search1.png;.\source\+.png;.\source\edit.png;.\source\x.png;.\source\close2%402x.png;.\source\column%402x.png;.\source\hiddenleft%402x.png;.\source\btnnext.png;.\source\btnlast.png;.\source\save.png;.\source\saveas.png;.\source\copy.png;.\source\paste.png;.\source\compile.png;.\source\debug.png;.\source\run.png;.\source\close.png;.\source\find.png;.\source\replace(2).png;.\source\Bookmark.png;.\source\pin.png;.\source\redo.png;.\source\undo.png;.\source\edit_cut.png;.\source\compile_run.png;.\source\clear.png;.\source\code.png;.\source\flay.png;.\source\btnlast%402x.png;.\source\btnnext%402x.png;.\source\clear%402x.png;.\source\compile%402x.png;.\source\compile_run%402x.png;.\source\debug%402x.png;.\source\replace(2)%402x.png;.\source\run%402x.png;.\source\save%402x.png;.\source\saveas%402x.png;.\source\code%402x.png;.\source\redo%402x.png;.\source\undo%402x.png;.\source\edit_cut%402x.png;.\source\newproject.png;.\source\doc.png;.\source\file.png;.\source\import.png;.\source\database.png;.\source\music.png;.\source\image.png;.\source\movie.png;.\source\bksfile.png;.\source\bksdoc.png;.\source\sourcedoc.png;.\source\open_file.png;.\source\openfile.png;.\source\newfile.png;.\source\alert.png;.\source\error.png;.\source\errorsmall.png;.\source\Bookmarksmall.png;.\source\pinsmall.png;.\source\textarea.png;.\source\terminal.png;.\source\product-design.png;.\source\log.png;.\source\warningsmall.png;.\source\auto_key.png;.\source\auto_normal.png;.\source\auto_function.png;.\source\hint.png;.\source\728.GIF;.\source\error_big.png;.\source\check_big.png;.\source\branch-end.png;.\source\branch-closed.png;.\source\branch-more.png;.\source\branch-open.png;.\source\branch-vline.png;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Rcc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FullPath);.\source\bianji.png;.\source\hiddenleft.png;.\source\close2.png;.\source\column.png;.\source\search1.png;.\source\+.png;.\source\edit.png;.\source\x.png;.\source\close2%402x.png;.\source\column%402x.png;.\source\hiddenleft%402x.png;.\source\btnnext.png;.\source\btnlast.png;.\source\save.png;.\source\saveas.png;.\source\copy.png;.\source\paste.png;.\source\compile.png;.\source\debug.png;.\source\run.png;.\source\close.png;.\source\find.png;.\source\replace(2).png;.\source\Bookmark.png;.\source\pin.png;.\source\redo.png;.\source\undo.png;.\source\edit_cut.png;.\source\compile_run.png;.\source\clear.png;.\source\code.png;.\source\flay.png;.\source\btnlast%402x.png;.\source\btnnext%402x.png;.\source\clear%402x.png;.\source\compile%402x.png;.\source\compile_run%402x.png;.\source\debug%402x.png;.\source\replace(2)%402x.png;.\source\run%402x.png;.\source\save%402x.png;.\source\saveas%402x.png;.\source\code%402x.png;.\source\redo%402x.png;.\source\undo%402x.png;.\source\edit_cut%402x.png;.\source\newproject.png;.\source\doc.png;.\source\file.png;.\source\import.png;.\source\database.png;.\source\music.png;.\source\image.png;.\source\movie.png;.\source\bksfile.png;.\source\bksdoc.png;.\source\sourcedoc.png;.\source\open_file.png;.\source\openfile.png;.\source\newfile.png;.\source\alert.png;.\source\error.png;.\source\errorsmall.png;.\source\wainningsmall.png;.\source\Bookmarksmall.png;.\source\pinsmall.png;.\source\textarea.png;.\source\terminal.png;.\source\product-design.png;.\source\auto_key.png;.\source\auto_nomal.png;.\source\auto_diction.png;.\source\auto_funcotin.png;.\source\auto_math.png;.\source\728.GIF;.\source\error_big.png;.\source\check_big.png;%(AdditionalInputs)</AdditionalInputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FullPath);.\source\bianji.png;.\source\hiddenleft.png;.\source\close2.png;.\source\column.png;.\source\search1.png;.\source\+.png;.\source\edit.png;.\source\x.png;.\source\close2%402x.png;.\source\column%402x.png;.\source\hiddenleft%402x.png;.\source\btnnext.png;.\source\btnlast.png;.\source\save.png;.\source\saveas.png;.\source\copy.png;.\source\paste.png;.\source\compile.png;.\source\debug.png;.\source\run.png;.\source\close.png;.\source\find.png;.\source\replace(2).png;.\source\Bookmark.png;.\source\pin.png;.\source\redo.png;.\source\undo.png;.\source\edit_cut.png;.\source\compile_run.png;.\source\clear.png;.\source\code.png;.\source\flay.png;.\source\btnlast%402x.png;.\source\btnnext%402x.png;.\source\clear%402x.png;.\source\compile%402x.png;.\source\compile_run%402x.png;.\source\debug%402x.png;.\source\replace(2)%402x.png;.\source\run%402x.png;.\source\save%402x.png;.\source\saveas%402x.png;.\source\code%402x.png;.\source\redo%402x.png;.\source\undo%402x.png;.\source\edit_cut%402x.png;.\source\newproject.png;.\source\doc.png;.\source\file.png;.\source\import.png;.\source\database.png;.\source\music.png;.\source\image.png;.\source\movie.png;.\source\bksfile.png;.\source\bksdoc.png;.\source\sourcedoc.png;.\source\open_file.png;.\source\openfile.png;.\source\newfile.png;.\source\alert.png;.\source\error.png;.\source\errorsmall.png;.\source\Bookmarksmall.png;.\source\pinsmall.png;.\source\textarea.png;.\source\terminal.png;.\source\product-design.png;.\source\log.png;.\source\warningsmall.png;.\source\auto_key.png;.\source\auto_normal.png;.\source\auto_function.png;.\source\hint.png;.\source\728.GIF;.\source\error_big.png;.\source\check_big.png;.\source\branch-end.png;.\source\branch-closed.png;.\source\branch-more.png;.\source\branch-open.png;.\source\branch-vline.png;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Rcc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
     </CustomBuild>
     <None Include="source\sourcedoc.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -1745,6 +1748,34 @@ endlocal
   </ItemGroup>
   <ItemGroup>
     <Image Include="source\+.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\auto_function.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\auto_normal.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\branch-closed.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\branch-end.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\branch-more.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\branch-open.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\branch-vline.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Image>
@@ -1796,6 +1827,14 @@ endlocal
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Image>
+    <Image Include="source\hint.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\log.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
     <Image Include="source\redo%402x.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -1817,6 +1856,10 @@ endlocal
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Image>
     <Image Include="source\undo%402x.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\warningsmall.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Image>

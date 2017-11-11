@@ -475,9 +475,6 @@
     <ClCompile Include="Release\moc_versioninfo.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_source.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="weh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -689,6 +686,12 @@
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
     <ClCompile Include="dia\autocompletelist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_source.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\ParserEditorUndoCommand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1140,6 +1143,9 @@
     <ClInclude Include="GeneratedFiles\ui_autocompletelist.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="dia\ParserEditorUndoCommand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\Setoptiondia.ui">
@@ -1225,6 +1231,9 @@
     </CustomBuild>
     <CustomBuild Include="dia\autocompletelist.ui">
       <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="source\source.qrc">
+      <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -1384,9 +1393,6 @@
     <None Include="source\search1.png">
       <Filter>Resource Files</Filter>
     </None>
-    <CustomBuild Include="source.qrc">
-      <Filter>Resource Files</Filter>
-    </CustomBuild>
     <None Include="source\sourcedoc.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -1476,6 +1482,36 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="source\edit_cut%402x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="source\log.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="source\warningsmall.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="source\auto_normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="source\auto_function.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="source\hint.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="source\branch-end.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="source\branch-closed.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="source\branch-more.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="source\branch-open.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="source\branch-vline.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

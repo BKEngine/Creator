@@ -24,12 +24,12 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	setMarginWidth(0, 48);
 	setMarginLineNumbers(1, true);
 	setMarginWidth(1, 24);
-	markerDefine(QImage(":/info/source/errorsmall.png"), 1);
-	markerDefine(QImage(":/info/source/warningsmall.png"), 2);
-	markerDefine(QImage(":/info/source/Bookmarksmall.png"), 3);
-	markerDefine(QImage(":/info/source/pinsmall.png"), 4);
-	markerDefine(QImage(":/info/source/errorsmall.png"), 5);
-	markerDefine(QImage(":/info/source/warningsmall.png"), 6);
+	markerDefine(QImage(":/info/errorsmall.png"), 1);
+	markerDefine(QImage(":/info/warningsmall.png"), 2);
+	markerDefine(QImage(":/info/bookmarksmall.png"), 3);
+	markerDefine(QImage(":/info/pinsmall.png"), 4);
+	markerDefine(QImage(":/info/errorsmall.png"), 5);
+	markerDefine(QImage(":/info/warningsmall.png"), 6);
 	setMarginMarkerMask(0, 0b01111111);
 	setMarginMarkerMask(1, 0);
 

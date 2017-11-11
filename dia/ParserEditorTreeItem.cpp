@@ -10,6 +10,10 @@ ParserEditorTreeItem::ParserEditorTreeItem(const QString &key, Type type, const 
 	, m_parentItem(nullptr)
 {
 }
+ParserEditorTreeItem::ParserEditorTreeItem()
+	: ParserEditorTreeItem(QString(), ParserEditorTreeItem::VOID, QString())
+{
+}
 //! [0]
 
 //! [1]

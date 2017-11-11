@@ -1,6 +1,7 @@
 ﻿#include "ParserEditor.h"
 #include "ui_ParserEditor.h"
 #include "ParserHelper/ParserHelper.h"
+#include "qnofocusitemdelegate.h"
 #include <QMessageBox>
 #include "loli/loli_island.h"
 #include "ParserEditorTreeItem.h"
@@ -10,11 +11,12 @@
 #include <QLineEdit>
 #include <QToolButton>
 #include <QVBoxLayout>
+#include <QUndoStack>
 
-class StringDelegate : public QStyledItemDelegate
+class StringDelegate : public QNoFocusItemDelegate
 {
 public:
-	explicit StringDelegate(QObject *parent = 0) :QStyledItemDelegate(parent) {}
+	explicit StringDelegate(QObject *parent = 0) :QNoFocusItemDelegate(parent) {}
 	QWidget *createEditor(QWidget *parent,
 		const QStyleOptionViewItem &option,
 		const QModelIndex &index) const Q_DECL_OVERRIDE
@@ -26,14 +28,12 @@ public:
 	void setEditorData(QWidget *editor, const QModelIndex &index) const Q_DECL_OVERRIDE
 	{
 		QLineEdit *edit = (QLineEdit *)editor;
-		ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(index.internalPointer());
-		edit->setText(item->data(index.column()).toString());
+		edit->setText(index.model()->data(index, Qt::DisplayRole).toString());
 	}
 	void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const Q_DECL_OVERRIDE
 	{
 		QLineEdit *edit = (QLineEdit *)editor;
-		ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(index.internalPointer());
-		item->setData(index.column(), edit->text());
+		model->setData(index, edit->text(), Qt::EditRole);
 	}
 
 	void updateEditorGeometry(QWidget *editor,
@@ -44,10 +44,10 @@ public:
 	}
 };
 
-class TypeDelegate : public QStyledItemDelegate
+class TypeDelegate : public QNoFocusItemDelegate
 {
 public:
-	explicit TypeDelegate(QObject *parent = 0) :QStyledItemDelegate(parent) {}
+	explicit TypeDelegate(QObject *parent = 0) :QNoFocusItemDelegate(parent) {}
 	QWidget *createEditor(QWidget *parent,
 		const QStyleOptionViewItem &option,
 		const QModelIndex &index) const Q_DECL_OVERRIDE
@@ -60,14 +60,12 @@ public:
 	void setEditorData(QWidget *editor, const QModelIndex &index) const Q_DECL_OVERRIDE
 	{
 		QComboBox *box = (QComboBox *)editor;
-		ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(index.internalPointer());
-		box->setCurrentText(item->typeString());
+		box->setCurrentText(index.model()->data(index, Qt::DisplayRole).toString());
 	}
 	void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const Q_DECL_OVERRIDE
 	{
 		QComboBox *box = (QComboBox *)editor;
-		ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(index.internalPointer());
-		item->setTypeString(box->currentText());
+		model->setData(index, box->currentText(), Qt::EditRole);
 	}
 
 	void updateEditorGeometry(QWidget *editor,
@@ -107,7 +105,6 @@ void ParserEditor::addButtons(const QModelIndex &index)
 		e->move(x1, y);
 		e->setVisible(true);
 	}
-	
 }
 
 void ParserEditor::buildToolButtons()
@@ -115,27 +112,27 @@ void ParserEditor::buildToolButtons()
 	QWidget *w = ui->treeView->viewport();
 	{
 		x = new QToolButton(w);
-		x->setIcon(QIcon(":/pedit/source/x.png"));
+		x->setIcon(QIcon(":/pedit/x.png"));
 		x->setFixedSize(QSize(15, 15));
 		x->setVisible(false);
 		connect(x, &QToolButton::clicked, this, &ParserEditor::onXClicked);
-		x->setWhatsThis("删除该条目");
+		x->setToolTip("删除该条目");
 	}
 	{
 		a = new QToolButton(w);
-		a->setIcon(QIcon(":/pedit/source/+.png"));
+		a->setIcon(QIcon(":/pedit/+.png"));
 		a->setFixedSize(QSize(15, 15));
 		a->setVisible(false);
 		connect(a, &QToolButton::clicked, this, &ParserEditor::onAClicked);
-		a->setWhatsThis("在该字典/数组中新增一个条目");
+		a->setToolTip("在该字典/数组中新增一个条目");
 	}
 	{
 		e = new QToolButton(w);
-		e->setIcon(QIcon(":/pedit/source/edit.png"));
+		e->setIcon(QIcon(":/pedit/edit.png"));
 		e->setFixedSize(QSize(15, 15));
 		e->setVisible(false);
 		connect(e, &QToolButton::clicked, this, &ParserEditor::onEClicked);
-		e->setWhatsThis("编辑该项值");
+		e->setToolTip("编辑该项值");
 	}
 }
 
@@ -245,6 +242,10 @@ ParserEditor::ParserEditor(const QString &filepath, QWidget *parent) :
 	connect(treeView, &QTreeView::customContextMenuRequested, this, &ParserEditor::onTreeViewRClick);
 	connect(treeView, &QTreeView::entered, this, &ParserEditor::onIndexEntered);
 	connect(treeView, &QTreeView::viewportEntered, this, &ParserEditor::onViewportEntered);
+	connect(model->undoStack(), &QUndoStack::canUndoChanged, ui->actundo, &QAction::setEnabled);
+	connect(model->undoStack(), &QUndoStack::canRedoChanged, ui->actredo, &QAction::setEnabled);
+	connect(ui->actundo, &QAction::triggered, model->undoStack(), &QUndoStack::undo);
+	connect(ui->actredo, &QAction::triggered, model->undoStack(), &QUndoStack::redo);
 	buildToolButtons();
 }
 
