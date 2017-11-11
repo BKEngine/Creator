@@ -57,6 +57,12 @@ void ParserEditorTreeItem::removeChildrenAt(int row, int count)
 	}
 }
 
+void ParserEditorTreeItem::replaceChildAt(int row, ParserEditorTreeItem * child)
+{
+	delete m_childItems[row];
+	m_childItems[row] = child;
+}
+
 void ParserEditorTreeItem::insertChildBefore(int pos, ParserEditorTreeItem *child)
 {
 	m_childItems.insert(m_childItems.begin() + pos, child);

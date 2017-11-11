@@ -227,8 +227,16 @@ void ParserEditorTreeModel::removeRowsInternal(int row, int count, const QModelI
 void ParserEditorTreeModel::setDataInternal(const QModelIndex & index, const QVariant & data)
 {
 	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(index.internalPointer());
+	//todo handle type
 	item->setData(index.column(), data);
 	emit dataChanged(index, index);
+}
+
+void ParserEditorTreeModel::replaceItemInternal(const QModelIndex & index, ParserEditorTreeItem *newitem)
+{
+	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(index.internalPointer());
+	ParserEditorTreeItem *parent = item->parentItem();
+	parent->replaceChildAt(item->row(), newitem);
 }
 
 QList<ParserEditorTreeItem *> ParserEditorTreeModel::itemsForRows(int row, int count, const QModelIndex &parent) const
@@ -261,7 +269,10 @@ bool ParserEditorTreeModel::setData(const QModelIndex &index, const QVariant &va
 {
 	if (role == Qt::EditRole)
 	{
-		_undoStack->push(new ModifyDataCommand(this, index, value));
+		if (index.column() == 1)
+			_undoStack->push(new ChangeTypeCommand(this, index, value));
+		else
+			_undoStack->push(new ModifyDataCommand(this, index, value));
 		return true;
 	}
 	return false;

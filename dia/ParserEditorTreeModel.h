@@ -108,11 +108,13 @@ private:
 	void insertDataInternal(int row, const QList<ParserEditorTreeItem *> &items, const QModelIndex &parent);
 	void removeRowsInternal(int row, int count, const QModelIndex &parent);
 	void setDataInternal(const QModelIndex &index, const QVariant &data);
+	void replaceItemInternal(const QModelIndex &index, ParserEditorTreeItem *item);
 	QList<ParserEditorTreeItem *> itemsForRows(int row, int count, const QModelIndex &parent) const;
 	friend class InsertRowsCommand;
 	friend class RemoveRowsCommand;
 	friend class InsertDataCommand;
 	friend class ModifyDataCommand;
+	friend class ChangeTypeCommand;
 
 private:
     ParserEditorTreeItem *root;

@@ -28,6 +28,7 @@ public:
     void appendChild(ParserEditorTreeItem *child);
 	void removeChildAt(int row);
 	void removeChildrenAt(int row, int count);
+	void replaceChildAt(int row, ParserEditorTreeItem *child);
 	void insertChildBefore(int pos, ParserEditorTreeItem *child);
 
     ParserEditorTreeItem *child(int row);

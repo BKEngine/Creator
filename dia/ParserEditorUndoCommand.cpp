@@ -98,3 +98,26 @@ void ModifyDataCommand::redo()
 {
 	model->setDataInternal(index, data);
 }
+
+ChangeTypeCommand::ChangeTypeCommand(ParserEditorTreeModel *model, const QModelIndex &index, const QVariant &data)
+	: model(model)
+	, index(index)
+	, data(data)
+{
+	item = model->item(index)->duplicate();
+}
+
+ChangeTypeCommand::~ChangeTypeCommand()
+{
+	delete item;
+}
+
+void ChangeTypeCommand::undo()
+{
+
+}
+
+void ChangeTypeCommand::redo()
+{
+	model->setDataInternal(index, data);
+}

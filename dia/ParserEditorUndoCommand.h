@@ -17,6 +17,7 @@ class ParserEditorTreeItem;
 class InsertRowsCommand : public QUndoCommand
 {
 	Q_DISABLE_COPY(InsertRowsCommand)
+private:
 	ParserEditorTreeModel *model;
 	int row;
 	int count;
@@ -30,6 +31,7 @@ public:
 class RemoveRowsCommand : public QUndoCommand
 {
 	Q_DISABLE_COPY(RemoveRowsCommand)
+private:
 	ParserEditorTreeModel *model;
 	int row;
 	int count;
@@ -45,6 +47,7 @@ public:
 class InsertDataCommand : public QUndoCommand
 {
 	Q_DISABLE_COPY(InsertDataCommand)
+private:
 	ParserEditorTreeModel *model;
 	int row;
 	QList<ParserEditorTreeItem *> items;
@@ -59,6 +62,7 @@ public:
 class ModifyDataCommand : public QUndoCommand
 {
 	Q_DISABLE_COPY(ModifyDataCommand)
+private:
 	ParserEditorTreeModel *model;
 	QPersistentModelIndex index;
 	QVariant data;
@@ -68,3 +72,19 @@ public:
 	virtual void undo() override;
 	virtual void redo() override;
 };
+
+class ChangeTypeCommand : public QUndoCommand
+{
+	Q_DISABLE_COPY(ChangeTypeCommand)
+private:
+	ParserEditorTreeModel *model;
+	QPersistentModelIndex index;
+	QVariant data;
+	ParserEditorTreeItem *item;
+public:
+	ChangeTypeCommand(ParserEditorTreeModel *model, const QModelIndex &index, const QVariant &data);
+	~ChangeTypeCommand();
+	virtual void undo() override;
+	virtual void redo() override;
+};
+
