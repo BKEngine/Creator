@@ -164,7 +164,7 @@ void AutoCompleteList::Match(const QString &str)
 
 void AutoCompleteList::UpdateWidgetSize()
 {
-	auto width = qMax(minWidth, ui->listWidget->sizeHintForColumn(0) + ui->listWidget->verticalScrollBar()->sizeHint().width() + 10);
+	auto width = qMax(minWidth, ui->listWidget->sizeHintForColumn(0) + ui->listWidget->verticalScrollBar()->sizeHint().width() + 16);
 	ui->listWidget->setFixedWidth(width);
 	auto height = qMin(10, ui->listWidget->count()) * ui->listWidget->sizeHintForRow(0) + 4;
 	ui->listWidget->setFixedHeight(height);
