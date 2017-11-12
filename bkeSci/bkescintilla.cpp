@@ -143,6 +143,7 @@ void BkeScintilla::onTimer()
 	// macro file的annotation
 	if (analysis->isMacroFile(FileName))
 	{
+		saveTopLine();
 		clearAnnotations(AnnotationType::MACRO_DEFINE);
 		BKEMacros macro;
 		for (auto && label : l)
@@ -161,12 +162,15 @@ void BkeScintilla::onTimer()
 					params.remove(0, 1);
 				if (!params.isEmpty())
 					info += "参数:" + params;
+				else
+					info += "参数：无";
 				if (!macro.comment.isEmpty())
 					info += "\n" + macro.comment;
 				static QsciStyle ks3(-1, "Macro Define", QColor(0, 0x80, 0), QColor(0xe0, 0xff, 0xe0), GetAnnotationFont());
 				annotate(lineFromPosition(p->findLabel(label)) - 1, info, ks3, MACRO_DEFINE);
 			}
 		}
+		restoreTopLine();
 	}
 }
 
@@ -823,39 +827,51 @@ void BkeScintilla::UpdateAutoComplete()
 				}
 				else
 				{
-					QByteArray valexpBytes;
-					while (isalnum(ch) || ch == '.' || ch == '_' || ch >= 0x80)
+					//detect enums first
+					if (isVarName(attrContext))
 					{
-						valexpBytes.push_front(ch);
-						ch = SendScintilla(SCI_GETCHARAT, --pos);
-					}
-					//while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
-					//	attrContext.remove(0, 1);
-					if (valexpBytes.isEmpty())
-						return;
-					if (valexpBytes[0] >= '0' && valexpBytes[0] <= '9')
-						return;
-					QString tmp = QString::fromUtf8(valexpBytes);
-					QStringList ls = tmp.split('.');
-					if (ls.size() == 1)
-					{
+						unsigned char ch2 = ch;
+						auto pos2 = pos;
+						QByteArray contextBytes;
+						do
+						{
+							contextBytes.push_front(ch2);
+							ch2 = SendScintilla(SCI_GETCHARAT, --pos2);
+						} while (ch2 != '=');
+						QString tmp = QString::fromUtf8(contextBytes);
 						completeList = GetEnums(cmdname, attrContext, tmp);
 						if (completeList.size())
 						{
 							autoCompleteContext = tmp;
 							autoCompleteType = SHOW_ENUMLIST;
 						}
-						else
+					}
+					if (autoCompleteType == SHOW_NULL)
+					{
+						QByteArray valexpBytes;
+						while (isalnum(ch) || ch == '.' || ch == '_' || ch >= 0x80)
+						{
+							valexpBytes.push_front(ch);
+							ch = SendScintilla(SCI_GETCHARAT, --pos);
+						}
+						//while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
+						//	attrContext.remove(0, 1);
+						if (valexpBytes.isEmpty())
+							return;
+						if (valexpBytes[0] >= '0' && valexpBytes[0] <= '9')
+							return;
+						QString tmp = QString::fromUtf8(valexpBytes);
+						QStringList ls = tmp.split('.');
+						if (ls.size() == 1)
 						{
 							autoCompleteContext = ls[0];
 							completeList = GetGlobalList(context, tmp);
-							autoCompleteType = SHOW_AUTOVALLIST;
 						}
-					}
-					else
-					{
-						autoCompleteContext = ls.back();
-						completeList = GetValList(ls, tmp);
+						else
+						{
+							autoCompleteContext = ls.back();
+							completeList = GetValList(ls, tmp);
+						}
 						autoCompleteType = SHOW_AUTOVALLIST;
 					}
 				}
@@ -1164,6 +1180,7 @@ void BkeScintilla::UiChange(int updated)
 							SendScintilla(SCI_SETLINEINDENTATION, modfieddata.line + 1, count);
 						}
 					}
+
 				}
 			}
 			SendScintilla(SCI_GOTOPOS, modfieddata.pos + modfieddata.text.count() + GetActualIndentCharLength(modfieddata.line + 1));

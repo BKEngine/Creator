@@ -342,7 +342,8 @@ void CodeWindow::AttachCurrentEdit()
 {
 	CurrentConnect(true);
 	ConnectAutoComplete(currentedit);
-	currentedit->clearAnnotationsAll();
+	currentedit->clearAnnotations(BkeScintilla::PROBLEM);
+	currentedit->clearAnnotations(BkeScintilla::RUNTIME_PROBLEM);
 	currentedit->restoreTopLine();
 
 	AddMarksToEdit();

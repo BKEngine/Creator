@@ -363,3 +363,7 @@ int ParserEditorTreeModel::rowCount(const QModelIndex &parent) const
     return parentItem->childCount();
 }
 
+void ParserEditorTreeModel::sort(int column, Qt::SortOrder order /*= Qt::AscendingOrder*/)
+{
+
+}
