@@ -10,7 +10,7 @@ ParserEditorTreeModel::ParserEditorTreeModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
 	root = NULL;
-	header << "¼ü" << "ÀàĞÍ" << "Öµ";
+	header << "é”®" << "ç±»å‹" << "å€¼";
 	_undoStack = new QUndoStack();
 }
 //! [0]
@@ -105,14 +105,14 @@ bool ParserEditorTreeModel::insertable(const QModelIndex &index) const
 {
 	ParserEditorTreeItem *childItem = static_cast<ParserEditorTreeItem*>(index.internalPointer());
 	ParserEditorTreeItem *parentItem = childItem->parentItem();
-	if (parentItem == 0) //±íÊ¾ÕâÊÇroot ²»¿É²åÈë
+	if (parentItem == 0) //è¡¨ç¤ºè¿™æ˜¯root ä¸å¯æ’å…¥
 		return false;
-	return true; //Ö»ÒªÊÇ¸öÌõÄ¿¶¼ÔÚ×Öµä»òÕßÊı×éÏÂ ËùÒÔ¶¼¿ÉÒÔ²åÈë
+	return true; //åªè¦æ˜¯ä¸ªæ¡ç›®éƒ½åœ¨å­—å…¸æˆ–è€…æ•°ç»„ä¸‹ æ‰€ä»¥éƒ½å¯ä»¥æ’å…¥
 }
 
 bool ParserEditorTreeModel::removeable(const QModelIndex &index) const
 {
-	//¿É²åÈë¾Í¿ÉÒÔ±»É¾³ı
+	//å¯æ’å…¥å°±å¯ä»¥è¢«åˆ é™¤
 	return insertable(index);
 }
 

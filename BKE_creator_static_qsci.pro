@@ -15,7 +15,7 @@ TARGET = BKE_Creator
 TEMPLATE = app
 
 CONFIG += warn_off qt
-CONFIG+= c++11
+CONFIG+= c++14
 
 DEFINES += QT SCI_LEXER SCINTILLA_QT BKE_CREATOR
 #if use in linux,you must use a full name
@@ -149,7 +149,8 @@ SOURCES += ./main.cpp \
     dia/gotofiledialog.cpp \
     qmacopenfileapplication.cpp \
     dia/autocompletelist.cpp \
-    DebugServer.cpp
+    DebugServer.cpp \
+    dia/ParserEditorUndoCommand.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -288,7 +289,8 @@ HEADERS  += \
     dia/gotofiledialog.h \
     qmacopenfileapplication.h \
     dia/autocompletelist.h \
-    DebugServer.h
+    DebugServer.h \
+    dia/ParserEditorUndoCommand.h
 
 RESOURCES += \
     source/source.qrc \

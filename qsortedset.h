@@ -32,7 +32,7 @@ class QSortedSet : public QMap<Key, details::_QSortedSetDummyStruct>
 	using Base::upperBound;
 	using Base::insertMulti;
 public:
-	inline QSortedSet() Q_DECL_NOTHROW : QMap() {}
+        inline QSortedSet() Q_DECL_NOTHROW : Base() {}
 #ifdef Q_COMPILER_INITIALIZER_LISTS
 	inline QSortedSet(std::initializer_list<Key> list)
 		: QSortedSet()
@@ -42,7 +42,7 @@ public:
 	}
 #endif
 
-	QSortedSet(const QSortedSet &other) : QMap(other) {}
+        QSortedSet(const QSortedSet &other) : Base(other) {}
 
 	inline QSortedSet &operator=(const QSortedSet &other) {
 		Base::operator =(other);
@@ -57,12 +57,12 @@ public:
 	}
 #endif
 
-	typedef Base::key_iterator const_iterator;
+        typedef typename Base::key_iterator const_iterator;
 
 	inline const_iterator begin() const { return Base::keyBegin(); }
 	inline const_iterator end() const { return Base::keyEnd(); }
 	inline const Key &first() const { return Base::firstKey(); }
 	inline const Key &last() const { return Base::lastKey(); }
-	inline const_iterator insert(const Key &key) { return const_iterator(Base::const_iterator(Base::insert(key, Dummy()))); }
+        inline const_iterator insert(const Key &key) { return const_iterator(typename Base::const_iterator(Base::insert(key, Dummy()))); }
 	inline const_iterator insert(const_iterator pos, const Key &key) { return Base::insert(pos.base(), key, Dummy()); }
 };
