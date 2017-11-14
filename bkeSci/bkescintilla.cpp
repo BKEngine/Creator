@@ -752,127 +752,134 @@ void BkeScintilla::UpdateAutoComplete()
 			autoCompleteContext = ls.back();
 			autoCompleteType = SHOW_AUTOVALLIST;
 		}
-		else if (style & 128 /*CMD_MASK*/ || style == SCE_BKE_COMMAND || style == SCE_BKE_COMMAND2)
+		else if (style & 128 /*CMD_MASK*/ || (style & 63) == SCE_BKE_COMMAND || (style & 63) == SCE_BKE_COMMAND2)
 		{
-			if (!(((style & 63) == SCE_BKE_COMMAND && ch == '@') || ((style & 63) == SCE_BKE_COMMAND2 && ch == '[')))
+			if ((style & 63) == SCE_BKE_COMMAND2 && ch == ']')
 			{
-				unsigned char ch2;
-				do
-				{
-					beginPos--;
-					style = SendScintilla(SCI_GETSTYLEAT, beginPos);
-					ch2 = SendScintilla(SCI_GETCHARAT, beginPos);
-				} while (beginPos > 0 && (style & 128) && !(((style & 63) == SCE_BKE_COMMAND && ch2 == '@') || ((style & 63) == SCE_BKE_COMMAND2 && ch2 == '[')));
-			}
-			//now we find the beginning the @ or [ command
-			context = TextForRange({ beginPos + 1, pos + 1 });
-			int p = context.indexOf(' ');
-			QString cmdname = context;
-			if (p < 0)
-			{
-				autoCompleteContext = cmdname;
-				autoCompleteType = SHOW_AUTOCOMMANDLIST;
-				completeList = analysis->getCmdList();
+				autoCompleteType = SHOW_NULL;
 			}
 			else
 			{
-				cmdname.truncate(p);
-				int p2 = context.lastIndexOf(' ');
-				QString attrContext = context.right(context.length() - p2 - 1);
-				int p3 = attrContext.indexOf('=');
-				if (p3 >= 0)
-					attrContext.truncate(p3);
-				if (isspace(ch) || (isVarName(attrContext) && p3 < 0))
+				if (!(((style & 63) == SCE_BKE_COMMAND && ch == '@') || ((style & 63) == SCE_BKE_COMMAND2 && ch == '[')))
 				{
-					autoCompleteType = SHOW_ATTR;
-					bool hasAttr = false;
-					unsigned char oldStyle;
-					int pp = beginPos + p + 1;
-					oldStyle = style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
-					pp++;
-					QStringList attrs;
-					QString tmp;
-					while (pp <= pos)
+					unsigned char ch2;
+					do
 					{
-						style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
-						if (style == SCE_BKE_DEFAULT && oldStyle == SCE_BKE_ATTRIBUTE)
-						{
-							attrs << tmp;
-							tmp.clear();
-							hasAttr = true;
-						}
-						else if (style == SCE_BKE_DEFAULT && hasAttr)
-						{
-							hasAttr = false;
-						}
-						else if (oldStyle != SCE_BKE_DEFAULT && oldStyle != SCE_BKE_ATTRIBUTE && style == SCE_BKE_DEFAULT && !hasAttr)
-						{
-							attrs << QString::number(attrs.size());
-						}
-						else if (style == SCE_BKE_ATTRIBUTE)
-						{
-							tmp.push_back((char)SendScintilla(SCI_GETCHARAT, pp));
-						}
-						oldStyle = style;
-						pp++;
-					}
-					completeList = GetAttrs(cmdname, attrs, context);
-					autoCompleteContext = attrContext;
+						beginPos--;
+						style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+						ch2 = SendScintilla(SCI_GETCHARAT, beginPos);
+					} while (beginPos > 0 && (style & 128) && !(((style & 63) == SCE_BKE_COMMAND && ch2 == '@') || ((style & 63) == SCE_BKE_COMMAND2 && ch2 == '[')));
 				}
-				else if (ch == '=' && isVarName(attrContext))
+				//now we find the beginning the @ or [ command
+				context = TextForRange({ beginPos + 1, pos + 1 });
+				int p = context.indexOf(' ');
+				QString cmdname = context;
+				if (p < 0)
 				{
-					autoCompleteContext = "";
-					autoCompleteType = SHOW_ENUMLIST;
-					completeList = GetEnums(cmdname, attrContext, "");
+					autoCompleteContext = cmdname;
+					autoCompleteType = SHOW_AUTOCOMMANDLIST;
+					completeList = analysis->getCmdList();
 				}
 				else
 				{
-					//detect enums first
-					if (isVarName(attrContext))
+					cmdname.truncate(p);
+					int p2 = context.lastIndexOf(' ');
+					QString attrContext = context.right(context.length() - p2 - 1);
+					int p3 = attrContext.indexOf('=');
+					if (p3 >= 0)
+						attrContext.truncate(p3);
+					if (isspace(ch) || (isVarName(attrContext) && p3 < 0))
 					{
-						unsigned char ch2 = ch;
-						auto pos2 = pos;
-						QByteArray contextBytes;
-						do
+						autoCompleteType = SHOW_ATTR;
+						bool hasAttr = false;
+						unsigned char oldStyle;
+						int pp = beginPos + p + 1;
+						oldStyle = style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
+						pp++;
+						QStringList attrs;
+						QString tmp;
+						while (pp <= pos)
 						{
-							contextBytes.push_front(ch2);
-							ch2 = SendScintilla(SCI_GETCHARAT, --pos2);
-						} while (ch2 != '=');
-						QString tmp = QString::fromUtf8(contextBytes);
-						completeList = GetEnums(cmdname, attrContext, tmp);
-						if (completeList.size())
-						{
-							autoCompleteContext = tmp;
-							autoCompleteType = SHOW_ENUMLIST;
+							style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
+							if (style == SCE_BKE_DEFAULT && oldStyle == SCE_BKE_ATTRIBUTE)
+							{
+								attrs << tmp;
+								tmp.clear();
+								hasAttr = true;
+							}
+							else if (style == SCE_BKE_DEFAULT && hasAttr)
+							{
+								hasAttr = false;
+							}
+							else if (oldStyle != SCE_BKE_DEFAULT && oldStyle != SCE_BKE_ATTRIBUTE && style == SCE_BKE_DEFAULT && !hasAttr)
+							{
+								attrs << QString::number(attrs.size());
+							}
+							else if (style == SCE_BKE_ATTRIBUTE)
+							{
+								tmp.push_back((char)SendScintilla(SCI_GETCHARAT, pp));
+							}
+							oldStyle = style;
+							pp++;
 						}
+						completeList = GetAttrs(cmdname, attrs, context);
+						autoCompleteContext = attrContext;
 					}
-					if (autoCompleteType == SHOW_NULL)
+					else if (ch == '=' && isVarName(attrContext))
 					{
-						QByteArray valexpBytes;
-						while (isalnum(ch) || ch == '.' || ch == '_' || ch >= 0x80)
+						autoCompleteContext = "";
+						autoCompleteType = SHOW_ENUMLIST;
+						completeList = GetEnums(cmdname, attrContext, "");
+					}
+					else
+					{
+						//detect enums first
+						if (isVarName(attrContext))
 						{
-							valexpBytes.push_front(ch);
-							ch = SendScintilla(SCI_GETCHARAT, --pos);
+							unsigned char ch2 = ch;
+							auto pos2 = pos;
+							QByteArray contextBytes;
+							do
+							{
+								contextBytes.push_front(ch2);
+								ch2 = SendScintilla(SCI_GETCHARAT, --pos2);
+							} while (ch2 != '=');
+							QString tmp = QString::fromUtf8(contextBytes);
+							completeList = GetEnums(cmdname, attrContext, tmp);
+							if (completeList.size())
+							{
+								autoCompleteContext = tmp;
+								autoCompleteType = SHOW_ENUMLIST;
+							}
 						}
-						//while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
-						//	attrContext.remove(0, 1);
-						if (valexpBytes.isEmpty())
-							return;
-						if (valexpBytes[0] >= '0' && valexpBytes[0] <= '9')
-							return;
-						QString tmp = QString::fromUtf8(valexpBytes);
-						QStringList ls = tmp.split('.');
-						if (ls.size() == 1)
+						if (autoCompleteType == SHOW_NULL)
 						{
-							autoCompleteContext = ls[0];
-							completeList = GetGlobalList(context, tmp);
+							QByteArray valexpBytes;
+							while (isalnum(ch) || ch == '.' || ch == '_' || ch >= 0x80)
+							{
+								valexpBytes.push_front(ch);
+								ch = SendScintilla(SCI_GETCHARAT, --pos);
+							}
+							//while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
+							//	attrContext.remove(0, 1);
+							if (valexpBytes.isEmpty())
+								return;
+							if (valexpBytes[0] >= '0' && valexpBytes[0] <= '9')
+								return;
+							QString tmp = QString::fromUtf8(valexpBytes);
+							QStringList ls = tmp.split('.');
+							if (ls.size() == 1)
+							{
+								autoCompleteContext = ls[0];
+								completeList = GetGlobalList(context, tmp);
+							}
+							else
+							{
+								autoCompleteContext = ls.back();
+								completeList = GetValList(ls, tmp);
+							}
+							autoCompleteType = SHOW_AUTOVALLIST;
 						}
-						else
-						{
-							autoCompleteContext = ls.back();
-							completeList = GetValList(ls, tmp);
-						}
-						autoCompleteType = SHOW_AUTOVALLIST;
 					}
 				}
 			}

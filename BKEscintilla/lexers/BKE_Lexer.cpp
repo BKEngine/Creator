@@ -949,7 +949,7 @@ void BKE_Lexer::DoCommand()
 		//if (error)
 		//	styler->SetState(SCE_BKE_ERROR | cur_mask);
 		//else
-			styler->SetState(SCE_BKE_COMMAND | cur_mask);
+			styler->SetState(SCE_BKE_COMMAND2 | cur_mask);
 		styler->Forward();
 		removeMask(CMD_MASK);
 		styler->SetState(SCE_BKE_DEFAULT | cur_mask);
