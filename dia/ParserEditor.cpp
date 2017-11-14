@@ -54,6 +54,11 @@ public:
 	{
 		QComboBox *box = new QComboBox(parent);
 		box->addItems(ParserEditorTreeItem::allTypeStrings());
+		TypeDelegate *d = (TypeDelegate *)this;
+		connect(box, &QComboBox::currentTextChanged, [d, box](auto str) {
+			emit d->commitData(box);
+			emit d->closeEditor(box);
+		});
 		return box;
 	}
 
@@ -167,13 +172,24 @@ void ParserEditor::onTreeViewRClick(const QPoint &pt)
 		});
 		mu.addAction(e);
 	}
+	mu.addSeparator();
 	if (model->insertable(index))
 	{
-		QAction *e = new QAction("克隆", &mu);
-		connect(e, &QAction::triggered, [this, &index]() {
-			model->duplicate(index.row(), model->parent(index));
-		});
-		mu.addAction(e);
+		{
+			QAction *e = new QAction("克隆", &mu);
+			connect(e, &QAction::triggered, [this, &index]() {
+				model->duplicate(index.row(), model->parent(index));
+			});
+			mu.addAction(e);
+		}
+		if(model->rowCount(index) > 0)
+		{
+			QAction *e = new QAction("清除子节点", &mu);
+			connect(e, &QAction::triggered, [this, &index]() {
+				model->removeRows(0, model->rowCount(index), index);
+			});
+			mu.addAction(e);
+		}
 	}
 	mu.addSeparator();
 	mu.exec(QCursor::pos());

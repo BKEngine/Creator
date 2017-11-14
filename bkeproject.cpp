@@ -731,6 +731,7 @@ void BkeProject::AddFiles(const QStringList &ls, const ItemInfo &f)
 	for (auto &&s : ls)
 	{
 		FindItem(f.Root, s);
+		analysis->pushFile(f.FullName + "/" + s);
 	}
 	SortTree(f.Root);
 	WriteBkpFile();

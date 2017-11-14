@@ -1956,6 +1956,8 @@ void BkeScintilla::ShowToolTip(int position, QPoint pos)
 	if (!d)
 		return;
 	auto node = d->findNode(position);
+	if (!node)
+		return;
 	//test indicator
 	{
 		int v2 = SendScintilla(SCI_INDICATORVALUEAT, BKE_INDICATOR_ERROR, position);
