@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true"/>
-  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout" rowstretch="1,1000,1" columnstretch="1,1000,1">
     <property name="leftMargin">
@@ -170,6 +167,9 @@ QTreeView::branch:open:has-children {
      <string>文件</string>
     </property>
     <addaction name="actsave"/>
+    <addaction name="actionreload"/>
+    <addaction name="separator"/>
+    <addaction name="actionexit"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -226,6 +226,19 @@ QTreeView::branch:open:has-children {
    </property>
    <property name="text">
     <string>保存</string>
+   </property>
+  </action>
+  <action name="actionreload">
+   <property name="text">
+    <string>重新载入</string>
+   </property>
+  </action>
+  <action name="actionexit">
+   <property name="text">
+    <string>退出</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
    </property>
   </action>
  </widget>

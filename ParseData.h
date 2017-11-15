@@ -232,6 +232,7 @@ public:
 	
 	BaseNode *findNode(/*Pos p*/int pos);
 	BaseNode *findLastLabelNode(/*Pos p*/int pos);
+	BaseNode *findNextLabelNode(/*Pos p*/int pos);
 
 	bool checkLabel(BaseNode *node);
 	bool checkCommand(BaseNode *node, bool startwithat);

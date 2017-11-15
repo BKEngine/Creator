@@ -2038,12 +2038,7 @@ bool CodeWindow::eventFilter(QObject * watched, QEvent *e)
 {
 	if (watched != currentedit)
 		return false;
-	if (e->type() == QEvent::ToolTip)
-	{
-		currentedit->ShowToolTip(((QHelpEvent*)e)->pos());
-		return true;
-	}
-	else if (e->type() == QEvent::KeyPress)
+	if (e->type() == QEvent::KeyPress)
 	{
 		auto *event = (QKeyEvent *)e;
 		if (aclist->isVisible() && aclist->OnKeyPress(event->key()))

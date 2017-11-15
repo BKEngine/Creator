@@ -1,4 +1,4 @@
-#include "ParserEditorTreeItem.h"
+﻿#include "ParserEditorTreeItem.h"
 #include "ParserEditorTreeModel.h"
 #include <QStringList>
 #include <QUndoStack>
@@ -227,9 +227,43 @@ void ParserEditorTreeModel::removeRowsInternal(int row, int count, const QModelI
 void ParserEditorTreeModel::setDataInternal(const QModelIndex & index, const QVariant & data)
 {
 	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(index.internalPointer());
-	//todo handle type
-	item->setData(index.column(), data);
-	emit dataChanged(index, index);
+	//�������ͱ任
+	if (index.column() == 1)
+	{
+		auto type = item->type();
+		if (item->setTypeString(data.toString())) 
+		{
+			if (type == ParserEditorTreeItem::DICTIONARY || type == ParserEditorTreeItem::ARRAY)
+			{
+				if (item->childCount())
+				{
+					beginRemoveRows(index, 0, item->childCount() - 1);
+					item->clear();
+					endRemoveRows();
+				}
+			}
+			else if (item->type() == ParserEditorTreeItem::DICTIONARY || item->type() == ParserEditorTreeItem::ARRAY)
+			{
+				item->setValue(QString());
+			}
+			else if (item->type() == ParserEditorTreeItem::NUMBER)
+			{
+				item->setValue(QString::number(item->value().toDouble()));
+			}
+			else if(item->type() == ParserEditorTreeItem::VOID)
+			{
+				item->setValue(QString());
+			}
+			QModelIndex index1 = this->index(index.row(), 0, index.parent());
+			QModelIndex index2 = this->index(index.row(), 2, index.parent());
+			emit dataChanged(index1, index2);
+		}
+	}
+	else
+	{
+		item->setData(index.column(), data);
+		emit dataChanged(index, index);
+	}
 }
 
 void ParserEditorTreeModel::replaceItemInternal(const QModelIndex & index, ParserEditorTreeItem *newitem)

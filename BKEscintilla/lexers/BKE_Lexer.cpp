@@ -300,18 +300,19 @@ private:
 
 bool BKE_Lexer::ParseVarname(bool forceVariable)
 {
-	QString s(QChar(styler->chPrev));
+	QByteArray qba;
+	qba.append(styler->chPrev);
 	while (styler->More())
 	{
 		if (isalnum(styler->ch) || styler->ch == '_' || styler->ch >= 0x80)
 		{
-			s.append(styler->ch);
+			qba.append(styler->ch);
 			styler->Forward();
 		}
 		else
 			break;
 	}
-	if (!forceVariable && info->BagelWords.contains(s))
+	if (!forceVariable && info->BagelWords.contains(QString::fromUtf8(qba)))
 	{
 		styler->SetState(last_state | cur_mask);
 	}

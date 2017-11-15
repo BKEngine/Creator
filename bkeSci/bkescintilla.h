@@ -32,6 +32,7 @@ public:
 		BKE_INDICATOR_WARNING,
 		BKE_INDICATOR_CLICK_COMMAND,
 		BKE_INDICATOR_CLICK_LABEL,
+		BKE_INDICATOR_HIGHLIGHT,
 	};
 	enum{
 		BKE_CHANGE_REPLACE = 0x1
@@ -55,28 +56,31 @@ public:
 	BkeIndicatorBase findIndicatorLast(int id,int from) ;
 	bool FindForward(int pos = 0) ;
 	bool FindBack(int pos = -1) ;
-	bool HasFind(){ return findcount > 0 ; }
+	bool HasFind() const { return findcount > 0 ; }
 	void clearSelection(int pos = -1) ;
-	void SetIndicator(int id, const BkeIndicatorBase &p) ;
+	void SetIndicator(int id, const BkeIndicatorBase &p);
+	void SetIndicator(int id, const BkeIndicatorBase &p, int value);
 	void BkeAnnotateSelect() ;
 	BkeIndicatorBase findIndicator(int id,int postion) ;
-	int GetCurrentLine();
-	int GetCurrentPosition();
+	int GetCurrentLine() const;
+	int GetCurrentPosition() const;
 	void SetCurrentPosition(int pos);
 	void setLexer(QsciLexer *lex = 0);
-	void setSelection(BkeIndicatorBase &p);
-	int GetTextLength();
-	int ClosedPositionAt(const QPoint &point);
-	int PositionAt(const QPoint & point);
-	QPoint PointByPosition(int position);
-	bool IsIndicator(int id, int pos);
+	void setSelection(const BkeIndicatorBase &p);
+	int GetTextLength() const;
+	int ClosedPositionAt(const QPoint &point) const;
+	int PositionAt(const QPoint & point) const;
+	QPoint PointByPosition(int position) const;
+	bool IsIndicator(int id, int pos) const;
 	unsigned char GetByte(int pos) const;
-	QString TextForRange(const BkeIndicatorBase &range);
+	QString TextForRange(const BkeIndicatorBase &range) const;
+	QByteArray TextBytesForRange(const BkeIndicatorBase &range) const;
 	void AppendText(const QString &text);
 	void AppendText(const QByteArray &text);
-	QByteArray TextAsBytes(const QString &text);
-	int PositionByLine(int line);
-	BkeIndicatorBase GetRangeForStyle(int position, unsigned char style);
+	QByteArray TextAsBytes(const QString &text) const;
+	int PositionByLine(int line) const;
+	BkeIndicatorBase GetRangeForStyle(int position, unsigned char style) const;
+	BkeIndicatorBase GetRangeForStyles(int position, const QList<unsigned char> &styles, unsigned char *style = nullptr) const;
 
 	int findcount ;
 
@@ -119,6 +123,8 @@ private slots:
 	void UiChange(int updated);
 	void InsertAndMove(const QString &text);
 	void CurrentPosChanged(int line , int index );
+	void OnDwellStart(int, int, int);
+	void OnDwellEnd(int, int, int);
 	QFont GetAnnotationFont();
 	void onTimer();
 
@@ -205,8 +211,16 @@ public:
 	void annotate(int line, const QList<QsciStyledText> &text, AnnotationType type);
 
 	// 悬浮信息显示
-public:
-	void ShowToolTip(QPoint pos);
+private:
+	void ShowToolTip(int position, QPoint pos);
+	void HideToolTip();
+
+	//高亮当前单词
+private:
+	bool isHighlightShown = false;
+	QTimer highlightTimer;
+	void CancelHighlight();
+	void ShowHighlight();
 };
 
 #endif // BKESCINTILLA_H
