@@ -207,7 +207,8 @@ void BkeScintilla::CurrentPosChanged(int line, int index)
 	if (!IsIndicator(BKE_INDICATOR_HIGHLIGHT, GetCurrentPosition()) && !IsIndicator(BKE_INDICATOR_HIGHLIGHT, GetCurrentPosition() - 1))
 	{
 		CancelHighlight();
-		highlightTimer.start(100);
+		if (!IgnorePosChanged)
+			highlightTimer.start(400);
 	}
 	if (IgnorePosChanged)
 		return;
@@ -236,7 +237,7 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 
 	if (mtype & (SC_MOD_BEFOREINSERT | SC_MOD_BEFOREDELETE))
 	{
-		IgnorePosChanged++;
+		IgnorePosChanged = true;
 		if (mtype & SC_PERFORMED_USER)
 		{
 			BkeStartUndoAction();
@@ -980,9 +981,7 @@ void BkeScintilla::ChooseComplete(const QString &text)
 	int pos = SendScintilla(SCI_GETCURRENTPOS);
 	int autoCompleteStartPos = pos - autoCompleteContext.toUtf8().length();
 	
-	SendScintilla(SCI_SETSELECTIONSTART, autoCompleteStartPos);
-	SendScintilla(SCI_SETSELECTIONEND, pos);
-	removeSelectedText();
+	RemoveRange({ autoCompleteStartPos, pos });
 	InsertAndMove(text);
 
 	switch (autoCompleteType)
@@ -1305,7 +1304,7 @@ void BkeScintilla::UiChange(int updated)
 	out:;
 		BkeEndUndoAction();
 	}
-	IgnorePosChanged--;
+	IgnorePosChanged = false;
 	//	如果是用户行为或者最后一次UNDO REDO修改的话
 	//if (ChangeType & (SC_PERFORMED_USER | SC_LASTSTEPINUNDOREDO))
 	{
@@ -1362,6 +1361,12 @@ QByteArray BkeScintilla::TextBytesForRange(const BkeIndicatorBase &range) const
 	QByteArray qba(len + 1, Qt::Initialization());
 	SendScintilla(SCI_GETTEXTRANGE, range.Start(), range.End(), qba.data());
 	return qba;
+}
+
+void BkeScintilla::RemoveRange(const BkeIndicatorBase & range)
+{
+	if (!range) return;
+	SendScintilla(SCI_DELETERANGE, range.Start(), range.Len());
 }
 
 void BkeScintilla::AppendText(const QString & text)
@@ -1945,6 +1950,8 @@ int BkeScintilla::GetActualIndentCharLength(int lineID)
 //显示鼠标悬浮位置的信息
 void BkeScintilla::ShowToolTip(int position, QPoint pos)
 {
+	if (analysis == nullptr)
+		return;
 	auto d = analysis->lockFile(FileName);
 	if (!d)
 		return;

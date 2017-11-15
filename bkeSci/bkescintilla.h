@@ -75,6 +75,7 @@ public:
 	unsigned char GetByte(int pos) const;
 	QString TextForRange(const BkeIndicatorBase &range) const;
 	QByteArray TextBytesForRange(const BkeIndicatorBase &range) const;
+	void RemoveRange(const BkeIndicatorBase &range);
 	void AppendText(const QString &text);
 	void AppendText(const QByteArray &text);
 	QByteArray TextAsBytes(const QString &text) const;
@@ -165,7 +166,7 @@ protected:
 	QList<QPair<QString, int>> GetValList(const QStringList &ls, const QString &alltext);
 	QList<QPair<QString, int>> GetGlobalList(const QString &ls, const QString &alltext);
 	void ChooseComplete(const QString &text);
-	int IgnorePosChanged = 0;
+	bool IgnorePosChanged = false;
 	virtual void mousePressEvent(QMouseEvent *e) override;
 	virtual void focusOutEvent(QFocusEvent *e) override;
 
