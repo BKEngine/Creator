@@ -57,7 +57,6 @@ public:
 	bool FindForward(int pos = 0) ;
 	bool FindBack(int pos = -1) ;
 	bool HasFind() const { return findcount > 0 ; }
-	void clearSelection(int pos = -1) ;
 	void SetIndicator(int id, const BkeIndicatorBase &p);
 	void SetIndicator(int id, const BkeIndicatorBase &p, int value);
 	void BkeAnnotateSelect() ;
@@ -66,7 +65,6 @@ public:
 	int GetCurrentPosition() const;
 	void SetCurrentPosition(int pos);
 	void setLexer(QsciLexer *lex = 0);
-	void setSelection(const BkeIndicatorBase &p);
 	int GetTextLength() const;
 	int ClosedPositionAt(const QPoint &point) const;
 	int PositionAt(const QPoint & point) const;
@@ -82,6 +80,10 @@ public:
 	int PositionByLine(int line) const;
 	BkeIndicatorBase GetRangeForStyle(int position, unsigned char style) const;
 	BkeIndicatorBase GetRangeForStyles(int position, const QList<unsigned char> &styles, unsigned char *style = nullptr) const;
+	//-----------------------Selection----------------------------
+	void ClearSelection(int pos = -1);
+	void SetSelection(const BkeIndicatorBase &p);
+	bool IsSelectionsEmpty() const;
 
 	int findcount ;
 
@@ -148,7 +150,7 @@ private:
 	QString Separate ;
 
 	bool IsSeparate(int ch) ;
-	void BkeStartUndoAction(bool newUndo = true) ;//记录Undo，如果当前正在记录，那么newUndo决定是记录一个新的还是继续当前记录
+	void BkeStartUndoAction(bool newUndo = false) ;//记录Undo，如果当前正在记录，那么newUndo决定是记录一个新的还是继续当前记录
 	void BkeEndUndoAction() ;
 	int GetActualIndentCharLength(int lineID) ;
 

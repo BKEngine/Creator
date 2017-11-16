@@ -66,6 +66,13 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	SendScintilla(SCI_INDICSETOUTLINEALPHA, BKE_INDICATOR_HIGHLIGHT, 128);
 	SendScintilla(SCI_INDICSETUNDER, BKE_INDICATOR_HIGHLIGHT, true);
 
+	//Multi Selection
+	SendScintilla(SCI_SETMULTIPLESELECTION, true);
+	SendScintilla(SCI_SETADDITIONALSELECTIONTYPING, true);
+	SendScintilla(SCI_SETMULTIPASTE, SC_MULTIPASTE_EACH);
+	SendScintilla(SCI_SETADDITIONALCARETSBLINK, true);
+	SendScintilla(SCI_SETADDITIONALCARETSVISIBLE, true);
+
 	setMarginsForegroundColor(QColor(100, 100, 100));
 	setMarginsBackgroundColor(QColor(240, 240, 240));
 	//setAutoIndent(true);
@@ -207,7 +214,7 @@ void BkeScintilla::CurrentPosChanged(int line, int index)
 	if (!IsIndicator(BKE_INDICATOR_HIGHLIGHT, GetCurrentPosition()) && !IsIndicator(BKE_INDICATOR_HIGHLIGHT, GetCurrentPosition() - 1))
 	{
 		CancelHighlight();
-		if (!IgnorePosChanged)
+		if (!IgnorePosChanged && IsSelectionsEmpty())
 			highlightTimer.start(400);
 	}
 	if (IgnorePosChanged)
@@ -780,6 +787,8 @@ void BkeScintilla::UpdateAutoComplete()
 				completeList = GetValList(ls, tmp);
 			}
 			autoCompleteContext = ls.back();
+			if (autoCompleteContext == ".")
+				__debugbreak();
 			autoCompleteType = SHOW_AUTOVALLIST;
 		}
 		else if (style & 128 /*CMD_MASK*/ || (style & 63) == SCE_BKE_COMMAND || (style & 63) == SCE_BKE_COMMAND2)
@@ -1376,9 +1385,11 @@ void BkeScintilla::AppendText(const QString & text)
 
 void BkeScintilla::AppendText(const QByteArray &text)
 {
-	BkeStartUndoAction();
+	ChangeIgnore++;
+	BkeStartUndoAction(false);
 	SendScintilla(SCI_APPENDTEXT, text.length(), text.constData());
 	BkeEndUndoAction();
+	ChangeIgnore--;
 }
 
 QByteArray BkeScintilla::TextAsBytes(const QString &text) const
@@ -1477,7 +1488,7 @@ bool BkeScintilla::FindForward(int pos)
 	//abc.SetEnd(abc.Start() + findstr_length);
 	ClearIndicator(BKE_INDICATOR_FIND,abc);
 	SendScintilla(SCI_GOTOPOS, abc.Start());
-	setSelection(abc);
+	SetSelection(abc);
 	findlast = abc;
 	return true;
 }
@@ -1519,7 +1530,7 @@ bool BkeScintilla::FindBack(int pos)
 	} while (abc.End() < abc2.End());
 	ClearIndicator(BKE_INDICATOR_FIND,abc);
 	SendScintilla(SCI_GOTOPOS, abc.Start());
-	setSelection(abc);
+	SetSelection(abc);
 	findlast = abc;
 	return true;
 }
@@ -1727,16 +1738,16 @@ BkeIndicatorBase BkeScintilla::findIndicator(int id, int postion)
 	return abc;
 }
 
-void BkeScintilla::setSelection(const BkeIndicatorBase &p)
+void BkeScintilla::SetSelection(const BkeIndicatorBase &p)
 {
 	if (p.IsNull()) return;
-	int fl, fi, el, ei;
-	lineIndexFromPosition(p.Start(), &fl, &fi);
-	lineIndexFromPosition(p.End(), &el, &ei);
+	SendScintilla(SCI_SETSEL, p.Start(), p.End());
 	SendScintilla(SCI_SETCURRENTPOS, p.End());
-	QsciScintilla::setSelection(fl, fi, el, ei);
-	//    SendScintilla(SCI_SETSELECTIONSTART,p.Start()) ;
-	//    SendScintilla(SCI_SETSELECTIONEND,p.End()) ;
+}
+
+bool BkeScintilla::IsSelectionsEmpty() const
+{
+	return SendScintilla(SCI_GETSELECTIONEMPTY);
 }
 
 int BkeScintilla::GetTextLength() const
@@ -1784,7 +1795,7 @@ void BkeScintilla::ClearIndicator(int id, const BkeIndicatorBase &p)
 	SendScintilla(SCI_INDICATORCLEARRANGE, p.Start(), p.Len());
 }
 
-void BkeScintilla::clearSelection(int pos)
+void BkeScintilla::ClearSelection(int pos)
 {
 	if (pos < 0 && pos >= this->length()) pos = SendScintilla(SCI_GETCURRENTPOS);
 	SendScintilla(SCI_SETEMPTYSELECTION, pos);
@@ -1793,7 +1804,7 @@ void BkeScintilla::clearSelection(int pos)
 //从区域中注释，反注释
 void BkeScintilla::BkeAnnotateSelect()
 {
-	BkeStartUndoAction();
+	BkeStartUndoAction(false);
 	int from, to;
 	if (!hasSelectedText()){
 		int xl, xi;
@@ -1826,7 +1837,7 @@ void BkeScintilla::BkeAnnotateSelect()
 		else{
 			int k = positionFromLineIndex(i, 0);
 			BkeIndicatorBase abc(k, k + 2);
-			setSelection(abc);
+			SetSelection(abc);
 			replaceSelectedText("");
 		}
 	}
@@ -1836,16 +1847,17 @@ void BkeScintilla::BkeAnnotateSelect()
 
 void BkeScintilla::BkeStartUndoAction(bool newUndo/* = true*/)
 {
-	WorkingUndoDepth++;
-	if (WorkingUndoDepth > 1)
+	if (WorkingUndoDepth >= 1)
 	{
 		if (newUndo)
 		{
 			QsciScintilla::endUndoAction();
 			QsciScintilla::beginUndoAction();
 		}
+		WorkingUndoDepth++;
 		return;
 	}
+	WorkingUndoDepth++;
 	QsciScintilla::beginUndoAction();
 }
 
@@ -1956,8 +1968,6 @@ void BkeScintilla::ShowToolTip(int position, QPoint pos)
 	if (!d)
 		return;
 	auto node = d->findNode(position);
-	if (!node)
-		return;
 	//test indicator
 	{
 		int v2 = SendScintilla(SCI_INDICATORVALUEAT, BKE_INDICATOR_ERROR, position);
