@@ -8,8 +8,6 @@
 #ifndef EXTERNALLEXER_H
 #define EXTERNALLEXER_H
 
-#include "Platform.h"
-
 #if PLAT_WIN
 #define EXT_LEXER_DECL __stdcall
 #elif PLAT_QT

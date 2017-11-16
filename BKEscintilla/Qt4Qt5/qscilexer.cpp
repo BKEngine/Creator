@@ -1,6 +1,6 @@
 // This module implements the QsciLexer class.
 //
-// Copyright (c) 2015 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2017 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -36,11 +36,11 @@ QsciLexer::QsciLexer(QObject *parent)
       autoIndStyle(-1), apiSet(0), attached_editor(0)
 {
 #if defined(Q_OS_WIN)
-    defFont = QFont("Verdana",10);
+    defFont = QFont("Verdana", 10);
 #elif defined(Q_OS_MAC)
-    defFont = QFont("Verdana", 12);
+    defFont = QFont("Menlo", 12);
 #else
-    defFont = QFont("Bitstream Vera Sans",9);
+    defFont = QFont("Bitstream Vera Sans", 9);
 #endif
 
     // Set the default fore and background colours.
