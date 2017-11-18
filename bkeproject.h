@@ -80,7 +80,6 @@ class CodeWindow;
 
 class BkeProject :public QObject
 {
-	CodeWindow *_codeWindow;
 public:
 	BkeProject(QObject *parent = 0);
 	~BkeProject() ;

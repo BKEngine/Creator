@@ -58,13 +58,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.;BKEscintilla;BKEscintilla\lexlib;BKEscintilla\include;BKEscintilla\src;BKEscintilla\Qt4Qt5;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;debug;$(QTDIR)\mkspecs\win32-msvc2013;.\GeneratedFiles;.\dia;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;BKEscintilla;BKEscintilla\lexlib;BKEscintilla\include;BKEscintilla\src;BKEscintilla\Qt4Qt5;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;debug;.\GeneratedFiles;.\dia;$(QTDIR)\include\QtWebSockets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>debug\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>CXX11_REGEX;BKE_CREATOR;_WINDOWS;UNICODE;WIN32;QT;SCI_LEXER;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_CORE_LIB;SCINTILLA_QT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CXX11_REGEX;BKE_CREATOR;_WINDOWS;UNICODE;WIN32;QT;SCI_LEXER;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_CORE_LIB;SCINTILLA_QT;QT_WEBSOCKETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -76,8 +76,8 @@
       <DisableSpecificWarnings>4996;4018</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>glu32.lib;opengl32.lib;gdi32.lib;user32.lib;qtmaind.lib;shell32.lib;Qt5Cored.lib;$(QTDIR)\lib\Qt5Widgetsd.lib;$(QTDIR)\lib\Qt5Guid.lib;$(QTDIR)\lib\Qt5Networkd.lib;$(QTDIR)\lib\Qt5Cored.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;C:/Qt/Qt5.5.0_vs2013/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glu32.lib;opengl32.lib;gdi32.lib;user32.lib;qtmaind.lib;shell32.lib;Qt5Cored.lib;$(QTDIR)\lib\Qt5Widgetsd.lib;$(QTDIR)\lib\Qt5Guid.lib;$(QTDIR)\lib\Qt5Networkd.lib;$(QTDIR)\lib\Qt5Cored.lib;Qt5WebSocketsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -100,14 +100,14 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.;BKEscintilla;BKEscintilla\lexlib;BKEscintilla\include;BKEscintilla\src;BKEscintilla\Qt4Qt5;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;release;$(QTDIR)\mkspecs\win32-msvc2013;.\GeneratedFiles;.\dia;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;BKEscintilla;BKEscintilla\lexlib;BKEscintilla\include;BKEscintilla\src;BKEscintilla\Qt4Qt5;$(QTDIR)\include;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtNetwork;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtCore;release;.\GeneratedFiles;.\dia;$(QTDIR)\include\QtWebSockets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:strictStrings %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>release\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>CXX11_REGEX;BKE_CREATOR;_WINDOWS;UNICODE;WIN32;QT;SCI_LEXER;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_CORE_LIB;NDEBUG;SCINTILLA_QT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CXX11_REGEX;BKE_CREATOR;_WINDOWS;UNICODE;WIN32;QT;SCI_LEXER;QT_NO_DEBUG;QT_WIDGETS_LIB;QT_GUI_LIB;QT_NETWORK_LIB;QT_CORE_LIB;NDEBUG;SCINTILLA_QT;QT_WEBSOCKETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -121,14 +121,14 @@
       <DisableSpecificWarnings>4996;4018</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>glu32.lib;opengl32.lib;gdi32.lib;user32.lib;$(QTDIR)\lib\qtmain.lib;shell32.lib;$(QTDIR)\lib\Qt5Core.lib;$(QTDIR)\lib\Qt5Widgets.lib;$(QTDIR)\lib\Qt5Gui.lib;$(QTDIR)\lib\Qt5Network.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;C:/Qt/Qt5.5.0_vs2013/lib;$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>glu32.lib;opengl32.lib;gdi32.lib;user32.lib;$(QTDIR)\lib\qtmain.lib;shell32.lib;$(QTDIR)\lib\Qt5Core.lib;$(QTDIR)\lib\Qt5Widgets.lib;$(QTDIR)\lib\Qt5Gui.lib;$(QTDIR)\lib\Qt5Network.lib;Qt5WebSockets.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
       <LinkIncremental>false</LinkIncremental>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <OutputFile>$(OutDir)$(TargetFileName)</OutputFile>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
       <SubSystem>Windows</SubSystem>
@@ -163,6 +163,10 @@
     <ClCompile Include="BKEscintilla\src\EditView.cpp" />
     <ClCompile Include="BKEscintilla\src\MarginView.cpp" />
     <ClCompile Include="CmdListLoader.cpp" />
+    <ClCompile Include="DebugServer.cpp" />
+    <ClCompile Include="Debug\moc_autocompletelist.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Debug\moc_BG_Analysis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -194,6 +198,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Debug\moc_ctextedit.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DebugServer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Debug\moc_doubleinput.cpp">
@@ -259,6 +266,9 @@
     <ClCompile Include="Debug\moc_qsearchlineedit.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Debug\moc_QSpoiler.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Debug\moc_SciClasses.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -280,6 +290,7 @@
     <ClCompile Include="Debug\moc_WaitWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="dia\autocompletelist.cpp" />
     <ClCompile Include="dia\doubleinput.cpp" />
     <ClCompile Include="dia\GameProperty.cpp" />
     <ClCompile Include="dia\gotofiledialog.cpp" />
@@ -288,6 +299,7 @@
     <ClCompile Include="dia\ParserEditor.cpp" />
     <ClCompile Include="dia\ParserEditorTreeItem.cpp" />
     <ClCompile Include="dia\ParserEditorTreeModel.cpp" />
+    <ClCompile Include="dia\ParserEditorUndoCommand.cpp" />
     <ClCompile Include="dia\qnofocusitemdelegate.cpp" />
     <ClCompile Include="GeneratedFiles\qrc_res.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -390,6 +402,10 @@
     <ClCompile Include="QPinyin\PinyinHelper.cpp" />
     <ClCompile Include="QPinyin\QPinyin.cpp" />
     <ClCompile Include="QPinyin\ResourceHelper.cpp" />
+    <ClCompile Include="QSpoiler.cpp" />
+    <ClCompile Include="Release\moc_autocompletelist.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Release\moc_BG_Analysis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -421,6 +437,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Release\moc_ctextedit.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DebugServer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Release\moc_doubleinput.cpp">
@@ -486,6 +505,9 @@
     <ClCompile Include="Release\moc_qsearchlineedit.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Release\moc_QSpoiler.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Release\moc_SciClasses.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -517,10 +539,10 @@
     <CustomBuild Include="BG_Analysis.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing BG_Analysis.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing BG_Analysis.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
@@ -535,20 +557,20 @@
     <CustomBuild Include="dia\LangOpt.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing LangOpt.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing LangOpt.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
     <CustomBuild Include="dia\GameProperty.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing GameProperty.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing GameProperty.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
@@ -560,24 +582,44 @@
     <ClInclude Include="BKEscintilla\src\UnicodeFromUTF8.h" />
     <ClInclude Include="BKS_info.h" />
     <ClInclude Include="CmdListLoader.h" />
+    <CustomBuild Include="DebugServer.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing DebugServer.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing DebugServer.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
+    </CustomBuild>
+    <CustomBuild Include="dia\autocompletelist.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing autocompletelist.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing autocompletelist.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+    </CustomBuild>
     <ClInclude Include="dia\CommonSettingDia.h" />
     <CustomBuild Include="dia\doubleinput.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing doubleinput.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing doubleinput.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
     <CustomBuild Include="dia\ParserEditor.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing ParserEditor.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing ParserEditor.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
@@ -585,35 +627,37 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing openlabeldialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing openlabeldialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
     </CustomBuild>
     <CustomBuild Include="dia\gotofiledialog.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing gotofiledialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing gotofiledialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
     </CustomBuild>
     <ClInclude Include="dia\ParserEditorTreeItem.h" />
     <CustomBuild Include="dia\ParserEditorTreeModel.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing ParserEditorTreeModel.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing ParserEditorTreeModel.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
+    <ClInclude Include="dia\ParserEditorUndoCommand.h" />
     <ClInclude Include="dia\qnofocusitemdelegate.h" />
     <ClInclude Include="EnumsComponent.h" />
+    <ClInclude Include="GeneratedFiles\ui_autocompletelist.h" />
     <ClInclude Include="GeneratedFiles\ui_bkeconfigdialog.h" />
     <ClInclude Include="GeneratedFiles\ui_cdiroption.h" />
     <ClInclude Include="GeneratedFiles\ui_cskinoption.h" />
@@ -670,13 +714,13 @@
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing SciClasses.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing SciClasses.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -690,14 +734,14 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing ScintillaQt.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing ScintillaQt.h...</Message>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -709,13 +753,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing Setoptiondia.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing Setoptiondia.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -734,13 +778,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing WaitWindow.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing WaitWindow.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -754,13 +798,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing bkecompile.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing bkecompile.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -772,13 +816,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing bkeconfigdialog.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing bkeconfigdialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -790,13 +834,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing bkeleftfilewidget.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing bkeleftfilewidget.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -810,13 +854,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing bkeprojectconfig.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing bkeprojectconfig.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -828,13 +872,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing bkescintilla.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing bkescintilla.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -847,13 +891,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing cconfigdia.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing cconfigdia.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -865,13 +909,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing cdiroption.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing cdiroption.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -883,13 +927,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing codewindow.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing codewindow.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -901,13 +945,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing cskinoption.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing cskinoption.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -919,13 +963,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing ctextedit.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing ctextedit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -940,13 +984,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing lablesuredialog.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing lablesuredialog.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -959,13 +1003,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing mainwindow.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing mainwindow.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -978,13 +1022,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing newprodia.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing newprodia.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -996,13 +1040,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing otherbasicwin.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing otherbasicwin.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1014,13 +1058,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing otherwindow.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing otherwindow.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1033,13 +1077,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing projectwindow.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing projectwindow.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1051,13 +1095,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qsciabstractapis.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qsciabstractapis.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1069,13 +1113,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qsciapis.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qsciapis.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1091,13 +1135,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qscilexer.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qscilexer.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1109,13 +1153,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qscilexerbkescript.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qscilexerbkescript.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1127,13 +1171,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qscimacro.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qscimacro.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1145,13 +1189,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qsciscintilla.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qsciscintilla.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1163,13 +1207,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qsciscintillabase.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qsciscintillabase.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1183,13 +1227,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qsearchlineedit.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qsearchlineedit.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1201,13 +1245,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing searchbox.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing searchbox.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1219,13 +1263,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing topbarwindow.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing topbarwindow.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1240,13 +1284,13 @@ endlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing versioninfo.h...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">setlocal
 if errorlevel 1 goto VCEnd
 if errorlevel 1 goto VCEnd
 endlocal
-"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I$(QTDIR)\mkspecs\win32-msvc2013" "-I.\GeneratedFiles" "-I.\dia"</Command>
+"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB  "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing versioninfo.h...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -1265,6 +1309,18 @@ endlocal
     <ClInclude Include="QPinyin\PinyinHelper.h" />
     <ClInclude Include="QPinyin\QPinyin.h" />
     <ClInclude Include="QPinyin\ResourceHelper.h" />
+    <ClInclude Include="qsortedset.h" />
+    <CustomBuild Include="QSpoiler.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing QSpoiler.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing QSpoiler.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
+    </CustomBuild>
+    <ClInclude Include="ScopePointer.h" />
     <ClInclude Include="ScriptEnums.h" />
     <ClInclude Include="weh.h" />
     <ClInclude Include="paper\wordsupport.h" />
@@ -1280,6 +1336,7 @@ endlocal
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <SubType>Designer</SubType>
     </CustomBuild>
     <CustomBuild Include="dia\WaitWindow.ui">
       <FileType>Document</FileType>
@@ -1379,6 +1436,7 @@ endlocal
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <SubType>Designer</SubType>
     </CustomBuild>
     <CustomBuild Include="dia\doubleinput.ui">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
@@ -1420,6 +1478,16 @@ endlocal
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
+    <CustomBuild Include="dia\autocompletelist.ui">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+    </CustomBuild>
     <None Include="QPinyin\pinyin.txt.compress">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -1434,6 +1502,7 @@ endlocal
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
     </CustomBuild>
+    <None Include="QSortedSet" />
     <None Include="source\728.GIF">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -1642,16 +1711,15 @@ endlocal
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
-    <CustomBuild Include="source.qrc">
-      <FileType>Document</FileType>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FullPath);.\source\bianji.png;.\source\hiddenleft.png;.\source\close2.png;.\source\column.png;.\source\search1.png;.\source\+.png;.\source\edit.png;.\source\x.png;.\source\close2%402x.png;.\source\column%402x.png;.\source\hiddenleft%402x.png;.\source\btnnext.png;.\source\btnlast.png;.\source\save.png;.\source\saveas.png;.\source\copy.png;.\source\paste.png;.\source\compile.png;.\source\debug.png;.\source\run.png;.\source\close.png;.\source\find.png;.\source\replace(2).png;.\source\Bookmark.png;.\source\pin.png;.\source\redo.png;.\source\undo.png;.\source\edit_cut.png;.\source\compile_run.png;.\source\clear.png;.\source\code.png;.\source\flay.png;.\source\btnlast%402x.png;.\source\btnnext%402x.png;.\source\clear%402x.png;.\source\compile%402x.png;.\source\compile_run%402x.png;.\source\debug%402x.png;.\source\replace(2)%402x.png;.\source\run%402x.png;.\source\save%402x.png;.\source\saveas%402x.png;.\source\code%402x.png;.\source\redo%402x.png;.\source\undo%402x.png;.\source\edit_cut%402x.png;.\source\newproject.png;.\source\doc.png;.\source\file.png;.\source\import.png;.\source\database.png;.\source\music.png;.\source\image.png;.\source\movie.png;.\source\bksfile.png;.\source\bksdoc.png;.\source\sourcedoc.png;.\source\open_file.png;.\source\openfile.png;.\source\newfile.png;.\source\alert.png;.\source\error.png;.\source\errorsmall.png;.\source\wainningsmall.png;.\source\Bookmarksmall.png;.\source\pinsmall.png;.\source\textarea.png;.\source\terminal.png;.\source\product-design.png;.\source\auto_key.png;.\source\auto_nomal.png;.\source\auto_diction.png;.\source\auto_funcotin.png;.\source\auto_math.png;.\source\728.GIF;.\source\error_big.png;.\source\check_big.png;%(AdditionalInputs)</AdditionalInputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
+    <CustomBuild Include="source\source.qrc">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(FullPath);.\source\bianji.png;.\source\hiddenleft.png;.\source\close2.png;.\source\column.png;.\source\search1.png;.\source\+.png;.\source\edit.png;.\source\x.png;.\source\close2%402x.png;.\source\column%402x.png;.\source\hiddenleft%402x.png;.\source\btnnext.png;.\source\btnlast.png;.\source\save.png;.\source\saveas.png;.\source\copy.png;.\source\paste.png;.\source\compile.png;.\source\debug.png;.\source\run.png;.\source\close.png;.\source\find.png;.\source\replace(2).png;.\source\Bookmark.png;.\source\pin.png;.\source\redo.png;.\source\undo.png;.\source\edit_cut.png;.\source\compile_run.png;.\source\clear.png;.\source\code.png;.\source\flay.png;.\source\btnlast%402x.png;.\source\btnnext%402x.png;.\source\clear%402x.png;.\source\compile%402x.png;.\source\compile_run%402x.png;.\source\debug%402x.png;.\source\replace(2)%402x.png;.\source\run%402x.png;.\source\save%402x.png;.\source\saveas%402x.png;.\source\code%402x.png;.\source\redo%402x.png;.\source\undo%402x.png;.\source\edit_cut%402x.png;.\source\newproject.png;.\source\doc.png;.\source\file.png;.\source\import.png;.\source\database.png;.\source\music.png;.\source\image.png;.\source\movie.png;.\source\bksfile.png;.\source\bksdoc.png;.\source\sourcedoc.png;.\source\open_file.png;.\source\openfile.png;.\source\newfile.png;.\source\alert.png;.\source\error.png;.\source\errorsmall.png;.\source\Bookmarksmall.png;.\source\pinsmall.png;.\source\textarea.png;.\source\terminal.png;.\source\product-design.png;.\source\log.png;.\source\warningsmall.png;.\source\auto_key.png;.\source\auto_normal.png;.\source\auto_function.png;.\source\hint.png;.\source\728.GIF;.\source\error_big.png;.\source\check_big.png;.\source\branch-end.png;.\source\branch-closed.png;.\source\branch-more.png;.\source\branch-open.png;.\source\branch-vline.png;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Rcc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FullPath);.\source\bianji.png;.\source\hiddenleft.png;.\source\close2.png;.\source\column.png;.\source\search1.png;.\source\+.png;.\source\edit.png;.\source\x.png;.\source\close2%402x.png;.\source\column%402x.png;.\source\hiddenleft%402x.png;.\source\btnnext.png;.\source\btnlast.png;.\source\save.png;.\source\saveas.png;.\source\copy.png;.\source\paste.png;.\source\compile.png;.\source\debug.png;.\source\run.png;.\source\close.png;.\source\find.png;.\source\replace(2).png;.\source\Bookmark.png;.\source\pin.png;.\source\redo.png;.\source\undo.png;.\source\edit_cut.png;.\source\compile_run.png;.\source\clear.png;.\source\code.png;.\source\flay.png;.\source\btnlast%402x.png;.\source\btnnext%402x.png;.\source\clear%402x.png;.\source\compile%402x.png;.\source\compile_run%402x.png;.\source\debug%402x.png;.\source\replace(2)%402x.png;.\source\run%402x.png;.\source\save%402x.png;.\source\saveas%402x.png;.\source\code%402x.png;.\source\redo%402x.png;.\source\undo%402x.png;.\source\edit_cut%402x.png;.\source\newproject.png;.\source\doc.png;.\source\file.png;.\source\import.png;.\source\database.png;.\source\music.png;.\source\image.png;.\source\movie.png;.\source\bksfile.png;.\source\bksdoc.png;.\source\sourcedoc.png;.\source\open_file.png;.\source\openfile.png;.\source\newfile.png;.\source\alert.png;.\source\error.png;.\source\errorsmall.png;.\source\wainningsmall.png;.\source\Bookmarksmall.png;.\source\pinsmall.png;.\source\textarea.png;.\source\terminal.png;.\source\product-design.png;.\source\auto_key.png;.\source\auto_nomal.png;.\source\auto_diction.png;.\source\auto_funcotin.png;.\source\auto_math.png;.\source\728.GIF;.\source\error_big.png;.\source\check_big.png;%(AdditionalInputs)</AdditionalInputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(FullPath);.\source\bianji.png;.\source\hiddenleft.png;.\source\close2.png;.\source\column.png;.\source\search1.png;.\source\+.png;.\source\edit.png;.\source\x.png;.\source\close2%402x.png;.\source\column%402x.png;.\source\hiddenleft%402x.png;.\source\btnnext.png;.\source\btnlast.png;.\source\save.png;.\source\saveas.png;.\source\copy.png;.\source\paste.png;.\source\compile.png;.\source\debug.png;.\source\run.png;.\source\close.png;.\source\find.png;.\source\replace(2).png;.\source\Bookmark.png;.\source\pin.png;.\source\redo.png;.\source\undo.png;.\source\edit_cut.png;.\source\compile_run.png;.\source\clear.png;.\source\code.png;.\source\flay.png;.\source\btnlast%402x.png;.\source\btnnext%402x.png;.\source\clear%402x.png;.\source\compile%402x.png;.\source\compile_run%402x.png;.\source\debug%402x.png;.\source\replace(2)%402x.png;.\source\run%402x.png;.\source\save%402x.png;.\source\saveas%402x.png;.\source\code%402x.png;.\source\redo%402x.png;.\source\undo%402x.png;.\source\edit_cut%402x.png;.\source\newproject.png;.\source\doc.png;.\source\file.png;.\source\import.png;.\source\database.png;.\source\music.png;.\source\image.png;.\source\movie.png;.\source\bksfile.png;.\source\bksdoc.png;.\source\sourcedoc.png;.\source\open_file.png;.\source\openfile.png;.\source\newfile.png;.\source\alert.png;.\source\error.png;.\source\errorsmall.png;.\source\Bookmarksmall.png;.\source\pinsmall.png;.\source\textarea.png;.\source\terminal.png;.\source\product-design.png;.\source\log.png;.\source\warningsmall.png;.\source\auto_key.png;.\source\auto_normal.png;.\source\auto_function.png;.\source\hint.png;.\source\728.GIF;.\source\error_big.png;.\source\check_big.png;.\source\branch-end.png;.\source\branch-closed.png;.\source\branch-more.png;.\source\branch-open.png;.\source\branch-vline.png;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Rcc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\qrc_%(Filename).cpp;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
     </CustomBuild>
     <None Include="source\sourcedoc.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -1680,6 +1748,34 @@ endlocal
   </ItemGroup>
   <ItemGroup>
     <Image Include="source\+.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\auto_function.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\auto_normal.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\branch-closed.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\branch-end.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\branch-more.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\branch-open.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\branch-vline.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Image>
@@ -1731,6 +1827,14 @@ endlocal
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Image>
+    <Image Include="source\hint.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\log.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
     <Image Include="source\redo%402x.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -1752,6 +1856,10 @@ endlocal
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Image>
     <Image Include="source\undo%402x.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="source\warningsmall.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Image>

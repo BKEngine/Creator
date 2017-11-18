@@ -15,6 +15,21 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout" rowstretch="1,1000,1" columnstretch="1,1000,1">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <item row="0" column="1">
      <spacer name="verticalSpacer">
       <property name="orientation">
@@ -43,18 +58,71 @@
     </item>
     <item row="1" column="1">
      <widget class="QTreeView" name="treeView">
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
       <property name="contextMenuPolicy">
        <enum>Qt::CustomContextMenu</enum>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QTreeView {
+    show-decoration-selected: 1;
+}
+QTreeView::item {
+    border-right: 0.5px solid #6d6d6d;
+    border-bottom: 0.5px solid #6d6d6d;
+    border-left: none;
+    border-top: none;
+}
+QTreeView::item:selected {
+    background-color: #3399FF;
+}
+QTreeView::branch {
+    border-bottom: 0.5px solid #6d6d6d;
+}
+QTreeView::branch:closed:has-children {
+    border-image: none;
+    image: url(:/qtreeview/branch-closed.png);
+}
+
+QTreeView::branch:open:has-children {
+    border-image: none;
+    image: url(:/qtreeview/branch-open.png);
+}
+</string>
       </property>
       <property name="editTriggers">
        <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
       </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="autoExpandDelay">
+       <number>1</number>
+      </property>
       <property name="indentation">
        <number>12</number>
+      </property>
+      <property name="rootIsDecorated">
+       <bool>true</bool>
+      </property>
+      <property name="itemsExpandable">
+       <bool>true</bool>
       </property>
       <property name="sortingEnabled">
        <bool>true</bool>
       </property>
+      <attribute name="headerCascadingSectionResizes">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="headerDefaultSectionSize">
+       <number>150</number>
+      </attribute>
+      <attribute name="headerMinimumSectionSize">
+       <number>100</number>
+      </attribute>
      </widget>
     </item>
     <item row="2" column="1">
@@ -98,14 +166,79 @@
     <property name="title">
      <string>文件</string>
     </property>
-    <addaction name="actionSave"/>
+    <addaction name="actsave"/>
+    <addaction name="actionreload"/>
+    <addaction name="separator"/>
+    <addaction name="actionexit"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>编辑</string>
+    </property>
+    <addaction name="actundo"/>
+    <addaction name="actredo"/>
    </widget>
    <addaction name="menu"/>
+   <addaction name="menu_2"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionSave">
+  <widget class="QStatusBar" name="statusbar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <action name="actundo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normalon>:/cedit/undo.png</normalon>
+    </iconset>
+   </property>
    <property name="text">
-    <string>Save</string>
+    <string>撤销</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actredo">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normalon>:/cedit/redo.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>重做</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Y</string>
+   </property>
+  </action>
+  <action name="actsave">
+   <property name="icon">
+    <iconset>
+     <normalon>:/cedit/save.png</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>保存</string>
+   </property>
+  </action>
+  <action name="actionreload">
+   <property name="text">
+    <string>重新载入</string>
+   </property>
+  </action>
+  <action name="actionexit">
+   <property name="text">
+    <string>退出</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
    </property>
   </action>
  </widget>

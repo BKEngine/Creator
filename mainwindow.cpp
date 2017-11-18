@@ -88,9 +88,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	CreateMenu();
 
 	//绑定其他窗口，并连接信号
-	codeedit->OtherWinOtherwin(otheredit);
-	codeedit->OtherWinProject(projectedit);
-	codeedit->OtherwinFileList(fileListWidget);
+	codeedit->BindOtherWindow(otheredit);
+	codeedit->BindProjectWindow(projectedit);
+	codeedit->BindFileListWidget(fileListWidget);
 	//改变标题
 	connect(codeedit,SIGNAL(CurrentFileChange(QString,QString)),this,SLOT(CurrentFileChange(QString,QString))) ;
 
@@ -115,10 +115,10 @@ void MainWindow::CreateMenu()
 	this->menuBar()->setFont(tff);
 	this->menuBar()->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menubar",QString()).toString());
 
-	btnnewprojectact = new QAction(QIcon(":/project/source/newproject.png"), "新建工程", this);
-	btnopenprojectact = new QAction(QIcon(":/project/source/open_file.png"), "打开工程", this);
-	btnopenfileact = new QAction(QIcon(":/project/source/openfile.png"), "打开文件", this);
-	btnnewfileact = new QAction(QIcon(":/project/source/newfile.png"), "新建脚本", this);
+	btnnewprojectact = new QAction(QIcon(":/project/newproject.png"), "新建工程", this);
+	btnopenprojectact = new QAction(QIcon(":/project/open_file.png"), "打开工程", this);
+	btnopenfileact = new QAction(QIcon(":/project/openfile.png"), "打开文件", this);
+	btnnewfileact = new QAction(QIcon(":/project/newfile.png"), "新建脚本", this);
 	btncloseprojectact = new QAction("关闭工程", this);
 
 	wmenu = this->menuBar()->addMenu("&文件");
@@ -198,7 +198,7 @@ void MainWindow::CreateDownBar()
 	downbar->setMovable(false);
 
 	//下边栏按钮
-	btnhiddenleftact = new QAction(QIcon(":/pedit/source/hiddenleft.png"),"隐藏侧边栏",this) ;
+	btnhiddenleftact = new QAction(QIcon(":/pedit/hiddenleft.png"),"隐藏侧边栏",this) ;
 	connect(btnhiddenleftact,SIGNAL(triggered()),this,SLOT(HiddenLeft())) ;
 	downbar->addAction(btnhiddenleftact) ;
 
@@ -207,13 +207,7 @@ void MainWindow::CreateDownBar()
 	temp11->setFixedWidth(240);
 	downbar->addWidget(temp11) ;
 
-	downbar->addWidget(otheredit->btnproblem) ;
-	downbar->addWidget(otheredit->btnsearch) ;
-	downbar->addWidget(otheredit->btncompiletext) ;
-	downbar->addWidget(otheredit->btnbookmark) ;
-	downbar->addWidget(otheredit->btnmark) ;
-	downbar->addSeparator();
-	downbar->addWidget(otheredit->lewords);
+	otheredit->feedDownBar(downbar);
 
 	btnbar = new QToolBar(this) ;
 	btnbar->setFixedHeight(24);

@@ -1,21 +1,28 @@
 ﻿#include <weh.h>
+#include <QGuiApplication>
 #include "codewindow.h"
 #include "dia/lablesuredialog.h"
 #include "dia/WaitWindow.h"
 #include "dia/openlabeldialog.h"
 #include "dia/gotofiledialog.h"
+#include "dia/autocompletelist.h"
 
 CodeWindow::CodeWindow(QWidget *parent)
 	:QMainWindow(parent)
 {
 	diasearch = new SearchBox(this);
-	addDockWidget(Qt::BottomDockWidgetArea, diasearch);
-	currentedit = 0;
-	labelbanned = false;
 
-	QSize fff = parent->size();
-	hint.setWidth(fff.width() * 0.8);
-	hint.setHeight(fff.height() - 50);
+	//自动补全初始化
+	aclist = new AutoCompleteList(this);
+	aclist->DefineIcon(1, QIcon(":/auto/auto_function.png"));
+	aclist->DefineIcon(3, QIcon(":/auto/auto_normal.png"));
+	aclist->DefineIcon(9, QIcon(":/auto/auto_key.png"));
+	aclist->hide();
+	aclist->SetStops(" ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
+
+	addDockWidget(Qt::BottomDockWidgetArea, diasearch);
+	currentedit = nullptr;
+	labelbanned = false;
 
 	ks1.setColor(QColor(0x80, 0, 0));
 	ks1.setPaper(QColor(0xff, 0xf0, 0xf0));
@@ -83,25 +90,33 @@ CodeWindow::CodeWindow(QWidget *parent)
 	//切换折叠
 	connect(btnswitchfold, SIGNAL(triggered()), this, SLOT(SwitchFold()));
 
-
 	btnDisable();
-	ChangeProject(0);
 	ignoreflag = false;
 	isRun = false;
 	isSearLable = false; //是否在查找标签，如果是，刷新文件队列
 	ignoreActive = false;
 
-	searchlablelater = 0;
+	searchlablelater = nullptr;
 	isCompileNotice = _NOTICE_ALWAYS;
 
 	tm.setTimerType(Qt::TimerType::VeryCoarseTimer);
 	connect(&tm, SIGNAL(timeout()), this, SLOT(onTimer()));
 	float interval = BKE_CLOSE_SETTING->value("autosavetime", 1).toFloat();
 	tm.start((int)(60000 * interval));
+
+	//////////////////////DEBUG COMPONENT/////////////////////
+	debugServer = new DebugServer(this);
+	connect(debugServer, SIGNAL(logReceived(int32_t, QString)), this, SLOT(DebugLogReceived(int32_t, QString)));
+
+	ChangeProject(nullptr);
 }
 
 CodeWindow::~CodeWindow()
 {
+	if (bkeprocess)
+	{
+		bkeprocess->kill();
+	}
 }
 
 void CodeWindow::onTimer()
@@ -115,36 +130,37 @@ void CodeWindow::CreateBtn()
 	toolbar->setFixedHeight(24);
 	toolbar->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT + "/codetoolbar").toString());
 
-	btnlastact = new QAction(QIcon(":/cedit/source/btnlast.png"), "返回", this);
-	btnnextact = new QAction(QIcon(":/cedit/source/btnnext.png"), "前进", this);
-	btnsaveact = new QAction(QIcon(":/cedit/source/save.png"), "保存", this);
-	btnsaveasact = new QAction(QIcon(":/cedit/source/saveas.png"), "另存为...", this);
-	btncodeact = new QAction(QIcon(":/cedit/source/code.png"), "改变源文件的编码", this);
-	btncopyact = new QAction(QIcon(":/cedit/source/copy.png"), "复制", this);
-	btncutact = new QAction(QIcon(":/cedit/source/edit_cut.png"), "剪切", this);
-	btnpasteact = new QAction(QIcon(":/cedit/source/paste.png"), "粘贴", this);
-	btncompileact = new QAction(QIcon(":/cedit/source/compile.png"), "编译成bkbin脚本", this);
-	btncompilelang = new QAction(QIcon(":/cedit/source/compile.png"), "编译并生成语言文件", this);
-	btncompilerunact = new QAction(QIcon(":/cedit/source/compile_run.png"), "编译并运行", this);
-	btnrunact = new QAction(QIcon(":/cedit/source/run.png"), "运行", this);
-	btndebugact = new QAction(QIcon(":/cedit/source/debug.png"), "调试", this);
-	btncloseact = new QAction(QIcon(":/cedit/source/close.png"), "关闭", this);
-	btnfindact = new QAction(QIcon(":/cedit/source/find.png"), "查找", this);
-	btnfindactall = new QAction(QIcon(":/cedit/source/find.png"), "查找全部", this);
-	btnreplaceact = new QAction(QIcon(":/cedit/source/replace(2).png"), "替换", this);
-	btnreplaceallact = new QAction(QIcon(":/cedit/source/replace(2).png"), "替换全部", this);
-	btnbookmarkact = new QAction(QIcon(":/cedit/source/Bookmark.png"), "添加书签", this);
-	btnmarkact = new QAction(QIcon(":/cedit/source/pin.png"), "添加标记", this);
+	btnlastact = new QAction(QIcon(":/cedit/btnlast.png"), "返回", this);
+	btnnextact = new QAction(QIcon(":/cedit/btnnext.png"), "前进", this);
+	btnsaveact = new QAction(QIcon(":/cedit/save.png"), "保存", this);
+	btnsaveasact = new QAction(QIcon(":/cedit/saveas.png"), "另存为...", this);
+	btncodeact = new QAction(QIcon(":/cedit/code.png"), "改变源文件的编码", this);
+	btncopyact = new QAction(QIcon(":/cedit/copy.png"), "复制", this);
+	btncutact = new QAction(QIcon(":/cedit/edit_cut.png"), "剪切", this);
+	btnpasteact = new QAction(QIcon(":/cedit/paste.png"), "粘贴", this);
+	btncompileact = new QAction(QIcon(":/cedit/compile.png"), "编译成bkbin脚本", this);
+	btncompilelang = new QAction(QIcon(":/cedit/compile.png"), "编译并生成语言文件", this);
+	btncompilerunact = new QAction(QIcon(":/cedit/compile_run.png"), "编译并运行", this);
+	btnrunact = new QAction(QIcon(":/cedit/run.png"), "运行", this);
+	btndebugact = new QAction(QIcon(":/cedit/debug.png"), "调试", this);
+	btncloseact = new QAction(QIcon(":/cedit/close.png"), "关闭", this);
+	btnfindact = new QAction(QIcon(":/cedit/find.png"), "查找", this);
+	btnfindactall = new QAction(QIcon(":/cedit/find.png"), "查找全部", this);
+	btnreplaceact = new QAction(QIcon(":/cedit/replace(2).png"), "替换", this);
+	btnreplaceallact = new QAction(QIcon(":/cedit/replace(2).png"), "替换全部", this);
+	btnbookmarkact = new QAction(QIcon(":/cedit/Bookmark.png"), "添加书签", this);
+	btnmarkact = new QAction(QIcon(":/cedit/pin.png"), "添加标记", this);
 	btnrunfromlabel = new QAction("从本标签处运行", this);
-	btnredoact = new QAction(QIcon(":/cedit/source/redo.png"), "重做", this);
-	btnundoact = new QAction(QIcon(":/cedit/source/undo.png"), "撤销", this);
-	btnclearact = new QAction(QIcon(":/cedit/source/clear.png"), "清理编译工程", this);
+	btnredoact = new QAction(QIcon(":/cedit/redo.png"), "重做", this);
+	btnundoact = new QAction(QIcon(":/cedit/undo.png"), "撤销", this);
+	btnclearact = new QAction(QIcon(":/cedit/clear.png"), "清理编译工程", this);
 	pannote = new QAction("选中部分注释/反注释", this);
 	btnselectall = new QAction("全选", this);
-	btnfly = new QAction(QIcon(":/cedit/source/flay.png"), "转到行...", this);
+	btnfly = new QAction(QIcon(":/cedit/flay.png"), "转到行...", this);
 	btngotolabellist = new QAction("转到标签", this);
 	btngotofile = new QAction("转到文件", this);
 	btnswitchfold = new QAction("全部折叠", this);
+	btnautofix = new QAction("自动修正", this);
 
 	//右键菜单
 	jumpToDef = new QAction(this);
@@ -156,6 +172,7 @@ void CodeWindow::CreateBtn()
 	connect(gotoLabel, SIGNAL(triggered()), this, SLOT(jumpToLabelFunc()));
 	connect(btngotolabellist, SIGNAL(triggered()), this, SLOT(GotoLabelList()));
 	connect(btngotofile, SIGNAL(triggered()), this, SLOT(GotoFile()));
+	connect(btnautofix, SIGNAL(triggered()), this, SLOT(AutoFix()));
 
 	btnlastact->setShortcut(Qt::ALT + Qt::Key_Left);
 	btnnextact->setShortcut(Qt::ALT + Qt::Key_Right);
@@ -178,6 +195,8 @@ void CodeWindow::CreateBtn()
 	btngotolabellist->setShortcut(Qt::CTRL + Qt::Key_L);
 	btngotofile->setShortcut(Qt::CTRL + Qt::Key_P);
 	btnswitchfold->setShortcut(Qt::CTRL + Qt::Key_M);
+	btnautofix->setShortcut(Qt::ALT + Qt::Key_Return);
+	addAction(btnautofix);
 
 	toolbar->addAction(btnlastact);
 	toolbar->addAction(btnnextact);
@@ -206,16 +225,12 @@ void CodeWindow::CreateBtn()
 	toolbar->addAction(btngotofile);
 	toolbar->addSeparator();
 
-
-
 	slablelist = new QComboBox;
 	slablelist->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	slablelist->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT + "/codecombox").toString());
 	slablelist->setView(new QListView());
 	toolbar->addWidget(slablelist);
 	toolbar->addAction(btncloseact);
-
-
 
 	//下边工具栏
 	toolbar2 = new QToolBar(this);
@@ -238,7 +253,7 @@ void CodeWindow::CreateBtn()
 
 }
 
-void CodeWindow::OtherWinOtherwin(OtherWindow *win)
+void CodeWindow::BindOtherWindow(OtherWindow *win)
 {
 	othwin = win;
 	//定位文件
@@ -246,7 +261,7 @@ void CodeWindow::OtherWinOtherwin(OtherWindow *win)
 	connect(this, SIGNAL(searchOne(const QString &, const QString &, int, int, int)), othwin, SLOT(onSearchOne(const QString &, const QString &, int, int, int)));
 }
 
-void CodeWindow::OtherWinProject(ProjectWindow *p)
+void CodeWindow::BindProjectWindow(ProjectWindow *p)
 {
 	prowin = p;
 	//rename
@@ -267,7 +282,7 @@ void CodeWindow::OtherWinProject(ProjectWindow *p)
 	//connect(p->btnnewfileact,SIGNAL(triggered()),this,SLOT(NewEmptyFile())) ;
 }
 
-void CodeWindow::OtherwinFileList(BkeLeftFileWidget *flist)
+void CodeWindow::BindFileListWidget(BkeLeftFileWidget *flist)
 {
 	filewidget = flist;
 	//改变文件
@@ -318,9 +333,35 @@ QString CodeWindow::getScenarioTextFromCode(QString text)
 	return text.remove(le1).remove(le2).remove(le3);
 }
 
-void calcWords(QString text, QLineEdit *edit)
+void calcWords(QString text)
 {
-	edit->setText("文本字数：" + QString::number(CodeWindow::getScenarioTextFromCode(text).remove(QRegExp("[\r\n]")).count()));
+	otheredit->setTextCount(CodeWindow::getScenarioTextFromCode(text).remove(QRegExp("[\t\r\n]")).count());
+}
+
+void CodeWindow::AttachCurrentEdit()
+{
+	CurrentConnect(true);
+	ConnectAutoComplete(currentedit);
+	currentedit->clearAnnotations(BkeScintilla::PROBLEM);
+	currentedit->clearAnnotations(BkeScintilla::RUNTIME_PROBLEM);
+	currentedit->restoreTopLine();
+
+	AddMarksToEdit();
+	refreshLabel(currentedit);
+	calcWords(currentedit->text());
+
+	// 导航
+	AddNavigation(currentbase->Name(), currentedit->GetCurrentPosition());
+}
+
+void CodeWindow::DetachCurrentEdit()
+{
+	aclist->Cancel();
+	DisconnectAutoComplete(currentedit);
+	CurrentConnect(false);
+	leaveClickGotoMode();
+	currentedit->saveTopLine();
+	currentedit->Detach();
 }
 
 //改变正在编辑的文档，文件列表选项是同步改变的
@@ -331,32 +372,25 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 	currentpos = pos;  //当前位置
 	if (currentedit == stackwidget->currentWidget()) return;
 
-	currentpos = pos;  //当前位置
 	btncopyact->setEnabled(false);
-	
 
-	//释放文档改变信号
-	if (currentpos > 0) CurrentConnect(false);
-
-	currentbase = docWidgetHash.value(stackwidget->currentWidget(), 0);
-	if (currentbase == 0){
+	currentbase = docWidgetHash.value(stackwidget->currentWidget(), nullptr);
+	if (currentbase == nullptr){
 		QMessageBox::critical(this, "", "致命错误：没有找到匹配的QWidget！", QMessageBox::Ok);
 		return;
 	}
-
+	if (currentedit)
+	{
+		DetachCurrentEdit();
+	}
+	
 	//改变工程
 	//ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
-	if(currentedit)
-		currentedit->saveTopLine();
 	currentedit = currentbase->edit;
 	//reset lexer
 	currentedit->deflex->ReadConfig(currentedit->deflex->ConfigName());
 	currentedit->setLexer(currentedit->deflex);
 	//连接文档改变信号
-	CurrentConnect(true);
-	currentedit->clearAnnotations();
-	currentedit->restoreTopLine();
-
 	diasearch->SetSci(currentedit); //查找管理
 	markadmin.SetFile(currentbase->FullName());  //标记管理器
 	btnsaveact->setEnabled(currentedit->isModified());
@@ -374,14 +408,7 @@ void CodeWindow::ChangeCurrentEdit(int pos)
 
 	emit CurrentFileChange(currentbase->FullName());
 	emit CurrentFileChange(currentbase->Name(), currentbase->ProjectDir());
-
-	AddMarksToEdit();
-	refreshLabel(currentedit);
-	calcWords(currentedit->text(), this->othwin->lewords);
-	//BackstageSearchLable(currentedit);
-
-	// 导航
-	AddNavigation(currentbase->Name(), currentedit->GetCurrentPosition());
+	AttachCurrentEdit();
 }
 
 //断开、连接当前文档信号
@@ -390,33 +417,21 @@ void CodeWindow::CurrentConnect(bool c)
 	if (c){
 		connect(currentedit, SIGNAL(copyAvailable(bool)), btncopyact, SLOT(setEnabled(bool)));
 		connect(currentedit, SIGNAL(copyAvailable(bool)), btncutact, SLOT(setEnabled(bool)));
-		//        connect(currentedit,SIGNAL(Undoready(bool)),btnundoact,SLOT(setEnabled(bool))) ;
-		//        connect(currentedit,SIGNAL(Redoready(bool)),btnredoact,SLOT(setEnabled(bool))) ;
-		//        connect(btncopyact,SIGNAL(triggered()),currentedit,SLOT(copy())) ;
-		//        connect(btncutact,SIGNAL(triggered()),currentedit,SLOT(cut())) ;
-		//        connect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
-		//        connect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
-		//        connect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
 		//工程被改变，需要从下层传递信号
 		connect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		connect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
-		connect(currentedit, SIGNAL(refreshLabel(QStringList &)), this, SLOT(refreshLabel(QStringList &)));
+		connect(currentedit, SIGNAL(refreshLabel(QSortedSet<QString> &)), this, SLOT(refreshLabel(QSortedSet<QString> &)));
 		connect(currentedit, SIGNAL(ShouldAddToNavigation()), this, SLOT(ShouldAddToNavigation()));
+		connect(currentedit, SIGNAL(indicatorReleased(int, int, Qt::KeyboardModifiers)), this, SLOT(indicatorReleased(int, int, Qt::KeyboardModifiers)));
 	}
 	else{
 		disconnect(currentedit, SIGNAL(copyAvailable(bool)), btncopyact, SLOT(setEnabled(bool)));
 		disconnect(currentedit, SIGNAL(copyAvailable(bool)), btncutact, SLOT(setEnabled(bool)));
-		//        disconnect(currentedit,SIGNAL(Undoready(bool)),btnundoact,SLOT(setEnabled(bool))) ;
-		//        disconnect(currentedit,SIGNAL(Redoready(bool)),btnredoact,SLOT(setEnabled(bool))) ;
-		//        disconnect(btncopyact,SIGNAL(triggered()),currentedit,SLOT(copy())) ;
-		//        disconnect(btncutact,SIGNAL(triggered()),currentedit,SLOT(cut())) ;
-		//        disconnect(btnpasteact,SIGNAL(triggered()),currentedit,SLOT(paste())) ;
-		//        disconnect(btnredoact,SIGNAL(triggered()),currentedit,SLOT(redo())) ;
-		//        disconnect(btnundoact,SIGNAL(triggered()),currentedit,SLOT(undo())) ;
 		disconnect(currentedit, SIGNAL(textChanged()), this, SLOT(ActCurrentChange()));
 		disconnect(currentedit, SIGNAL(refreshLabel(BkeScintilla *)), this, SLOT(refreshLabel(BkeScintilla *)));
-		disconnect(currentedit, SIGNAL(refreshLabel(QStringList &)), this, SLOT(refreshLabel(QStringList &)));
+		disconnect(currentedit, SIGNAL(refreshLabel(QSortedSet<QString> &)), this, SLOT(refreshLabel(QSortedSet<QString> &)));
 		disconnect(currentedit, SIGNAL(ShouldAddToNavigation()), this, SLOT(ShouldAddToNavigation()));
+		disconnect(currentedit, SIGNAL(indicatorReleased(int, int, Qt::KeyboardModifiers)), this, SLOT(indicatorReleased(int, int, Qt::KeyboardModifiers)));
 	}
 }
 
@@ -443,7 +458,7 @@ void CodeWindow::btnDisable()
 
 void CodeWindow::Rename(const QString &old, const QString &now)
 {
-	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(old), 0);
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(old), nullptr);
 	docStrHash.remove(LOLI_OS_QSTRING(old));
 	docStrHash.insert(LOLI_OS_QSTRING(now), loli);
 	if (loli)
@@ -461,7 +476,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 {
 	if (!workpro)
 		return;
-	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), nullptr);
 	bool close = !loli;
 	if (!loli)
 	{
@@ -497,7 +512,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 		int line = loli->edit->SendScintilla(QsciScintilla::SCI_LINEFROMPOSITION, p.Start());
 		int linestart = loli->edit->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line);
 		int linelen = loli->edit->SendScintilla(QsciScintilla::SCI_LINELENGTH, line);
-		char *buf = new char[linelen + 1];
+		auto *buf = new char[linelen + 1];
 		loli->edit->SendScintilla(QsciScintilla::SCI_GETLINE, line, buf);
 		buf[linelen] = 0;
 		linelen--;
@@ -507,7 +522,7 @@ void CodeWindow::searchOneFile(const QString &file, const QString &searchstr, bo
 		}
 		int offset = p.Start() - linestart;
 		//实际行号从1开始
-		othwin->searchlist->addItem(loli->edit->FileName + QString("(%1, %2)").arg(line + 1).arg(offset) + ":\t" + buf);
+		othwin->AddSearchItem(loli->edit->FileName + QString("(%1, %2)").arg(line + 1).arg(offset) + ":\t" + buf);
 		emit searchOne(loli->edit->FileName, loli->FullName(), line, p.Start(), p.End());
 		delete[] buf;
 	}
@@ -523,7 +538,7 @@ void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, c
 {
 	if (!workpro)
 		return;
-	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), nullptr);
 	bool close = !loli;
 	if (!loli)
 	{
@@ -569,6 +584,7 @@ void CodeWindow::replaceOneFile(const QString &file, const QString &searchstr, c
 			//加到各种列表里去
 			//BkeCreator::AddRecentFile(loli->FullName());
 			//为了恢复当前文档的currentpos
+			loli->edit->installEventFilter(this);
 			QString curopenfile = ItemTextList.at(currentpos);
 			int pos = LOLI_SORT_INSERT(ItemTextList, loli->Name() + "*");
 			currentpos = ItemTextList.indexOf(curopenfile);
@@ -659,10 +675,10 @@ void CodeWindow::replaceAllFile(const QString &searchstr, const QString &replace
 //打开文件，文件列表是自动维护的
 void CodeWindow::AddFile(const QString &file)
 {
-	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), 0);
+	BkeDocBase* loli = docStrHash.value(LOLI_OS_QSTRING(file), nullptr);
 
 	//如果为空，则创建
-	if (loli == 0){
+	if (loli == nullptr){
 		loli = new BkeDocBase;
 		loli->SetFileName(file);
 		if (!loli->File()->exists()){
@@ -698,11 +714,36 @@ void CodeWindow::AddFile(const QString &file)
 	//QfileChange("");
 }
 
+void CodeWindow::ConnectAutoComplete(BkeScintilla *edit)
+{
+	aclist->SetFont(edit->deflex->font(0));
+	connect(edit, &BkeScintilla::AutoCompleteStart, [this, edit](auto v1, auto v2) {
+		aclist->SetList(v1);
+		aclist->Start(edit->mapToGlobal(edit->PointByPosition(edit->GetCurrentPosition() - v2.toUtf8().length())));
+		aclist->Match(v2);
+	});
+	connect(edit, &BkeScintilla::AutoCompleteCancel, aclist, &AutoCompleteList::Cancel);
+	connect(edit, &BkeScintilla::AutoCompleteMatch, aclist, &AutoCompleteList::Match);
+	connect(aclist, &AutoCompleteList::OnCanceled, edit, &BkeScintilla::OnAutoCompleteCanceled);
+	connect(aclist, &AutoCompleteList::OnSelected, edit, &BkeScintilla::OnAutoCompleteSelected);
+	connect(aclist, &AutoCompleteList::RequestRestart, [edit]() {
+		edit->UpdateAutoComplete();
+	});
+}
+
+void CodeWindow::DisconnectAutoComplete(BkeScintilla *edit)
+{
+	aclist->disconnect(edit);
+	edit->disconnect(aclist);
+}
+
 void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 {
 	ignoreflag = true; //忽略改变，在所有准备工作完成以后才改变
 
 	loli->edit = new BkeScintilla(this);
+	loli->edit->ChangeIgnore++;
+	loli->edit->installEventFilter(this);
 	if (workpro)
 		loli->edit->analysis = workpro->analysis;
 	loli->edit->workpro = workpro;
@@ -725,7 +766,7 @@ void CodeWindow::simpleNew(BkeDocBase *loli, const QString &t)
 	//文件有改动
 	connect(loli->edit, SIGNAL(textChanged()), diasearch, SLOT(onDocChanged()));
 	connect(loli->edit, SIGNAL(selectionChanged()), diasearch, SLOT(onSelectionChanged()));
-
+	loli->edit->ChangeIgnore--;
 	ignoreflag = false;
 }
 
@@ -819,13 +860,11 @@ void CodeWindow::backupAll()
 	jo.insert("files", QJsonArray::fromStringList(files));
 	jd.setObject(jo);
 	LOLI::AutoWrite(userdir + "pro", jd.toJson());
-	return;
 }
 
 void CodeWindow::SaveFile()
 {
 	simpleSave(currentbase);
-	return;
 }
 
 bool CodeWindow::simpleBackup(BkeDocBase *loli)
@@ -881,7 +920,7 @@ void CodeWindow::SaveAs()
 void CodeWindow::CloseFile()
 {
 	if (currentedit->isModified()){
-		QMessageBox *msg = new QMessageBox(this);
+		auto *msg = new QMessageBox(this);
 		msg->addButton("保存", QMessageBox::AcceptRole);
 		msg->addButton("关闭", QMessageBox::RejectRole);
 		msg->addButton("取消", QMessageBox::DestructiveRole);
@@ -908,9 +947,7 @@ bool CodeWindow::CloseAll()
 {
 	QList<BkeDocBase*> ls = docWidgetHash.values();
 
-	BkeDocBase *ptr;
-	for (int i = 0; i < ls.size(); i++){
-		ptr = ls.at(i);
+	for (auto ptr : ls){
 		if (ptr->edit->isModified()){
 			SetCurrentEdit(ptr->edit);
 			auto btn = QMessageBox::information(this, "", "文件:\r\n" + ptr->FullName() + "\r\n已经修改，是否保存？", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
@@ -930,6 +967,10 @@ bool CodeWindow::CloseAll()
 
 QSize CodeWindow::sizeHint() const
 {
+	auto fff = ((QWidget *)this->parent())->size();
+	QSize hint;
+	hint.setWidth(fff.width() * 0.8);
+	hint.setHeight(fff.height() - 50);
 	return hint;
 }
 
@@ -961,9 +1002,9 @@ void CodeWindow::FileIOclose(const QStringList &list)
 	BkeDocBase *llm;
 	QList<BkeDocBase*> doclist;
 	for (int i = 0; i < list.size(); i++){
-		llm = docStrHash.value(list.at(i), 0);
+		llm = docStrHash.value(list.at(i), nullptr);
 		//已经被打开的文件
-		if (llm != 0){
+		if (llm != nullptr){
 			ls.append(list.at(i));
 			doclist.append(llm);
 		}
@@ -991,7 +1032,7 @@ void CodeWindow::CompileLang(bool release /*= false*/)
 {
 	LOLI_CLEAR_TEMP(BKE_CURRENT_DIR + "/temp");
 	//当前编辑项不是工程的话，什么也不会发生
-	if (workpro == 0) return;
+	if (workpro == nullptr) return;
 
 	//设置按钮
 	btncompileact->setEnabled(false);
@@ -1035,31 +1076,18 @@ void CodeWindow::CompileAll(bool release /*= false*/)
 {
 	LOLI_CLEAR_TEMP(BKE_CURRENT_DIR + "/temp");
 	//当前编辑项不是工程的话，什么也不会发生
-	if (workpro == 0) return;
+	if (workpro == nullptr) return;
+
+	markadmin.ClearRuntimeProblems();
+	if (currentedit)
+		CheckRuntimeProblemMarks(currentedit, nullptr);
+	othwin->SetRuntimeProblemList(nullptr, workpro->ProjectDir());
 
 	//设置按钮
 	btncompileact->setEnabled(false);
 	btncompilerunact->setEnabled(false);
 	btnrunact->setEnabled(false);
-	////清理上次编译的工程
-	//deleteCompileFile(ComList, cosdir);
-
-	////拷贝文件
-	//if( !WriteOpenFile(currentproject->FileDir()) ){
-	//    btncompileact->setEnabled(true);
-	//    btncompilerunact->setEnabled(true);
-	//    btnrunact->setEnabled(true);
-	//    return ;
-	//}
-	//QStringList ls = ListDirsCopy(ComList,cosdir,BKE_CURRENT_DIR+"/temp") ;
-
-	//if( ls.size() > 0){
-	//    QMessageBox msg ;
-	//    msg.setText("以下文件复制失败：\r\n" + ls.join("\r\n") );
-	//    msg.addButton(QMessageBox::Ok);
-	//    msg.exec() ;
-	//    return ;
-	//}
+	
 	QStringList ls = workpro->AllScriptFiles();
 	kag->setMaximum(ls.size());
 	kag->setValue(0);
@@ -1084,14 +1112,14 @@ bool CodeWindow::WriteOpenFile(const QString &dir)
 	QList<BkeDocBase*> ks;
 	QStringList ns;
 
-	for (int i = 0; i < ls.size(); i++){
-		if (LOLI_OS_QSTRING(ls.at(i)->ProjectDir()) != LOLI_OS_QSTRING(dir)) continue;
-		if (!ls.at(i)->edit->isModified()) continue;
-		ks.append(ls.at(i));
-		ns.append(ls.at(i)->Name());
+	for (auto l : ls){
+		if (LOLI_OS_QSTRING(l->ProjectDir()) != LOLI_OS_QSTRING(dir)) continue;
+		if (!l->edit->isModified()) continue;
+		ks.append(l);
+		ns.append(l->Name());
 	}
 
-	if (ns.size() < 1) return true;
+	if (ns.empty()) return true;
 
 	if (isCompileNotice == _NOTICE_ALWAYS){
 
@@ -1099,7 +1127,7 @@ bool CodeWindow::WriteOpenFile(const QString &dir)
 		msg.SetLable("以下文件已经修改，是否保存？");
 		msg.SetBtn(QStringList() << "取消" << "不要保存" << "全部保存");
 		msg.SetCheckbox(QStringList() << "不再提示");
-		QListWidget *tls = new QListWidget(&msg);
+		auto *tls = new QListWidget(&msg);
 		tls->addItems(ns);
 		msg.SetCenterWidget(tls);
 		msg.SetDefaultBtn(2);
@@ -1114,7 +1142,7 @@ bool CodeWindow::WriteOpenFile(const QString &dir)
 
 	}
 
-	for (int i = 0; i < ks.size(); i++) simpleSave(ks.at(i));
+	for (auto k : ks) simpleSave(k);
 
 	return true;
 }
@@ -1144,9 +1172,8 @@ QStringList fileEntries(const QString &dir, const QStringList &suffixes)
 	QStringList l;
 	QDir d(dir);
 	QFileInfoList a = d.entryInfoList();
-	for (int i = 0; i < a.size(); i++)
+	for (QFileInfo &info : a)
 	{
-		QFileInfo &info = a[i];
 		if (info.isDir())
 		{
 			if (info.fileName() != ".." && info.fileName() != ".")
@@ -1169,7 +1196,7 @@ QStringList fileEntries(const QString &dir, const QStringList &suffixes)
 //删除编译过的文件
 void CodeWindow::deleteCompileFile()
 {
-	if (workpro == 0)
+	if (workpro == nullptr)
 		return;
 	QStringList l = fileEntries(workpro->ProjectDir(), QStringList() << ".bkbin");
 	for (auto i : l)
@@ -1225,18 +1252,17 @@ void CodeWindow::CompileFinish()
 	BkeMarkList *problemslist;
 	if (stackwidget->count() > 0){
 		//给当前文件标记错误信息
-		BkeMarkList templs = *(markadmin.GetPrombleMark(currentbase->FullName(), false));
-		problemslist = markadmin.GetPrombleMark(currentbase->FullName(), true);
+		BkeMarkList templs = *(markadmin.GetProblemMark(currentbase->FullName(), false));
+		problemslist = markadmin.GetProblemMark(currentbase->FullName(), true);
 		CheckProblemMarks(currentedit, &templs);
 		currentedit->update();
 	}
 	else{
-		problemslist = markadmin.GetPrombleMark("", true);
+		problemslist = markadmin.GetProblemMark("", true);
 	}
 
-    othwin->compileedit->setText(comResult);
-	othwin->compileedit->setReadOnly(true);
-	othwin->ShowProblem(problemslist, workpro->ProjectDir());
+    othwin->SetCompileResult(comResult);
+	othwin->SetProblemList(problemslist, workpro->ProjectDir());
 
 	//按钮可用
 	btncompileact->setEnabled(true);
@@ -1351,7 +1377,7 @@ void CodeWindow::AddBookMark()
 	if (info.isEmpty()) return;
 
 	int line = currentedit->GetCurrentLine();
-	if (currentbase != 0){
+	if (currentbase != nullptr){
 		//markadmin.AddBookMark(info, line ,BkeFullnameToName(currentbase->fullname,currentproject->FileDir()) );
 		workpro->WriteMarkFile(&markadmin);
 	}
@@ -1368,14 +1394,16 @@ void CodeWindow::AddMarksToEdit()
 {
 	CheckBookMarks(currentedit, markadmin.GetBookMark(currentbase->FullName(), false));
 	CheckMarks(currentedit, markadmin.GetMarks(currentbase->FullName(), false));
-	CheckProblemMarks(currentedit, markadmin.GetPrombleMark(currentbase->FullName(), false));
+	CheckProblemMarks(currentedit, markadmin.GetProblemMark(currentbase->FullName(), false));
+	CheckRuntimeProblemMarks(currentedit, markadmin.GetRuntimeProblemMark(currentbase->FullName(), false));
+
 	currentedit->update();
 }
 
 //标记更新完后使用 updata
 void CodeWindow::CheckProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 {
-	edit->clearAnnotations();
+	edit->clearAnnotations(BkeScintilla::PROBLEM);
 	edit->markerDeleteAll(1);
 	edit->markerDeleteAll(2);
 
@@ -1384,19 +1412,19 @@ void CodeWindow::CheckProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 	BkeMarkerBase *abc;
 	QString info;
 
-	for (int i = 0; i < list->size(); i++){
-		abc = list->at(i);
+	for (auto i : *list){
+		abc = i;
 		info = edit->annotation(abc->Atpos - 1);
 
 		if (info.isEmpty()) info = abc->Information;
-		else info += "\r\n" + LOLI_AUTONEXT_QSTRING(abc->Information);
+		else info += "\n\n" + abc->Information;
 
 		if (abc->Type == 1){
-			edit->annotate(abc->Atpos - 1, info, ks1);
+			edit->annotate(abc->Atpos - 1, info, ks1, BkeScintilla::PROBLEM);
 			edit->markerAdd(abc->Atpos - 1, 1);
 		}
 		else{
-			edit->annotate(abc->Atpos - 1, info, ks2);
+			edit->annotate(abc->Atpos - 1, info, ks2, BkeScintilla::PROBLEM);
 			edit->markerAdd(abc->Atpos - 1, 2);
 		}
 	}
@@ -1409,8 +1437,8 @@ void CodeWindow::CheckBookMarks(BkeScintilla *edit, BkeMarkList *list)
 	if (list->isEmpty()) return;
 
 	BkeMarkerBase *abc;
-	for (int i = 0; i < list->size(); i++){
-		abc = list->at(i);
+	for (auto i : *list){
+		abc = i;
 		edit->markerAdd(abc->Atpos, 3);
 	}
 }
@@ -1422,33 +1450,54 @@ void CodeWindow::CheckMarks(BkeScintilla *edit, BkeMarkList *list)
 	if (list->isEmpty()) return;
 
 	BkeMarkerBase *abc;
-	for (int i = 0; i < list->size(); i++){
-		abc = list->at(i);
+	for (auto i : *list){
+		abc = i;
 		edit->markerAdd(abc->Atpos, 4);
 	}
 }
 
-
-//运行BKEngine.exe
-void CodeWindow::RunBKE()
+//标记更新完后使用 updata
+void CodeWindow::CheckRuntimeProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 {
-	QString ndir;
-#ifdef Q_OS_WIN
-		ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev.exe";
-#elif defined(Q_OS_MAC)
-		ndir = BKE_CURRENT_DIR+"/BKEngine_Dev.app";
-#else
-		ndir = BKE_CURRENT_DIR+"/tool/BKEngine_Dev";
-#endif
-#ifdef Q_OS_MAC
-    QProcess::startDetached( "open",QStringList() << ndir << "--args" << workpro->ProjectDir() << "-nologo") ;
-#else
-	QProcess::startDetached(ndir, QStringList() << "-nologo", workpro->ProjectDir());
-#endif
+	edit->clearAnnotations(BkeScintilla::RUNTIME_PROBLEM);
+	edit->markerDeleteAll(5);
+	edit->markerDeleteAll(6);
+
+	if (list == nullptr || list->isEmpty()) return;
+
+	BkeMarkerBase *abc;
+	QString info;
+
+	for (auto i : *list) {
+		abc = i;
+		info = edit->annotation(abc->Atpos - 1);
+
+		if (info.isEmpty()) info = abc->Information;
+		else info += "\n\n" + abc->Information;
+
+		if (abc->Type == 1) {
+			edit->annotate(abc->Atpos - 1, info, ks1, BkeScintilla::RUNTIME_PROBLEM);
+			edit->markerAdd(abc->Atpos - 1, 5);
+		}
+		else {
+			edit->annotate(abc->Atpos - 1, info, ks2, BkeScintilla::RUNTIME_PROBLEM);
+			edit->markerAdd(abc->Atpos - 1, 6);
+		}
+	}
 }
 
-void CodeWindow::RunBKEWithArgs()
+void CodeWindow::StartBKEProcess(const QStringList &args)
 {
+	if(bkeprocess)
+	{
+		bkeprocess->kill();
+		bkeprocess->waitForFinished();
+	}
+	bkeprocess = new QProcess(this);
+	connect(bkeprocess, (void (QProcess::*)(int))&QProcess::finished, [this](int) {
+		bkeprocess->deleteLater();
+		bkeprocess = nullptr;
+	});
 	QString ndir;
 #ifdef Q_OS_WIN
 	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev.exe";
@@ -1457,18 +1506,30 @@ void CodeWindow::RunBKEWithArgs()
 #else
 	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev";
 #endif
-	QStringList args;
+
 #ifdef Q_OS_MAC
-    args << ndir << "--args" << workpro->ProjectDir() << "-nologo";
-	for (auto &s : BKE_extraArgs)
-		args << s;
-	QProcess::startDetached("open", args);
+	bkeprocess->setProgram("open");
+	bkeprocess->setArguments(QStringList() << ndir << "--args" << workpro->ProjectDir() << args);
 #else
-	args << "-nologo";
-	for (auto &s : BKE_extraArgs)
-		args << s;
-	QProcess::startDetached(ndir, args, workpro->ProjectDir());
+	bkeprocess->setProgram(ndir);
+	bkeprocess->setArguments(args);
+	bkeprocess->setWorkingDirectory(workpro->ProjectDir());
 #endif
+	bkeprocess->start(QIODevice::NotOpen);
+	bkeprocess->closeReadChannel(QProcess::StandardOutput);
+	bkeprocess->closeReadChannel(QProcess::StandardError);
+	bkeprocess->closeWriteChannel();
+}
+
+//运行BKEngine.exe
+void CodeWindow::RunBKE()
+{
+	StartBKEProcess(QStringList() << "-nologo");
+}
+
+void CodeWindow::RunBKEWithArgs()
+{
+	StartBKEProcess(QStringList() << "-nologo" << BKE_extraArgs);
 }
 
 void CodeWindow::AnnotateSelect()
@@ -1505,12 +1566,12 @@ void CodeWindow::ChangeCodec()
 
 void CodeWindow::refreshLabel(BkeScintilla *sci)
 {
-	std::set<QString> l;
+	QSortedSet<QString> l;
 	sci->analysis->getLabels(sci->FileName, l);
 	refreshLabel(l);
 }
 
-void CodeWindow::refreshLabel(std::set<QString> &l)
+void CodeWindow::refreshLabel(QSortedSet<QString> &l)
 {
 	slablelist->clear();
 	labelbanned = true;
@@ -1549,18 +1610,21 @@ void CodeWindow::ChangeProject(BkeProject *p)
 		navigationList.clear();
 		currentNavigation = -1;
 
-		if (p == 0) {
+		if (p == nullptr)
+		{
 			btncompileact->setEnabled(false);  //编译按钮只有当工程出现时才可用
 			btncompilerunact->setEnabled(false);
 			btnrunact->setEnabled(false);
 			btndebugact->setEnabled(false);
-			workpro = 0;
-			return;
+		}
+		else 
+		{
+			btncompileact->setEnabled(true);  //工程出现后编译按钮都是可用的
+			btncompilerunact->setEnabled(true);
 		}
 
 		workpro = p;
-		btncompileact->setEnabled(true);  //工程出现后编译按钮都是可用的
-		btncompilerunact->setEnabled(true);
+		debugServer->WorkproChanged(p);
 	}
 }
 
@@ -1574,7 +1638,7 @@ void CodeWindow::TextToMarks(const QString &text, const QString &dir, int type)
 
 void CodeWindow::NewEmptyFile()
 {
-	BkeDocBase *llm = new BkeDocBase;
+	auto *llm = new BkeDocBase;
 	llm->SetFileName("New");
 	simpleNew(llm, "");
 	llm->edit->FileName = "New";
@@ -1594,8 +1658,8 @@ void CodeWindow::QfileChange(const QString &path)
 	BkeDocBase *tempbase = currentbase;
 
 	if (!path.isEmpty()){
-		tempbase = docStrHash.value(LOLI_OS_QSTRING(path), 0);
-		if (tempbase == 0) return;
+		tempbase = docStrHash.value(LOLI_OS_QSTRING(path), nullptr);
+		if (tempbase == nullptr) return;
 		SetCurrentEdit(tempbase->edit);
 	}
 
@@ -1613,7 +1677,7 @@ void CodeWindow::QfileChange(const QString &path)
 		if (i == QMessageBox::Close){
 			//BkeProject *pro = prowin->FindProjectFromDir(tempbase->ProjectDir());
 			BkeProject *pro = workpro;
-			if (pro != 0) pro->RemoveItem(tempbase->FullName());
+			if (pro != nullptr) pro->RemoveItem(tempbase->FullName());
 			simpleClose(tempbase);
 		}
 		else if (i == QMessageBox::Save)
@@ -1706,11 +1770,41 @@ void CodeWindow::GotoLabel(QString l)
 		l = l.right(l.length() - 1);
 	}
 	int pos = currentedit->analysis->findLabel(currentedit->FileName, l);
+	if (pos < 0)
+		return;
 	int line, index;
 	currentedit->lineIndexFromPositionByte(pos, &line, &index);
-	if (line < 0)
-		return;
 	currentedit->setFirstVisibleLine(line);
+}
+
+void CodeWindow::GotoOrCreateLabel(QString l)
+{
+	if (l.startsWith("*"))
+	{
+		l = l.right(l.length() - 1);
+	}
+	int pos = currentedit->analysis->findLabel(currentedit->FileName, l);
+	if (pos < 0)
+	{
+		CreateLabel(l);
+		return;
+	}
+	int line, index;
+	currentedit->lineIndexFromPositionByte(pos, &line, &index);
+	currentedit->setFirstVisibleLine(line);
+}
+
+void CodeWindow::CreateLabel(QString l)
+{
+	if (l.startsWith("*"))
+	{
+		l = l.right(l.length() - 1);
+	}
+	QString text = "\n*" + l + "\n\n[return]\n";
+	int line = currentedit->lines();
+	QByteArray data = currentedit->TextAsBytes(text);
+	currentedit->AppendText(data);
+	currentedit->SetCurrentPosition(currentedit->PositionByLine(line + 1));
 }
 
 void CodeWindow::GotoLabelList()
@@ -1719,7 +1813,7 @@ void CodeWindow::GotoLabelList()
 	{
 		return;
 	}
-	std::set<QString> qs;
+	QSortedSet<QString> qs;
 	currentedit->analysis->getLabels(currentedit->FileName, qs);
 	OpenLabelDialog *dialog = new OpenLabelDialog(qs, this);
 	dialog->setModal(true);
@@ -1734,7 +1828,7 @@ void CodeWindow::GotoFile()
 		return;
 	}
 	QStringList qs = workpro->AllScriptFiles();
-	GotoFileDialog *dialog = new GotoFileDialog(qs, this);
+	auto *dialog = new GotoFileDialog(qs, this);
 	dialog->setModal(true);
 	connect(dialog, &GotoFileDialog::GotoFile, projectedit, &ProjectWindow::OpenProjectFile);
 	dialog->show();
@@ -1767,7 +1861,7 @@ void CodeWindow::ActCurrentChange()
 {
 	btnundoact->setEnabled(currentedit->isUndoAvailable());
 	btnredoact->setEnabled(currentedit->isRedoAvailable());
-	calcWords(currentedit->text(), this->othwin->lewords);
+	calcWords(currentedit->text());
 }
 
 //剪切
@@ -1789,7 +1883,7 @@ void CodeWindow::ActCopy()
 
 void CodeWindow::jumpToDefFunc()
 {
-	QAction *act = (QAction*)sender();
+	auto *act = (QAction*)sender();
 	QStringList ls = act->data().toString().split('|');
 	int pos = ls[1].toInt();
 	AddFile(workpro->ProjectDir() + ls[0]);
@@ -1802,7 +1896,7 @@ void CodeWindow::jumpToDefFunc()
 
 void CodeWindow::jumpToCodeFunc()
 {
-	QAction *act = (QAction*)sender();
+	auto *act = (QAction*)sender();
 	QStringList ls = act->data().toString().split('|');
 	AddFile(workpro->ProjectDir() + ls[0]);
 	if (currentedit->FileName != ls[0])
@@ -1827,7 +1921,7 @@ void CodeWindow::AddNavigation(const QString &file, int pos)
 {
 	if (navigationLocker)
 		return;
-	if (navigationList.size() && navigationList[currentNavigation].first == file && navigationList[currentNavigation].second == pos)
+	if (!navigationList.empty() && navigationList[currentNavigation].first == file && navigationList[currentNavigation].second == pos)
 		return;
 	if (currentNavigation != navigationList.size() - 1)
 	{
@@ -1885,8 +1979,208 @@ void CodeWindow::CreateAndGotoLabel(QString label)
 	}
 }
 
+void CodeWindow::AutoFix()
+{
+	if (currentedit == nullptr)
+		return;
+	QMenu menu;
+	QAction *firstAction = nullptr;
+	//测试Label
+	{
+		BkeIndicatorBase base = currentedit->GetRangeForStyle(currentedit->GetCurrentPosition(), SCE_BKE_LABEL_IN_PARSER);
+		if (base)
+		{
+			QString content = currentedit->TextForRange(base);
+			QAction *action = menu.addAction(QIcon(":/auto/hint.png"), "跳转或创建标签");
+			if (firstAction == nullptr)
+				firstAction = action;
+			connect(action, &QAction::triggered, [this, content]() {
+				GotoOrCreateLabel(content);
+			});
+		}
+	}
+	if (firstAction != nullptr)
+	{
+		menu.setActiveAction(firstAction);
+		QPoint pos = currentedit->mapToGlobal(currentedit->PointByPosition(currentedit->GetCurrentPosition()));
+		menu.exec(pos + QPoint(0, 20));
+	}
+}
+
 void CodeWindow::RefreshNavigation()
 {
 	btnlastact->setEnabled(currentNavigation > 0);
 	btnnextact->setEnabled(currentNavigation < navigationList.size() - 1);
+}
+
+void CodeWindow::DebugLogReceived(int32_t level, QString log)
+{
+	if (!workpro)
+		return;
+	markadmin.AddRuntimeProblem(workpro->ProjectDir(), level, log);
+
+	BkeMarkList *runtimeproblemslist;
+	if (stackwidget->count() > 0) {
+		//给当前文件标记错误信息
+		BkeMarkList templs = *(markadmin.GetRuntimeProblemMark(currentbase->FullName(), false));
+		runtimeproblemslist = markadmin.GetRuntimeProblemMark(currentbase->FullName(), true);
+		CheckRuntimeProblemMarks(currentedit, &templs);
+		currentedit->update();
+	}
+	else {
+		runtimeproblemslist = markadmin.GetRuntimeProblemMark("", true);
+	}
+
+	othwin->SetRuntimeProblemList(runtimeproblemslist, workpro->ProjectDir());
+}
+
+bool CodeWindow::eventFilter(QObject * watched, QEvent *e)
+{
+	if (watched != currentedit)
+		return false;
+	if (e->type() == QEvent::KeyPress)
+	{
+		auto *event = (QKeyEvent *)e;
+		if (aclist->isVisible() && aclist->OnKeyPress(event->key()))
+		{
+			return true;
+		}
+		if (event->key() == Qt::Key_Control && !event->isAutoRepeat())
+		{
+			enterClickGotoMode();
+		}
+	}
+	else if (e->type() == QEvent::KeyRelease)
+	{
+		auto *event = (QKeyEvent *)e;
+		if (event->key() == Qt::Key_Control && !event->isAutoRepeat())
+		{
+			leaveClickGotoMode();
+		}
+	}
+	else if (e->type() == QEvent::HoverMove)
+	{
+		auto *event = (QHoverEvent *)e;
+		if (event->modifiers() & Qt::ControlModifier)
+		{
+			onHoverMove(event->pos());
+		}
+	}
+	else if (e->type() == QEvent::MouseButtonPress)
+	{
+		auto *event = (QMouseEvent *)e;
+		if (event->button() == Qt::LeftButton)
+		{
+			if(aclist->isVisible())
+				aclist->Cancel();
+		}
+	}
+	return false;
+}
+
+void CodeWindow::enterClickGotoMode()
+{
+	if (clickGotoMode)
+		return;
+	clickGotoMode = true;
+	//currentedit->setMouseTracking(true);
+	currentedit->setAttribute(Qt::WA_Hover, true);
+	onHoverMove(currentedit->mapFromGlobal(QCursor::pos()));
+	QMouseEvent event(QEvent::MouseMove, QPointF(currentedit->viewport()->mapFromGlobal(QCursor::pos())), Qt::NoButton, nullptr, nullptr);
+	QGuiApplication::sendEvent(currentedit->viewport(), &event);
+}
+
+void CodeWindow::leaveClickGotoMode()
+{
+	if (!clickGotoMode)
+		return;
+	clickGotoMode = false;
+	currentedit->ClearIndicator(lastClickIndicatorType, lastClickIndicator);
+	lastClickIndicator.Clear();
+	lastClickIndicatorType = 0;
+	currentedit->setAttribute(Qt::WA_Hover, false);
+	QMouseEvent event(QEvent::MouseMove, QPointF(currentedit->viewport()->mapFromGlobal(QCursor::pos())), Qt::NoButton, nullptr, nullptr);
+	QGuiApplication::sendEvent(currentedit->viewport(), &event);
+}
+
+void CodeWindow::setClickIndicator(const BkeIndicatorBase &indicator, int id)
+{
+	if (lastClickIndicator != indicator || id != lastClickIndicatorType)
+	{
+		currentedit->ClearIndicator(lastClickIndicatorType, lastClickIndicator);
+		lastClickIndicator = indicator;
+		lastClickIndicatorType = id;
+		currentedit->SetIndicator(id, indicator);
+	}
+}
+
+void CodeWindow::onHoverMove(QPoint pos)
+{
+	int position = currentedit->PositionAt(pos);
+	if (position < 0)
+		return;
+	BkeIndicatorBase indicator = currentedit->GetRangeForStyle(position, SCE_BKE_COMMAND);
+	if (!indicator.IsNull())
+	{
+		if (currentedit->GetByte(indicator.Start()) == '@')
+		{
+			indicator.SetStart(indicator.Start() + 1);
+		}
+		setClickIndicator(indicator, BkeScintilla::BKE_INDICATOR_CLICK_COMMAND);
+		return;
+	}
+	indicator = currentedit->GetRangeForStyle(position, SCE_BKE_COMMAND2);
+	if (!indicator.IsNull())
+	{
+		if (currentedit->GetByte(indicator.Start()) == '[')
+		{
+			indicator.SetStart(indicator.Start() + 1);
+		}
+		else if (currentedit->GetByte(indicator.Start()) != ']')
+		{
+			setClickIndicator(indicator, BkeScintilla::BKE_INDICATOR_CLICK_COMMAND);
+			return;
+		}
+	}
+	indicator = currentedit->GetRangeForStyle(position, SCE_BKE_LABEL_IN_PARSER);
+	if (!indicator.IsNull())
+	{
+		setClickIndicator(indicator, BkeScintilla::BKE_INDICATOR_CLICK_LABEL);
+		return;
+	}
+	setClickIndicator(BkeIndicatorBase(), 0);
+}
+
+void CodeWindow::indicatorReleased(int line, int index, Qt::KeyboardModifiers state)
+{
+	auto *edit = (BkeScintilla *)sender();
+	auto pos = edit->positionFromLineIndex(line, index);
+	if (lastClickIndicatorType != 0 && edit->IsIndicator(lastClickIndicatorType, pos))
+	{
+		QString content = edit->TextForRange(lastClickIndicator);
+		QTimer::singleShot(0, [content, this, edit]() {
+			switch (lastClickIndicatorType)
+			{
+				case BkeScintilla::BKE_INDICATOR_CLICK_COMMAND:
+				{
+					BKEMacros macro;
+					if (edit->analysis->findMacro(content, &macro))
+					{
+						AddFile(workpro->ProjectDir() + macro.definefile);
+						if (currentedit->FileName != macro.definefile)
+							return;
+						emit GotoLabel(macro.name);
+					}
+					break;
+				}
+				case BkeScintilla::BKE_INDICATOR_CLICK_LABEL:
+				{
+					emit GotoLabel(content);
+					break;
+				}
+				default:
+					break;
+			}
+		});
+	}
 }

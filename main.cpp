@@ -8,6 +8,8 @@
 #include "quazip/JlCompress.h"
 #include "codewindow.h"
 #include "qmacopenfileapplication.h"
+#include <QStyle>
+#include <QStyleFactory>
 
 QString title = "BKE Creator - ";
 uint32_t titlehash = 0;
@@ -18,6 +20,7 @@ extern CodeWindow *codeedit;
 #ifdef WIN32
 #include <Windows.h>
 #include <DbgHelp.h>
+#pragma comment(lib,"user32.lib")
 
 BOOL CALLBACK EnumWndProc(HWND hwnd, LPARAM lParam)
 {
@@ -142,16 +145,13 @@ int main(int argc, char *argv[])
 		QApplication::addLibraryPath(d.absolutePath());
 	}
 #else
+#if !defined(Q_OS_WIN) || !defined(QT_DEBUG)
     BKE_CURRENT_DIR = QFileInfo( exeDir ).path();
     //qt has a bug in 5.2.1(windows)? so I use setLibraryPaths
-    QApplication::addLibraryPath( BKE_CURRENT_DIR ) ;
+	QApplication::addLibraryPath(BKE_CURRENT_DIR);
+#else
+	BKE_CURRENT_DIR = QDir::currentPath();
 #endif
-#endif
-
-
-#ifdef QT_DEBUG
-#ifdef WIN32
-	BKE_CURRENT_DIR = QDir::currentPath() ;
 #endif
 #endif
 
@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
 #else
     QApplication a(argc, argv);
 #endif
+	QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
 #ifdef Q_OS_MAC
     BKE_CURRENT_DIR = QDir::homePath() + "/Documents/BKE_Creator";

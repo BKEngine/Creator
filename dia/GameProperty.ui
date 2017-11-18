@@ -119,7 +119,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="../source.qrc"/>
+  <include location="../source/source.qrc"/>
  </resources>
  <connections/>
 </ui>

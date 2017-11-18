@@ -1,14 +1,17 @@
-#include "ParserEditorTreeItem.h"
+ï»¿#include "ParserEditorTreeItem.h"
 #include "ParserEditorTreeModel.h"
 #include <QStringList>
+#include <QUndoStack>
 #include "ParserHelper/ParserHelper.h"
+#include "ParserEditorUndoCommand.h"
 
 //! [0]
 ParserEditorTreeModel::ParserEditorTreeModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
 	root = NULL;
-	header << "¼ü" << "ÀàĞÍ" << "Öµ";
+	header << "é”®" << "ç±»å‹" << "å€¼";
+	_undoStack = new QUndoStack();
 }
 //! [0]
 
@@ -30,10 +33,7 @@ int ParserEditorTreeModel::columnCount(const QModelIndex &parent) const
 
 bool ParserEditorTreeModel::removeRows(int row, int count, const QModelIndex &parent /*= QModelIndex()*/)
 {
-	beginRemoveRows(parent, row, row + count - 1);
-	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(parent.internalPointer());
-	item->removeChildrenAt(row, count);
-	endRemoveRows();
+	_undoStack->push(new RemoveRowsCommand(this, row, count, parent));
 	return true;
 }
 
@@ -41,25 +41,44 @@ bool ParserEditorTreeModel::insertRows(int row, int count, const QModelIndex &pa
 {
 	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(parent.internalPointer());
 	if (row < 0)
-		row += item->childCount();
-	beginInsertRows(parent, row + 1, row + count);
-	while (count--)
-	{
-		item->insertChildBefore(row, new ParserEditorTreeItem(QString(), ParserEditorTreeItem::VOID, QString()));
-		row++;
-	}
-	endInsertRows();
+		row += item->childCount() + 1;
+	_undoStack->push(new InsertRowsCommand(this, row, count, parent));
 	return true;
+}
+
+static QPair<QString, QString> splitNumber(const QString &str)
+{
+	for (int i = str.size() - 1; i >= 0; i--)
+	{
+		if (str[i] < '0' || str[i] > '9')
+		{
+			if (i == str.size() - 1)
+			{
+				return {str, QString()};
+			}
+			else
+			{
+				return { str.left(i + 1), str.right(str.size() - 1 - i) };
+			}
+		}
+	}
+	return{ QString(), str };
 }
 
 bool ParserEditorTreeModel::duplicate(int row, const QModelIndex &parent /*= QModelIndex()*/)
 {
-	ParserEditorTreeItem *parentItem = static_cast<ParserEditorTreeItem*>(parent.internalPointer());
-	ParserEditorTreeItem *item = parentItem->child(row);
-	ParserEditorTreeItem *duplicated = item->duplicate();
-	beginInsertRows(parent, row + 1, row + 1);
-	parentItem->insertChildBefore(row + 1, duplicated);
-	endInsertRows();
+	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(parent.internalPointer());
+	ParserEditorTreeItem *duplicated = item->child(row)->duplicate();
+	QPair<QString, QString> nameSplited = splitNumber(duplicated->key());
+	if (nameSplited.second.isEmpty())
+	{
+		duplicated->setKey(duplicated->key() + "2");
+	}
+	else
+	{
+		duplicated->setKey(nameSplited.first + QString::number(nameSplited.second.toInt() + 1));
+	}
+	_undoStack->push(new InsertDataCommand(this, row + 1, { duplicated }, parent));
 	return true;
 }
 
@@ -86,14 +105,14 @@ bool ParserEditorTreeModel::insertable(const QModelIndex &index) const
 {
 	ParserEditorTreeItem *childItem = static_cast<ParserEditorTreeItem*>(index.internalPointer());
 	ParserEditorTreeItem *parentItem = childItem->parentItem();
-	if (parentItem == 0) //±íÊ¾ÕâÊÇroot ²»¿É²åÈë
+	if (parentItem == 0) //è¡¨ç¤ºè¿™æ˜¯root ä¸å¯æ’å…¥
 		return false;
-	return true; //Ö»ÒªÊÇ¸öÌõÄ¿¶¼ÔÚ×Öµä»òÕßÊı×éÏÂ ËùÒÔ¶¼¿ÉÒÔ²åÈë
+	return true; //åªè¦æ˜¯ä¸ªæ¡ç›®éƒ½åœ¨å­—å…¸æˆ–è€…æ•°ç»„ä¸‹ æ‰€ä»¥éƒ½å¯ä»¥æ’å…¥
 }
 
 bool ParserEditorTreeModel::removeable(const QModelIndex &index) const
 {
-	//¿É²åÈë¾Í¿ÉÒÔ±»É¾³ı
+	//å¯æ’å…¥å°±å¯ä»¥è¢«åˆ é™¤
 	return insertable(index);
 }
 
@@ -165,13 +184,104 @@ ParserEditorTreeItem * ParserEditorTreeModel::itemFromVariable(const QBkeVariabl
 	}
 	else if (var.isVoid())
 	{
-		parent = new ParserEditorTreeItem(QString(), ParserEditorTreeItem::VOID, QString());
+		parent = new ParserEditorTreeItem();
 	}
 	else if (var.isNum())
 	{
 		parent = new ParserEditorTreeItem(QString(), ParserEditorTreeItem::NUMBER, QString::number(var.toReal()));
 	}
 	return parent;
+}
+
+void ParserEditorTreeModel::insertRowsInternal(int row, int count, const QModelIndex & parent)
+{
+	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(parent.internalPointer());
+	beginInsertRows(parent, row, row + count - 1);
+	for (int i = 0; i < count; i++)
+	{
+		item->insertChildBefore(row + i, new ParserEditorTreeItem());
+	}
+	endInsertRows();
+}
+
+void ParserEditorTreeModel::insertDataInternal(int row, const QList<ParserEditorTreeItem*>& items, const QModelIndex & parent)
+{
+	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(parent.internalPointer());
+	int count = items.count();
+	beginInsertRows(parent, row, row + count - 1);
+	for (int i = 0; i < count; i++)
+	{
+		item->insertChildBefore(row + i, items[i]);
+	}
+	endInsertRows();
+}
+
+void ParserEditorTreeModel::removeRowsInternal(int row, int count, const QModelIndex & parent)
+{
+	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(parent.internalPointer());
+	beginRemoveRows(parent, row, row + count - 1);
+	item->removeChildrenAt(row, count);
+	endRemoveRows();
+}
+
+void ParserEditorTreeModel::setDataInternal(const QModelIndex & index, const QVariant & data)
+{
+	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(index.internalPointer());
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í±ä»»
+	if (index.column() == 1)
+	{
+		auto type = item->type();
+		if (item->setTypeString(data.toString())) 
+		{
+			if (type == ParserEditorTreeItem::DICTIONARY || type == ParserEditorTreeItem::ARRAY)
+			{
+				if (item->childCount())
+				{
+					beginRemoveRows(index, 0, item->childCount() - 1);
+					item->clear();
+					endRemoveRows();
+				}
+			}
+			else if (item->type() == ParserEditorTreeItem::DICTIONARY || item->type() == ParserEditorTreeItem::ARRAY)
+			{
+				item->setValue(QString());
+			}
+			else if (item->type() == ParserEditorTreeItem::NUMBER)
+			{
+				item->setValue(QString::number(item->value().toDouble()));
+			}
+			else if(item->type() == ParserEditorTreeItem::VOID)
+			{
+				item->setValue(QString());
+			}
+			QModelIndex index1 = this->index(index.row(), 0, index.parent());
+			QModelIndex index2 = this->index(index.row(), 2, index.parent());
+			emit dataChanged(index1, index2);
+		}
+	}
+	else
+	{
+		item->setData(index.column(), data);
+		emit dataChanged(index, index);
+	}
+}
+
+void ParserEditorTreeModel::replaceItemInternal(const QModelIndex & index, ParserEditorTreeItem *newitem)
+{
+	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(index.internalPointer());
+	ParserEditorTreeItem *parent = item->parentItem();
+	parent->replaceChildAt(item->row(), newitem);
+}
+
+QList<ParserEditorTreeItem *> ParserEditorTreeModel::itemsForRows(int row, int count, const QModelIndex &parent) const
+{
+	QList<ParserEditorTreeItem*> items;
+	ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(parent.internalPointer());
+	for (int i = row; i < row + count; i++)
+	{
+		items << item->child(i);
+	}
+	return items;
 }
 
 //! [2]
@@ -181,13 +291,27 @@ QVariant ParserEditorTreeModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
-
+	
     if (role != Qt::DisplayRole)
         return QVariant();
 
     ParserEditorTreeItem *item = static_cast<ParserEditorTreeItem*>(index.internalPointer());
     return item->data(index.column());
 }
+
+bool ParserEditorTreeModel::setData(const QModelIndex &index, const QVariant &value, int role /* = Qt::EditRole */)
+{
+	if (role == Qt::EditRole)
+	{
+		if (index.column() == 1)
+			_undoStack->push(new ChangeTypeCommand(this, index, value));
+		else
+			_undoStack->push(new ModifyDataCommand(this, index, value));
+		return true;
+	}
+	return false;
+}
+
 //! [3]
 
 //! [4]
@@ -273,3 +397,7 @@ int ParserEditorTreeModel::rowCount(const QModelIndex &parent) const
     return parentItem->childCount();
 }
 
+void ParserEditorTreeModel::sort(int column, Qt::SortOrder order /*= Qt::AscendingOrder*/)
+{
+
+}

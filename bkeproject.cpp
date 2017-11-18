@@ -34,15 +34,16 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 	info.Root = dest;
 	if (list.size() == 0){  //工程文件本身
 		info.RootName = "";
+		info.FullName = info.Dirs + info.Name;
 	}
 	else if (list.size() == 1){  //导入，脚本，资源
 		info.RootName = info.Name;
+		info.FullName = info.Dirs;
 	}
 	else{
 		info.RootName = list.at(1);
+		info.FullName = info.Dirs + info.Name;
 	}
-
-	info.FullName = info.Dirs + info.Name;
 }
 
 //新建一个工程
@@ -53,16 +54,16 @@ BkeProject::BkeProject(QObject *parent)
 	currentptr = 0;
 	analysis = 0;
 
-	fileico = new QIcon(":/project/source/file.png");
-	dirsico = new QIcon(":/project/source/doc.png");
-	baseico = new QIcon(":/project/source/database.png");
-	importico = new QIcon(":/project/source/import.png");
-	bksdocico = new QIcon(":/project/source/bksdoc.png");
-	sourcedocico = new QIcon(":/project/source/sourcedoc.png");
-	bksfileico = new QIcon(":/project/source/bksfile.png");
-	imgfileico = new QIcon(":/project/source/image.png");
-	volfileico = new QIcon(":/project/source/music.png");
-	movfileico = new QIcon(":/project/source/movie.png");
+	fileico = new QIcon(":/project/file.png");
+	dirsico = new QIcon(":/project/doc.png");
+	baseico = new QIcon(":/project/database.png");
+	importico = new QIcon(":/project/import.png");
+	bksdocico = new QIcon(":/project/bksdoc.png");
+	sourcedocico = new QIcon(":/project/sourcedoc.png");
+	bksfileico = new QIcon(":/project/bksfile.png");
+	imgfileico = new QIcon(":/project/image.png");
+	volfileico = new QIcon(":/project/music.png");
+	movfileico = new QIcon(":/project/movie.png");
 	config = nullptr;
 }
 
@@ -730,6 +731,7 @@ void BkeProject::AddFiles(const QStringList &ls, const ItemInfo &f)
 	for (auto &&s : ls)
 	{
 		FindItem(f.Root, s);
+		analysis->pushFile(f.FullName + "/" + s);
 	}
 	SortTree(f.Root);
 	WriteBkpFile();

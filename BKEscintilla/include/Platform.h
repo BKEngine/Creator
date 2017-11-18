@@ -42,13 +42,13 @@
 #undef PLAT_QT
 #define PLAT_QT 1
 
-// This is needed to work around an HP-UX bug with Qt4.
 #include <Qsci/qsciglobal.h>
-#include <qnamespace.h>
 QT_BEGIN_NAMESPACE
 class QPainter;
 QT_END_NAMESPACE
 
+// This is needed to work around an HP-UX bug with Qt4.
+#include <qnamespace.h>
 
 #elif defined(TK)
 #undef PLAT_TK
@@ -153,7 +153,7 @@ public:
 			(pt.y >= top) && (pt.y <= bottom);
 	}
 	bool ContainsWholePixel(Point pt) const {
-		// Does the rectangle contain all of the pixel to left/below the point 
+		// Does the rectangle contain all of the pixel to left/below the point
 		return (pt.x >= left) && ((pt.x+1) <= right) &&
 			(pt.y >= top) && ((pt.y+1) <= bottom);
 	}
@@ -279,9 +279,6 @@ struct FontParameters {
 class Font {
 protected:
 	FontID fid;
-#if PLAT_WX
-	int ascent;
-#endif
 	// Private so Font objects can not be copied
 	Font(const Font &);
 	Font &operator=(const Font &);
@@ -295,9 +292,6 @@ public:
 	FontID GetID() { return fid; }
 	// Alias another font - caller guarantees not to Release
 	void SetID(FontID fid_) { fid = fid_; }
-#if PLAT_WX
-	void SetAscent(int ascent_) { ascent = ascent_; }
-#endif
 	friend class Surface;
 	friend class SurfaceImpl;
 };
@@ -359,7 +353,7 @@ public:
 	virtual void SetUnicodeMode(bool unicodeMode_)=0;
 	virtual void SetDBCSMode(int codePage)=0;
 
-#if PLAT_QT
+#if defined(PLAT_QT)
     virtual void Init(QPainter *p)=0;
     virtual void DrawXPM(PRectangle rc, const XPM *xpm)=0;
 #endif
@@ -546,10 +540,6 @@ public:
 
 #ifdef SCI_NAMESPACE
 }
-#endif
-
-#if defined(__GNUC__) && defined(SCINTILLA_QT)
-#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
 
 #endif

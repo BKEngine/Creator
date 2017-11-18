@@ -10,6 +10,10 @@ ParserEditorTreeItem::ParserEditorTreeItem(const QString &key, Type type, const 
 	, m_parentItem(nullptr)
 {
 }
+ParserEditorTreeItem::ParserEditorTreeItem()
+	: ParserEditorTreeItem(QString(), ParserEditorTreeItem::VOID, QString())
+{
+}
 //! [0]
 
 //! [1]
@@ -51,6 +55,12 @@ void ParserEditorTreeItem::removeChildrenAt(int row, int count)
 	{
 		this->rebuildArrayName();
 	}
+}
+
+void ParserEditorTreeItem::replaceChildAt(int row, ParserEditorTreeItem * child)
+{
+	delete m_childItems[row];
+	m_childItems[row] = child;
 }
 
 void ParserEditorTreeItem::insertChildBefore(int pos, ParserEditorTreeItem *child)
@@ -171,18 +181,23 @@ QString ParserEditorTreeItem::typeString() const
 	return _typeStrings[_type];
 }
 
-void ParserEditorTreeItem::setTypeString(const QString &str)
+bool ParserEditorTreeItem::setTypeString(const QString &str)
 {
 	int i = 0;
+	Type type = _type;
 	for (auto && it : _typeStrings)
 	{
 		if (it == str)
 		{
-			_type = (Type)i;
-			return;
+			type = (Type)i;
+			break;
 		}
 		i++;
 	}
+	if (type == _type)
+		return false;
+	_type = type;
+	return true;
 }
 
 void ParserEditorTreeItem::rebuildArrayName()

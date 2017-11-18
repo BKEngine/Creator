@@ -2,6 +2,7 @@
 #define CODEWINDOW_H
 #include "weh.h"
 #include <QDockWidget>
+#include <QProcess>
 #include "topbarwindow.h"
 #include "bkeSci/bkescintilla.h"
 #include "projectwindow.h"
@@ -13,6 +14,7 @@
 #include <QFileSystemWatcher>
 #include "dia/searchbox.h"
 #include "dia/bkeleftfilewidget.h"
+#include "DebugServer.h"
 
 class BkeDocBase
 {
@@ -81,29 +83,27 @@ private:
 	QFileInfo info;
 };
 
-
+class AutoCompleteList;
 class CodeWindow : public QMainWindow
 {
 	Q_OBJECT
 
 public:
 
-	friend class SearchThread;
-
 	~CodeWindow();
 	CodeWindow(QWidget *parent = 0);
+
 	QSize sizeHint() const;
-	void OtherWinStartX(ProjectWindow *p, OtherWindow *win, BkeLeftFileWidget *flist);
-	void OtherWinOtherwin(OtherWindow *win);
-	void OtherWinProject(ProjectWindow *p);
-	void OtherwinFileList(BkeLeftFileWidget *flist);
+	void BindOtherWindow(OtherWindow *win);
+	void BindProjectWindow(ProjectWindow *p);
+	void BindFileListWidget(BkeLeftFileWidget *flist);
+
 	enum{
 		ERROR_NO,
 		ERROR_SAVE
 	};
 
 	BkeLeftFileWidget *filewidget;
-
 
 	QAction *jumpToDef;
 	QAction *jumpToCode;
@@ -138,6 +138,7 @@ public:
 	QAction *btngotolabellist;
 	QAction *btngotofile;
 	QAction *btnswitchfold;	//	全部折叠/全部展开
+	QAction *btnautofix; //自动纠正系统，类似于VS的Ctrl+.
 	QToolBar *toolbar;
 	QComboBox *slablelist;
 	QStringList slablels;
@@ -152,8 +153,11 @@ signals:
 signals:
 	void searchOne(const QString &file, const QString &fullfile, int line, int start, int end);
 
+private:
+	void AttachCurrentEdit();
+	void DetachCurrentEdit();
+
 public slots:
-	void onTimer();
 	bool CloseAll();
 	void ChangeCurrentEdit(int pos);
 	void SetCurrentEdit(int pos);
@@ -197,6 +201,8 @@ public slots:
 	void GotoLine();
 	void GotoLabel(int i);
 	void GotoLabel(QString label);
+	void GotoOrCreateLabel(QString label);
+	void CreateLabel(QString label);
 	void ActUndo();
 	void ActRedo();
 	void ActCurrentChange();
@@ -212,7 +218,7 @@ public slots:
 	void replaceAllFile(const QString &searchstr, const QString &replacestr, bool iscase, bool isregular, bool isword, bool stayopen);
 	void resetLexer();
 	void refreshLabel(BkeScintilla *sci);
-	void refreshLabel(std::set<QString> &l);
+	void refreshLabel(QSortedSet<QString> &l);
 	void SwitchFold();
 	void jumpToDefFunc();
 	void jumpToCodeFunc();
@@ -220,8 +226,10 @@ public slots:
 	void AddNavigation(const QString &file, int line);
 	void RemoveNavigation(const QString &file);
 	void CreateAndGotoLabel(QString label);
+	void AutoFix();
 
 private slots:
+	void onTimer();
 	void ShouldAddToNavigation();
 	void RefreshNavigation();
 	void NavigateTo(const QPair<QString, int> &target);
@@ -257,6 +265,9 @@ private:
 	QAction *pdeletemark;
 	QAction *pannote;
 	SearchBox *diasearch;
+	AutoCompleteList *aclist;
+	void ConnectAutoComplete(BkeScintilla *doc);
+	void DisconnectAutoComplete(BkeScintilla *doc);
 	QProgressBar *kag;
 	BkeScintilla *searchlablelater;
 
@@ -269,7 +280,6 @@ private:
 	int isCompileNotice;
 	bool labelbanned;
 
-	QSize hint;
 	QsciStyle ks1;
 	QsciStyle ks2;
 
@@ -293,12 +303,37 @@ private:
 	void CurrentConnect(bool c);
 	//bool ReadyCompile(const QString &file) ;
 	void CheckProblemMarks(BkeScintilla *edit, BkeMarkList *list);
+	void CheckRuntimeProblemMarks(BkeScintilla *edit, BkeMarkList *list);
 	void CheckBookMarks(BkeScintilla *edit, BkeMarkList *list);
 	void CheckMarks(BkeScintilla *edit, BkeMarkList *list);
 	void AddMarksToEdit();
 	void FileIOclose(const QStringList &list);
 	void DrawLine(bool isClear);
 	bool WriteOpenFile(const QString &dir);
+	void StartBKEProcess(const QStringList &args);
+	QProcess *bkeprocess = nullptr;
+
+	/////////////Debug Component///////////////
+	DebugServer *debugServer;
+private slots:
+	void DebugLogReceived(int32_t, QString);
+
+	// 事件劫持
+protected:
+	virtual bool eventFilter(QObject *watched, QEvent *event) override;
+
+	//Ctrl+点击 Goto宏定义/标签 管理
+private:
+	BkeIndicatorBase lastClickIndicator;
+	int lastClickIndicatorType = 0;
+	int lastMouseHoverPosition = -1;
+	bool clickGotoMode = false;
+	void enterClickGotoMode();
+	void leaveClickGotoMode();
+	void onHoverMove(QPoint pos);
+	void setClickIndicator(const BkeIndicatorBase &indicator, int id);
+private slots:
+	void indicatorReleased(int line, int index, Qt::KeyboardModifiers state);
 };
 
 #endif // CODEWINDOW_H

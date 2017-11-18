@@ -87,8 +87,8 @@
         <string>文本编辑器</string>
        </property>
        <property name="icon">
-        <iconset resource="../source.qrc">
-         <normaloff>:/info/source/textarea.png</normaloff>:/info/source/textarea.png</iconset>
+        <iconset resource="../source/source.qrc">
+         <normaloff>:/info/textarea.png</normaloff>:/info/textarea.png</iconset>
        </property>
       </item>
       <item>
@@ -96,8 +96,8 @@
         <string>环境</string>
        </property>
        <property name="icon">
-        <iconset resource="../source.qrc">
-         <normaloff>:/info/source/terminal.png</normaloff>:/info/source/terminal.png</iconset>
+        <iconset resource="../source/source.qrc">
+         <normaloff>:/info/terminal.png</normaloff>:/info/terminal.png</iconset>
        </property>
       </item>
       <item>
@@ -105,8 +105,8 @@
         <string>外观</string>
        </property>
        <property name="icon">
-        <iconset resource="../source.qrc">
-         <normaloff>:/info/source/product-design.png</normaloff>:/info/source/product-design.png</iconset>
+        <iconset resource="../source/source.qrc">
+         <normaloff>:/info/product-design.png</normaloff>:/info/product-design.png</iconset>
        </property>
       </item>
      </widget>
@@ -141,7 +141,7 @@
   </widget>
  </widget>
  <resources>
-  <include location="../source.qrc"/>
+  <include location="../source/source.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
-QT += network
+QT += network websockets
 
 greaterThan(QT_MAJOR_VERSION, 4): {
 QT += widgets
@@ -15,7 +15,7 @@ TARGET = BKE_Creator
 TEMPLATE = app
 
 CONFIG += warn_off qt
-CONFIG+= c++11
+CONFIG+= c++14
 
 DEFINES += QT SCI_LEXER SCINTILLA_QT BKE_CREATOR
 #if use in linux,you must use a full name
@@ -147,7 +147,10 @@ SOURCES += ./main.cpp \
     QPinyin/ResourceHelper.cpp \
     dia/qnofocusitemdelegate.cpp \
     dia/gotofiledialog.cpp \
-    qmacopenfileapplication.cpp
+    qmacopenfileapplication.cpp \
+    dia/autocompletelist.cpp \
+    DebugServer.cpp \
+    dia/ParserEditorUndoCommand.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -284,10 +287,13 @@ HEADERS  += \
     QPinyin/ResourceHelper.h \
     dia/qnofocusitemdelegate.h \
     dia/gotofiledialog.h \
-    qmacopenfileapplication.h
+    qmacopenfileapplication.h \
+    dia/autocompletelist.h \
+    DebugServer.h \
+    dia/ParserEditorUndoCommand.h
 
 RESOURCES += \
-    source.qrc \
+    source/source.qrc \
     QPinyin/res.qrc
 
 INCLUDEPATH += ./BKEscintilla ./BKEscintilla/lexlib ./BKEscintilla/include ./BKEscintilla/src ./BKEscintilla/Qt4Qt5 ./
@@ -306,7 +312,8 @@ FORMS += \
     dia/doubleinput.ui \
     dia/ParserEditor.ui \
     dia/openlabeldialog.ui \
-    dia/gotofiledialog.ui
+    dia/gotofiledialog.ui \
+    dia/autocompletelist.ui
 
 mac{
     QMAKE_INFO_PLIST = info-mac.plist

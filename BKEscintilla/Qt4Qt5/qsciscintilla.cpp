@@ -2,7 +2,7 @@
 // Scintilla.  It is modelled on QTextEdit - a method of the same name should
 // behave in the same way.
 //
-// Copyright (c) 2015 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2017 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -41,11 +41,6 @@
 #include "Qsci/qscistyle.h"
 #include "Qsci/qscistyledtext.h"
 
-struct QsciScintilla::Lexer
-{
-    QPointer<QsciLexer> object;
-};
-#define lex lexerStruct->object
 
 // Make sure these match the values in Scintilla.h.  We don't #include that
 // file because it just causes more clashes.
@@ -62,6 +57,9 @@ static const int defaultFoldMarginWidth = 14;
 // The default set of characters that make up a word.
 static const char *defaultWordChars = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
+// Forward declarations.
+static QColor asQColor(long sci_colour);
+
 
 // The ctor.
 QsciScintilla::QsciScintilla(QWidget *parent)
@@ -71,8 +69,7 @@ QsciScintilla::QsciScintilla(QWidget *parent)
       braceMode(NoBraceMatch), acSource(AcsNone), acThresh(-1),
       wchars(defaultWordChars), call_tips_position(CallTipsBelowText),
       call_tips_style(CallTipsNoContext), maxCallTips(-1),
-      use_single(AcusNever), explicit_fillups(""), fillups_enabled(false),
-      lexerStruct(new Lexer())
+      use_single(AcusNever), explicit_fillups(""), fillups_enabled(false)
 {
     connect(this,SIGNAL(SCN_MODIFYATTEMPTRO()),
              SIGNAL(modificationAttempted()));
@@ -89,6 +86,8 @@ QsciScintilla::QsciScintilla(QWidget *parent)
              SLOT(handleIndicatorRelease(int,int)));
     connect(this,SIGNAL(SCN_MARGINCLICK(int,int,int)),
              SLOT(handleMarginClick(int,int,int)));
+    connect(this,SIGNAL(SCN_MARGINRIGHTCLICK(int,int,int)),
+             SLOT(handleMarginRightClick(int,int,int)));
     connect(this,SIGNAL(SCN_SAVEPOINTREACHED()),
              SLOT(handleSavePointReached()));
     connect(this,SIGNAL(SCN_SAVEPOINTLEFT()),
@@ -152,7 +151,6 @@ QsciScintilla::~QsciScintilla()
 
     doc.undisplay(this);
     delete stdCmds;
-    delete lexerStruct;
 }
 
 
@@ -1080,12 +1078,24 @@ void QsciScintilla::convertEols(EolMode mode)
 }
 
 
+// Add an edge column.
+void QsciScintilla::addEdgeColumn(int colnr, const QColor &col)
+{
+    SendScintilla(SCI_MULTIEDGEADDLINE, colnr, col);
+}
+
+
+// Clear all multi-edge columns.
+void QsciScintilla::clearEdgeColumns()
+{
+    SendScintilla(SCI_MULTIEDGECLEARALL);
+}
+
+
 // Return the edge colour.
 QColor QsciScintilla::edgeColor() const
 {
-    long res = SendScintilla(SCI_GETEDGECOLOUR);
-
-    return QColor((int)res, ((int)(res >> 8)) & 0x00ff, ((int)(res >> 16)) & 0x00ff);
+    return asQColor(SendScintilla(SCI_GETEDGECOLOUR));
 }
 
 
@@ -1205,6 +1215,20 @@ QsciScintilla::WhitespaceVisibility QsciScintilla::whitespaceVisibility() const
 void QsciScintilla::setWhitespaceVisibility(WhitespaceVisibility mode)
 {
     SendScintilla(SCI_SETVIEWWS, mode);
+}
+
+
+// Return the tab draw mode.
+QsciScintilla::TabDrawMode QsciScintilla::tabDrawMode() const
+{
+    return (TabDrawMode)SendScintilla(SCI_GETTABDRAWMODE);
+}
+
+
+// Set the tab draw mode.
+void QsciScintilla::setTabDrawMode(TabDrawMode mode)
+{
+    SendScintilla(SCI_SETTABDRAWMODE, mode);
 }
 
 
@@ -1910,6 +1934,16 @@ void QsciScintilla::handleMarginClick(int pos, int modifiers, int margin)
 }
 
 
+// Handle the SCN_MARGINRIGHTCLICK notification.
+void QsciScintilla::handleMarginRightClick(int pos, int modifiers, int margin)
+{
+    int state = mapModifiers(modifiers);
+    int line = SendScintilla(SCI_LINEFROMPOSITION, pos);
+
+    emit marginRightClicked(margin, line, Qt::KeyboardModifiers(state));
+}
+
+
 // Handle the SCN_SAVEPOINTREACHED notification.
 void QsciScintilla::handleSavePointReached()
 {
@@ -2287,6 +2321,29 @@ QString QsciScintilla::text(int line) const
 }
 
 
+// Return the text between two positions.
+QString QsciScintilla::text(int start, int end) const
+{
+    char *buf = new char[end - start + 1];
+    SendScintilla(SCI_GETTEXTRANGE, start, end, buf);
+    QString text = bytesAsText(buf);
+    delete[] buf;
+
+    return text;
+}
+
+
+// Return the text as encoded bytes between two positions.
+QByteArray QsciScintilla::bytes(int start, int end) const
+{
+    QByteArray bytes(end - start + 1, '\0');
+
+    SendScintilla(SCI_GETTEXTRANGE, start, end, bytes.data());
+
+    return bytes;
+}
+
+
 // Set the given text.
 void QsciScintilla::setText(const QString &text)
 {
@@ -2530,6 +2587,34 @@ bool QsciScintilla::indentationsUseTabs() const
 void QsciScintilla::setIndentationsUseTabs(bool tabs)
 {
     SendScintilla(SCI_SETUSETABS, tabs);
+}
+
+
+// Return the number of margins.
+int QsciScintilla::margins() const
+{
+    return SendScintilla(SCI_GETMARGINS);
+}
+
+
+// Set the number of margins.
+void QsciScintilla::setMargins(int margins)
+{
+    SendScintilla(SCI_SETMARGINS, margins);
+}
+
+
+// Return the margin background colour.
+QColor QsciScintilla::marginBackgroundColor(int margin) const
+{
+    return asQColor(SendScintilla(SCI_GETMARGINBACKN, margin));
+}
+
+
+// Set the margin background colour.
+void QsciScintilla::setMarginBackgroundColor(int margin, const QColor &col)
+{
+    SendScintilla(SCI_SETMARGINBACKN, margin, col);
 }
 
 
@@ -3377,7 +3462,7 @@ void QsciScintilla::handleStyleFontChange(const QFont &f, int style)
 // Set the font for a style.
 void QsciScintilla::setStylesFont(const QFont &f, int style)
 {
-    SendScintilla(SCI_STYLESETFONT, style, f.family().toUtf8().data());
+    SendScintilla(SCI_STYLESETFONT, style, f.family().toLatin1().data());
     SendScintilla(SCI_STYLESETSIZEFRACTIONAL, style,
             long(f.pointSizeF() * SC_FONT_SIZE_MULTIPLIER));
 
@@ -3549,7 +3634,7 @@ bool QsciScintilla::findMatchingBrace(long &brace, long &other,BraceMatch mode)
             other = SendScintilla(SCI_GETLINEENDPOSITION, lineMaxSubord);
         }
         else
-            other = SendScintilla(SCI_BRACEMATCH, brace);
+            other = SendScintilla(SCI_BRACEMATCH, brace, 0L);
 
         if (other > brace)
             isInside = !isInside;
@@ -4061,17 +4146,11 @@ QString QsciScintilla::wordAtPosition(int position) const
 
     long start_pos = SendScintilla(SCI_WORDSTARTPOSITION, position, true);
     long end_pos = SendScintilla(SCI_WORDENDPOSITION, position, true);
-    int word_len = end_pos - start_pos;
 
-    if (word_len <= 0)
+    if (start_pos >= end_pos)
         return QString();
 
-    char *buf = new char[word_len + 1];
-    SendScintilla(SCI_GETTEXTRANGE, start_pos, end_pos, buf);
-    QString word = bytesAsText(buf);
-    delete[] buf;
-
-    return word;
+    return text(start_pos, end_pos);
 }
 
 
@@ -4386,4 +4465,14 @@ void QsciScintilla::set_shortcut(QAction *action, QsciCommand::Command cmd_id) c
 void QsciScintilla::delete_selection()
 {
     SendScintilla(SCI_CLEAR);
+}
+
+
+// Convert a Scintilla colour to a QColor.
+static QColor asQColor(long sci_colour)
+{
+    return QColor(
+            ((int)sci_colour) & 0x00ff,
+            ((int)(sci_colour >> 8)) & 0x00ff,
+            ((int)(sci_colour >> 16)) & 0x00ff);
 }

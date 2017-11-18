@@ -4,7 +4,6 @@
 #include <QDialog>
 #include <QHash>
 #include <QStandardItemModel>
-#include <QPointer>
 #include <memory>
 #include "QFuzzyMatcher/QFuzzyMatcher.h"
 

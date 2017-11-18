@@ -1,9 +1,8 @@
 ﻿#pragma once
 
 #include <QVector>
-#include <QSet>
+#include <QSortedSet>
 #include "ParserHelper/parser/parser.h"
-#include <set>
 
 using namespace std;
 
@@ -207,17 +206,11 @@ struct BaseNode
 
 class ParseData
 {
+	QByteArray qba;
 public:
-	ParseData(QByteArray &file, BKE_VarClosure *clo);
+	ParseData(const QByteArray &file, BKE_VarClosure *clo);
 
-	~ParseData()
-	{
-		delete[] textbuf;
-		fileclo->clear();
-		fileclo->release();
-		for (auto &it : fileNodes)
-			delete it;
-	}
+	~ParseData();
 
 	//BkeScintilla *scifile;
 
@@ -225,7 +218,7 @@ public:
 
 	QList<QMap<int, BaseNode*>::iterator> labels;
 
-	void getLabels(set<QString> &l);
+	void getLabels(QSortedSet<QString> &l);
 
 	//void insertChars(Pos p, Pos offset);
 
@@ -239,6 +232,7 @@ public:
 	
 	BaseNode *findNode(/*Pos p*/int pos);
 	BaseNode *findLastLabelNode(/*Pos p*/int pos);
+	BaseNode *findNextLabelNode(/*Pos p*/int pos);
 
 	bool checkLabel(BaseNode *node);
 	bool checkCommand(BaseNode *node, bool startwithat);
@@ -288,7 +282,7 @@ public:
 	
 	bool refresh;
 
-	char *textbuf;
+	const char *textbuf;
 
 	bool isLineStart;
 
@@ -361,50 +355,3 @@ public:
 
 	BKE_Variable analysisToPos(BKE_VarClosure *clo, int pos);
 };
-
-inline bool isVarName(const QString &s)
-{
-	if (s.isEmpty())
-		return false;
-	bool r = true;
-	QByteArray ba = s.toUtf8();
-	for (int i = 0; i < ba.length(); i++)
-	{
-		unsigned char c = ba[i];
-		if (i == 0 && isalpha(c))
-			continue;
-		if (i > 0 && isalnum(c))
-			continue;
-		if (c == '_' || c >= 0x80)
-			continue;
-		r = false;
-		break;
-	}
-	return r;
-}
-
-inline void getAllMembers(BKE_VarClass *cla, set<QString> &params)
-{
-	for (int i = 0; i < cla->parents.size(); i++)
-		getAllMembers(cla->parents[i], params);
-	for (auto &it : cla->varmap)
-	{
-		if (it.second.getType() == VAR_FUNC)
-			params.insert(QString::fromStdWString(it.first.getConstStr() + L"()?3"));
-		else
-			params.insert(QString::fromStdWString(it.first.getConstStr() + L"?0"));
-	}
-}
-
-inline void getAllMembers(BKE_VarClosure *clo, set<QString> &params)
-{
-	if (clo->parent)
-		getAllMembers(clo->parent, params);
-	for (auto &it : clo->varmap)
-	{
-		if (it.second.getType() == VAR_FUNC)
-			params.insert(QString::fromStdWString(it.first.getConstStr() + L"()?3"));
-		else
-			params.insert(QString::fromStdWString(it.first.getConstStr() + L"?0"));
-	}
-}

@@ -25,7 +25,7 @@ OtherBasicWin::OtherBasicWin(QWidget *parent)
 
     bar->addWidget(winlist) ;
     QToolButton *llm = new QToolButton(this) ;
-    llm->setIcon(QIcon(":/pedit/source/column.png"));
+    llm->setIcon(QIcon(":/pedit/column.png"));
     llm->setText("分栏");
 
     llm->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectbtn").toString());
@@ -33,7 +33,7 @@ OtherBasicWin::OtherBasicWin(QWidget *parent)
     connect(llm,SIGNAL(clicked()),this,SLOT(AddWindow())) ;
 
     llm = new QToolButton(this) ;
-    llm->setIcon(QIcon(":/pedit/source/close2.png"));
+    llm->setIcon(QIcon(":/pedit/close2.png"));
     llm->setText("关闭");
     llm->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/projectbtn").toString());
     bar->addWidget(llm) ;

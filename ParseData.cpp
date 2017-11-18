@@ -55,13 +55,10 @@ void erase(Pos p, Pos &org, Pos off)
 	}
 }
 
-ParseData::ParseData(QByteArray &file, BKE_VarClosure *clo)
+ParseData::ParseData(const QByteArray &file, BKE_VarClosure *clo)
+	: qba(file)
 {
-	int len = file.length();
-	textbuf = new char[len + 1];
-	//textbuf = file.data();
-	memcpy(textbuf, file.data(), len);
-	textbuf[len] = 0;
+	textbuf = qba.constData();
 	isLineStart = true;
 	refresh = true;
 	fileclo = new BKE_VarClosure();
@@ -71,7 +68,15 @@ ParseData::ParseData(QByteArray &file, BKE_VarClosure *clo)
 	fileclo->assignStructure(clo, pMap, true);
 }
 
-void ParseData::getLabels(set<QString> &l)
+ParseData::~ParseData()
+{
+	fileclo->clear();
+	fileclo->release();
+	for (auto &it : fileNodes)
+		delete it;
+}
+
+void ParseData::getLabels(QSortedSet<QString> &l)
 {
 	for (auto &it : labels)
 	{
@@ -252,6 +257,20 @@ BaseNode * ParseData::findLastLabelNode(int pos)
 	return *it;
 }
 
+BaseNode * ParseData::findNextLabelNode(int pos)
+{
+	auto it = fileNodes.lowerBound(pos);
+	if (it == fileNodes.end())
+		return NULL;
+	while (!(*it)->isLabel())
+	{
+		++it;
+		if (it == fileNodes.end())
+			return NULL;
+	}
+	return *it;
+}
+
 char ParseData::fetchNextOne()
 {
 	char ch = textbuf[idx];
@@ -262,7 +281,7 @@ char ParseData::fetchNextOne()
 	{
 		int rawidx = idx + 2;
 		skipLineComment();
-		lastComment = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
+		lastComment = QString::fromUtf8(textbuf + rawidx, idx - rawidx);
 		return textbuf[idx];
 	}
 	else if (ch == '/' && ch2 == '*')
@@ -270,7 +289,7 @@ char ParseData::fetchNextOne()
 		int rawidx = idx + 2;
 		if (skipBlockComment())
 		{
-			lastComment = QString::fromStdString(string(textbuf + rawidx, idx - 2 - rawidx));
+			lastComment = QString::fromUtf8(textbuf + rawidx, idx - 2 - rawidx);
 		}
 		return textbuf[idx];
 	}
@@ -315,7 +334,7 @@ bool ParseData::skipBlockComment()
 	}
 	if (!s)
 	{
-		infos.push_back({ 3, 9, idx - 2, 1 });
+		infos.push_back({ BkeScintilla::BKE_INDICATOR_WARNING, 9, idx - 2, 1 });
 	}
 	else
 		idx++;
@@ -502,12 +521,12 @@ QString ParseData::readValue(bool startwithat)
 				if (_stack.empty())
 				{
 					//缺少对应的(
-					infos.push_back({ 2, 3, idx, 1 });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 3, idx, 1 });
 				}
 				else
 				{
 					//此处应为其它括号
-					infos.push_back({ 2, 6 + _stack.back(), idx, 1 });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 6 + _stack.back(), idx, 1 });
 				}
 			}
 		}
@@ -523,12 +542,12 @@ QString ParseData::readValue(bool startwithat)
 				if (_stack.empty())
 				{
 					//缺少对应的[
-					infos.push_back({ 2, 4, idx, 1 });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 4, idx, 1 });
 				}
 				else
 				{
 					//此处应为其它括号
-					infos.push_back({ 2, 6 + _stack.back(), idx, 1 });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 6 + _stack.back(), idx, 1 });
 				}
 			}
 		}
@@ -544,12 +563,12 @@ QString ParseData::readValue(bool startwithat)
 				if (_stack.empty())
 				{
 					//缺少对应的{
-					infos.push_back({ 2, 5, idx, 1 });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 5, idx, 1 });
 				}
 				else
 				{
 					//此处应为其它括号
-					infos.push_back({ 2, 6 + _stack.back(), idx, 1 });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 6 + _stack.back(), idx, 1 });
 				}
 			}
 		}
@@ -561,12 +580,12 @@ QString ParseData::readValue(bool startwithat)
 				if (_stack.empty())
 				{
 					//缺少对应的(
-					infos.push_back({ 2, 2, idx, 1 });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 2, idx, 1 });
 				}
 				else
 				{
 					//此处应为其它括号
-					infos.push_back({ 2, 6 + _stack.back(), idx, 1 });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 6 + _stack.back(), idx, 1 });
 				}
 				_stack.clear();
 			}
@@ -577,12 +596,12 @@ QString ParseData::readValue(bool startwithat)
 	if (yinhao)
 	{
 		//字符串未完结
-		infos.push_back({ 2, 9, posstack.back(), idx - posstack.back() });
+		infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 9, posstack.back(), idx - posstack.back() });
 	}
 	else if (!_stack.empty())
 	{
 		//此处应为其它括号
-		infos.push_back({ 2, 6 + _stack.back(), posstack.back(), idx - posstack.back() });
+		infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 6 + _stack.back(), posstack.back(), idx - posstack.back() });
 		_stack.clear();
 	}
 	QString tmp;
@@ -639,6 +658,7 @@ QString readName(unsigned char *buf, int &start, int end)
 	return QString();
 }
 
+/*
 QString readValue(unsigned char *buf, int &start, int end, bool startwithat, BkeScintilla *scifile, int startpos)
 {
 	enum BracketType
@@ -819,7 +839,7 @@ QString readValue(unsigned char *buf, int &start, int end, bool startwithat, Bke
 	QString tmp;
 	tmp.prepend(ba);
 	return tmp;
-}
+}*/
 
 bool skipSpace(char *buf, int &start, int end)
 {
@@ -995,7 +1015,7 @@ repos:
 			{
 				int rawidx = idx;
 				skipLineComment();
-				lastComment = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
+				lastComment = QString::fromUtf8(textbuf + rawidx, idx - rawidx);
 				delete node;
 				continue;
 			}
@@ -1016,7 +1036,7 @@ repos:
 				node->name = readCmdName(true);
 				if (node->name.isEmpty())
 				{
-					infos.push_back({ 3, 11, node->startPos, 1 });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_WARNING, 11, node->startPos, 1 });
 				}
 				skipSpace();
 				if (!isLineEnd())
@@ -1024,7 +1044,7 @@ repos:
 					int start = idx;
 					skipLineComment();
 					int len = idx - start;
-					infos.push_back({ 3, 1, start, len });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_WARNING, 1, start, len });
 				}
 				node->endPos = idx - 1;
 				auto it = fileNodes.insert(node->startPos, node);
@@ -1057,7 +1077,7 @@ repos:
 			node->name = readCmdName(startwithat);
 			if (node->name.isEmpty())
 			{
-				infos.push_back({ 3, 2, node->startPos, 1 });
+				infos.push_back({ BkeScintilla::BKE_INDICATOR_WARNING, 2, node->startPos, 1 });
 			}
 			skipSpace();
 			ch = fetchNextOne();
@@ -1097,7 +1117,7 @@ repos:
 				{
 					int start = idx;
 					skipLineComment();
-					infos.push_back({ 2, 12, start, idx - start });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 12, start, idx - start });
 				}
 			}
 			node->endPos = idx;
@@ -1124,7 +1144,7 @@ repos:
 			{
 				rawidx = idx;
 				skipLineComment();
-				node->name = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
+				node->name = QString::fromUtf8(textbuf + rawidx, idx - rawidx);
 				node->endPos = idx - 1;
 				fileNodes.insert(node->startPos, node);
 			}
@@ -1143,11 +1163,11 @@ repos:
 					skipSpace();
 					ch = textbuf[idx];
 				}
-				node->name = QString::fromStdString(string(textbuf + rawidx, idx - rawidx));
+				node->name = QString::fromUtf8(textbuf + rawidx, idx - rawidx);
 				node->endPos = ch ? idx + 1 : idx - 1;
 				if (!ch)
 				{
-					infos.push_back({ 2, 13, idx - 1, 1 });
+					infos.push_back({ BkeScintilla::BKE_INDICATOR_ERROR, 13, idx - 1, 1 });
 				}
 				else
 					idx += 2;
