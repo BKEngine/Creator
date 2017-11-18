@@ -64,7 +64,7 @@ bool AutoCompleteList::OnKeyPress(int key)
 	{
 		Cancel();
 	}
-	else if (key == Qt::Key_Return || key == Qt::Key_Enter)
+	else if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Tab)
 	{
 		emit OnSelected(matches[ui->listWidget->currentRow()]);
 		this->hide();
