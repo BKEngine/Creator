@@ -19,6 +19,8 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	setUtf8(true);
 
 	deflex = new QsciLexerBkeScript(this);
+	//pdata = new ParseData(this);
+	setLexer(deflex);
 
 	setMarginLineNumbers(0, false);
 	setMarginWidth(0, 48);
@@ -86,9 +88,6 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	LastLine = -1;
 	ChangeStateFlag = 0;
 	WorkingUndoDepth = 0;
-
-	//pdata = new ParseData(this);
-	setLexer(deflex);
 
 	standardCommands()->find(QsciCommand::LineCut)->setKey(0);
 

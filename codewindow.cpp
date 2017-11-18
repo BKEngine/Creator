@@ -1297,11 +1297,14 @@ void CodeWindow::ToLocation(BkeMarkerBase *p, const QString &prodir)
 	//        addFile(p->FullName,0);
 	//    }
 	//    else  addFile(p->FullName,pro->FileDir());
+	int docLine = currentedit->SendScintilla(BkeScintilla::SCI_VISIBLEFROMDOCLINE, p->Atpos>=1 ? p->Atpos - 1: 0);
+	currentedit->setFirstVisibleLine(docLine);
 
-	if (p->Atpos > 1)
-		currentedit->setFirstVisibleLine(p->Atpos - 1);
-	else
-		currentedit->setFirstVisibleLine(p->Atpos);
+	//if (p->Atpos > 1)
+	//	currentedit->setFirstVisibleLine(p->Atpos - 1);
+	//else
+	//	currentedit->setFirstVisibleLine(p->Atpos);
+
 	if (p->Type == BkeMarkSupport::BKE_MARK_SEARCH)
 	{
 		BkeIndicatorBase in;
@@ -1494,6 +1497,7 @@ void CodeWindow::StartBKEProcess(const QStringList &args)
 		bkeprocess->waitForFinished();
 	}
 	bkeprocess = new QProcess(this);
+	bkeprocess->setProcessChannelMode(QProcess::ForwardedChannels);
 	connect(bkeprocess, (void (QProcess::*)(int))&QProcess::finished, [this](int) {
 		bkeprocess->deleteLater();
 		bkeprocess = nullptr;

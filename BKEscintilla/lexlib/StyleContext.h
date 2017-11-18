@@ -59,7 +59,7 @@ public:
 	Sci_Position widthNext;
 
 	StyleContext(Sci_PositionU startPos, Sci_PositionU length,
-                        int initStyle, LexAccessor &styler_, char chMask='\377') :
+                        int initStyle, LexAccessor &styler_, int chMask='\377') :
 		styler(styler_),
 		multiByteAccess(0),
 		endPos(startPos + length),

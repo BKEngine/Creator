@@ -38,6 +38,8 @@ public:
 	virtual void SCI_METHOD StartStyling(Sci_Position position, char mask) = 0;
 	virtual bool SCI_METHOD SetStyleFor(Sci_Position length, char style) = 0;
 	virtual bool SCI_METHOD SetStyles(Sci_Position length, const char *styles) = 0;
+	//user-defined
+	virtual bool SCI_METHOD SetSingleStyles(Sci_Position start, Sci_Position length, unsigned char styles) { return true; };
 	virtual void SCI_METHOD DecorationSetCurrentIndicator(int indicator) = 0;
 	virtual void SCI_METHOD DecorationFillRange(Sci_Position position, int value, Sci_Position fillLength) = 0;
 	virtual void SCI_METHOD ChangeLexerState(Sci_Position start, Sci_Position end) = 0;

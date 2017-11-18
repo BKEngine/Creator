@@ -156,7 +156,7 @@ void ProjectWindow::OpenProjectFile(QString file)
 		return;
 	}
 
-	if (file.endsWith(".bkscr"))
+	if (file.endsWith(".bkscr") || file.endsWith(".txt") || file.endsWith(".csv"))
 	{
 		emit OpenBkscrFile(name);
 	}
@@ -359,7 +359,7 @@ void ProjectWindow::AddFiles(const ItemInfo &f)
 	}
 	QString path = workpro->ProjectDir() + f.getFullName();
 	if (f.RootName == "宏" || f.RootName == "脚本"){
-		ls = QFileDialog::getOpenFileNames(this, "添加文件", path, "bkscr脚本(*.bkscr)");
+		ls = QFileDialog::getOpenFileNames(this, "添加文件", path, "bkscr脚本(*.bkscr);;Bagel脚本(*.bkpsr);;文本文件(*.txt *.csv)");
 	}
 	else ls = QFileDialog::getOpenFileNames(this, "添加文件", path, "所有文件(*.*)");
 

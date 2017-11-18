@@ -274,14 +274,22 @@ void ParserEditor::load()
 		return;
 	}
 	
-	QBkeVariable var = QBkeVariable::fromString(text);
-	if (!var.isArray() && !var.isDic())
+	try
+	{
+		QBkeVariable var = QBkeVariable::fromString(text);
+		if (!var.isArray() && !var.isDic())
+		{
+			_error = "根节点应该是Dictionary或者Array。";
+			return;
+		}
+		model->clear();
+		model->buildRoot(var);
+		ui->treeView->expandAll();
+	}
+	catch (...)
 	{
 		_error = "根节点应该是Dictionary或者Array。";
 		return;
 	}
-	model->clear();
-	model->buildRoot(var);
-	ui->treeView->expandAll();
 }
 

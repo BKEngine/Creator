@@ -255,11 +255,11 @@ public:
 private:
 	int last_state;
 
-	void setMask(char m)
+	void setMask(unsigned char m)
 	{
 		cur_mask |= m;
 	}
-	void removeMask(int m)
+	void removeMask(unsigned char m)
 	{
 		cur_mask &= ~m;
 	}
@@ -300,7 +300,7 @@ private:
 
 bool BKE_Lexer::ParseVarname(bool forceVariable)
 {
-	QByteArray qba;
+	QString qba;
 	qba.append(styler->chPrev);
 	while (styler->More())
 	{
@@ -312,7 +312,7 @@ bool BKE_Lexer::ParseVarname(bool forceVariable)
 		else
 			break;
 	}
-	if (!forceVariable && info->BagelWords.contains(QString::fromUtf8(qba)))
+	if (!forceVariable && info->BagelWords.contains(/*QString::fromUtf8(qba)*/qba))
 	{
 		styler->SetState(last_state | cur_mask);
 	}
@@ -633,7 +633,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
 			break;
 		}
-		if (isspace(styler->ch) && !ignoreSpace && stack.empty())
+		if (iswspace(styler->ch) && !ignoreSpace && stack.empty())
 		{
 			removeMask(BEGAL_MASK);
 			styler->SetState(SCE_BKE_DEFAULT | cur_mask);
@@ -666,7 +666,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 			bool error = false;
 			while (!styler->atLineEnd && styler->More())
 			{
-				if (isspace(styler->ch))
+				if (iswspace(styler->ch))
 					styler->Forward();
 				else
 				{
@@ -824,7 +824,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 				ParseVarname(lastOpIsDot);
 				nextIsLed = true;
 			}
-			else if (isspace(styler->ch))
+			else if (iswspace(styler->ch))
 			{
 				styler->SetState(defaultState | cur_mask);
 				lastOp = 0;
@@ -842,7 +842,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 							styler->Forward();
 						}
 					}
-					else if (isspace(styler->ch))
+					else if (iswspace(styler->ch))
 						styler->Forward();
 					else
 						break;
@@ -872,11 +872,11 @@ void BKE_Lexer::DoCommand()
 	styler->SetState(styler->state | cur_mask);
 	//bool error = false;
 	QString cmdName;
-	if (!styler->atLineEnd && !isspace(styler->ch) && styler->ch != ']')
+	if (!styler->atLineEnd && !iswspace(styler->ch) && styler->ch != ']')
 	{
 		while (styler->More())
 		{
-			if (isspace(styler->ch) || styler->ch == ']')
+			if (iswspace(styler->ch) || styler->ch == ']')
 			{
 				break;
 			}
@@ -909,7 +909,7 @@ void BKE_Lexer::DoCommand()
 	//prop-value
 	while (styler->More() && !styler->atLineEnd && styler->ch != ']')
 	{
-		if (isspace(styler->ch))
+		if (iswspace(styler->ch))
 		{
 			styler->Forward();
 			continue;
@@ -980,11 +980,11 @@ void BKE_Lexer::DoAtCommand()
 	styler->SetState(styler->state | cur_mask);
 	//check cmd name
 	QString cmdName;
-	if (!styler->atLineEnd && !isspace(styler->ch))
+	if (!styler->atLineEnd && !iswspace(styler->ch))
 	{
 		while (styler->More())
 		{
-			if (isspace(styler->ch))
+			if (iswspace(styler->ch))
 			{
 				break;
 			}
@@ -1016,7 +1016,7 @@ void BKE_Lexer::DoAtCommand()
 	//prop-value
 	while (styler->More() && !styler->atLineEnd)
 	{
-		if (isspace(styler->ch))
+		if (iswspace(styler->ch))
 		{
 			styler->Forward();
 			continue;
@@ -1089,7 +1089,7 @@ void BKE_Lexer::ContinueLabel()
 		//if (!sp)
 		//	ba.append(styler->ch);
 		styler->Forward();
-		//sp = isspace(styler->ch);
+		//sp = iswspace(styler->ch);
 	}
 	removeMask(CMD_MASK);
 	styler->SetState(SCE_BKE_DEFAULT | cur_mask);
