@@ -29,7 +29,8 @@ public:
 	bool OnKeyPress(int key);
 
 public slots:
-	void Start(const QPoint &pos);
+	void Start(const QList<QPair<QString, int>> &list, const QString &str, const QPoint &pos);
+	void ShowAt(const QPoint &pos);
 	void Cancel();
 	void Match(const QString &str);
 

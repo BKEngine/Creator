@@ -90,11 +90,18 @@ void AutoCompleteList::Cancel()
 	emit OnCanceled();
 }
 
-void AutoCompleteList::Start(const QPoint &pos)
+void AutoCompleteList::ShowAt(const QPoint &pos)
 {
 	this->move(pos);
 	this->pos = pos;
 	this->show();
+}
+
+void AutoCompleteList::Start(const QList<QPair<QString, int>> &list, const QString &str, const QPoint &pos)
+{
+	SetList(list);
+	ShowAt(pos);
+	Match(str);
 }
 
 void AutoCompleteList::Match(const QString &str)

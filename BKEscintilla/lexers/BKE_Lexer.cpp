@@ -304,7 +304,7 @@ bool BKE_Lexer::ParseVarname(bool forceVariable)
 	qba.append(styler->chPrev);
 	while (styler->More())
 	{
-		if (isalnum(styler->ch) || styler->ch == '_' || styler->ch >= 0x80)
+		if (styler->ch >= 0x80 || styler->ch == '_' || isalnum(styler->ch))
 		{
 			qba.append(styler->ch);
 			styler->Forward();
@@ -817,7 +817,7 @@ void BKE_Lexer::ParseBegal(bool ignoreLineEnd, bool ignoreSpace, bool atCommand)
 				}
 				styler->Forward();
 			}
-			else if (isalpha(styler->ch) || styler->ch == '_' || styler->ch >= 0x80)
+			else if (iswalpha(styler->ch) || styler->ch == '_' || styler->ch >= 0x80)
 			{
 				styler->SetState(SCE_BKE_PARSER_KEYWORD | cur_mask);
 				styler->Forward();
@@ -1117,7 +1117,7 @@ void BKE_Lexer::ContinueLabelInParser()
 			styler->Forward();
 			ContinueBlockComment();
 		}
-		else if (isalnum(styler->ch) || styler->ch == '_' || styler->ch >= 0x80)
+		else if (styler->ch >= 0x80 || styler->ch == '_' || isalnum(styler->ch))
 		{
 			styler->Forward();
 		}
