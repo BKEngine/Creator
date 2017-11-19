@@ -224,6 +224,10 @@ private:
 	QTimer highlightTimer;
 	void CancelHighlight();
 	void ShowHighlight();
+
+	//IME相关，给QT修锅
+protected:
+	virtual void inputMethodEvent(QInputMethodEvent *event) override;
 };
 
 #endif // BKESCINTILLA_H

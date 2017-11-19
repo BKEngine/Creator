@@ -2151,6 +2151,13 @@ void BkeScintilla::ShowHighlight()
 	isHighlightShown = true;
 }
 
+void BkeScintilla::inputMethodEvent(QInputMethodEvent * event)
+{
+	if (!hasFocus())
+		event->setCommitString(QString());
+	QsciScintilla::inputMethodEvent(event);
+}
+
 BkeIndicatorBase BkeScintilla::GetRangeForStyle(int position, unsigned char style) const
 {
 	BkeIndicatorBase indicator;
