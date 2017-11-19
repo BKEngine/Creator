@@ -1862,9 +1862,9 @@ void BkeScintilla::BkeStartUndoAction(bool newUndo/* = true*/)
 
 void BkeScintilla::BkeEndUndoAction()
 {
-	WorkingUndoDepth--;
-	if (WorkingUndoDepth)
+	if (!WorkingUndoDepth)
 		return;
+	WorkingUndoDepth = 0;
 	QsciScintilla::endUndoAction();
 }
 
