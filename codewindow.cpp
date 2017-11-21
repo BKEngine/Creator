@@ -2128,8 +2128,14 @@ void CodeWindow::onHoverMove(QPoint pos)
 		{
 			indicator.SetStart(indicator.Start() + 1);
 		}
-		setClickIndicator(indicator, BkeScintilla::BKE_INDICATOR_CLICK_COMMAND);
-		return;
+		QString cmd = currentedit->TextForRange(indicator);
+		BKEMacros m;
+		if (currentedit->analysis->findMacro(cmd, &m))
+		{
+			setClickIndicator(indicator, BkeScintilla::BKE_INDICATOR_CLICK_COMMAND);
+			return;
+		}
+		goto end;
 	}
 	indicator = currentedit->GetRangeForStyle(position, SCE_BKE_COMMAND2);
 	if (!indicator.IsNull())
@@ -2138,11 +2144,22 @@ void CodeWindow::onHoverMove(QPoint pos)
 		{
 			indicator.SetStart(indicator.Start() + 1);
 		}
-		else if (currentedit->GetByte(indicator.Start()) != ']')
+		else if (currentedit->GetByte(indicator.Start()) == ']')
+		{
+			return;
+		}
+		if (currentedit->GetByte(indicator.End() - 1) == ']')
+		{
+			indicator.SetEnd(indicator.End() - 1);
+		}
+		QString cmd = currentedit->TextForRange(indicator);
+		BKEMacros m;
+		if (currentedit->analysis->findMacro(cmd, &m))
 		{
 			setClickIndicator(indicator, BkeScintilla::BKE_INDICATOR_CLICK_COMMAND);
 			return;
 		}
+		goto end;
 	}
 	indicator = currentedit->GetRangeForStyle(position, SCE_BKE_LABEL_IN_PARSER);
 	if (!indicator.IsNull())
@@ -2150,6 +2167,7 @@ void CodeWindow::onHoverMove(QPoint pos)
 		setClickIndicator(indicator, BkeScintilla::BKE_INDICATOR_CLICK_LABEL);
 		return;
 	}
+end:
 	setClickIndicator(BkeIndicatorBase(), 0);
 }
 

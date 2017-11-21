@@ -1803,6 +1803,7 @@ void BkeScintilla::ClearSelection(int pos)
 //从区域中注释，反注释
 void BkeScintilla::BkeAnnotateSelect()
 {
+	ChangeIgnore++;
 	BkeStartUndoAction(false);
 	int from, to;
 	if (!hasSelectedText()){
@@ -1841,6 +1842,7 @@ void BkeScintilla::BkeAnnotateSelect()
 		}
 	}
 	BkeEndUndoAction();
+	ChangeIgnore--;
 }
 
 
