@@ -785,9 +785,7 @@ void BkeScintilla::UpdateAutoComplete()
 			{
 				completeList = GetValList(ls, tmp);
 			}
-			autoCompleteContext = ls.back();
-			if (autoCompleteContext == ".")
-				__debugbreak();
+            autoCompleteContext = ls.back();
 			autoCompleteType = SHOW_AUTOVALLIST;
 		}
 		else if (style & 128 /*CMD_MASK*/ || (style & 63) == SCE_BKE_COMMAND || (style & 63) == SCE_BKE_COMMAND2)
