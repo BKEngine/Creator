@@ -176,7 +176,16 @@ void MainWindow::CreateMenu()
 	wmenu->setStyleSheet(BKE_SKIN_SETTING->value(BKE_SKIN_CURRENT+"/menu").toString());
 	wmenu->addAction("帮助文件") ;
 	connect(wmenu->addAction("检查更新"),SIGNAL(triggered()),this,SLOT(CheckUpdate())) ;
-	connect(wmenu->addAction("(开启/关闭)自动更新"),SIGNAL(triggered()),this,SLOT(OCupdate())) ;
+	connect(wmenu->addAction("(开启/关闭)自动更新"), SIGNAL(triggered()), this, SLOT(OCupdate()));
+	togenvmobile = new QAction("模拟手机环境启动BKE", this);
+	togenvmobile->setCheckable(true);
+	togenvmobile->setChecked(BKE_SKIN_SETTING->value("EnvMobile").toBool());
+	connect(togenvmobile, &QAction::triggered, [this](bool b) {
+		codeedit->SetEnvMobile(b);
+		BKE_SKIN_SETTING->setValue("EnvMobile", b);
+	});
+	codeedit->SetEnvMobile(BKE_SKIN_SETTING->value("EnvMobile").toBool());
+	wmenu->addAction(togenvmobile);
 	connect(wmenu->addAction("API列表"),SIGNAL(triggered()),this,SLOT(OpenAPIList())) ;
 	connect(wmenu->addAction("关于..."),SIGNAL(triggered()),this,SLOT(AboutBkeCreator())) ;
 

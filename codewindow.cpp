@@ -1526,12 +1526,18 @@ void CodeWindow::StartBKEProcess(const QStringList &args)
 //运行BKEngine.exe
 void CodeWindow::RunBKE()
 {
-	StartBKEProcess(QStringList() << "-nologo");
+	auto args = QStringList() << "-nologo" << BKE_extraArgs;
+	if (envMobile)
+		args << "-envmobile";
+	StartBKEProcess(args);
 }
 
 void CodeWindow::RunBKEWithArgs()
 {
-	StartBKEProcess(QStringList() << "-nologo" << BKE_extraArgs);
+	auto args = QStringList() << "-nologo" << BKE_extraArgs;
+	if (envMobile)
+		args << "-envmobile";
+	StartBKEProcess(args);
 }
 
 void CodeWindow::AnnotateSelect()
@@ -2114,6 +2120,11 @@ void CodeWindow::setClickIndicator(const BkeIndicatorBase &indicator, int id)
 		lastClickIndicatorType = id;
 		currentedit->SetIndicator(id, indicator);
 	}
+}
+
+void CodeWindow::SetEnvMobile(bool enabled)
+{
+	envMobile = enabled;
 }
 
 void CodeWindow::onHoverMove(QPoint pos)

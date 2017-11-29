@@ -75,6 +75,7 @@ private:
 	QAction *btnopenprojectact;
 	QAction *btnopenfileact;
 	QAction *btnnewfileact;
+	QAction *togenvmobile;
 	QAction *btnReleaseGame;
 	QAction *btncloseprojectact;
 	QToolBar *btnbar;

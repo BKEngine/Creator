@@ -284,6 +284,7 @@ private:
 	QsciStyle ks2;
 
 	QStringList BKE_extraArgs;
+	bool envMobile = false;
 
 	enum{
 		_NOTICE_ALWAYS,
@@ -334,6 +335,8 @@ private:
 	void setClickIndicator(const BkeIndicatorBase &indicator, int id);
 private slots:
 	void indicatorReleased(int line, int index, Qt::KeyboardModifiers state);
+public:
+	void SetEnvMobile(bool enabled);
 };
 
 #endif // CODEWINDOW_H
