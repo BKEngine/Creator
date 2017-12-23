@@ -721,6 +721,12 @@ void BkeScintilla::annotate(int line, const QList<QsciStyledText>& text, Annotat
 	annotations.insert(line, type);
 }
 
+void BkeScintilla::setFirstVisibleDocumentLine(int linenr)
+{
+	int docLine = SendScintilla(BkeScintilla::SCI_VISIBLEFROMDOCLINE, linenr);
+	setFirstVisibleLine(docLine);
+}
+
 void BkeScintilla::UpdateAutoComplete()
 {
 	//当前不存在AutoComplete的Context，则尝试找一个新的AutoComplete

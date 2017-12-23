@@ -212,6 +212,8 @@ public:
 	void annotate(int line, const QString &text, const QsciStyle &style, AnnotationType type);
 	void annotate(int line, const QsciStyledText &text, AnnotationType type);
 	void annotate(int line, const QList<QsciStyledText> &text, AnnotationType type);
+	void setFirstVisibleDocumentLine(int linenr);
+
 
 	// 悬浮信息显示
 private:

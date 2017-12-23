@@ -1295,8 +1295,7 @@ void CodeWindow::ToLocation(BkeMarkerBase *p, const QString &prodir)
 	//        addFile(p->FullName,0);
 	//    }
 	//    else  addFile(p->FullName,pro->FileDir());
-	int docLine = currentedit->SendScintilla(BkeScintilla::SCI_VISIBLEFROMDOCLINE, p->Atpos>=1 ? p->Atpos - 1: 0);
-	currentedit->setFirstVisibleLine(docLine);
+	currentedit->setFirstVisibleDocumentLine(p->Atpos >= 1 ? p->Atpos - 1 : 0);
 
 	//if (p->Atpos > 1)
 	//	currentedit->setFirstVisibleLine(p->Atpos - 1);
@@ -1782,7 +1781,7 @@ void CodeWindow::GotoLabel(QString l)
 		return;
 	int line, index;
 	currentedit->lineIndexFromPositionByte(pos, &line, &index);
-	currentedit->setFirstVisibleLine(line);
+	currentedit->setFirstVisibleDocumentLine(line);
 }
 
 void CodeWindow::GotoOrCreateLabel(QString l)
@@ -1899,7 +1898,7 @@ void CodeWindow::jumpToDefFunc()
 		return;
 	int line, xpos;
 	currentedit->lineIndexFromPositionByte(pos, &line, &xpos);
-	currentedit->setFirstVisibleLine(line);
+	currentedit->setFirstVisibleDocumentLine(line);
 }
 
 void CodeWindow::jumpToCodeFunc()
@@ -1912,7 +1911,7 @@ void CodeWindow::jumpToCodeFunc()
 	int pos = currentedit->analysis->findLabel(currentedit->FileName, ls[1]);
 	int line, index;
 	currentedit->lineIndexFromPositionByte(pos, &line, &index);
-	currentedit->setFirstVisibleLine(line);
+	currentedit->setFirstVisibleDocumentLine(line);
 }
 
 void CodeWindow::jumpToLabelFunc()
