@@ -39,6 +39,11 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 	else if (list.size() == 1){  //导入，脚本，资源
 		info.RootName = info.Name;
 		info.FullName = info.Dirs;
+		if (info.FullName.isEmpty())
+		{
+			//config.bkpsr这个东西现在直接属于顶级目录下
+			info.FullName = info.RootName;
+		}
 	}
 	else{
 		info.RootName = list.at(1);

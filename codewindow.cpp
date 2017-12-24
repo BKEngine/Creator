@@ -1516,6 +1516,7 @@ void CodeWindow::StartBKEProcess(const QStringList &args)
 	bkeprocess->setArguments(args);
 	bkeprocess->setWorkingDirectory(workpro->ProjectDir());
 #endif
+	BKE_extraArgs.clear();
 	bkeprocess->start(QIODevice::NotOpen);
 	bkeprocess->closeReadChannel(QProcess::StandardOutput);
 	bkeprocess->closeReadChannel(QProcess::StandardError);
