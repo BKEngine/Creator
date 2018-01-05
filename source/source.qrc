@@ -75,4 +75,7 @@
         <file>branch-closed.png</file>
         <file>branch-open.png</file>
     </qresource>
+    <qresource prefix="/">
+        <file>icon.png</file>
+    </qresource>
 </RCC>

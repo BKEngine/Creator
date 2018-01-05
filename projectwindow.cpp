@@ -657,14 +657,9 @@ void ProjectWindow::ShowInDir(const ItemInfo &f)
                << QLatin1String("tell application \"Finder\" to activate");
     QProcess::execute("/usr/bin/osascript", scriptArgs);
 #else
-    const QFileInfo fileInfo(n);
-    const QString folder = fileInfo.absoluteFilePath();
-    const QString app = Utils::UnixUtils::fileBrowser(Core::ICore::instance()->settings());
-    QProcess browserProc;
-    const QString browserArgs = Utils::UnixUtils::substituteFileBrowserParameters(app, folder);
-    bool success = browserProc.startDetached(browserArgs);
-    const QString error = QString::fromLocal8Bit(browserProc.readAllStandardError());
-    success = success && error.isEmpty();
+    const QFileInfo fileInfo(n);;
+    const QString app = QLatin1String("xdg-open ") + fileInfo.path();
+    QProcess::startDetached(app);
 #endif
 }
 

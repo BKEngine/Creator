@@ -148,7 +148,7 @@ void CodeWindow::CreateBtn()
 	btnfindactall = new QAction(QIcon(":/cedit/find.png"), "查找全部", this);
 	btnreplaceact = new QAction(QIcon(":/cedit/replace(2).png"), "替换", this);
 	btnreplaceallact = new QAction(QIcon(":/cedit/replace(2).png"), "替换全部", this);
-	btnbookmarkact = new QAction(QIcon(":/cedit/Bookmark.png"), "添加书签", this);
+    btnbookmarkact = new QAction(QIcon(":/cedit/bookmark.png"), "添加书签", this);
 	btnmarkact = new QAction(QIcon(":/cedit/pin.png"), "添加标记", this);
 	btnrunfromlabel = new QAction("从本标签处运行", this);
 	btnredoact = new QAction(QIcon(":/cedit/redo.png"), "重做", this);

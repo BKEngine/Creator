@@ -131,10 +131,17 @@ int main(int argc, char *argv[])
 	QString exeDir = xcodec->toUnicode( QByteArray(argv[0]) ) ;
 #endif
 #ifdef Q_OS_LINUX
+#if !defined(QT_DEBUG)
     QDir dir = QFileInfo( exeDir ).absoluteDir();
+    dir.cdUp();
+    dir.cd("plugins");
+    QApplication::addLibraryPath(dir.absolutePath());
     dir.cdUp();
     dir.cd("share");
     BKE_CURRENT_DIR = dir.absolutePath();
+#else
+    BKE_CURRENT_DIR = QFileInfo(exeDir).absolutePath();
+#endif
 	//qt has a bug in 5.2.1(windows)? so I use setLibraryPaths
 #else
 #ifdef Q_OS_MAC
@@ -199,7 +206,8 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef Q_OS_LINUX
-    QApplication::setWindowIcon(QIcon("icon.png"));
+    QIcon icon(":/icon.png");
+    QApplication::setWindowIcon(icon);
 #endif
 	//SingleApplication a(argc, argv);
 
