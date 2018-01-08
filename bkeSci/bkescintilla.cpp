@@ -1554,7 +1554,7 @@ bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr, bool cs
 	BkeStartUndoAction();
 	int flag = (cs ? SCFIND_MATCHCASE : 0) |
 		(word ? SCFIND_WHOLEWORD : 0) |
-		(exp ? SCFIND_REGEXP : 0);
+		(exp ? SCFIND_CXX11REGEX | SCFIND_REGEXP : 0);
 
 	int from = SendScintilla(SCI_GETCURRENTPOS);
 	int to = this->length();
