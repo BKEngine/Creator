@@ -1612,7 +1612,7 @@ void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool
 
 	int flag = (cs ? SCFIND_MATCHCASE : 0) |
 		(word ? SCFIND_WHOLEWORD : 0) |
-		(exp ? SCFIND_REGEXP : 0);
+		(exp ? SCFIND_CXX11REGEX | SCFIND_REGEXP : 0);
 
 	int from = 0;
 	int to = this->length();
