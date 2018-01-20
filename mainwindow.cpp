@@ -1,6 +1,10 @@
 ﻿#include <weh.h>
 #include "mainwindow.h"
 #include "BKS_info.h"
+#ifdef Q_OS_WIN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
 
 QSplitter *ras[3];
 CodeWindow *codeedit;
@@ -12,7 +16,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent)
 {
 	//this->setWindowFlags(Qt::FramelessWindowHint); //隐藏标题栏
-	setWindowTitle("BKE Creator");
 	codeedit = new CodeWindow(this) ;
 	otheredit = new OtherWindow(this) ;
 	projectedit = new ProjectWindow(this) ;
@@ -95,16 +98,16 @@ MainWindow::MainWindow(QWidget *parent) :
 	connect(codeedit,SIGNAL(CurrentFileChange(QString,QString)),this,SLOT(CurrentFileChange(QString,QString))) ;
 
 	//注册事件过滤器
-	QMainWindow::installEventFilter(this) ;
+	QMainWindow::installEventFilter(this);
 
-	_instance = this;
+	CurrentProChange(nullptr);
+#ifdef Q_OS_WIN
+	WriteInstanceId();
+#endif
 }
-
-MainWindow *MainWindow::_instance = NULL;
 
 MainWindow::~MainWindow()
 {
-	_instance = NULL;
 	codeedit = NULL;
 }
 
@@ -315,7 +318,19 @@ void MainWindow::ReflashMenu()
 	QMenu *mn = dynamic_cast<QMenu*>(sender()) ;
 	if( mn == NULL ) return ;
 	//else if( mn == rfmenu ) SetMenuList(mn,BKE_Recently_Files) ;
-	else if( mn == rpmenu ) SetMenuList(mn,BKE_Recently_Project) ;
+	else if (mn == rpmenu)
+	{
+#ifdef Q_OS_WIN
+		QStringList qs = BKE_Recently_Project;
+		for (auto &s : qs)
+		{
+			s.replace('/', '\\');
+		}
+		SetMenuList(mn, qs);
+#else
+		SetMenuList(mn, BKE_Recently_Project);
+#endif
+	}
 }
 
 void MainWindow::Recentfile()
@@ -403,6 +418,70 @@ bool MainWindow::eventFilter ( QObject * watched, QEvent * event )
 	return false ;
 }
 
+#ifdef Q_OS_WIN
+bool MainWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
+{
+	Q_UNUSED(eventType);
+
+	MSG* msg = reinterpret_cast<MSG*>(message);
+	return winEvent(msg, result);
+}
+
+bool MainWindow::winEvent(MSG * message, long * result)
+{
+	if (message->message == WM_COPYDATA) {
+		// extract the string from lParam
+		COPYDATASTRUCT * data = (COPYDATASTRUCT *)message->lParam;
+		if (data->dwData == 1)
+		{
+			QString file = QString::fromUtf8((const char *)data->lpData, data->cbData);
+			projectedit->OpenProject(file);
+		}
+		*result = 0;
+		return true;
+	}
+
+	// give the event to qt
+	return false;
+}
+
+void MainWindow::WriteInstanceId()
+{
+	bool isCreate = false;
+	sharedMemory.setKey(SHARED_MEMORY_NAME);
+	if (!sharedMemory.attach(QSharedMemory::ReadWrite))
+	{
+		if (sharedMemory.error() == QSharedMemory::NotFound)
+		{
+			sharedMemory.create(10000);
+			isCreate = true;
+		}
+		else
+		{
+			return;
+		}
+	}
+
+	QList<QHash<QString, QVariant>> data;
+	sharedMemory.lock();
+	if (!isCreate)
+	{
+		QDataStream reader(QByteArray((const char *)sharedMemory.constData(), sharedMemory.size()));
+		reader >> data;
+	}
+	data.append({
+		{"hwnd", (uint64_t)this->winId() },
+		});
+	QBuffer outer;
+	outer.open(QBuffer::WriteOnly);
+	QDataStream writer(&outer);
+	writer << data;
+	outer.close();
+	memcpy(sharedMemory.data(), outer.data().constData(), outer.size());
+	sharedMemory.unlock();
+}
+#endif
+
 
 //开启或关闭自动更新
 void MainWindow::OCupdate()
@@ -457,10 +536,16 @@ void MainWindow::CurrentProChange(BkeProject *pro)
 {
 	if (pro)
 	{
+		QString proj = pro->ProjectFile();
+#ifdef Q_OS_WIN
+		proj.replace('/', '\\');
+#endif
+		setWindowTitle(BKE_CREATOR_TITLE_PROJECT(proj));
 		btnReleaseGame->setEnabled(true);
 	}
 	else
 	{
+		setWindowTitle(BKE_CREATOR_TITLE);
 		btnReleaseGame->setEnabled(false);
 	}
 }

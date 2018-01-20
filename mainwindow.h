@@ -15,6 +15,7 @@
 //#include "dia/cconfigdia.h"
 #include "dia/Setoptiondia.h"
 #include "dia/GameProperty.h"
+#include <QSharedMemory>
 
 extern QSplitter *ras[3];
 extern CodeWindow *codeedit;
@@ -28,10 +29,6 @@ class MainWindow : public QMainWindow
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	virtual ~MainWindow();
-private:
-	static MainWindow *_instance;
-public:
-	static MainWindow *getInstance(){ return _instance; }
 
 signals:
 
@@ -103,9 +100,19 @@ private:
 protected:
 	void closeEvent(QCloseEvent *e);
 	bool eventFilter(QObject * watched, QEvent * event);
+#ifdef Q_OS_WIN
+	bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+	bool winEvent(MSG * message, long * result);
+	void WriteInstanceId();
+	QSharedMemory sharedMemory;
+#endif
 
 private:
 	QProcess *checkUpdate = NULL;
 };
+
+#ifdef Q_OS_WIN
+#define SHARED_MEMORY_NAME "BkeCreatorSharedMemory"
+#endif
 
 #endif // MAINWINDOW_H

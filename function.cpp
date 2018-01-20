@@ -1,5 +1,15 @@
 ﻿#include <weh.h>
 #include "function.h"
+#include "bkeproject.h"
+
+#ifdef Q_OS_WIN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <ShlObj.h>
+#include <propvarutil.h>  
+#include <propkey.h>  
+#include <combaseapi.h>
+#endif
 
 QString BKE_CURRENT_DIR ;
 QString BKE_PROJECT_NAME("BkeProject.bkp") ;
@@ -186,6 +196,132 @@ QStringList ListDirsCopy(QStringList &list,const QString &dir,const QString &new
     return ls ;
 }
 
+#ifdef Q_OS_WIN
+static IShellLink* CreateShortCut(const QString &proj)
+{
+	QString infotip = "打开工程：" + proj;
+	HRESULT hr;
+	IShellLink *pLink = NULL;
+	QJsonObject doc = BkeProject::LoadProject(proj);
+	if (doc.isEmpty())
+		return NULL;
+	hr = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER,
+		IID_PPV_ARGS(&pLink));
+	if (SUCCEEDED(hr))
+	{
+		wchar_t exe[MAX_PATH];
+		GetModuleFileNameW(NULL, exe, MAX_PATH);
+		pLink->SetPath(exe);
+		QString desc = proj;
+		desc.replace('/', '\\');
+		pLink->SetDescription(desc.toStdWString().c_str());
+		pLink->SetArguments(("\"" + desc + "\"").toStdWString().c_str());
+		pLink->SetShowCmd(SW_SHOW);
+		// Explicitly setting icon file,
+		// without this icons are not shown at least in Windows 7 jumplist
+		pLink->SetIconLocation(exe, 0);
+
+		// this is necessary for Windows 7 taskbar jump list links
+		IPropertyStore * PropertyStore;
+		if (SUCCEEDED(pLink->QueryInterface(IID_IPropertyStore, (void**)&PropertyStore)))
+		{
+			std::wstring name = doc.value("name").toString().toStdWString();
+			PROPVARIANT Prop;
+			Prop.vt = VT_LPWSTR;
+			Prop.pwszVal = (wchar_t *)name.c_str();
+			PropertyStore->SetValue(PKEY_Title, Prop);
+			PropertyStore->Commit();
+			PropertyStore->Release();
+		}
+	}
+	return pLink;
+}
+
+
+static void WinUpdateRecentList()
+{
+	HRESULT hr;
+	//创建List  
+	ICustomDestinationList *pCDL = NULL;
+	hr = CoCreateInstance(CLSID_DestinationList, NULL,
+		CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pCDL));
+	if (SUCCEEDED(hr))
+	{
+		//BeginList  
+		UINT uMaxSlots;
+		IObjectArray *pOARemoved = NULL;
+		hr = pCDL->BeginList(&uMaxSlots, IID_PPV_ARGS(&pOARemoved));
+		if (SUCCEEDED(hr))
+		{
+			QStringList removed;
+			unsigned int removedCount;
+			if (FAILED(pOARemoved->GetCount(&removedCount)))
+			{
+				removedCount = 0;
+			}
+
+			for (unsigned int i = 0; i < removedCount; i++)
+			{
+				IShellLink * link;
+				wchar_t desc[2048];
+				if (SUCCEEDED(pOARemoved->GetAt(i, IID_IShellLink, (void**)&link)) &&
+					SUCCEEDED(link->GetDescription(desc, sizeof(desc) - 1)))
+				{
+					BKE_Recently_Project.removeAll(QString::fromWCharArray(desc).replace('\\','/'));
+				}
+			}
+
+			//ObjectCollection  
+			IObjectCollection *pOC = NULL;
+			hr = CoCreateInstance(CLSID_EnumerableObjectCollection, NULL,
+				CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pOC));
+			if (SUCCEEDED(hr))
+			{
+				//每个文件分别创建ShellItem  
+				for (auto && p : BKE_Recently_Project)
+				{
+					IShellLink *pSI = NULL;
+					pSI = CreateShortCut(p);
+					if (pSI)
+					{
+						pOC->AddObject(pSI);
+						pSI->Release();
+					}
+				}
+				IObjectArray *pOA = NULL;
+				hr = pOC->QueryInterface(IID_PPV_ARGS(&pOA));
+				if (SUCCEEDED(hr))
+				{
+					//将自定义Category加入JumpList  
+					pCDL->AppendCategory(TEXT("最近的工程"), pOA);
+					pOA->Release();
+				}
+				hr = pCDL->CommitList();
+				pOC->Release();
+			}
+			pOARemoved->Release();
+		}
+		pCDL->Release();
+	}
+}
+#endif
+
+void BkeCreator::LoadRecentProject()
+{
+	//读取最近使用列表
+	QString ks;
+	LOLI::AutoRead(ks, BKE_CURRENT_DIR + "/projects.txt");
+	BKE_Recently_Project = ks.split("\r\n");
+	for (auto &s : BKE_Recently_Project)
+	{
+		s.replace('\\', '/');
+	}
+	BKE_Recently_Project.removeDuplicates();
+#ifdef Q_OS_WIN
+	WinUpdateRecentList();
+#endif
+}
+
 void BkeCreator::AddRecentProject(const QString &file)
 {
     if( file == "##" ){
@@ -200,8 +336,22 @@ void BkeCreator::AddRecentProject(const QString &file)
     if( i > 0 ) BKE_Recently_Project.takeAt(i) ;
     else if( i == 0 ) return ;
     BKE_Recently_Project.prepend( file );
-    while( BKE_Recently_Project.size() > 10 )BKE_Recently_Project.takeLast() ;
+    while( BKE_Recently_Project.size() > 10 )BKE_Recently_Project.takeLast();
+#ifdef Q_OS_WIN
+	WinUpdateRecentList();
+#endif
     LOLI::AutoWrite(BKE_CURRENT_DIR+"/projects.txt",BKE_Recently_Project.join("\r\n")) ;
+}
+
+void BkeCreator::RemoveRecentProject(const QString &file)
+{
+	QString path = file;
+	path.replace('\\', '/');
+	BKE_Recently_Project.removeOne(file);
+#ifdef Q_OS_WIN
+	WinUpdateRecentList();
+#endif
+	LOLI::AutoWrite(BKE_CURRENT_DIR + "/projects.txt", BKE_Recently_Project.join("\r\n"));
 }
 
 /*

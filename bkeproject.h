@@ -81,6 +81,7 @@ class CodeWindow;
 class BkeProject :public QObject
 {
 public:
+	static QString NormalizeDirPath(QString path);
 	BkeProject(QObject *parent = 0);
 	~BkeProject() ;
 	QString ProjectFile() const;
@@ -91,6 +92,7 @@ public:
 	QString AllNameToName(const QString &allname) ;
 	bool NewProject(const QString &dir,const QString &name) ;
 	bool OpenProject(const QString &name) ;
+	static QJsonObject LoadProject(const QString &name);
 	bool IsNull() ;
 	bool WriteBkpFile() ;
 	bool WriteMarkFile(BkeMarkSupport *m) ;
@@ -159,7 +161,6 @@ private:
 	QString ErrorInfo ;
 	QString Time ;
 	QStringList emptylist ;
-	QJsonObject *bkpAdmin ;
 	bool isnull ;
 	int  currentptr ;
 

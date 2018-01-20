@@ -103,6 +103,7 @@ void ProjectWindow::OpenProject(const QString &file)
 	if (!workpro->OpenProject(file))
 	{
 		QMessageBox::information(this, "错误", "文件不存在，工程打开失败", QMessageBox::Ok);
+		BkeCreator::RemoveRecentProject(file);
 		delete workpro;
 		workpro = NULL;
 		return;
@@ -123,10 +124,6 @@ void ProjectWindow::OpenProject(const QString &file)
 	workpro->Script->setExpanded(true);
 	workpro->Import->setExpanded(true);
 
-	QString t = "BKE Creator - " + file;
-
-	MainWindow::getInstance()->setWindowTitle(t);
-	//SetProp(GetActiveWindow(), L"title", (HANDLE)BKE_hash(t.toStdWString().c_str()));
 	emit onProjectOpen(workpro);
 }
 
@@ -611,8 +608,7 @@ void ProjectWindow::CloseProject()
 	emit onProjectClose();
 	delete workpro;
 	workpro = NULL;
-	QString t = "BKE Creator";
-	MainWindow::getInstance()->setWindowTitle(t);
+	emit CurrentProChange(workpro);
 }
 
 void ProjectWindow::CloseProject(const ItemInfo &f)

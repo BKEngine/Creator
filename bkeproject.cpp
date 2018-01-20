@@ -3,7 +3,7 @@
 //#include "dia/newversiondatawizard.h"
 //#include "dia/versioninfo.h"
 
-QString NormalizeDirPath(QString path) 
+QString BkeProject::NormalizeDirPath(QString path)
 {
 	path.replace('\\', '/');
 	if (!path.endsWith('/'))
@@ -173,26 +173,17 @@ void BkeProject::ForceAddScript(const QString &f, QTreeWidgetItem* p)
 //读取文件
 bool BkeProject::OpenProject(const QString &name)
 {
-	QFile f(name);
-	if (!f.isOpen() && !f.open(QFile::ReadOnly)) return false;
-
-	QJsonDocument kk = QJsonDocument::fromJson(f.readAll());
-	if (kk.isNull() || !kk.isObject()) return false;
-
-	bkpAdmin = new QJsonObject(kk.object());
-	if (bkpAdmin->isEmpty())
-	{
-		delete bkpAdmin;
+	QJsonObject bkpAdmin = LoadProject(name);
+	if (bkpAdmin.isEmpty())
 		return false;
-	}
 
-	int version = int(bkpAdmin->value("version").toString().toDouble() * 10 + 0.5);
+	int version = int(bkpAdmin.value("version").toString().toDouble() * 10 + 0.5);
 
 	QFileInfo fi(name);
 	pdir = NormalizeDirPath(fi.path());
 	pfile = fi.fileName();
-	pname = bkpAdmin->value("name").toString();
-	//if( bkpAdmin->value("version").toString().isEmpty() ) pdir = pdir + "/" + pname ;
+	pname = bkpAdmin.value("name").toString();
+	//if( bkpAdmin.value("version").toString().isEmpty() ) pdir = pdir + "/" + pname ;
 
 	delete config;
 	config = new BkeProjectConfig(pdir, pdir + "config.bkpsr");
@@ -201,9 +192,9 @@ bool BkeProject::OpenProject(const QString &name)
 
 	BuildItem(pname);
 	{
-		JsonToTree(Import, bkpAdmin->value("import").toObject(), version);
-		JsonToTree(Script, bkpAdmin->value("script").toObject(), version);
-		JsonToTree(Source, bkpAdmin->value("source").toObject(), version);
+		JsonToTree(Import, bkpAdmin.value("import").toObject(), version);
+		JsonToTree(Script, bkpAdmin.value("script").toObject(), version);
+		JsonToTree(Source, bkpAdmin.value("source").toObject(), version);
 	}
 	//remove config.bkpsr from Import
 	auto it = FindItem(Import, "config.bkpsr", false);
@@ -234,8 +225,18 @@ bool BkeProject::OpenProject(const QString &name)
 	if (version < SAVE_VERSION)
 		WriteBkpFile();
 
-	delete bkpAdmin;
 	return true;
+}
+
+QJsonObject BkeProject::LoadProject(const QString &name)
+{
+	QFile f(name);
+	if (!f.isOpen() && !f.open(QFile::ReadOnly)) return QJsonObject();
+
+	QJsonDocument kk = QJsonDocument::fromJson(f.readAll());
+	if (kk.isNull() || !kk.isObject()) return QJsonObject();
+
+	return kk.object();
 }
 
 void BkeProject::SetupConfig()
@@ -433,19 +434,19 @@ void BkeProject::SetIconFromSuffix(QTreeWidgetItem *dest, const QString &suffix)
 
 bool BkeProject::WriteBkpFile()
 {
-	bkpAdmin = new QJsonObject;
-	bkpAdmin->insert("name", pname);
+	QJsonObject bkpAdmin;
+	bkpAdmin.insert("name", pname);
 
-	//bkpAdmin->insert("import", HashToJson(ImportHash));
-	//bkpAdmin->insert("script", HashToJson(ScriptHash));
-	//bkpAdmin->insert("source", HashToJson(SourceHash));
-	bkpAdmin->insert("import", TreeToJson(Import));
-	bkpAdmin->insert("script", TreeToJson(Script));
-	bkpAdmin->insert("source", TreeToJson(Source));
-	bkpAdmin->insert("version", QString("1.2"));
+	//bkpAdmin.insert("import", HashToJson(ImportHash));
+	//bkpAdmin.insert("script", HashToJson(ScriptHash));
+	//bkpAdmin.insert("source", HashToJson(SourceHash));
+	bkpAdmin.insert("import", TreeToJson(Import));
+	bkpAdmin.insert("script", TreeToJson(Script));
+	bkpAdmin.insert("source", TreeToJson(Source));
+	bkpAdmin.insert("version", QString("1.2"));
 
 	QJsonDocument llm;
-	llm.setObject(*bkpAdmin);
+	llm.setObject(bkpAdmin);
 	return LOLI::AutoWrite(ProjectDir() + BKE_PROJECT_NAME, llm.toJson());
 }
 

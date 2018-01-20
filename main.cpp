@@ -11,9 +11,6 @@
 #include <QStyle>
 #include <QStyleFactory>
 
-QString title = "BKE Creator - ";
-uint32_t titlehash = 0;
-
 extern CodeWindow *codeedit;
 
 //register error handling in Windows
@@ -22,15 +19,32 @@ extern CodeWindow *codeedit;
 #include <DbgHelp.h>
 #pragma comment(lib,"user32.lib")
 
+struct EnumHelper
+{
+	HWND hwnd = NULL;
+	HWND emptyHwnd = NULL;
+	QString title;
+};
+
 BOOL CALLBACK EnumWndProc(HWND hwnd, LPARAM lParam)
 {
-	uint32_t h = (uint32_t)GetProp(hwnd, L"title");
-	if (h == titlehash)
+	EnumHelper *e = (EnumHelper *)lParam;
+	wchar_t title[MAX_PATH];
+	GetWindowText(hwnd, title, MAX_PATH);
+	QString t = QString::fromWCharArray(title);
+	if (t == BKE_CREATOR_TITLE)
 	{
-		*(HWND*)lParam = hwnd;
-		return false;
+		e->emptyHwnd = hwnd;
 	}
-	return true;
+	else if (!e->title.isEmpty() && t.startsWith(BKE_CREATOR_TITLE_PROJECT_PREFIX))
+	{
+		t = t.mid(sizeof(BKE_CREATOR_TITLE_PROJECT_PREFIX) - 1).replace('\\', '/');
+		if (t == e->title)
+		{
+			e->hwnd = hwnd;
+		}
+	}
+	return !(e->emptyHwnd && (e->title.isEmpty() || e->hwnd));
 }
 
 #pragma comment(lib, "DbgHelp.lib")
@@ -213,18 +227,57 @@ int main(int argc, char *argv[])
 
 #ifndef WIN32
 #else
-	if (argc > 1)
-		title += argv[1];
-	titlehash = BKE_hash(title.toStdWString().c_str());
-	HWND oldHWnd = NULL;
-	EnumWindows(EnumWndProc, (LPARAM)&oldHWnd);
-	if (oldHWnd != NULL)
+#ifndef _DEBUG
+	do
 	{
-		ShowWindow(oldHWnd, SW_SHOWNORMAL);
-		SetWindowPos(oldHWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-		SetWindowPos(oldHWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+		EnumHelper e;
+		if (argc > 1)
+			e.title = xcodec->toUnicode(QByteArray(argv[1])).replace('\\', '/');
+		EnumWindows(EnumWndProc, (LPARAM)&e);
+		HWND hwnd;
+		if (e.hwnd != NULL)
+		{
+			hwnd = e.hwnd;
+		}
+		else if (e.emptyHwnd != NULL)
+		{
+			hwnd = e.emptyHwnd;
+			if (!e.title.isEmpty())
+			{
+				//将命令行参数发送到hwnd
+				QByteArray utf8 = e.title.toUtf8();
+				COPYDATASTRUCT cpdata = { 0 };
+				cpdata.dwData = 1;
+				cpdata.lpData = (void *)utf8.constData();
+				cpdata.cbData = utf8.size();
+				SendMessage(hwnd, WM_COPYDATA, 0, reinterpret_cast<LPARAM>(&cpdata));
+			}
+		}
+		else
+		{
+			break;
+		}
+		WINDOWPLACEMENT place = {0};
+		place.length = sizeof(WINDOWPLACEMENT);
+		GetWindowPlacement(hwnd, &place);
+
+		switch (place.showCmd)
+		{
+		case SW_SHOWMAXIMIZED:
+			ShowWindow(hwnd, SW_SHOWMAXIMIZED);
+			break;
+		case SW_SHOWMINIMIZED:
+			ShowWindow(hwnd, SW_RESTORE);
+			break;
+		default:
+			ShowWindow(hwnd, SW_NORMAL);
+			break;
+		}
+
+		SetForegroundWindow(hwnd);
 		return 0;
-	}
+	} while (false);
+#endif
 #endif
 	QTranslator translator;
 	if( !translator.load("qt_zh_CN",BKE_CURRENT_DIR,"",".qm") ) QMessageBox::information(0,"错误","加载中文翻译失败",QMessageBox::Ok) ;
@@ -245,10 +298,8 @@ int main(int argc, char *argv[])
 	//	QMessageBox::information(0,"初始化","读取API列表失败",QMessageBox::Ok) ;
 	//}
 
-	//读取最近使用列表
-	QString ks ;
-	LOLI::AutoRead(ks,BKE_CURRENT_DIR+"/projects.txt") ;
-	BKE_Recently_Project = ks.split("\r\n") ;
+	BkeCreator::LoadRecentProject();
+
 	//LOLI::AutoRead(ks,BKE_CURRENT_DIR+"/files.txt") ;
 	//BKE_Recently_Files = ks.split("\r\n") ;
 
