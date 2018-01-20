@@ -529,6 +529,9 @@
     <ClCompile Include="Release\moc_WaitWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="TinyProcess\process.cpp" />
+    <ClCompile Include="TinyProcess\process_unix.cpp" />
+    <ClCompile Include="TinyProcess\process_win.cpp" />
     <ClCompile Include="topbarwindow.cpp" />
     <ClCompile Include="ParserHelper\parser\utils.cpp" />
     <ClCompile Include="dia\versioninfo.cpp" />
@@ -1872,7 +1875,7 @@ endlocal
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_Win32="msvc2015" />
+      <UserProperties UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_Win32="$(DefaultQtVersion)" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

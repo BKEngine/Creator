@@ -131,6 +131,10 @@ private slots:
 	QFont GetAnnotationFont();
 	void onTimer();
 
+private:
+	void ScanMacroDefine();
+	void ScanMacroDefine(ScopePointer<ParseData>& p, const QSortedSet<QString>& l);
+
 public:
 	int ChangeStateFlag;
 	int ChangeIgnore;

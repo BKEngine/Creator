@@ -123,6 +123,7 @@ void BkeScintilla::Detach()
 
 void BkeScintilla::Attach()
 {
+	ScanMacroDefine();
 }
 
 void BkeScintilla::onTimer()
@@ -159,6 +160,24 @@ void BkeScintilla::onTimer()
 	}
 	p->infos2_mutex.unlock();
 
+	ScanMacroDefine(p, l);
+}
+
+void BkeScintilla::ScanMacroDefine()
+{
+	if (analysis->isMacroFile(FileName))
+	{
+		auto p = analysis->lockFile(FileName);
+		if (!p)
+			return;
+		QSortedSet<QString> l;
+		p->getLabels(l);
+		ScanMacroDefine(p, l);
+	}
+}
+
+void BkeScintilla::ScanMacroDefine(ScopePointer<ParseData> &p, const QSortedSet<QString>& l)
+{
 	// macro file的annotation
 	if (analysis->isMacroFile(FileName))
 	{
@@ -174,7 +193,7 @@ void BkeScintilla::onTimer()
 				for (int i = 0; i < macro.paramqueue.size(); i++)
 				{
 					params += " " + macro.paramqueue[i].first;
-					if(!macro.paramqueue[i].second.isEmpty())
+					if (!macro.paramqueue[i].second.isEmpty())
 						params += "=" + macro.paramqueue[i].second;
 				}
 				if (!params.isEmpty())

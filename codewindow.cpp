@@ -297,8 +297,6 @@ void CodeWindow::BindFileListWidget(BkeLeftFileWidget *flist)
 void CodeWindow::SetCurrentEdit(int pos)
 {
 	if (ignoreflag) return;
-	else if (pos == stackwidget->currentIndex() && pos == lablelist->currentIndex()
-		&& pos == filewidget->currentRow()) return;
 
 	ignoreflag = true;
 	stackwidget->setCurrentIndex(pos);
@@ -342,8 +340,7 @@ void CodeWindow::AttachCurrentEdit()
 {
 	CurrentConnect(true);
 	ConnectAutoComplete(currentedit);
-	currentedit->clearAnnotations(BkeScintilla::PROBLEM);
-	currentedit->clearAnnotations(BkeScintilla::RUNTIME_PROBLEM);
+	currentedit->clearAnnotationsAll();
 	currentedit->restoreTopLine();
 
 	AddMarksToEdit();
@@ -352,6 +349,7 @@ void CodeWindow::AttachCurrentEdit()
 
 	// 导航
 	AddNavigation(currentbase->Name(), currentedit->GetCurrentPosition());
+	currentedit->Attach();
 }
 
 void CodeWindow::DetachCurrentEdit()
@@ -367,48 +365,63 @@ void CodeWindow::DetachCurrentEdit()
 //改变正在编辑的文档，文件列表选项是同步改变的
 void CodeWindow::ChangeCurrentEdit(int pos)
 {
-	if (!stackwidget->styleSheet().isEmpty()) DrawLine(true);
-
 	currentpos = pos;  //当前位置
 	if (currentedit == stackwidget->currentWidget()) return;
 
 	btncopyact->setEnabled(false);
 
-	currentbase = docWidgetHash.value(stackwidget->currentWidget(), nullptr);
-	if (currentbase == nullptr){
-		QMessageBox::critical(this, "", "致命错误：没有找到匹配的QWidget！", QMessageBox::Ok);
-		return;
+	if (pos >= 0)
+	{
+		currentbase = docWidgetHash.value(stackwidget->currentWidget(), nullptr);
+		if (currentbase == nullptr) {
+			QMessageBox::critical(this, "", "致命错误：没有找到匹配的QWidget！", QMessageBox::Ok);
+			return;
+		}
 	}
+	else
+	{
+		currentbase = nullptr;
+	}
+	
 	if (currentedit)
 	{
 		DetachCurrentEdit();
 	}
 	
-	//改变工程
-	//ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
-	currentedit = currentbase->edit;
+	if (currentbase)
+	{
+		if (!stackwidget->styleSheet().isEmpty()) DrawLine(true);
+		//改变工程
+		//ChangeProject(prowin->FindProjectFromDir(currentbase->ProjectDir()));
+		currentedit = currentbase->edit;
+		currentedit->deflex->ReadConfig(currentedit->deflex->ConfigName());
+		currentedit->setLexer(currentedit->deflex);
+
+		markadmin.SetFile(currentbase->FullName());  //标记管理器
+		btnsaveact->setEnabled(currentedit->isModified());
+		btnsaveasact->setEnabled(true);
+		btnpasteact->setEnabled(true);
+		btnfindact->setEnabled(true);
+		btnreplaceact->setEnabled(true);
+		btnbookmarkact->setEnabled(true);
+		btnmarkact->setEnabled(true);
+		btnundoact->setEnabled(currentedit->isUndoAvailable());
+		btnredoact->setEnabled(currentedit->isRedoAvailable());
+		btncodeact->setEnabled(true);
+		btncloseact->setEnabled(stackwidget->count() > 0);
+		btnfly->setEnabled(true);
+
+		emit CurrentFileChange(currentbase->FullName());
+		emit CurrentFileChange(currentbase->Name(), currentbase->ProjectDir());
+		AttachCurrentEdit();
+	}
+	else
+	{
+		currentedit = nullptr;
+	}
 	//reset lexer
-	currentedit->deflex->ReadConfig(currentedit->deflex->ConfigName());
-	currentedit->setLexer(currentedit->deflex);
 	//连接文档改变信号
 	diasearch->SetSci(currentedit); //查找管理
-	markadmin.SetFile(currentbase->FullName());  //标记管理器
-	btnsaveact->setEnabled(currentedit->isModified());
-	btnsaveasact->setEnabled(true);
-	btnpasteact->setEnabled(true);
-	btnfindact->setEnabled(true);
-	btnreplaceact->setEnabled(true);
-	btnbookmarkact->setEnabled(true);
-	btnmarkact->setEnabled(true);
-	btnundoact->setEnabled(currentedit->isUndoAvailable());
-	btnredoact->setEnabled(currentedit->isRedoAvailable());
-	btncodeact->setEnabled(true);
-	btncloseact->setEnabled(stackwidget->count() > 0);
-	btnfly->setEnabled(true);
-
-	emit CurrentFileChange(currentbase->FullName());
-	emit CurrentFileChange(currentbase->Name(), currentbase->ProjectDir());
-	AttachCurrentEdit();
 }
 
 //断开、连接当前文档信号
@@ -1465,25 +1478,57 @@ void CodeWindow::CheckRuntimeProblemMarks(BkeScintilla *edit, BkeMarkList *list)
 
 	if (list == nullptr || list->isEmpty()) return;
 
-	BkeMarkerBase *abc;
-	QString info;
-
 	for (auto i : *list) {
-		abc = i;
-		info = edit->annotation(abc->Atpos - 1);
+		BkeMarkerBase *abc = i;
+		if(abc->Atpos > 0)
+		{
+			QString info = edit->annotation(abc->Atpos - 1);
 
-		if (info.isEmpty()) info = abc->Information;
-		else info += "\n\n" + abc->Information;
-
-		if (abc->Type == 1) {
-			edit->annotate(abc->Atpos - 1, info, ks1, BkeScintilla::RUNTIME_PROBLEM);
-			edit->markerAdd(abc->Atpos - 1, 5);
-		}
-		else {
-			edit->annotate(abc->Atpos - 1, info, ks2, BkeScintilla::RUNTIME_PROBLEM);
-			edit->markerAdd(abc->Atpos - 1, 6);
+			if (info.isEmpty()) info = abc->Information;
+			else info += "\n\n" + abc->Information;
+			if (abc->Type == 1) {
+				edit->annotate(abc->Atpos - 1, info, ks1, BkeScintilla::RUNTIME_PROBLEM);
+				edit->markerAdd(abc->Atpos - 1, 5);
+			}
+			else {
+				edit->annotate(abc->Atpos - 1, info, ks2, BkeScintilla::RUNTIME_PROBLEM);
+				edit->markerAdd(abc->Atpos - 1, 6);
+			}
 		}
 	}
+}
+
+
+static QString qt_create_commandline(const QString &program, const QStringList &arguments)
+{
+	QString args;
+	if (!program.isEmpty()) {
+		QString programName = program;
+		if (!programName.startsWith(QLatin1Char('\"')) && !programName.endsWith(QLatin1Char('\"')) && programName.contains(QLatin1Char(' ')))
+			programName = QLatin1Char('\"') + programName + QLatin1Char('\"');
+		programName.replace(QLatin1Char('/'), QLatin1Char('\\'));
+
+		// add the prgram as the first arg ... it works better
+		args = programName + QLatin1Char(' ');
+	}
+
+	for (int i = 0; i < arguments.size(); ++i) {
+		QString tmp = arguments.at(i);
+		// Quotes are escaped and their preceding backslashes are doubled.
+		tmp.replace(QRegExp(QLatin1String("(\\\\*)\"")), QLatin1String("\\1\\1\\\""));
+		if (tmp.isEmpty() || tmp.contains(QLatin1Char(' ')) || tmp.contains(QLatin1Char('\t'))) {
+			// The argument must not end with a \ since this would be interpreted
+			// as escaping the quote -- rather put the \ behind the quote: e.g.
+			// rather use "foo"\ than "foo\"
+			int i = tmp.length();
+			while (i > 0 && tmp.at(i - 1) == QLatin1Char('\\'))
+				--i;
+			tmp.insert(i, QLatin1Char('"'));
+			tmp.prepend(QLatin1Char('"'));
+		}
+		args += QLatin1Char(' ') + tmp;
+	}
+	return args;
 }
 
 void CodeWindow::StartBKEProcess(const QStringList &args)
@@ -1491,14 +1536,7 @@ void CodeWindow::StartBKEProcess(const QStringList &args)
 	if(bkeprocess)
 	{
 		bkeprocess->kill();
-		bkeprocess->waitForFinished();
 	}
-	bkeprocess = new QProcess(this);
-	bkeprocess->setProcessChannelMode(QProcess::ForwardedChannels);
-	connect(bkeprocess, (void (QProcess::*)(int))&QProcess::finished, [this](int) {
-		bkeprocess->deleteLater();
-		bkeprocess = nullptr;
-	});
 	QString ndir;
 #ifdef Q_OS_WIN
 	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev.exe";
@@ -1508,19 +1546,20 @@ void CodeWindow::StartBKEProcess(const QStringList &args)
 	ndir = BKE_CURRENT_DIR + "/tool/BKEngine_Dev";
 #endif
 
+	QString command;
+	QString path;
 #ifdef Q_OS_MAC
-	bkeprocess->setProgram("open");
-	bkeprocess->setArguments(QStringList() << ndir << "--args" << workpro->ProjectDir() << args);
+	command = qt_create_commandline("open", QStringList() << ndir << "--args" << workpro->ProjectDir() << args);
 #else
-	bkeprocess->setProgram(ndir);
-	bkeprocess->setArguments(args);
-	bkeprocess->setWorkingDirectory(workpro->ProjectDir());
+	command = qt_create_commandline(ndir, args);
+	path = workpro->ProjectDir();
+#endif
+#ifdef _WIN32
+	bkeprocess = new TinyProcessLib::Process(command.toStdWString(), path.toStdWString());
+#else
+	bkeprocess = new TinyProcessLib::Process(command.toStdString(), path.toStdString());
 #endif
 	BKE_extraArgs.clear();
-	bkeprocess->start(QIODevice::NotOpen);
-	bkeprocess->closeReadChannel(QProcess::StandardOutput);
-	bkeprocess->closeReadChannel(QProcess::StandardError);
-	bkeprocess->closeWriteChannel();
 }
 
 //运行BKEngine.exe
@@ -1737,14 +1776,11 @@ void CodeWindow::simpleClose(BkeDocBase *loli)
 
 	if (stackwidget->count() < 1){
 		btnDisable();
-		currentedit = NULL;
 		filewatcher->removePaths(filewatcher->files()) ;
 		DrawLine(false);
+		
 	}
-	else{
-		SetCurrentEdit(stackwidget->currentIndex());
-	}
-
+	SetCurrentEdit(stackwidget->currentIndex());
 }
 
 //跳转到指定行

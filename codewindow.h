@@ -15,6 +15,7 @@
 #include "dia/searchbox.h"
 #include "dia/bkeleftfilewidget.h"
 #include "DebugServer.h"
+#include "TinyProcess/process.hpp"
 
 class BkeDocBase
 {
@@ -312,7 +313,7 @@ private:
 	void DrawLine(bool isClear);
 	bool WriteOpenFile(const QString &dir);
 	void StartBKEProcess(const QStringList &args);
-	QProcess *bkeprocess = nullptr;
+	TinyProcessLib::Process *bkeprocess = nullptr;
 
 	/////////////Debug Component///////////////
 	DebugServer *debugServer;

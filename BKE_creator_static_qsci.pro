@@ -150,7 +150,11 @@ SOURCES += ./main.cpp \
     qmacopenfileapplication.cpp \
     dia/autocompletelist.cpp \
     DebugServer.cpp \
-    dia/ParserEditorUndoCommand.cpp
+    dia/ParserEditorUndoCommand.cpp \
+    DebugServer.cpp \
+    TinyProcess\process.cpp \
+    TinyProcess\process_unix.cpp \
+    TinyProcess\process_win.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -290,7 +294,8 @@ HEADERS  += \
     qmacopenfileapplication.h \
     dia/autocompletelist.h \
     DebugServer.h \
-    dia/ParserEditorUndoCommand.h
+    dia/ParserEditorUndoCommand.h \
+    TinyProcess\process.hpp
 
 RESOURCES += \
     source/source.qrc \

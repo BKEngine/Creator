@@ -30,7 +30,7 @@ public slots :
 	void onDocChanged();
 	void onSelectionChanged();
 	void onFindConditionChange();
-	void onSearcAllConditionChange();
+	void onSearchAllConditionChange();
 
 	void onReturn1();
 	void onReturn2();

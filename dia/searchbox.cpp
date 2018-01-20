@@ -35,7 +35,7 @@ QDockWidget(parent)
 	connect(edit, SIGNAL(returnPressed()), this, SLOT(onReturn1()));
 	connect(edit1, SIGNAL(returnPressed()), this, SLOT(onReturn2()));
 
-	connect(findallpro, SIGNAL(stateChanged(int)), this, SLOT(onSearcAllConditionChange()));
+	connect(findallpro, SIGNAL(stateChanged(int)), this, SLOT(onSearchAllConditionChange()));
 	connect(iscase, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
 	connect(isregular, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
 	connect(isword, SIGNAL(stateChanged(int)), this, SLOT(onFindConditionChange()));
@@ -99,7 +99,7 @@ void SearchBox::onFindConditionChange()
 	sciedit->refind = true;
 }
 
-void SearchBox::onSearcAllConditionChange()
+void SearchBox::onSearchAllConditionChange()
 {
 	if (findallpro->isChecked())
 	{
@@ -203,6 +203,7 @@ bool SearchBox::eventFilter(QObject *watched, QEvent *event)
 
 void SearchBox::_SearchModel(bool all)
 {
+	if (!all && sciedit == 0) return;
 	searchMode = true;
 	findallpro->setChecked(all);
 	btnreplacemodel->setText("替换>>");
@@ -212,9 +213,9 @@ void SearchBox::_SearchModel(bool all)
 	btnreplaceall->setEnabled(false);
 	edit1->setEnabled(false);
 	//如果有选中部分，自动填入edit
-	edit->setText(sciedit->selectedText());
-	onSearcAllConditionChange();
-	if (sciedit == 0) return;
+	if(sciedit)
+		edit->setText(sciedit->selectedText());
+	onSearchAllConditionChange();
 	Show();
 }
 
@@ -230,6 +231,7 @@ void SearchBox::SearchAllModel()
 
 void SearchBox::_ReplaceModel(bool all)
 {
+	if (!all && sciedit == 0) return;
 	searchMode = false;
 	findallpro->setChecked(all);
 	btnreplacemodel->setText("查找>>");
@@ -238,9 +240,9 @@ void SearchBox::_ReplaceModel(bool all)
 	btnreplace->setEnabled(true);
 	btnreplaceall->setEnabled(true);
 	edit1->setEnabled(true);
-	edit->setText(sciedit->selectedText());
-	onSearcAllConditionChange();
-	if (sciedit == 0) return;
+	if(sciedit)
+		edit->setText(sciedit->selectedText());
+	onSearchAllConditionChange();
 	Show();
 }
 
