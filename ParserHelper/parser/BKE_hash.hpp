@@ -14,206 +14,127 @@
 #pragma push_macro("new")
 #undef new
 
-//copied from MS xstddef
-template<class T>
-int32_t BKE_hash(const T &val)
+namespace bke_hash
 {
-	const uint32_t _FNV_offset_basis = 2166136261U;
-	const uint32_t _FNV_prime = 16777619U;
-	const unsigned char *p = (const unsigned char*)&val;
-	const unsigned char *plim = (const unsigned char*)&val + sizeof(T);
-	uint32_t ret = _FNV_offset_basis;
-	while (p < plim)
+	constexpr static const uint32_t _FNV_offset_basis = 2166136261U;
+	constexpr static const uint32_t _FNV_prime = 16777619U;
+
+	//copied from MS xstddef
+	template<class T>
+	inline int32_t BKE_hash(const T &val)
 	{
-		ret ^= (unsigned char)*p;
-		ret *= _FNV_prime;
-		p++;
-	}
-	return (int32_t)ret;
-};
+		const unsigned char *p = (const unsigned char*)&val;
+		const unsigned char *plim = (const unsigned char*)&val + sizeof(T);
+		uint32_t ret = _FNV_offset_basis;
+		while (p < plim)
+		{
+			ret ^= (unsigned char)*p;
+			ret *= _FNV_prime;
+			p++;
+		}
+		return (int32_t)ret;
+	};
 
-template<class T>
-inline int32_t BKE_hash(const T* val)
-{
-	return BKE_hash(*val);
-};
-
-template<class T>
-inline int32_t BKE_hash(T* val)
-{
-	return BKE_hash(*val);
-};
-
-template<>
-inline int32_t BKE_hash(const std::wstring &str)
-{
-	if (str.empty()) return 0;
-	const uint32_t _FNV_offset_basis = 2166136261U;
-	const uint32_t _FNV_prime = 16777619U;
-	const wchar_t *c = str.c_str();
-	uint32_t ret = _FNV_offset_basis;
-	while (*c)
+	template<class T>
+	inline int32_t BKE_hash(const T* val)
 	{
-		ret ^= (uint32_t)*c;
-		ret *= _FNV_prime;
-		c++;
-	}
-	return (int32_t)ret;
-};
+		return BKE_hash(*val);
+	};
 
-template<>
-inline int32_t BKE_hash(const std::string &str)
-{
-	if (str.empty()) return 0;
-	const uint32_t _FNV_offset_basis = 2166136261U;
-	const uint32_t _FNV_prime = 16777619U;
-	const char *c = str.c_str();
-	uint32_t ret = _FNV_offset_basis;
-	while (*c)
+	template<class T>
+	inline int32_t BKE_hash(T* val)
 	{
-		ret ^= (uint32_t)*c;
-		ret *= _FNV_prime;
-		c++;
-	}
-	return (int32_t)ret;
-};
+		return BKE_hash(*val);
+	};
 
-template<>
-inline int32_t BKE_hash(const std::u16string &str)
-{
-	if (str.empty()) return 0;
-	const uint32_t _FNV_offset_basis = 2166136261U;
-	const uint32_t _FNV_prime = 16777619U;
-	auto c = str.c_str();
-	uint32_t ret = _FNV_offset_basis;
-	while (*c)
+	template<class T>
+	inline int32_t BKE_hash_strptr(const T *str)
 	{
-		ret ^= (uint32_t)*c;
-		ret *= _FNV_prime;
-		c++;
+		const T *c = (const T *)str;
+		if (!*c)
+			return 0;
+		uint32_t ret = _FNV_offset_basis;
+		while (*c)
+		{
+			ret ^= (uint32_t)*c;
+			ret *= _FNV_prime;
+			c++;
+		}
+		return (int32_t)ret;
 	}
-	return (int32_t)ret;
-};
 
-template<>
-inline int32_t BKE_hash(const wchar_t* str)
-{
-	if (!*str)
-		return 0;
-	const uint32_t _FNV_offset_basis = 2166136261U;
-	const uint32_t _FNV_prime = 16777619U;
-	const wchar_t *c = str;
-	uint32_t ret = _FNV_offset_basis;
-	while (*c)
+	template<class Ch>
+	inline int32_t BKE_hash(const std::basic_string<Ch> &str)
 	{
-		ret ^= (uint32_t)*c;
-		ret *= _FNV_prime;
-		c++;
+		return BKE_hash_strptr(str.c_str());
+	};
+
+	template<>
+	inline int32_t BKE_hash(const wchar_t* str)
+	{
+		return BKE_hash_strptr<wchar_t>(str);
 	}
-	return (int32_t)ret;
+
+	template<>
+	inline int32_t BKE_hash(wchar_t* str)
+	{
+		return BKE_hash_strptr<wchar_t>(str);
+	}
+
+	template<>
+	inline int32_t BKE_hash(const char *str)
+	{
+		return BKE_hash_strptr<char>(str);
+	}
+
+	template<>
+	inline int32_t BKE_hash(char *str)
+	{
+		return BKE_hash_strptr<char>(str);
+	}
+
+	template<>
+	inline int32_t BKE_hash(const char16_t *str)
+	{
+		return BKE_hash_strptr<char16_t>(str);
+	}
+
+	template<>
+	inline int32_t BKE_hash(char16_t *str)
+	{
+		return BKE_hash_strptr<char16_t>(str);
+	}
+
+	template<class Ch>
+	inline constexpr int32_t BKE_hash_constexpr(const Ch *str, int32_t accumulator = _FNV_offset_basis)
+	{
+		return *str ? BKE_hash_constexpr(str + 1, (int32_t)(1ull * (accumulator ^ (uint32_t)(*str)) * _FNV_prime)) : accumulator;
+	}
+
+	template <int32_t hash>
+	inline constexpr int32_t BKE_hash_constexpr()
+	{
+		return hash;
+	}
+
+#define BKE_HASH(x) bke_hash::BKE_hash_constexpr<bke_hash::BKE_hash_constexpr(x)>()
+	
+
+	template<>
+	inline int32_t BKE_hash(const void* p)
+	{
+		return (int32_t)(intptr_t)p;
+	}
+
+	template<>
+	inline int32_t BKE_hash(void* p)
+	{
+		return (int32_t)(intptr_t)p;
+	}
+
 }
 
-template<>
-inline int32_t BKE_hash(wchar_t* str)
-{
-	if (!*str)
-		return 0;
-	const uint32_t _FNV_offset_basis = 2166136261U;
-	const uint32_t _FNV_prime = 16777619U;
-	wchar_t *c = str;
-	uint32_t ret = _FNV_offset_basis;
-	while (*c)
-	{
-		ret ^= (uint32_t)*c;
-		ret *= _FNV_prime;
-		c++;
-	}
-	return (int32_t)ret;
-}
-
-template<>
-inline int32_t BKE_hash(const char *str)
-{
-	if (!*str)
-		return 0;
-	const uint32_t _FNV_offset_basis = 2166136261U;
-	const uint32_t _FNV_prime = 16777619U;
-	const char *c = str;
-	uint32_t ret = _FNV_offset_basis;
-	while (*c)
-	{
-		ret ^= (uint32_t)*c;
-		ret *= _FNV_prime;
-		c++;
-	}
-	return (int32_t)ret;
-}
-
-template<>
-inline int32_t BKE_hash(char *str)
-{
-	if (!*str)
-		return 0;
-	const uint32_t _FNV_offset_basis = 2166136261U;
-	const uint32_t _FNV_prime = 16777619U;
-	char *c = str;
-	uint32_t ret = _FNV_offset_basis;
-	while (*c)
-	{
-		ret ^= (uint32_t)*c;
-		ret *= _FNV_prime;
-		c++;
-	}
-	return (int32_t)ret;
-}
-
-template<>
-inline int32_t BKE_hash(const char16_t *str)
-{
-	if (!*str)
-		return 0;
-	const uint32_t _FNV_offset_basis = 2166136261U;
-	const uint32_t _FNV_prime = 16777619U;
-	const char16_t *c = str;
-	uint32_t ret = _FNV_offset_basis;
-	while (*c)
-	{
-		ret ^= (uint32_t)*c;
-		ret *= _FNV_prime;
-		c++;
-	}
-	return (int32_t)ret;
-}
-
-template<>
-inline int32_t BKE_hash(char16_t *str)
-{
-	if (!*str)
-		return 0;
-	const uint32_t _FNV_offset_basis = 2166136261U;
-	const uint32_t _FNV_prime = 16777619U;
-	char16_t *c = str;
-	uint32_t ret = _FNV_offset_basis;
-	while (*c)
-	{
-		ret ^= (uint32_t)*c;
-		ret *= _FNV_prime;
-		c++;
-	}
-	return (int32_t)ret;
-}
-
-template<>
-inline int32_t BKE_hash(const void* p)
-{
-	return (int32_t)(intptr_t)p;
-}
-
-template<>
-inline int32_t BKE_hash(void* p)
-{
-	return (int32_t)(intptr_t)p;
-}
+using bke_hash::BKE_hash;
 
 #define HASH_LEVEL 5
 
@@ -284,9 +205,9 @@ protected:
 	{
 		BKE_HashNode *next;
 		BKE_HashNode *last;
-		_Content ct;
 		int32_t index;
 		int32_t hashvalue;
+		_Content ct;
 
 		BKE_HashNode()
 		{
@@ -300,11 +221,11 @@ protected:
 		{
 		};
 
-		BKE_HashNode(BKE_HashNode &&c) :ct(std::move(c.ct)), index(c.index), hashvalue(c.hashvalue)
+		BKE_HashNode(BKE_HashNode &&c) :index(c.index), hashvalue(c.hashvalue), ct(std::move(c.ct))
 		{
 		};
 
-		BKE_HashNode(const BKE_HashNode &c) :ct(c.ct), index(c.index), hashvalue(c.hashvalue)
+		BKE_HashNode(const BKE_HashNode &c) :index(c.index), hashvalue(c.hashvalue), ct(c.ct)
 		{
 		};
 
@@ -314,10 +235,16 @@ protected:
 		};
 	};
 
+	struct BKE_HashNodehelper
+	{
+		BKE_HashNode *next;
+		BKE_HashNode *last;
+		int32_t index;
+	};
 	//char _head[sizeof(BKE_HashNode)];
 	//char _end[sizeof(BKE_HashNode)];
 
-	BKE_HashNode *_dummy[4];
+	BKE_HashNodehelper _dummy[2];
 
 	BKE_allocator<BKE_HashNode> al;
 
@@ -718,7 +645,7 @@ public:
 	};
 
 	//hashlevel根据hash表中元素的大约个数来选取，hash表的大小为2的hashlevel次方
-	BKE_hashmap(int initsize = HASH_LEVEL) :start(*reinterpret_cast<BKE_HashNode*>(_dummy)), stop(*reinterpret_cast<BKE_HashNode*>(_dummy + 2)), clearlock(false)
+	BKE_hashmap(int initsize = HASH_LEVEL) :start(*reinterpret_cast<BKE_HashNode*>(&_dummy[0])), stop(*reinterpret_cast<BKE_HashNode*>(&_dummy[1])), clearlock(false)
 	{
 		//static_assert(hashlevel >= 4, "hashlevel必须不小于4");
 		this->hashsize = 1 << initsize;
@@ -726,7 +653,7 @@ public:
 		//buf = (BKE_HashNode **)malloc(sizeof(void*) * hashsize);
 		buf = (BKE_HashNode **)memal.allocate(hashsize);
 		memset(buf, 0, sizeof(void*) * hashsize);
-		//start.index = stop.index = -1;
+		start.index = stop.index = -1;
 		start.last = NULL;
 		start.next = &stop;
 		stop.last = &start;
@@ -792,7 +719,7 @@ public:
 
 	//copy constructor
 	//notice: the sequence of Nodes in same leaf may not same
-	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h) :start(*reinterpret_cast<BKE_HashNode*>(_dummy)), stop(*reinterpret_cast<BKE_HashNode*>(_dummy + 2)), clearlock(false)
+	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h) :start(*reinterpret_cast<BKE_HashNode*>(&_dummy[0])), stop(*reinterpret_cast<BKE_HashNode*>(&_dummy[1])), clearlock(false)
 	{
 		hashsize = h.hashsize;
 		//buf = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
@@ -801,7 +728,7 @@ public:
 		count = h.count;
 		deletetick = 1;
 		inserttick = 1;
-		//start.index = stop.index = -1;
+		start.index = stop.index = -1;
 		start.last = NULL;
 		start.next = &stop;
 		stop.last = &start;
@@ -823,7 +750,7 @@ public:
 	}
 
 	template<class T>
-	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h, const T &func) :start(*reinterpret_cast<BKE_HashNode*>(_dummy)), stop(*reinterpret_cast<BKE_HashNode*>(_dummy + 2)), clearlock(false)
+	BKE_hashmap(const BKE_hashmap<_Key_t, _Val_t> &h, const T &func) :start(*reinterpret_cast<BKE_HashNode*>(&_dummy[0])), stop(*reinterpret_cast<BKE_HashNode*>(&_dummy[1])), clearlock(false)
 	{
 		hashsize = h.hashsize;
 		//buf = (BKE_HashNode **)malloc(sizeof(void*)* hashsize);
@@ -832,7 +759,7 @@ public:
 		count = h.count;
 		deletetick = 1;
 		inserttick = 1;
-		//start.index = stop.index = -1;
+		start.index = stop.index = -1;
 		start.last = NULL;
 		start.next = &stop;
 		stop.last = &start;
@@ -856,7 +783,7 @@ public:
 		}
 	}
 
-	BKE_hashmap(BKE_hashmap<_Key_t, _Val_t> &&h) :start(*reinterpret_cast<BKE_HashNode*>(_dummy)), stop(*reinterpret_cast<BKE_HashNode*>(_dummy + 2)), clearlock(false)
+	BKE_hashmap(BKE_hashmap<_Key_t, _Val_t> &&h) :start(*reinterpret_cast<BKE_HashNode*>(&_dummy[0])), stop(*reinterpret_cast<BKE_HashNode*>(&_dummy[1])), clearlock(false)
 	{
 		hashsize = h.hashsize;
 		buf = h.buf;
@@ -865,7 +792,7 @@ public:
 		h.count = 0;
 		deletetick = 1;
 		inserttick = 1;
-		//start.index = stop.index = -1;
+		start.index = stop.index = -1;
 		start.last = NULL;
 		start.next = h.start.next;
 		start.next->last = &start;

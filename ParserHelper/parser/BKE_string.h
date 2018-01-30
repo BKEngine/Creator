@@ -7,7 +7,6 @@
 #include <mutex>
 typedef std::recursive_mutex BKE_WrapperMutex;
 typedef std::lock_guard<std::recursive_mutex> BKE_WrapperMutexLocker;
-
 #ifndef WCHAR_MAX
 #include <wchar.h>
 #endif
@@ -68,11 +67,14 @@ struct StringType
 	inline StringType(wstring &&s);
 };
 
-//special hash function
-template<>
-inline int32_t BKE_hash(const StringType &str)
+namespace bke_hash
 {
-	return str.hashed ? str.hash : BKE_hash(str.str);
+	//special hash function
+	template<>
+	inline int32_t BKE_hash(const StringType &str)
+	{
+		return str.hashed ? str.hash : BKE_hash(str.str);
+	}
 }
 
 StringType::StringType(StringType &&s)
@@ -150,9 +152,14 @@ public:
 	inline void changeToHashed();
 
 	//to number
+	static inline BKE_Number asNumber(const wchar_t *str)
+	{
+		return str2num(str);
+	}
+
 	inline BKE_Number asNumber() const
 	{
-		return str2num(var->str.c_str());
+		return asNumber(var->str.c_str());
 	}
 
 	const wchar_t *c_str() const
@@ -160,11 +167,16 @@ public:
 		return var->str.c_str();
 	}
 
-	inline bool canBeNumber() const
+	static bool canBeNumber(const wchar_t *str, size_t length)
 	{
 		wchar_t *end;
-		str2num(var->str.c_str(),&end);
-		return end == var->str.c_str() + var->str.size();
+		str2num(str, &end);
+		return end == str + length;
+	}
+
+	inline bool canBeNumber() const
+	{
+		return canBeNumber(var->str.c_str(), var->str.size());
 	}
 
 	inline bool empty() const;
@@ -336,10 +348,13 @@ inline int32_t _BKE_hash(const BKE_String &str)
 	return str.var->hash;
 }
 
-template<>
-inline int32_t BKE_hash(const BKE_String &str)
+namespace bke_hash
 {
-	return _BKE_hash(str);
+	template<>
+	inline int32_t BKE_hash(const BKE_String &str)
+	{
+		return _BKE_hash(str);
+	}
 }
 
 inline BKE_String::BKE_String(const wchar_t *str, bool hash)

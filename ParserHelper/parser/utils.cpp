@@ -140,17 +140,19 @@ bkplong bkpwcstoxl(const wchar_t *nptr, const wchar_t **endptr, int ibase, int f
 			p = nptr;
 		number = 0L;        /* return 0 */
 	}
-	else if ( (flags & FL_OVERFLOW) ||
-		  ( !(flags & FL_UNSIGNED) &&
+	else if ( (flags & FL_OVERFLOW)
+		 // || ( !(flags & FL_UNSIGNED) &&
 			//( ( (flags & FL_NEG) && (number > -LONG_MIN) ) ||
 			//  ( !(flags & FL_NEG) && (number > LONG_MAX) ) ) ) )
-			(number > BKPLONG_MAX) ) )
+		//	(number > BKPLONG_MAX) ) 
+		)
 	{
 		/* overflow or signed overflow occurred */
 		errno = ERANGE;
-		if ( flags & FL_UNSIGNED )
-			number = BKPULONG_MAX;
-		else if ( flags & FL_NEG )
+//		if ( flags & FL_UNSIGNED )
+//			number = BKPULONG_MAX;
+//		else 
+		if ( flags & FL_NEG )
 			number = (bkpulong)BKPLONG_MAX+1;
 		else
 			number = BKPULONG_MAX;
@@ -474,16 +476,25 @@ double getutime()
 
 #include <random>
 
-std::random_device random_pool;
+std::random_device &get_random_pool(){
+    static std::random_device r;
+    return r;
+}
 
 bkplong bkpRandomInt()
 {
-	return (bkplong)random_pool();
+	return (bkplong)get_random_pool()();
+}
+//[min, max)
+int32_t bkpRandomInt(int min, int max)
+{
+	std::uniform_int_distribution<int32_t> u(min, max - 1);
+	return u(get_random_pool());
 }
 double bkpRandomDouble(double min, double max)
 {
 	std::uniform_real_distribution<double> u(min, max);
-	return u(random_pool);
+	return u(get_random_pool());
 }
 
 #include "BKE_string.h"

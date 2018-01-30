@@ -78,6 +78,7 @@ public:
 	~GlobalMemoryPool()
 	{
 		purge();
+		//__uninit_memorypool();
 	};
 public:
 	int count;
@@ -125,7 +126,7 @@ public:
 		}
 #else
 		if (size <= MEMORY_UNIT * SMALL)
-			p = allocator_array()[(size + MEMORY_UNIT - 1) / MEMORY_UNIT]->dynamic_allocate();
+			p = allocator_array()[(size + MEMORY_UNIT - 1) / MEMORY_UNIT]->allocate();
 		else
 			p = malloc(size);
 		if (p)
@@ -164,7 +165,7 @@ public:
 			free(m);
 #else
 			if (m->size <= MEMORY_UNIT * SMALL)
-				allocator_array()[(m->size + MEMORY_UNIT - 1) / MEMORY_UNIT]->dynamic_deallocate(m);
+				allocator_array()[(m->size + MEMORY_UNIT - 1) / MEMORY_UNIT]->deallocate(m);
 			else
 				free(m);
 #endif
@@ -375,8 +376,8 @@ public:
 	double asNumber() const;
 	wstring asString() const;
 	BKE_VarArray *asArray() const;
-	BKE_VarDic *asDic() const;
-	BKE_VarFunction *asFunc() const;
+	BKE_VarDic *asDicRetain() const;
+	BKE_VarFunction *asFuncRetain() const;
 	BKE_VarClass *asClass() const;
 	bool canBeNumber() const;
 	inline bool isInteger() const { return vt == VAR_NUM && num.isInteger(); };
@@ -417,7 +418,7 @@ public:
 	BKE_VarClosure *getClosure(BKE_VarClosure *defaultValue = nullptr) const;
 	BKE_VarProp *getProp(BKE_VarProp *defaultValue = nullptr) const;
 
-	template<class T, class... Args>
+	template<class T, class Cond = void, class... Args>
 	struct ConventerDelegate
 	{
 		static T convertTo(const BKE_Variable &_this, Args&&...args)
@@ -2019,10 +2020,10 @@ public:
 		return true;
 	}
 
-	inline BKE_Variable getSuperMember(const BKE_String &key)
+	inline BKE_Variable getSuperMember(const BKE_String &key, const BKE_Variable &self)
 	{
 		if (!isdef)
-			return defclass->getSuperMember(key);
+			return defclass->getSuperMember(key, self);
 		if (parents.size() == 0)
 			throw Var_Except(L"类" + classname.getConstStr() + L"不存在父类，super无意义。");
 		if (parents.size() > 1)
@@ -2032,11 +2033,11 @@ public:
 		{
 			if (var->getType() == VAR_FUNC)
 			{
-				return new BKE_VarFunction(*(BKE_VarFunction*)(var->obj), this);
+				return new BKE_VarFunction(*(BKE_VarFunction*)(var->obj), self.getClosure(), self);
 			}
 			if (var->getType() == VAR_PROP)
 			{
-				return new BKE_VarProp(*(BKE_VarProp*)(var->obj), this);
+				return new BKE_VarProp(*(BKE_VarProp*)(var->obj), self.getClosure(), self);
 			}
 			throw Var_Except(L"类" + classname.getConstStr() + L"的父类" + parents[0]->classname.getConstStr() + L"的成员" + key.getConstStr()+L"不是函数或属性，super只能取父类的函数或属性");
 		}

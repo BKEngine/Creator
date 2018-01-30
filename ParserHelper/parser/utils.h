@@ -5,10 +5,12 @@
 //#define ENABLE_FILE
 #define HAS_REGEX
 
+#ifndef PARSER_MULTITHREAD
 #if BKE_CREATOR
 #define PARSER_MULTITHREAD 1
 #else
 #define PARSER_MULTITHREAD 0
+#endif
 #endif
 
 #include <string>
@@ -171,9 +173,8 @@ public:
 
 double getutime();
 
-void bkpRandomSeed(unsigned int seed);
-
 int bkpRandomInt();
+int32_t bkpRandomInt(int min, int max);
 
 double bkpRandomDouble(double min, double max);
 

@@ -43,6 +43,13 @@ namespace ParserUtils
 	//	else
 	//		return L"";
 	//};
+	
+	NATIVE_FUNC(set)
+	{
+		BKE_Variable &var = Parser::getInstance()->getVar(PARAM(0), _this);
+		var = PARAM(1);
+		RETURNDEFAULT;
+	}
 
 	NATIVE_FUNC(array)
 	{
@@ -899,7 +906,7 @@ namespace ParserUtils
 				auto &&v = ((BKE_VarArray *)self->obj)->vararray;
 				for (int i = 0; i < v.size(); i++)
 				{
-					if (var == v[i])
+					if (v[i].isVoid() ? var.isVoid() : var == v[i])
 						return i;
 				}
 				return -1;
@@ -935,6 +942,91 @@ namespace ParserUtils
 		if (v.size() == 0)
 			RETURNDEFAULT;
 		return v[((bkpulong)bkpRandomInt()) % v.size()];
+	}
+
+	//randomPick(n=1)
+	//return [array]
+	NATIVE_FUNC(randomPick)
+	{
+		int n = PARAMDEFAULT(0, 1);
+		auto &&v = ((BKE_VarArray *)self->obj)->vararray;
+		int N = v.size();
+		BKE_VarArray *res = new BKE_VarArray();
+		if (N == 0 || n <= 0)
+			return res;
+		if (6 * n < N && n <= 15)
+		{
+			int choose[15];
+			int choosesize = 0;
+			while (choosesize < n)
+			{
+				int i = (int)bkpRandomInt(0, N);
+				bool r = false;
+				for (int j = 0; j < choosesize; j++)
+				{
+					if (choose[j] == i)
+					{
+						r = true;
+						break;
+					}
+				}
+				if (!r)
+				{
+					choose[choosesize++] = i;
+					res->pushMember(v[i]);
+				}
+			}
+		}
+		else if (N <= 1024)
+		{
+			int idx[1024];
+			for (int i = 0; i < N; i++)
+				idx[i] = i;
+			int i = 0;
+			while (i < n)
+			{
+				int r = (int)bkpRandomInt(0, N - i);
+				i++;
+				res->pushMember(v[idx[r]]);
+				idx[r] = idx[N - i];
+			}
+		}
+		else
+		{
+			int *idx = new int[N];
+			for (int i = 0; i < N; i++)
+				idx[i] = i;
+			int i = 0;
+			while (i < n)
+			{
+				int r = (int)bkpRandomInt(0, N - i);
+				i++;
+				res->pushMember(v[idx[r]]);
+				idx[r] = idx[N - i];
+			}
+			delete[] idx;
+		}
+		return res;
+	}
+
+	//shuffle(int n=0)
+	NATIVE_FUNC(shuffle)
+	{
+		int n = PARAMDEFAULT(0, 1);
+		auto &&v = ((BKE_VarArray *)self->obj)->vararray;
+		int N = v.size();
+		if (n <= 0)
+			n = N;
+		int i = 0;
+		while (i < n)
+		{
+			int r = bkpRandomInt(0, N - i) + i;
+			auto tmp = v[r];
+			v[r] = v[i];
+			v[i] = tmp;
+			i++;
+		}
+		RETURNDEFAULT;
 	}
 
 	NATIVE_FUNC(take)
@@ -1047,6 +1139,7 @@ namespace ParserUtils
 		if (ss.getType() == VAR_FUNC)
 		{
 			auto param = new BKE_VarArray();
+			BKE_Variable tmp(param);
 			auto func = static_cast<BKE_VarFunction*>(ss.obj);
 			sort(arr.addrs.begin(), arr.addrs.end(), [param, func](const raw_t &a, const raw_t &b)
 			{
@@ -1220,6 +1313,7 @@ namespace ParserUtils
 		if (ss.getType() == VAR_FUNC)
 		{
 			auto param = new BKE_VarArray();
+			BKE_Variable tmp(param);
 			auto func = static_cast<BKE_VarFunction*>(ss.obj);
 			sort(v->vararray.addrs.begin(), v->vararray.addrs.end(), [param, &varmap, func](const raw_t &a, const raw_t &b)
 			{
@@ -1875,6 +1969,12 @@ namespace ParserUtils
 		*/
 		{ QUICKFUNC(time) },
 		/**
+		*  @param string exp
+		*  @param anytype value
+		*  @brief  给一个变量赋值一个值。
+		*/
+		{ QUICKFUNC(set) },
+		/**
 		*  @return number
 		*  @brief  返回当前的时间戳（单位ms）。
 		*/
@@ -2288,6 +2388,19 @@ namespace ParserUtils
 		*/
 		{ L"random", &ParserUtils::nativeFunc_array_random },
 		/**
+		*	@class array（内部保留类）
+		*	@param integer n=1
+		*	@return array
+		*   @brief  取出数组中n个不重复的元素，返回数组，原数组顺序不变。
+		*/
+		{ QUICKFUNC(randomPick) },
+			/**
+			*	@class array（内部保留类）
+			*	@param integer n=0
+			*   @brief  数组洗牌，打乱数组中前n个元素，n<=0时打乱全数组。
+			*/
+		{ QUICKFUNC(shuffle) },
+			/**
 		*	@class array（内部保留类）
 		*	@param integer index
 		*	@return anytype

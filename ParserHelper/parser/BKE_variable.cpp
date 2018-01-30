@@ -16,7 +16,7 @@ void GlobalMemoryPool::purge()
 		free(it2);
 #else
 		if (it2->size <= MEMORY_UNIT * SMALL)
-			allocator_array()[(it2->size + MEMORY_UNIT - 1) / MEMORY_UNIT]->dynamic_deallocate(it2);
+			allocator_array()[(it2->size + MEMORY_UNIT - 1) / MEMORY_UNIT]->deallocate(it2);
 		else
 			free(it2);
 #endif
@@ -488,27 +488,27 @@ BKE_VarArray *BKE_Variable::asArray() const
 	}
 }
 
-BKE_VarDic *BKE_Variable::asDic() const
+BKE_VarDic *BKE_Variable::asDicRetain() const
 {
 	if (getType() == VAR_PROP)
-		return static_cast<BKE_VarProp*>(obj)->get().asDic();
+		return static_cast<BKE_VarProp*>(obj)->get().asDicRetain();
 	switch (vt)
 	{
 	case VAR_DIC:
-		return static_cast<BKE_VarDic*>(obj);
+		return static_cast<BKE_VarDic*>(obj->addRef());
 	default:
 		_throw(L"无法转化为字典");
 	}
 }
 
-BKE_VarFunction *BKE_Variable::asFunc() const
+BKE_VarFunction *BKE_Variable::asFuncRetain() const
 {
 	if (getType() == VAR_PROP)
-		return static_cast<BKE_VarProp*>(obj)->get().asFunc();
+		return static_cast<BKE_VarProp*>(obj)->get().asFuncRetain();
 	switch (vt)
 	{
 	case VAR_FUNC:
-		return static_cast<BKE_VarFunction*>(obj);
+		return static_cast<BKE_VarFunction*>(obj->addRef());
 	default:
 		_throw(L"无法转化为方法");
 	}
@@ -732,6 +732,7 @@ BKE_VarClosure *BKE_Variable::getClosure(BKE_VarClosure *defaultValue) const
 		return static_cast<BKE_VarProp*>(obj)->get().getClosure(defaultValue);
 	switch (vt)
 	{
+	case VAR_CLO:
 	case VAR_CLASS:
 		return static_cast<BKE_VarClosure*>(obj);
 	default:

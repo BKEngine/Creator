@@ -238,7 +238,7 @@ void QBkeVariable::loadClosureDicFromString(const QString &s)
         throw(QBkeVarExcept(e));
     }
     *_var = BKE_Variable::dic();
-    _var->asDic()->varmap.Union(clo->varmap, true);
+    _var->forceAsDic()->varmap.Union(clo->varmap, true);
     clo->release();
 }
 

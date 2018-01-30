@@ -885,21 +885,28 @@ void Parser::readToken()
 			switch (nn)
 			{
 			case 3:
-				n[3] = 15;
-			case 4:
-				color = 0x11000000 * n[3];
+				color = 0xFF000000;
 				color |= 0x110000 * n[0];
 				color |= 0x1100 * n[1];
 				color |= 0x11 * n[2];
 				break;
+			case 4:
+				color = 0x11000000 * n[0];
+				color |= 0x110000 * n[1];
+				color |= 0x1100 * n[2];
+				color |= 0x11 * n[3];
+				break;
 			case 6:
-				n[6] = 0x0F;
-				n[7] = 0x0F;
-			case 8:
-				color |= (0x10000000 * n[6]) | (0x01000000 * n[7]);
+				color = 0xFF000000;
 				color |= (0x100000 * n[0]) | (0x010000 * n[1]);
 				color |= (0x1000 * n[2]) | (0x0100 * n[3]);
 				color |= (0x10 * n[4]) | (0x01 * n[5]);
+				break;
+			case 8:
+				color |= (0x10000000 * n[0]) | (0x01000000 * n[1]);
+				color |= (0x100000 * n[2]) | (0x010000 * n[3]);
+				color |= (0x1000 * n[4]) | (0x0100 * n[5]);
+				color |= (0x10 * n[6]) | (0x01 * n[7]);
 				break;
 			default:
 				throw Var_Except(L"#后面只能接3,4,6,或8个十六进制数字表示颜色值", static_cast<bkpulong>(curpos - exp));
@@ -1894,10 +1901,8 @@ void Parser::nud_foreach(BKE_bytree** tree)
 			tr->childs.push_back(new BKE_bytree(next));
 			readToken();
 		}
-		//else
-		//{
-		//	THROW(L"此处需要变量", next.pos);
-		//}
+		else
+			tr->addChild();
 	}
 	else
 	{
@@ -1963,7 +1968,7 @@ void Parser::nud_while(BKE_bytree** tree)
 		THROW(L"语法错误，此处需要{", next.pos);
 	};
 	GET_TREE_OR_NULL;
-	if(tr->childs[0]->Node.opcode != OP_CONSTVAR + OP_COUNT && (bool)tr->childs[0]->Node.var==false)
+	if(tr->childs[0]->Node.opcode == OP_CONSTVAR + OP_COUNT && (bool)tr->childs[0]->Node.var==false)
 	{
 		tr->release();
 		*tree=nullptr;
@@ -3180,6 +3185,9 @@ NUD_FUNC(class)
 	else
 		cla = new BKE_VarClass(n/*, _this*/);
 	BKE_Variable claclo = cla;
+	BKE_VarClosure::global()->deleteMemberIndex(n);
+	//_this->setConstMember(n, claclo);
+	BKE_VarClosure::global()->setConstMember(n, claclo);
 	for (; i < s; i++)
 	{
 		BKE_bytree *&subtr = tree->childs[i];
@@ -3232,8 +3240,6 @@ NUD_FUNC(class)
 			break;
 		}
 	}
-	//_this->setConstMember(n, claclo);
-	BKE_VarClosure::global()->setConstMember(n, claclo);
 	RETURNNULL;
 }
 
@@ -3689,7 +3695,7 @@ LED_FUNC(dot)
 		auto thisvar = _this->getThisClosure();
 		if (!thisvar)
 			throw Var_Except(L"super在当前环境下无定义");
-		QUICKRETURNCONST(thisvar->getSuperMember(str));
+		QUICKRETURNCONST(thisvar->getSuperMember(str, thisvar));
 	}
 	GETLEFTVARWITHOUTPROP;
 	CHECKEMPTY(1);
@@ -3729,7 +3735,7 @@ LED_FUNC(ele)
 		if (tree->childs.size() == 2)
 		{
 			GETRIGHTVAR;
-			QUICKRETURNCONST(thisvar->getSuperMember(rightvar.asBKEStr()));
+			QUICKRETURNCONST(thisvar->getSuperMember(rightvar.asBKEStr(), thisvar));
 		}
 		throw Var_Except(L"语法错误，中括号里只能有一项");
 	}
@@ -3866,12 +3872,19 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 		if (tree->childs[1] != nullptr)
 		{
 			unParse(tree->childs[1], res);
+			if (res.back() != L'}')
+			{
+				res += L';';
+			}
 		}
-		res += L';';
 		if (tree->childs[2] != nullptr)
 		{
 			res += L"else ";
 			unParse(tree->childs[2], res);
+			if (res.back() != L'}')
+			{
+				res += L';';
+			}
 		}
 		break;
 	case OP_FOR + OP_COUNT:
@@ -3951,7 +3964,7 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 		}
 		res += L"){";
 		unParse(((BKE_VarFunction *)tree->Node.var.obj)->func->code, res);
-		res += L'}';
+		res += L";}";
 		break;
 	}
 	case OP_CLASS + OP_COUNT:
@@ -4168,7 +4181,7 @@ void Parser::unParse(BKE_bytree *tree, wstring &res)
 			res += L";";
 			unParse(tree->childs[i], res);
 		}
-		res += L"}";
+		res += L";}";
 		break;
 	case OP_DOT + OP_COUNT:
 		res += L'.';

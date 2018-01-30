@@ -22,3 +22,6 @@ typedef uint64_t bkpulonglong;
 #undef NULL
 #define NULL nullptr
 #endif
+
+//add compatibility to V2 string
+#define W(x) L##x
