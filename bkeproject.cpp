@@ -771,6 +771,12 @@ int BkeProject::addVersionData(QWidget *parent)
 	return -1;
 }
 
+void BkeProject::DeleteSaveData()
+{
+	auto saveDir = config->saveDir;
+	QDir(ProjectDir() + "/" + saveDir).removeRecursively();
+}
+
 QString BkeProject::AllNameToName(const QString &allname)
 {
 

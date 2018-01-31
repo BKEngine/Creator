@@ -190,13 +190,14 @@ public slots:
 	void RunBKE();
 	void RunBKEWithArgs();
 	void AnnotateSelect();
-	void ClearCompile();
+	void ClearCompileAndSaveData();
 	void ChangeCodec();
 	void NewEmptyFile();
 	void FileReadyToCompile(int i);
 	void ChangeProject(BkeProject *p);
 	void TextToMarks(const QString &text, const QString &dir, int type);
-	void deleteCompileFile();
+	void DeleteCompileFile();
+	void DeleteSaveData();
 	void SelectAll();
 	void QfileChange(const QString &path);
 	void GotoLine();

@@ -202,6 +202,7 @@ private:
 public:
 	QList<VersionData> &getVersionDataList(){return _versionData;}
 	int addVersionData(QWidget *parent); //返回编号，如果是-1表明没有添加成功或者用户取消了添加操作
+	void DeleteSaveData();
 };
 
 #endif // BKEPROJECT_H

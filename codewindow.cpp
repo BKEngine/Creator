@@ -69,7 +69,7 @@ CodeWindow::CodeWindow(QWidget *parent)
 	connect(btnrunact, SIGNAL(triggered()), this, SLOT(RunBKE()));
 	connect(btnrunfromlabel, SIGNAL(triggered()), this, SLOT(RunBKEWithArgs()));
 	connect(pannote, SIGNAL(triggered()), this, SLOT(AnnotateSelect()));
-	connect(btnclearact, SIGNAL(triggered()), this, SLOT(ClearCompile()));
+	connect(btnclearact, SIGNAL(triggered()), this, SLOT(ClearCompileAndSaveData()));
 	//编码转换
 	connect(btncodeact, SIGNAL(triggered()), this, SLOT(ChangeCodec()));
 	connect(btnselectall, SIGNAL(triggered()), this, SLOT(SelectAll()));
@@ -153,7 +153,7 @@ void CodeWindow::CreateBtn()
 	btnrunfromlabel = new QAction("从本标签处运行", this);
 	btnredoact = new QAction(QIcon(":/cedit/redo.png"), "重做", this);
 	btnundoact = new QAction(QIcon(":/cedit/undo.png"), "撤销", this);
-	btnclearact = new QAction(QIcon(":/cedit/clear.png"), "清理编译工程", this);
+	btnclearact = new QAction(QIcon(":/cedit/clear.png"), "清理编译工程和存档", this);
 	pannote = new QAction("选中部分注释/反注释", this);
 	btnselectall = new QAction("全选", this);
 	btnfly = new QAction(QIcon(":/cedit/flay.png"), "转到行...", this);
@@ -1205,15 +1205,22 @@ QStringList fileEntries(const QString &dir, const QStringList &suffixes)
 }
 
 //删除编译过的文件
-void CodeWindow::deleteCompileFile()
+void CodeWindow::DeleteCompileFile()
 {
 	if (workpro == nullptr)
 		return;
 	QStringList l = fileEntries(workpro->ProjectDir(), QStringList() << ".bkbin");
-	for (auto i : l)
+	for (auto &&i : l)
 	{
-		QFile(i).remove();
+		QFile::remove(i);
 	}
+}
+
+void CodeWindow::DeleteSaveData()
+{
+	if (workpro == nullptr)
+		return;
+	workpro->DeleteSaveData();
 }
 
 /*
@@ -1584,9 +1591,10 @@ void CodeWindow::AnnotateSelect()
 	currentedit->BkeAnnotateSelect();
 }
 
-void CodeWindow::ClearCompile()
+void CodeWindow::ClearCompileAndSaveData()
 {
-	deleteCompileFile();
+	DeleteCompileFile();
+	DeleteSaveData();
 	btnrunact->setEnabled(false); //清理后运行按钮不可用
 	btndebugact->setEnabled(false); //debug按钮也不可用
 }
