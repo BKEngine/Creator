@@ -1599,6 +1599,13 @@ void CodeWindow::ClearCompileAndSaveData()
 	btndebugact->setEnabled(false); //debug按钮也不可用
 }
 
+void CodeWindow::ClearCompile()
+{
+	DeleteCompileFile();
+	btnrunact->setEnabled(false); //清理后运行按钮不可用
+	btndebugact->setEnabled(false); //debug按钮也不可用
+}
+
 void CodeWindow::ChangeCodec()
 {
 	QMessageBox msg;

@@ -417,7 +417,19 @@ void CheckFileAssociation()
 		{
 			if (QMessageBox::question(0, "提示", "检测到工程文件尚未关联。是否关联工程文件？") == QMessageBox::Yes)
 			{
-				QProcess::execute(BKE_CURRENT_DIR + "/FileAssociation.exe -set");
+				auto s = BKE_CURRENT_DIR.toStdWString();
+				SHELLEXECUTEINFO shExInfo = { 0 };
+				shExInfo.cbSize = sizeof(shExInfo);
+				shExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+				shExInfo.hwnd = 0;
+				shExInfo.lpVerb = L"runas";                // Operation to perform
+				shExInfo.lpFile = L"FileAssociation.exe";       // Application to start    
+				shExInfo.lpParameters = L"-set";                  // Additional parameters
+				shExInfo.lpDirectory = s.c_str();
+				shExInfo.nShow = SW_HIDE;
+				shExInfo.hInstApp = 0;
+
+				ShellExecuteEx(&shExInfo);
 			}
 		}
 		delete cmd;
