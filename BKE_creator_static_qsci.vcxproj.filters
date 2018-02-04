@@ -74,6 +74,9 @@
     <Filter Include="QFuzzyMatcher">
       <UniqueIdentifier>{07e335b2-cb4f-400d-9080-38d551bc157d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Debugger">
+      <UniqueIdentifier>{c2546e03-452f-4612-ada4-73d1e20975c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp">
@@ -661,15 +664,6 @@
     <ClCompile Include="Release\moc_openlabeldialog.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="DebugServer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Debug\moc_DebugServer.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="Release\moc_DebugServer.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_QSpoiler.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -702,6 +696,15 @@
     </ClCompile>
     <ClCompile Include="TinyProcess\process_win.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_DebugServer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_DebugServer.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="Debugger\DebugServer.cpp">
+      <Filter>Debugger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1155,6 +1158,9 @@
     <ClInclude Include="dia\ParserEditorUndoCommand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Debugger\BreakpointInfo.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\Setoptiondia.ui">
@@ -1229,9 +1235,6 @@
     <CustomBuild Include="dia\openlabeldialog.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
-    <CustomBuild Include="DebugServer.h">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="QSpoiler.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
@@ -1243,6 +1246,9 @@
     </CustomBuild>
     <CustomBuild Include="source\source.qrc">
       <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Debugger\DebugServer.h">
+      <Filter>Debugger</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

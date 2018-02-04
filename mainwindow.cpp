@@ -501,7 +501,6 @@ void MainWindow::OCupdate()
 
 void MainWindow::ProjectOpen(BkeProject *p)
 {
-	global_bke_info.setProj(p);
 	option_prop->setEnabled(true);
 	btnReleaseGame->setEnabled(true);
 }
@@ -536,6 +535,7 @@ void MainWindow::CurrentProChange(BkeProject *pro)
 {
 	if (pro)
 	{
+		global_bke_info.setProj(pro);
 		QString proj = pro->ProjectFile();
 #ifdef Q_OS_WIN
 		proj.replace('/', '\\');

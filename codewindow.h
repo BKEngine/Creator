@@ -14,7 +14,7 @@
 #include <QFileSystemWatcher>
 #include "dia/searchbox.h"
 #include "dia/bkeleftfilewidget.h"
-#include "DebugServer.h"
+#include "Debugger/DebugServer.h"
 #include "TinyProcess/process.hpp"
 
 class BkeDocBase

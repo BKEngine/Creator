@@ -1,6 +1,7 @@
 ﻿#ifndef BKESCINTILLA_H
 #define BKESCINTILLA_H
 
+#include <weh.h>
 #include <QWidget>
 #include <Qsci/qsciscintilla.h>
 #include <QMessageBox>
@@ -8,8 +9,8 @@
 #include <QSortedSet>
 #include "bkeSci/qscilexerbkescript.h"
 #include "bkeSci/BkeIndicatorBase.h"
-#include <weh.h>
 #include "../BG_Analysis.h"
+#include "Debugger/BreakpointInfo.h"
 
 class BkeDocBase;
 class BkeProject;
@@ -43,8 +44,8 @@ public:
 	BkeIndicatorBase findlast;
 	QString FileName;
 
-	void    DefineIndicators(int id,int intype) ;
-	void    ClearIndicators(int id) ;
+	void DefineIndicators(int id,int intype) ;
+	void ClearIndicators(int id) ;
 	void ClearIndicator(int id, const BkeIndicatorBase &p) ;
 	int findFirst1(const QString fstr,bool cs,bool exp,bool word,bool mark = true) ;
 	void ReplaceAllFind(const QString &rstr) ;
@@ -130,6 +131,9 @@ private slots:
 	void OnDwellEnd(int, int, int);
 	QFont GetAnnotationFont();
 	void onTimer();
+
+private:
+	void OnMarginClicked(int margin, int line, Qt::KeyboardModifiers state);
 
 private:
 	void ScanMacroDefine();
@@ -234,6 +238,21 @@ private:
 	//IME相关，给QT修锅
 protected:
 	virtual void inputMethodEvent(QInputMethodEvent *event) override;
+
+	//Debug相关
+signals:
+	void DebugBreakpointChange(const QString &file, const QMap<int, BreakpointInfo> &);
+
+private:
+	void EmitBreakpointChange();
+protected:
+	QMap<int, BreakpointInfo> breakpointInfos;
+	BreakpointInfo *GetBreakpointInfoByLine(int line);
+	int GetBreakpointHandleByLine(int line);
+	void AddBreakpoint(int line);
+	void DeleteBreakpoint(int line);
+	void ToggleBreakpoint(int line);
+public:
 };
 
 #endif // BKESCINTILLA_H

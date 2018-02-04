@@ -23,17 +23,24 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	setLexer(deflex);
 
 	setMarginLineNumbers(0, false);
-	setMarginWidth(0, 48);
+	setMarginWidth(0, 36);
 	setMarginLineNumbers(1, true);
-	setMarginWidth(1, 24);
+	setMarginWidth(1, 36);
 	markerDefine(QImage(":/info/errorsmall.png"), 1);
 	markerDefine(QImage(":/info/warningsmall.png"), 2);
 	markerDefine(QImage(":/info/bookmarksmall.png"), 3);
 	markerDefine(QImage(":/info/pinsmall.png"), 4);
 	markerDefine(QImage(":/info/errorsmall.png"), 5);
 	markerDefine(QImage(":/info/warningsmall.png"), 6);
-	setMarginMarkerMask(0, 0b01111111);
+	setMarginMarkerMask(0, 0b111111111);
 	setMarginMarkerMask(1, 0);
+	setMarginSensitivity(0, true);
+	//Debug Breakpoint
+	markerDefine(QsciScintilla::Circle, 7);
+	setMarkerBackgroundColor(QColor(Qt::GlobalColor::red), 7);
+	//Debug CurrentLine
+	markerDefine(QsciScintilla::RightArrow, 8);
+	setMarkerBackgroundColor(QColor(Qt::GlobalColor::darkYellow), 8);
 
 	SendScintilla(SCI_SETSCROLLWIDTHTRACKING, true);
 	SendScintilla(SCI_SETMOUSEDWELLTIME, 500);
@@ -98,6 +105,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	connect(this, SIGNAL(SCN_DWELLEND(int, int, int)), this, SLOT(OnDwellEnd(int, int, int)));
 	//光标位置被改变
 	connect(this, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(CurrentPosChanged(int, int)));
+	connect(this, &QsciScintilla::marginClicked, this, &BkeScintilla::OnMarginClicked);
 	//输入单个字符
 	//connect(this, SIGNAL(SCN_CHARADDED(int)), this, SLOT(CharHandle(int)));
 
@@ -114,6 +122,17 @@ BkeScintilla::~BkeScintilla()
 	tm.stop();
 	highlightTimer.stop();
 	//delete Selfparser;
+}
+
+void BkeScintilla::OnMarginClicked(int margin, int line, Qt::KeyboardModifiers state)
+{
+	if (margin == 0)
+	{
+		if (state == 0)
+		{
+			ToggleBreakpoint(line);
+		}
+	}
 }
 
 void BkeScintilla::Detach()
@@ -2240,4 +2259,73 @@ BkeIndicatorBase BkeScintilla::GetRangeForStyles(int position, const QList<unsig
 		}
 	}
 	return result;
+}
+
+/////////////////// Debug ///////////////////
+
+void BkeScintilla::EmitBreakpointChange()
+{
+	QMap<int, BreakpointInfo> info;
+
+	for (auto it = breakpointInfos.constBegin(); it != breakpointInfos.constEnd(); ++it)
+	{
+		int handle = it.key();
+		int line = markerLine(handle);
+		info.insert(line, it.value());
+	}
+
+	emit DebugBreakpointChange(FileName, info);
+}
+
+BreakpointInfo * BkeScintilla::GetBreakpointInfoByLine(int line)
+{
+	for (auto it = breakpointInfos.begin(); it != breakpointInfos.end(); ++it)
+	{
+		int handle = it.key();
+		int l = markerLine(handle);
+		if (l == line)
+		{
+			return &it.value();
+		}
+	}
+	return nullptr;
+}
+
+int BkeScintilla::GetBreakpointHandleByLine(int line)
+{
+	for (auto it = breakpointInfos.begin(); it != breakpointInfos.end(); ++it)
+	{
+		int handle = it.key();
+		int l = markerLine(handle);
+		if (l == line)
+			return handle;
+	}
+	return -1;
+}
+
+void BkeScintilla::AddBreakpoint(int line)
+{
+	int handle = markerAdd(line, 7);
+	breakpointInfos.insert(handle, BreakpointInfo());
+}
+
+void BkeScintilla::DeleteBreakpoint(int line)
+{
+	int handle = GetBreakpointHandleByLine(line);
+	if (handle == -1)
+		return;
+	breakpointInfos.remove(handle);
+	markerDeleteHandle(handle);
+}
+
+void BkeScintilla::ToggleBreakpoint(int line)
+{
+	int handle = GetBreakpointHandleByLine(line);
+	if (handle == -1)
+		AddBreakpoint(line);
+	else
+	{
+		breakpointInfos.remove(handle);
+		markerDeleteHandle(handle);
+	}
 }

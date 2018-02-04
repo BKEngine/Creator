@@ -138,12 +138,12 @@ void DebugServer::processBinaryMessage(const QByteArray & message)
 				{
 					flag = debugClient == nullptr;
 				}
+				reply(pClient, flag ? SocketDataType::RETURN_SUCCESS : SocketDataType::RETURN_FAIL, taskmask);
 				if (flag)
 				{
 					debugClient = pClient;
 					emit onDebugClientConnected();
 				}
-				reply(pClient, flag ? SocketDataType::RETURN_SUCCESS : SocketDataType::RETURN_FAIL, taskmask);
 			}
 			default:
 				break;
