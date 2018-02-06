@@ -190,8 +190,8 @@ public slots:
 	void RunBKE();
 	void RunBKEWithArgs();
 	void AnnotateSelect();
-	void ClearCompileAndSaveData();
 	void ClearCompile();
+	void ClearCompileAndSaveData();
 	void ChangeCodec();
 	void NewEmptyFile();
 	void FileReadyToCompile(int i);

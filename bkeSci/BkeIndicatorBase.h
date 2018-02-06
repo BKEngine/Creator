@@ -27,6 +27,7 @@ class BkeModifiedBase
 {
 public:
     int pos ;
+	int endpos;
     int type ;
     int line ;
     int index ;
@@ -37,13 +38,14 @@ public:
 
     void clear(){
         pos = 0 ;
+		endpos = 0;
         type = 0 ;
         line = 0 ;
         lineadd = 0 ;
         text.clear();
     }
     bool isEmpty(){ return text.isEmpty() || pos < 1 ; }
-    int  EndPos(){ return index + text.length() ; }
+    int  EndPos(){ return endpos ; }
 };
 
 #endif // BKEINDICATORBASE_H

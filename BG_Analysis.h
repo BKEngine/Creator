@@ -6,7 +6,8 @@
 #include <QSet>
 #include <atomic>
 #include <algorithm>
-#include "ParserHelper/parser/parser.h"
+//#include "ParserHelper/parser/parser.h"
+#include "ParserHelper\Bagel\Bagel_Include.h"
 #include "ScopePointer.h"
 
 using std::atomic_bool;
@@ -18,7 +19,7 @@ struct BKEMacros
     QString name;
 	QString definefile;
 	QString comment;
-	bkplong pos;
+	int32_t pos;
 	vector<pair<QString, QString>> paramqueue;
 };
 
@@ -45,9 +46,9 @@ private:
 		STATE_PARSEMACRO,
 	}cur_state;
 
-	BKE_VarClosure *backup_topclo;
+	Bagel_Handler<Bagel_Closure> backup_topclo;
 
-	BKE_VarClosure *topclo;
+	Bagel_Handler<Bagel_Closure> topclo;
 
 	/// <summary>
 	/// Global macro data.

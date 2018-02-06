@@ -479,7 +479,7 @@ bool BKE_Lexer::ParseString2()
 	std::vector<Trans> trans_info;
 	int pos = styler->currentPos;
 	int realpos = pos;
-	unsigned char ch = styler->ch;
+	wchar_t ch = styler->ch;
 	bool intrans = false;
 	realpos++;
 	while (ch && ch != '\r' && ch != '\n')

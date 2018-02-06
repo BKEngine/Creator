@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+	<Type Name="StringType">
+		<DisplayString>{{ str={str} }}</DisplayString>
+		<StringView>str,su</StringView>
+	</Type>
+
+	<Type Name="Bagel_String">
+		<DisplayString>{{ str={var->str} }}</DisplayString>
+		<StringView>var->str,su</StringView>
+	</Type>
+	
+  <Type Name="Bagel_StringHolder">
+    <DisplayString>{{ str={s->var->str} }}</DisplayString>
+    <StringView>s->var->str,su</StringView>
+  </Type>
+
+	<Type Name="Bagel_Number">
+		<DisplayString>{{ num={var} }}</DisplayString>
+	</Type>
+
+	<Type Name="Bagel_Array">
+		<DisplayString>{vararray}</DisplayString>
+		<Expand>
+			<Item Name="[reference]">((BKE_VarObject*)this)->ref</Item>
+	  		<ExpandedItem>vararray</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<Type Name="BKE_array&lt;*&gt;">
+		<DisplayString>{{ size={count} }}</DisplayString>
+		<Expand>
+			<Item Name="[size]" >count</Item>
+			<ArrayItems>
+				<Size>count</Size>
+				<ValuePointer>_Myfirst</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="Bagel_Dic">
+		<DisplayString>{varmap}</DisplayString>
+		<Expand>
+			<ExpandedItem>varmap</ExpandedItem>
+		</Expand>
+	</Type>
+
+	<Type Name="BKE_hashmap&lt;*&gt;">
+		<DisplayString>{{ size={count} }}</DisplayString>
+		<Expand>
+			<Item Name="Count">count</Item>
+			<LinkedListItems>
+				<Size>count</Size>
+				<HeadPointer>start.next</HeadPointer>
+				<NextPointer>next</NextPointer>
+				<ValueNode>ct</ValueNode>
+			</LinkedListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="BKE_hashmap&lt;*&gt;::BKE_HashNode::_Content">
+		<DisplayString>"{first,sub}"=>{second}</DisplayString>
+		<Expand>
+			<Item Name="key">first</Item>
+			<Item Name="value">second</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Bagel_Var">
+		<DisplayString Condition="vt==VAR_NONE">{{ void }}</DisplayString>
+		<DisplayString Condition="vt==VAR_NUM">{{ num={num} }}</DisplayString>
+		<DisplayString Condition="vt==VAR_STR">{{ str={((Bagel_String*)obj)->str} }}</DisplayString>
+		<DisplayString Condition="vt==VAR_ARRAY">{{ Array }}</DisplayString>
+		<DisplayString Condition="vt==VAR_DIC">{{ Dictionary }}</DisplayString>
+		<DisplayString Condition="vt==VAR_FUNC">{{ Function }}</DisplayString>
+		<DisplayString Condition="vt==VAR_PROP">{{ Property }}</DisplayString>
+		<DisplayString Condition="vt==VAR_CLASS">{{ Class }}</DisplayString>
+    <DisplayString Condition="vt==VAR_CLO">{{ Closure }}</DisplayString>
+    <DisplayString Condition="vt==VAR_CLASSDEF">{{ ClassDef }}</DisplayString>
+    <Expand>
+			<ExpandedItem Condition="vt==VAR_NUM">num</ExpandedItem>
+			<ExpandedItem Condition="vt==VAR_STR">((Bagel_String*)obj)->str</ExpandedItem>
+			<ExpandedItem Condition="vt==VAR_ARRAY">((Bagel_Array*)obj)->vararray</ExpandedItem>
+			<ExpandedItem Condition="vt==VAR_DIC">((Bagel_Dic*)obj)->varmap</ExpandedItem>
+			<ExpandedItem Condition="vt==VAR_CLO">((Bagel_Closure*)obj)->varmap</ExpandedItem>
+			<ExpandedItem Condition="vt==VAR_CLASS">((Bagel_Class*)obj)</ExpandedItem>
+		</Expand>
+	</Type>
+	
+	<Type Name="BKE_Node">
+		<DisplayString Condition="opcode!=OP_LITERAL+OP_COUNT &amp;&amp; opcode!=OP_CONSTVAR+OP_COUNT &amp;&amp; opcode&gt;=OP_COUNT">{{ 前置运算符 opcode={(BKE_opcode)(opcode-OP_COUNT)} }}</DisplayString>
+		<DisplayString Condition="opcode&lt;OP_COUNT">{{ opcode={(BKE_opcode)opcode} }}</DisplayString>
+		<DisplayString Condition="opcode==OP_CONSTVAR+OP_COUNT">{{ const={var} }}</DisplayString>
+		<DisplayString Condition="opcode==OP_LITERAL+OP_COUNT">{{ VariableName={var} }}</DisplayString>
+		<Expand>
+			<Item Name="pos">pos</Item>
+		</Expand>
+	</Type>
+	
+	<Type Name="Bagel_AST">
+		<Expand>
+			<Item Name="Parent">parent</Item>
+			<Item Name="Node">Node</Item>
+			<ExpandedItem>childs</ExpandedItem>
+		</Expand>
+	</Type>
+	
+	<Type Name="Bagel_ByteCodeStruct">
+		<Expand>
+			<Item Name="opcode">(Bagel_BC)opcode</Item>
+			<Item Name="A">A</Item>
+			<Item Name="B">B</Item>
+			<Item Name="C">C</Item>
+			<Item Name="pos">pos</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="Bagel_Stack">
+		<Expand>
+      <Item Name="localDepth" Optional="true">relativePos - stack</Item>
+      <Item Name="size">stacksize</Item>
+      <Item Name="isSpecial">isSpecialStack</Item>
+      <CustomListItems>
+        <Variable Name="base" InitialValue="relativePos - stack"/>
+        <Variable Name="idx" InitialValue="0"/>
+        <Size>stacksize</Size>
+        <Loop>
+          <Item Name="[{idx-base}]">stack[idx]</Item>
+          <Exec>++idx</Exec>
+          <Break Condition="idx >= stacksize"/>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+	</Type>
+
+</AutoVisualizer>

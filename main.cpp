@@ -12,6 +12,7 @@
 #include <QStyleFactory>
 
 extern CodeWindow *codeedit;
+GLOBALSTRUCTURES_INIT();
 
 //register error handling in Windows
 #ifdef WIN32

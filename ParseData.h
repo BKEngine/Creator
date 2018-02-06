@@ -2,7 +2,7 @@
 
 #include <QVector>
 #include <QSortedSet>
-#include "ParserHelper/parser/parser.h"
+#include "ParserHelper/Bagel/Bagel_Include.h"
 
 using namespace std;
 
@@ -208,7 +208,7 @@ class ParseData
 {
 	QByteArray qba;
 public:
-	ParseData(const QByteArray &file, BKE_VarClosure *clo);
+	ParseData(const QByteArray &file, Bagel_Closure *clo);
 
 	~ParseData();
 
@@ -252,7 +252,7 @@ public:
 	QString readValue(bool startwithat);
 	bool skipSpace();
 
-	BKE_VarClosure *fileclo;
+	Bagel_Handler<Bagel_Closure> fileclo;
 
 	struct Info
 	{
@@ -287,71 +287,4 @@ public:
 	bool isLineStart;
 
 	bool Parse();
-};
-
-/// <summary>
-/// Parser Analysis Module
-/// </summary>
-class PAModule : private Parser
-{
-private:
-	std::wstring expstr;
-	Parser *p;
-	BKE_bytree *restree;
-	BKE_Variable res;
-	bool constvar;
-
-	const wchar_t* curpos;
-
-	//for ineer lexer
-	bool MatchFunc(const wchar_t *a, const wchar_t **c);
-	virtual void readToken();
-	virtual void expression(BKE_bytree** tree, int rbp = 0);
-	void skipToNextSentence();
-
-	BKE_Variable *tmpvar;
-	BKE_VarClosure *top;
-	BKE_Variable topvar;
-	BKE_Variable posvar;	//used by analysisToPos
-	void _analysisToClosure(BKE_bytree *tr, BKE_VarClosure *clo, BKE_Variable *var);
-	bool _analysisToPos(BKE_bytree *tr, BKE_VarClosure *clo, int pos, BKE_Variable *var);
-
-public:
-	~PAModule()
-	{
-		if (restree)
-			restree->release();
-	}
-
-	PAModule(const QString &str);
-
-	BKE_bytree *getTree()
-	{
-		return restree;
-	}
-
-	BKE_Variable getValue(bool *success)
-	{
-		if (success)
-			*success = constvar;
-		return res;
-	}
-
-	QString getStringValue(bool *success)
-	{
-		if (success)
-			*success = constvar && res.getType() == VAR_STR;
-		return QString::fromStdWString(res.forceAsString());
-	}
-
-	int getIntValue(bool *success)
-	{
-		if (success)
-			*success = constvar && res.getType() == VAR_NUM;
-		return res.forceAsInteger();
-	}
-
-	void analysisToClosure(BKE_VarClosure *clo);
-
-	BKE_Variable analysisToPos(BKE_VarClosure *clo, int pos);
 };

@@ -5,7 +5,7 @@
 #include <QSet>
 #include <QHash>
 
-#include "ParserHelper/parser/parser.h"
+#include "ParserHelper/Bagel/Bagel_Include.h"
 
 #include "function.h"
 
@@ -40,7 +40,7 @@ public:
 
 	void init();
 
-	BKE_VarClosure *glo;
+	Bagel_Handler<Bagel_Closure> glo;
 
 	QSet<QString> syscmd;
 	QSet<QString> macros;
@@ -49,7 +49,7 @@ public:
 	QSet<QString> BagelOperators;
 	QString OperatorAncestor;	//所有构成运算符的字符
 
-	BKE_Variable projsetting;
+	Bagel_VarHandler projsetting;
 
 	BkeProject *pro;
 

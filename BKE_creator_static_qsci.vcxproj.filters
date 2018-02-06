@@ -77,18 +77,12 @@
     <Filter Include="Debugger">
       <UniqueIdentifier>{c2546e03-452f-4612-ada4-73d1e20975c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bagel">
+      <UniqueIdentifier>{3c475f1f-51bc-4ed3-8ddd-1328b692ce0e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\BKE_number.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\BKE_string.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\BKE_variable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BKS_info.cpp">
@@ -163,9 +157,6 @@
     <ClCompile Include="otherwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParserHelper\parser\parser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="projectwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -214,9 +205,6 @@
     <ClCompile Include="topbarwindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParserHelper\parser\utils.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="dia\versioninfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -224,9 +212,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dia\LangOpt.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\bkutf8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dia\GameProperty.cpp">
@@ -239,12 +224,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ParseData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\extend.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParserHelper\parser\parserextend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dia\ParserEditor.cpp">
@@ -706,6 +685,48 @@
     <ClCompile Include="Debugger\DebugServer.cpp">
       <Filter>Debugger</Filter>
     </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_DCompiler.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Export.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_GC.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Parser.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_RCompiler.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Serializer.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_String.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Utils.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Var.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Vcode.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\Bagel_VM.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\bkutf8.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\extend.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
+    <ClCompile Include="ParserHelper\Bagel\poolmalloc.cpp">
+      <Filter>Bagel</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -1161,6 +1182,66 @@
     <ClInclude Include="Debugger\BreakpointInfo.h">
       <Filter>Debugger</Filter>
     </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Config.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_DCompiler.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_GC.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Include.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Number.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Parser.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_RCompiler.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Serializer.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_String.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Utils.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Var.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Vcode.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\Bagel_VM.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\BKE_array.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\BKE_hash.hpp">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\bkutf8.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\extend.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\memorypool.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\poolmalloc.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
+    <ClInclude Include="ParserHelper\Bagel\stack_allocator.h">
+      <Filter>Bagel</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\Setoptiondia.ui">
@@ -1529,5 +1610,8 @@
     <Image Include="source\branch-vline.png">
       <Filter>Resource Files</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="ParserHelper\Bagel\Bagel.natvis" />
   </ItemGroup>
 </Project>

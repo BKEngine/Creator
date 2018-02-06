@@ -297,6 +297,14 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 		modfieddata.lineadd = added;
 		modfieddata.bytes = text;
 		modfieddata.text = QString::fromUtf8(text);
+		if (mtype & SC_MOD_INSERTTEXT)
+		{
+			modfieddata.endpos = modfieddata.pos + modfieddata.text.length();
+		}
+		else
+		{
+			modfieddata.endpos = modfieddata.pos;
+		}
 	}
 }
 
@@ -328,35 +336,37 @@ static bool isVarName(const QString &s)
 	return r;
 }
 
-static void getAllMembers(const BKE_hashmap<BKE_String, BKE_Variable> &map, QList<QPair<QString, int>> &result)
+static void getAllMembers(const std::map<StringVal, PromptType> &vmap, QList<QPair<QString, int>> &result)
 {
-	for (auto &it : map)
+	for (auto &it : vmap)
 	{
 		//TODO func def
-		if (it.second.getType() == VAR_FUNC)
-			result << qMakePair(QString::fromStdWString(it.first.getConstStr()) + "()", 3);
+		if (it.second == PromptType::API_FUNCTION || it.second == PromptType::API_CLASS)
+			result << qMakePair(QString::fromStdU16String(it.first) + "()", BAGEL_STARTMARK + it.second);
 		else
-			result << qMakePair(QString::fromStdWString(it.first.getConstStr()), 1);
+			result << qMakePair(QString::fromStdU16String(it.first), BAGEL_STARTMARK + it.second);
 	}
 }
 
-static void getAllMembers(BKE_VarClass *cla, QList<QPair<QString, int>> &result)
+static void getAllMembers(Bagel_Class *cla, QList<QPair<QString, int>> &result)
 {
-	for (int i = 0; i < cla->parents.size(); i++)
-		getAllMembers(cla->parents[i], result);
-	getAllMembers(cla->varmap, result);
+	std::map<StringVal, PromptType> vmap;
+	cla->getAllVariables(vmap);
+	getAllMembers(vmap, result);
 }
 
-static void getAllMembers(BKE_VarClosure *clo, QList<QPair<QString, int>> &result)
+static void getAllMembers(Bagel_Closure *clo, QList<QPair<QString, int>> &result)
 {
-	if (clo->parent)
-		getAllMembers(clo->parent, result);
-	getAllMembers(clo->varmap, result);
+	std::map<StringVal, PromptType> vmap;
+	clo->getAllVariables(vmap);
+	getAllMembers(vmap, result);
 }
 
-static void getAllMembers(BKE_VarDic *dic, QList<QPair<QString, int>> &result)
+static void getAllMembers(Bagel_Dic *dic, QList<QPair<QString, int>> &result)
 {
-	getAllMembers(dic->varmap, result);
+	std::map<StringVal, PromptType> vmap;
+	dic->getAllVariables(vmap);
+	getAllMembers(vmap, result);
 }
 
 QList<QPair<QString, int>> BkeScintilla::GetAttrs(const QString &name, const QStringList &attrs, const QString &alltext)
@@ -407,10 +417,10 @@ QList<QPair<QString, int>> BkeScintilla::GetAttrs(const QString &name, const QSt
 			if (modeidx >= 0)
 			{
 				QString modename = reg.cap(1);
-				PAModule pa(modename);
-				bool f;
-				int idx = pa.getIntValue(&f);
-				if (f)
+				Bagel_AST_Analysis pa;
+				Bagel_VarHandler v = pa.tryGetConstVar(modename.toStdU16String());
+				int idx = v->getInteger(-1);
+				if (idx >= 0)
 				{
 					/*auto &&m = it.value();
 					for (auto it3 = m.begin(); it3!=m.end(); it3++)
@@ -424,8 +434,8 @@ QList<QPair<QString, int>> BkeScintilla::GetAttrs(const QString &name, const QSt
 				}
 				else
 				{
-					modename = pa.getStringValue(&f);
-					if (f)
+					modename = QString::fromStdU16String(v->getString());
+					if (!modename.isEmpty())
 					{
 						auto it3 = it->find(modename);
 						if (it3 != it->end())
@@ -566,11 +576,11 @@ QList<QPair<QString, int>> BkeScintilla::GetEnums(const QString &name, const QSt
 			if (modeidx >= 0)
 			{
 				QString modename = reg.cap(1);
-				PAModule pa(modename);
-				bool f;
 				QBkeCmdInfo *info = NULL;
-				int idx = pa.getIntValue(&f);
-				if (f)
+				Bagel_AST_Analysis pa;
+				Bagel_VarHandler v = pa.tryGetConstVar(modename.toStdU16String());
+				int idx = v->getInteger(-1);
+				if (idx >= 0)
 				{
 					/*for (auto &it3 : it->modes)
 					{
@@ -583,8 +593,8 @@ QList<QPair<QString, int>> BkeScintilla::GetEnums(const QString &name, const QSt
 				}
 				else
 				{
-					modename = pa.getStringValue(&f);
-					if (f)
+					modename = QString::fromStdU16String(v->getString());
+					if (!modename.isEmpty())
 					{
 						auto it3 = it->find(modename);
 						if (it3 != it->end())
@@ -641,63 +651,63 @@ QList<QPair<QString, int>> BkeScintilla::GetEnums(const QString &name, const QSt
 	return result;
 }
 
-QList<QPair<QString, int>> BkeScintilla::GetValList(const QStringList &ls, const QString &alltext)
-{
-	QList<QPair<QString, int>> result;
-	auto p = analysis->lockFile(FileName);
-	if (!p)
-	{
-		return result;
-	}
-	BKE_Variable v;
-	auto idx = 0;
-	while (idx != ls.size() - 1)
-	{
-		if (!idx)
-		{
-			if (ls[idx] == "global")
-				v = p->fileclo->addRef();
-			else
-				v = p->fileclo->getMember(ls[idx].toStdWString());
-		}
-		else if (v.getType() == VAR_DIC || v.getType() == VAR_CLASS || v.getType() == VAR_CLO)
-		{
-			v = v.dot(ls[idx].toStdWString());
-		}
-		else
-		{
-			return result;
-		}
-		idx++;
-	}
-	BKE_Variable vv;
-	switch (v.getType())
-	{
-	case VAR_DIC:
-		vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
-		if (vv.getType() != VAR_CLASS)
-		{
-			return result;
-		}
-		getAllMembers((BKE_VarClass*)vv.obj, result);
-		getAllMembers((BKE_VarDic*)v.obj, result);
-		return result;
-	case VAR_CLO:
-		getAllMembers((BKE_VarClosure*)v.obj, result);
-		return result;
-	case VAR_CLASS:
-		getAllMembers((BKE_VarClass*)v.obj, result);
-		return result;
-	default:
-		vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
-		if (vv.getType() != VAR_CLASS)
-		{
-			return result;
-		}
-		getAllMembers((BKE_VarClass*)vv.obj, result);
-		return result;
-	}
-}
+//QList<QPair<QString, int>> BkeScintilla::GetValList(const QStringList &ls, const QString &alltext)
+//{
+//	QList<QPair<QString, int>> result;
+//	auto p = analysis->lockFile(FileName);
+//	if (!p)
+//	{
+//		return result;
+//	}
+//	Bagel_VarHandler v;
+//	auto idx = 0;
+//	while (idx != ls.size() - 1)
+//	{
+//		if (!idx)
+//		{
+//			if (ls[idx] == "global")
+//				v = p->fileclo;
+//			else
+//				v = p->fileclo->getMember(ls[idx].toStdWString());
+//		}
+//		else if (v.getType() == VAR_DIC || v.getType() == VAR_CLASS || v.getType() == VAR_CLO)
+//		{
+//			v = v.dot(ls[idx].toStdWString());
+//		}
+//		else
+//		{
+//			return result;
+//		}
+//		idx++;
+//	}
+//	BKE_Variable vv;
+//	switch (v.getType())
+//	{
+//	case VAR_DIC:
+//		vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
+//		if (vv.getType() != VAR_CLASS)
+//		{
+//			return result;
+//		}
+//		getAllMembers((BKE_VarClass*)vv.obj, result);
+//		getAllMembers((BKE_VarDic*)v.obj, result);
+//		return result;
+//	case VAR_CLO:
+//		getAllMembers((BKE_VarClosure*)v.obj, result);
+//		return result;
+//	case VAR_CLASS:
+//		getAllMembers((BKE_VarClass*)v.obj, result);
+//		return result;
+//	default:
+//		vv = BKE_VarClosure::global()->getMember(v.getTypeBKEString());
+//		if (vv.getType() != VAR_CLASS)
+//		{
+//			return result;
+//		}
+//		getAllMembers((BKE_VarClass*)vv.obj, result);
+//		return result;
+//	}
+//}
 
 QList<QPair<QString, int>> BkeScintilla::GetGlobalList(const QString &ls, const QString &alltext)
 {
@@ -765,6 +775,42 @@ void BkeScintilla::setFirstVisibleDocumentLine(int linenr)
 	setFirstVisibleLine(docLine);
 }
 
+QString BkeScintilla::getBagelMaskText(int pos, int *start, int *stop, int *offset)
+{
+	unsigned char style;
+	int beginPos = pos;
+	do
+	{
+		style = SendScintilla(SCI_GETSTYLEAT, beginPos);
+	} while ((style & 64) && (--beginPos) >= 0);
+	++beginPos;
+	int endPos = modfieddata.EndPos() + 1;
+	int len = this->length();
+	do
+	{
+		style = SendScintilla(SCI_GETSTYLEAT, endPos);
+	} while ((style & 64) && (++endPos) < len);
+	QString txt = TextForRange({ beginPos, endPos });
+	if (txt.startsWith("##") && txt.endsWith("##"))
+	{
+		beginPos += 2;
+		endPos -= 2;
+		txt = txt.mid(2, endPos - beginPos);
+	}
+	if (start)
+		*start = beginPos;
+	if (*stop)
+		*stop = endPos;
+	if (offset)
+	{
+		QString txt2 = TextForRange({ beginPos, modfieddata.EndPos() });
+		*offset = txt2.toStdU16String().length();
+		if (txt2.startsWith("##"))
+			*offset -= 2;
+	}
+	return txt;
+}
+
 void BkeScintilla::UpdateAutoComplete()
 {
 	//当前不存在AutoComplete的Context，则尝试找一个新的AutoComplete
@@ -801,12 +847,23 @@ void BkeScintilla::UpdateAutoComplete()
 		}
 		else if (style & 64 /*BEGAL_MASK*/)
 		{
-			do
+			int start, stop, offset;
+			context = getBagelMaskText(pos, &start, &stop, &offset);
+			std::map<StringVal, PromptType> out;
+			Bagel_AST_Analysis pa;
 			{
-				beginPos--;
-				style = SendScintilla(SCI_GETSTYLEAT, beginPos);
-			} while (beginPos > 0 && (style & 64));
-			context = TextForRange({ beginPos, pos + 1 });
+				auto p = analysis->lockFile(FileName);
+				if (p)
+				{
+					pa.analysisVar(context.toStdU16String(), p->fileclo, p->fileclo, offset, out, QBkeVariable::getMainParser());
+				}
+			}
+			if (!out.empty())
+			{
+				getAllMembers(out, completeList);
+				autoCompleteType = SHOW_AUTOVALLIST;
+			}
+			/*
 			QByteArray valexpBytes;
 			while (isalnum(ch) || ch == '.' || ch == '_' || ch >= 0x80)
 			{
@@ -831,6 +888,8 @@ void BkeScintilla::UpdateAutoComplete()
 			}
             autoCompleteContext = ls.back();
 			autoCompleteType = SHOW_AUTOVALLIST;
+			*/
+
 		}
 		else if (style & 128 /*CMD_MASK*/ || (style & 63) == SCE_BKE_COMMAND || (style & 63) == SCE_BKE_COMMAND2)
 		{
@@ -851,7 +910,7 @@ void BkeScintilla::UpdateAutoComplete()
 					} while (beginPos > 0 && (style & 128) && !(((style & 63) == SCE_BKE_COMMAND && ch2 == '@') || ((style & 63) == SCE_BKE_COMMAND2 && ch2 == '[')));
 				}
 				//now we find the beginning the @ or [ command
-				context = TextForRange({ beginPos + 1, pos + 1 });
+				context = TextForRange({ beginPos + 1, modfieddata.EndPos() });
 				int p = context.indexOf(' ');
 				QString cmdname = context;
 				if (p < 0)
@@ -865,9 +924,14 @@ void BkeScintilla::UpdateAutoComplete()
 					cmdname.truncate(p);
 					int p2 = context.lastIndexOf(' ');
 					QString attrContext = context.right(context.length() - p2 - 1);
+					QString expContext = attrContext;
 					int p3 = attrContext.indexOf('=');
 					if (p3 >= 0)
+					{
+						if (p3 + 1 < attrContext.length())
+							expContext = attrContext.mid(p3 + 1);
 						attrContext.truncate(p3);
+					}
 					if (isspace(ch) || (isVarName(attrContext) && p3 < 0))
 					{
 						autoCompleteType = SHOW_ATTR;
@@ -893,6 +957,13 @@ void BkeScintilla::UpdateAutoComplete()
 							}
 							else if (oldStyle != SCE_BKE_DEFAULT && oldStyle != SCE_BKE_ATTRIBUTE && style == SCE_BKE_DEFAULT && !hasAttr)
 							{
+								unsigned char ch = (unsigned char)SendScintilla(SCI_GETCHARAT, pp);
+								if (isspace(ch))
+								{
+									pp++;
+									continue;
+									//do not modify oldStyle
+								}
 								attrs << QString::number(attrs.size());
 							}
 							else if (style == SCE_BKE_ATTRIBUTE)
@@ -911,55 +982,69 @@ void BkeScintilla::UpdateAutoComplete()
 						autoCompleteType = SHOW_ENUMLIST;
 						completeList = GetEnums(cmdname, attrContext, "");
 					}
-					else
+					//detect enums first
+					else if (ch == '=' && isVarName(attrContext))
 					{
-						//detect enums first
-						if (isVarName(attrContext))
+						unsigned char ch2 = ch;
+						auto pos2 = pos;
+						QByteArray contextBytes;
+						do
 						{
-							unsigned char ch2 = ch;
-							auto pos2 = pos;
-							QByteArray contextBytes;
-							do
+							contextBytes.push_front(ch2);
+							ch2 = SendScintilla(SCI_GETCHARAT, --pos2);
+						} while (ch2 != '=');
+						QString tmp = QString::fromUtf8(contextBytes);
+						completeList = GetEnums(cmdname, attrContext, tmp);
+						if (completeList.size())
+						{
+							autoCompleteContext = tmp;
+							autoCompleteType = SHOW_ENUMLIST;
+						}
+					}
+					else// if (autoCompleteType == SHOW_NULL)
+					{
+						std::map<StringVal, PromptType> out;
+						Bagel_AST_Analysis pa;
+						{
+							auto p = analysis->lockFile(FileName);
+							if (p)
 							{
-								contextBytes.push_front(ch2);
-								ch2 = SendScintilla(SCI_GETCHARAT, --pos2);
-							} while (ch2 != '=');
-							QString tmp = QString::fromUtf8(contextBytes);
-							completeList = GetEnums(cmdname, attrContext, tmp);
-							if (completeList.size())
-							{
-								autoCompleteContext = tmp;
-								autoCompleteType = SHOW_ENUMLIST;
+								auto exp = expContext.toStdU16String();
+								pa.analysisVar(exp, p->fileclo, p->fileclo, exp.length(), out, QBkeVariable::getMainParser());
 							}
 						}
-						if (autoCompleteType == SHOW_NULL)
+						if (!out.empty())
 						{
-							QByteArray valexpBytes;
-							while (isalnum(ch) || ch == '.' || ch == '_' || ch >= 0x80)
-							{
-								valexpBytes.push_front(ch);
-								ch = SendScintilla(SCI_GETCHARAT, --pos);
-							}
-							//while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
-							//	attrContext.remove(0, 1);
-							if (valexpBytes.isEmpty())
-								return;
-							if (valexpBytes[0] >= '0' && valexpBytes[0] <= '9')
-								return;
-							QString tmp = QString::fromUtf8(valexpBytes);
-							QStringList ls = tmp.split('.');
-							if (ls.size() == 1)
-							{
-								autoCompleteContext = ls[0];
-								completeList = GetGlobalList(context, tmp);
-							}
-							else
-							{
-								autoCompleteContext = ls.back();
-								completeList = GetValList(ls, tmp);
-							}
+							getAllMembers(out, completeList);
 							autoCompleteType = SHOW_AUTOVALLIST;
 						}
+						/*
+						QByteArray valexpBytes;
+						while (isalnum(ch) || ch == '.' || ch == '_' || ch >= 0x80)
+						{
+							valexpBytes.push_front(ch);
+							ch = SendScintilla(SCI_GETCHARAT, --pos);
+						}
+						//while (!attrContext.isEmpty() && (attrContext[0] >= '0' && attrContext[0] <= '9'))
+						//	attrContext.remove(0, 1);
+						if (valexpBytes.isEmpty())
+							return;
+						if (valexpBytes[0] >= '0' && valexpBytes[0] <= '9')
+							return;
+						QString tmp = QString::fromUtf8(valexpBytes);
+						QStringList ls = tmp.split('.');
+						if (ls.size() == 1)
+						{
+							autoCompleteContext = ls[0];
+							completeList = GetGlobalList(context, tmp);
+						}
+						else
+						{
+							autoCompleteContext = ls.back();
+							completeList = GetValList(ls, tmp);
+						}
+						autoCompleteType = SHOW_AUTOVALLIST;
+						*/
 					}
 				}
 			}
@@ -2069,10 +2154,10 @@ void BkeScintilla::ShowToolTip(int position, QPoint pos)
 				{
 					QBkeCmdInfo *info = NULL;
 					QString modename = mode->name;
-					PAModule pa(modename);
-					bool f;
-					int idx = pa.getIntValue(&f);
-					if (f)
+					Bagel_AST_Analysis pa;
+					Bagel_VarHandler v = pa.tryGetConstVar(modename.toStdU16String());
+					int idx = v->getInteger(-1);
+					if (idx >= 0)
 					{
 						/*for (auto &it3 : it->modes)
 						{
@@ -2085,8 +2170,8 @@ void BkeScintilla::ShowToolTip(int position, QPoint pos)
 					}
 					else
 					{
-						modename = pa.getStringValue(&f);
-						if (f)
+						modename = QString::fromStdU16String(v->getString());
+						if (!modename.isEmpty())
 						{
 							auto it3 = it->find(modename);
 							if (it3 != it->end())

@@ -18,7 +18,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <PlatformToolSet>v140</PlatformToolSet>
+    <PlatformToolSet>v141</PlatformToolSet>
     <OutputDirectory>debug\</OutputDirectory>
     <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
     <CharacterSet>NotSet</CharacterSet>
@@ -72,7 +72,7 @@
       <WarningLevel>Level3</WarningLevel>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <DisableSpecificWarnings>4996;4018</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996;4018;4091</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glu32.lib;opengl32.lib;gdi32.lib;user32.lib;qtmaind.lib;shell32.lib;Qt5Cored.lib;$(QTDIR)\lib\Qt5Widgetsd.lib;$(QTDIR)\lib\Qt5Guid.lib;$(QTDIR)\lib\Qt5Networkd.lib;$(QTDIR)\lib\Qt5Cored.lib;Qt5WebSocketsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -314,9 +314,20 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="ParseData.cpp" />
-    <ClCompile Include="ParserHelper\parser\BKE_number.cpp" />
-    <ClCompile Include="ParserHelper\parser\BKE_string.cpp" />
-    <ClCompile Include="ParserHelper\parser\BKE_variable.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_DCompiler.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Export.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_GC.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Parser.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_RCompiler.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Serializer.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_String.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Utils.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Var.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_Vcode.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\Bagel_VM.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\bkutf8.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\extend.cpp" />
+    <ClCompile Include="ParserHelper\Bagel\poolmalloc.cpp" />
     <ClCompile Include="BKS_info.cpp" />
     <ClCompile Include="BKEscintilla\src\CallTip.cpp" />
     <ClCompile Include="BKEscintilla\src\Catalogue.cpp" />
@@ -367,7 +378,6 @@
     <ClCompile Include="codewindow.cpp" />
     <ClCompile Include="dia\cskinoption.cpp" />
     <ClCompile Include="dia\ctextedit.cpp" />
-    <ClCompile Include="ParserHelper\parser\bkutf8.cpp" />
     <ClCompile Include="function.cpp" />
     <ClCompile Include="dia\lablesuredialog.cpp" />
     <ClCompile Include="loli\loli_island.cpp" />
@@ -376,9 +386,6 @@
     <ClCompile Include="dia\newprodia.cpp" />
     <ClCompile Include="otherbasicwin.cpp" />
     <ClCompile Include="otherwindow.cpp" />
-    <ClCompile Include="ParserHelper\parser\extend.cpp" />
-    <ClCompile Include="ParserHelper\parser\parser.cpp" />
-    <ClCompile Include="ParserHelper\parser\parserextend.cpp" />
     <ClCompile Include="projectwindow.cpp" />
     <ClCompile Include="BKEscintilla\Qt4Qt5\qsciabstractapis.cpp" />
     <ClCompile Include="BKEscintilla\Qt4Qt5\qsciapis.cpp" />
@@ -533,7 +540,6 @@
     <ClCompile Include="TinyProcess\process_unix.cpp" />
     <ClCompile Include="TinyProcess\process_win.cpp" />
     <ClCompile Include="topbarwindow.cpp" />
-    <ClCompile Include="ParserHelper\parser\utils.cpp" />
     <ClCompile Include="dia\versioninfo.cpp" />
     <ClCompile Include="paper\wordsupport.cpp" />
     <ClCompile Include="weh.cpp" />
@@ -677,6 +683,26 @@
     <ClInclude Include="GeneratedFiles\ui_versioninfo.h" />
     <ClInclude Include="GeneratedFiles\ui_WaitWindow.h" />
     <ClInclude Include="ParseData.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Config.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_DCompiler.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_GC.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Include.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Number.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Parser.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_RCompiler.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Serializer.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_String.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Utils.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Var.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_Vcode.h" />
+    <ClInclude Include="ParserHelper\Bagel\Bagel_VM.h" />
+    <ClInclude Include="ParserHelper\Bagel\BKE_array.h" />
+    <ClInclude Include="ParserHelper\Bagel\BKE_hash.hpp" />
+    <ClInclude Include="ParserHelper\Bagel\bkutf8.h" />
+    <ClInclude Include="ParserHelper\Bagel\extend.h" />
+    <ClInclude Include="ParserHelper\Bagel\memorypool.h" />
+    <ClInclude Include="ParserHelper\Bagel\poolmalloc.h" />
+    <ClInclude Include="ParserHelper\Bagel\stack_allocator.h" />
     <ClInclude Include="ParserHelper\parser\BKE_array.h" />
     <ClInclude Include="ParserHelper\parser\BKE_hash.hpp" />
     <ClInclude Include="ParserHelper\parser\BKE_number.h" />
@@ -1871,6 +1897,9 @@ endlocal
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="ParserHelper\Bagel\Bagel.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

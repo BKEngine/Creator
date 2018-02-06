@@ -1,6 +1,5 @@
 ﻿#include <weh.h>
 #include "BKS_info.h"
-#include "ParserHelper/parser/parserextend.h"
 #include "bkeproject.h"
 #include "dia/LangOpt.h"
 
@@ -12,8 +11,9 @@ void BKE_Info::init()
 {
 	//Parser_GlobalInit();
 	//Parser::getInstance() included by registerExtendFunction
-	registerExtendFunction();
-	glo = BKE_VarClosure::global();
+	Bagel_VM::initVM();
+	//registerExtendFunction();
+	glo = Bagel_Closure::global();
 	QStringList ls = QString("enum if for while do foreach function class propget propset continue break return var delete try throw this super global int string number const typeof instanceof extends in else then catch with static switch case true false void").split(' ');
 	for (auto &&v : ls)
 	{
@@ -25,27 +25,38 @@ void BKE_Info::init()
 		BagelOperators.insert(v);
 	}
 	OperatorAncestor = "+-*/%^=!><&|([{)]}.?,:;";
-	glo->setConstMember(L"tf", BKE_Variable::dic());
-	glo->setConstMember(L"sf", BKE_Variable::dic());
-	glo->setConstMember(L"f", BKE_Variable::dic());
-	glo->setConstMember(L"basic_layer", -1);
-	glo->setConstMember(L"message_layer", -2);
-	glo->setConstMember(L"bgm", -1);
-	glo->setConstMember(L"voice", -2);
+	glo->setConstMember(L"tf", Bagel_Var::dic());
+	glo->setConstMember(L"sf", Bagel_Var::dic());
+	glo->setConstMember(L"f", Bagel_Var::dic());
+	try
+	{
+		Bagel_VM::getInstance()->RunFile(u"BKE_dump.bkpsr");
+	}
+	catch (Bagel_Except &e)
+	{
+		QMessageBox::warning(NULL, "执行BKE_dump出错:", QString::fromStdU16String(e.getMsg()));
+	}
+	//glo->setConstMember(L"basic_layer", -1);
+	//glo->setConstMember(L"message_layer", -2);
+	//glo->setConstMember(L"bgm", -1);
+	//glo->setConstMember(L"voice", -2);
 }
 
 void BKE_Info::setProj(BkeProject *p)
 {
 	pro = p;
-	wstring w;
-	bool res = BKE_readFile(w, (p->ProjectFile() + ".user").toStdWString());
+	StringVal w;
+	bool res = Bagel_ReadFile(w, (p->ProjectFile() + ".user").toStdU16String());
 	if (res && !w.empty())
 	{
+		auto runclo = new Bagel_Closure();
+		Bagel_VM::getInstance()->setCurrentGlobal(runclo);
 		try
 		{
-			projsetting = Parser::getInstance()->evalMultiLineStr(w);
+			projsetting = Bagel_VM::getInstance()->Run(w, runclo);
 		}
-		catch (Var_Except &){}
+		catch (Bagel_Except &){}
+		Bagel_VM::getInstance()->setCurrentGlobal(glo);
 	}
 	else
 	{
@@ -57,5 +68,5 @@ void BKE_Info::setProj(BkeProject *p)
 
 void BKE_Info::save()
 {
-	BKE_writeFile(projsetting.saveString(false), (pro->ProjectFile() + ".user").toStdWString());
+	Bagel_WriteFile(projsetting->saveString(false), (pro->ProjectFile() + ".user").toStdU16String());
 }

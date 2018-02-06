@@ -1,9 +1,10 @@
 ﻿#include "ParserHelper.h"
-#include "parser/parser.h"
 
-QBkeVarExcept::QBkeVarExcept(const Var_Except &e)
+GLOBALSTRUCTURES_INIT();
+
+QBkeVarExcept::QBkeVarExcept(const Bagel_Except &e)
 {
-    msg = QString::fromStdWString(e.getMsg());
+    msg = QString::fromStdU16String(e.getMsg());
 }
 
 QString QBkeVarExcept::getMsg()
@@ -13,17 +14,14 @@ QString QBkeVarExcept::getMsg()
 
 QBkeVariable::QBkeVariable()
 {
-    _var = new BKE_Variable;
 }
 
 QBkeVariable::~QBkeVariable()
 {
-    delete _var;
 }
 
 QBkeVariable::QBkeVariable(const QVariant &v)
 {
-    _var = new BKE_Variable;
     switch(v.type())
     {
     case QVariant::Bool:
@@ -60,80 +58,88 @@ QBkeVariable::QBkeVariable(const QVariant &v)
 
 QBkeVariable::QBkeVariable(const QVariantHash &h)
 {
-    BKE_Variable r = BKE_Variable::dic();
+	_var = Bagel_Var::dic();
     for(auto it = h.begin(); it != h.end(); it++)
     {
-        r[it.key().toStdWString()] = QBkeVariable(it.value());
+        //r[it.key().toStdU16String()] = QBkeVariable(it.value());
+		(*_var)[it.key().toStdU16String()] = QBkeVariable(it.value());
     }
-    _var = new BKE_Variable(r);
+    //_var = new Bagel_Var(r);
 }
 
 QBkeVariable::QBkeVariable(const QVariantList &list)
 {
-    BKE_Variable r = BKE_Variable::array(list.count());
+	_var = Bagel_Var::array(list.count());
     for(int i = 0;i < list.count(); i++)
     {
-        r[i] = QBkeVariable(list[i]);
+        //r[i] = QBkeVariable(list[i]);
+		(*_var)[i] = QBkeVariable(list[i]);
     }
-    _var = new BKE_Variable(r);
+    //_var = new Bagel_Var(r);
 }
 
 QBkeVariable::QBkeVariable(const QBkeArray &list)
 {
-    BKE_Variable r = BKE_Variable::array(list.count());
+	_var = Bagel_Var::array(list.count());
     for(int i = 0;i < list.count(); i++)
     {
-        r[i] = QBkeVariable(list[i]);
-    }
-    _var = new BKE_Variable(r);
+        //r[i] = QBkeVariable(list[i]);
+		(*_var)[i] = QBkeVariable(list[i]);
+	}
+    //_var = new Bagel_Var(r);
 }
 
 QBkeVariable::QBkeVariable(const QBkeDictionary &h)
 {
-    BKE_Variable r = BKE_Variable::dic();
-    for(auto it = h.begin(); it != h.end(); it++)
+	_var = Bagel_Var::dic();
+	for(auto it = h.begin(); it != h.end(); it++)
     {
-        r[it.key().toStdWString()] = QBkeVariable(it.value());
+        //r[it.key().toStdU16String()] = QBkeVariable(it.value());
+		(*_var)[it.key().toStdU16String()] = QBkeVariable(it.value());
     }
-    _var = new BKE_Variable(r);
+    //_var = new Bagel_Var(r);
 }
 
 QBkeVariable::QBkeVariable(const QVariantMap &map)
 {
-    BKE_Variable r = BKE_Variable::dic();
-    for(auto it = map.begin(); it != map.end(); it++)
+	_var = Bagel_Var::dic();
+	for(auto it = map.begin(); it != map.end(); it++)
     {
-        r[it.key().toStdWString()] = QBkeVariable(it.value());
-    }
-    _var = new BKE_Variable(r);
+		//r[it.key().toStdU16String()] = QBkeVariable(it.value());
+		(*_var)[it.key().toStdU16String()] = QBkeVariable(it.value());
+	}
+    //_var = new Bagel_Var(r);
 }
 
 QBkeVariable::QBkeVariable(const QString &s)
 {
-    _var = new BKE_Variable(s.toStdWString());
+    _var = s.toStdU16String();
 }
 
 QBkeVariable::QBkeVariable(const QStringList &l)
 {
-    BKE_Variable r = BKE_Variable::array(l.count());
-    for(int i = 0; i < l.count(); i++)
-        r[i] = l[i].toStdWString();
-    _var = new BKE_Variable(r);
+	_var = Bagel_Var::array(l.count());
+	for (int i = 0; i < l.count(); i++)
+	{
+		//r[i] = l[i].toStdU16String();
+		(*_var)[i] = l[i].toStdU16String();
+	}
+    //_var = new Bagel_Var(r);
 }
 
 QBkeVariable::QBkeVariable(bool b)
 {
-    _var = new BKE_Variable(b);
+    _var = b;
 }
 
 QBkeVariable::QBkeVariable(qreal d)
 {
-    _var = new BKE_Variable(d);
+    _var = d;
 }
 
 QBkeVariable::QBkeVariable(int i)
 {
-    _var = new BKE_Variable(i);
+    _var = i;
 }
 
 QStringList QBkeVariable::toStringList() const
@@ -142,10 +148,10 @@ QStringList QBkeVariable::toStringList() const
     {
         QStringList a;
         for(int i = 0 ; i < _var->getCount(); i++)
-            a << QString::fromStdWString((*_var)[i].asString());
+            a << QString::fromStdU16String((*_var)[i].asString());
         return a;
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -157,7 +163,7 @@ const QBkeVariable QBkeVariable::operator [](int i) const
     {
         return (*_var)[i];
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -167,9 +173,9 @@ const QBkeVariable QBkeVariable::operator [](const QString &k) const
 {
     try
     {
-        return (*_var)[k.toStdWString()];
+        return (*_var)[k.toStdU16String()];
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -180,10 +186,10 @@ QBkeVariableRef QBkeVariable::operator [](int i)
     try
     {
         if(_var->isVoid())
-            *_var = BKE_Variable::array();
-        return &(*_var)[i];
+            *_var = Bagel_Var::array();
+        return QBkeVariableRef(*_var, i);
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -194,10 +200,10 @@ QBkeVariableRef QBkeVariable::operator [](const QString &k)
     try
     {
         if(_var->isVoid())
-            *_var = BKE_Variable::dic();
-        return &(*_var)[k.toStdWString()];
-    }
-    catch(Var_Except &e)
+            *_var = Bagel_Var::dic();
+		return QBkeVariableRef(*_var, k.toStdU16String());
+	}
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -210,50 +216,66 @@ void QBkeVariable::loadFromBinary(const QByteArray &b)
     loadFromString(a);
 }
 
+//Bagel_Run只能放在一个线程，这里我们放主线程，因为子线程基本只做一些静态分析的事情
+//会污染global
 void QBkeVariable::loadFromString(const QString &s)
 {
-    BKE_VarClosure *clo = new BKE_VarClosure;
+	Bagel_Handler<Bagel_Closure> clo = new Bagel_Closure();
     try
     {
-        *_var = Parser::getInstance()->evalMultiLineStr(s.toStdWString(),clo);
+		_var = Bagel_VM::getInstance()->Run(s.toStdU16String(), clo);
+        //*_var = Parser::getInstance()->evalMultiLineStr(s.toStdU16String(),clo);
     }
-    catch(Var_Except e)
+    catch(Bagel_Except e)
     {
-        clo->release();
         throw(QBkeVarExcept(e));
     }
-    clo->release();      
+}
+
+//只分析字符串内容是不是纯粹的一个变量
+void QBkeVariable::parseFromString(const QString & s)
+{
+	try
+	{
+		Bagel_Handler<Bagel_AST> tree = getMainParser()->parse(s.toStdU16String());
+		if (tree != nullptr)
+		{
+			if (tree->Node.opcode == OP_CONSTVAR + OP_COUNT)
+			{
+				_var = tree->Node.var;
+			}
+		}
+	}
+	catch (...) {}
 }
 
 void QBkeVariable::loadClosureDicFromString(const QString &s)
 {
-    BKE_VarClosure *clo = new BKE_VarClosure;
-    try
-    {
-        Parser::getInstance()->evalMultiLineStr(s.toStdWString(),clo);
-    }
-    catch(Var_Except e)
-    {
-        clo->release();
-        throw(QBkeVarExcept(e));
-    }
-    *_var = BKE_Variable::dic();
-    _var->forceAsDic()->varmap.Union(clo->varmap, true);
-    clo->release();
+	Bagel_Handler<Bagel_Closure> clo = new Bagel_Closure();
+	try
+	{
+		Bagel_VM::getInstance()->Run(s.toStdU16String(), clo);
+		//*_var = Parser::getInstance()->evalMultiLineStr(s.toStdU16String(),clo);
+	}
+	catch (Bagel_Except e)
+	{
+		throw(QBkeVarExcept(e));
+	}
+	_var = Bagel_Var::dic();
+	_GC.writeBarrier(_var->forceAsDic(), clo);
+	_var->forceAsDic()->varmap.Union(clo->varmap, true);
 }
 
 void QBkeVariable::setVoid()
 {
-    _var->setVoid();
+	_var->setVoid();
 }
-
 
 void QBkeVariable::remove(const QString &key)
 {
     if(_var->getType()==VAR_DIC)
     {
-        BKE_VarDic *v = (BKE_VarDic *)_var->obj;
-        v->deleteMemberIndex(key.toStdWString());
+		_var->forceAsDic()->deleteMemberIndex(key.toStdU16String());
     }
 }
 
@@ -261,26 +283,36 @@ void QBkeVariable::remove(int i)
 {
     if(_var->getType()==VAR_ARRAY)
     {
-        BKE_VarArray *v = (BKE_VarArray *)_var->obj;
-        v->deleteMemberIndex(i);
+		_var->forceAsArray()->deleteMemberIndex(i);
     }
 }
 
 void QBkeVariable::append(const QBkeVariable &v)
 {
-    if(_var)
-        _var->push_back(*v._var);
+	_GC.writeBarrier(_var, *v._var);
+	_var->push_back(*v._var);
+}
+
+void QBkeVariable::insert(const QString & key, const QBkeVariable & value)
+{
+	if (_var->isVoid())
+		_var = Bagel_Var::dic();
+	if (_var->getType() == VAR_DIC)
+	{
+		_GC.writeBarrier(_var, *value._var);
+		_var->forceAsDic()->setMember(key.toStdU16String(), *value._var);
+	}
 }
 
 void QBkeVariable::insert(int i, const QBkeVariable &_v)
 {
     if(_var->isVoid())
-        *_var = BKE_Variable::array();
+        _var = Bagel_Var::array();
     if(_var->getType()==VAR_ARRAY)
     {
-        BKE_VarArray *v = (BKE_VarArray *)_var->obj;
-        v->insertMember(i, *_v._var);
-    }
+		_GC.writeBarrier(_var, *_v._var);
+		_var->forceAsArray()->insertMember(i, *_v._var);
+	}
 }
 
 
@@ -291,10 +323,10 @@ QBkeDictionary QBkeVariable::toBkeDic() const
         return a;
     if(_var->getType()!=VAR_DIC)
         throw(QBkeVarExcept("非字典类型不能转换为QtMap。"));
-    auto b = ((BKE_VarDic *)_var->obj)->varmap;
+    auto b = _var->forceAsDic()->varmap;
     for(auto it = b.begin(); it != b.end(); it++)
     {
-        a[QString::fromStdWString(it->first.getConstStr())] = QBkeVariable(it->second);
+        a[QString::fromStdU16String(it->first.getConstStr())] = QBkeVariable(it->second);
     }
     return a;
 }
@@ -306,7 +338,7 @@ QBkeArray QBkeVariable::toBkeArray() const
         return a;
     if(_var->getType()!=VAR_ARRAY)
         throw(QBkeVarExcept("非数组类型不能转换为QtList。"));
-    auto b = (BKE_VarArray *)_var->obj;
+    auto b = _var->forceAsArray();
     for(auto i = 0; i < _var->getCount(); i++)
     {
         a.append(QBkeVariable(b->quickGetMember(i)));
@@ -321,8 +353,8 @@ QBkeVector QBkeVariable::toBkeVector() const
         return a;
     if(_var->getType()!=VAR_ARRAY)
         throw(QBkeVarExcept("非数组类型不能转换为QVector。"));
-    auto b = (BKE_VarArray *)_var->obj;
-    for(auto i = 0; i < _var->getCount(); i++)
+	auto b = _var->forceAsArray();
+	for(auto i = 0; i < _var->getCount(); i++)
     {
         a.append(QBkeVariable(b->quickGetMember(i)));
     }
@@ -336,10 +368,10 @@ QStringList QBkeVariable::getKeys() const
         return a;
     if(_var->getType()!=VAR_DIC)
         throw(QBkeVarExcept("非字典类型不能获取key list。"));
-    auto b = ((BKE_VarDic *)_var->obj)->varmap;
-    for(auto it = b.begin(); it != b.end(); it++)
+	auto b = _var->forceAsDic()->varmap;
+	for(auto it = b.begin(); it != b.end(); it++)
     {
-        a.append(QString::fromStdWString(it->first.getConstStr()));
+        a.append(QString::fromStdU16String(it->first.getConstStr()));
     }
     a.sort();
     return a;
@@ -347,13 +379,16 @@ QStringList QBkeVariable::getKeys() const
 
 const QBkeVariable QBkeVariableRef::operator [](int i) const
 {
-    try
+	if (!_var)
+		return QBkeVariable();
+	try
     {
-        if(!_var)
-            return QBkeVariable();
-        return (*_var)[i];
+		Bagel_Var v = _var->get();
+		if (v.isVoid())
+			return QBkeVariable();
+        return v[i];
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -361,13 +396,16 @@ const QBkeVariable QBkeVariableRef::operator [](int i) const
 
 const QBkeVariable QBkeVariableRef::operator [](const QString &k) const
 {
-    try
+	if (!_var)
+		return QBkeVariable();
+	try
     {
-        if(!_var)
-            return QBkeVariable();
-        return (*_var)[k.toStdWString()];
+		Bagel_Var v = _var->get();
+		if (v.isVoid())
+			return QBkeVariable();
+		return v[k.toStdU16String()];
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -375,15 +413,20 @@ const QBkeVariable QBkeVariableRef::operator [](const QString &k) const
 
 QBkeVariableRef QBkeVariableRef::operator [](int i)
 {
-    try
+	if (!_var)
+		return QBkeVariableRef();
+	try
     {
-        if(!_var)
-            return QBkeVariableRef();
-        if(_var->isVoid())
-            *_var = BKE_Variable::array();
-        return &(*_var)[i];
+		Bagel_Var v = _var->get();
+		if (v.isVoid())
+		{
+			v = Bagel_Var::array();
+			_var->set(v);
+		}
+		//v is temp
+		return &v[i];
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -391,40 +434,44 @@ QBkeVariableRef QBkeVariableRef::operator [](int i)
 
 QBkeVariableRef QBkeVariableRef::operator [](const QString &k)
 {
-    try
+	if (!_var)
+		return QBkeVariableRef();
+	try
     {
-        if(!_var)
-            return QBkeVariableRef();
-        if(_var->isVoid())
-            *_var = BKE_Variable::dic();
-        return &(*_var)[k.toStdWString()];
+		Bagel_Var v = _var->get();
+		if (v.isVoid())
+		{
+			v = Bagel_Var::dic();
+			_var->set(v);
+		}
+		//v is temp
+		return &v[k.toStdU16String()];
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
 }
 
-
 void QBkeVariableRef::remove(const QString &key)
 {
-    if(!_var)
-        return;
-    if(_var->getType()==VAR_DIC)
+	if (!_var)
+		return;
+	Bagel_Var v = _var->get();
+    if(v.getType()==VAR_DIC)
     {
-        BKE_VarDic *v = (BKE_VarDic *)_var->obj;
-        v->deleteMemberIndex(key.toStdWString());
+        v.forceAsDic()->deleteMemberIndex(key.toStdU16String());
     }
 }
 
 void QBkeVariableRef::remove(int i)
 {
-    if(!_var)
-        return;
-    if(_var->getType()==VAR_ARRAY)
+	if (!_var)
+		return;
+	Bagel_Var v = _var->get();
+    if(v.getType()==VAR_ARRAY)
     {
-        BKE_VarArray *v = (BKE_VarArray *)_var->obj;
-        v->deleteMemberIndex(i);
+        v.forceAsArray()->deleteMemberIndex(i);
     }
 }
 
@@ -432,51 +479,54 @@ void QBkeVariableRef::insert(int i, const QBkeVariable &_v)
 {
     if(!_var)
         return;
-    if(_var->isVoid())
-        *_var = BKE_Variable::array();
-    if(_var->getType()==VAR_ARRAY)
-    {
-        BKE_VarArray *v = (BKE_VarArray *)_var->obj;
-        v->insertMember(i, *_v._var);
-    }
+	Bagel_Var v = _var->get();
+	if (v.isVoid())
+	{
+		v = Bagel_Var::array();
+	}
+	if (v.getType() == VAR_ARRAY)
+	{
+		v.forceAsArray()->insertMember(i, *_v._var);
+	}
+	_var->set(v);
 }
-
 
 QBkeVariable QBkeVariableRef::value() const
 {
     if(!_var)
         return QBkeVariable();
-    return *_var;
+    return _var->get();
 }
 
 QBkeVariableRef &QBkeVariableRef::operator =(const QBkeVariable &r)
 {
     if(_var)
-        *_var = *r._var;
+        _var->set(*r._var);
     return *this;
 }
 
-QBkeVariableRef QBkeVariableRef::operator -(const QBkeVariable &r)
+QBkeVariableRef &QBkeVariableRef::operator -(const QBkeVariable &r)
 {
-    if(_var){
-        QBkeVariableRef t = *this;
-        return t -= *r._var;
+    if(_var)
+	{
+		_var->set(_var->get() - r);
     }
-    else
-        return *this;
+    return *this;
 }
 
 QBkeVariableRef &QBkeVariableRef::operator -=(const QBkeVariable &r)
 {
-    if(_var)
-        *_var - *r._var;
-    return *this;
+	return operator - (r);
 }
 
 void QBkeVariableRef::append(const QBkeVariable &v)
 {
-    if(_var)
-        _var->push_back(*v._var);
+	if (_var)
+	{
+		Bagel_Var vv = _var->get();
+		vv.push_back(*v._var);
+		_var->set(vv);
+	}
 }
 
 const QBkeVariable QBkeVariableRef::value(int i) const
@@ -495,7 +545,7 @@ const QBkeVariable QBkeVariableRef::value(const QString &k) const
 
 void QBkeVariableRef::redirect(QBkeVariable &v)
 {
-    _var = v._var;
+    _var->changeAddr(&*v._var);
 }
 
 QBkeVariableRef &QBkeVariableRef::operator =(const QBkeVariableRef &r)
@@ -505,32 +555,25 @@ QBkeVariableRef &QBkeVariableRef::operator =(const QBkeVariableRef &r)
     return *this;
 }
 
-QBkeVariableRef QBkeVariableRef::operator -(const QBkeVariableRef &r)
+QBkeVariableRef &QBkeVariableRef::operator -(const QBkeVariableRef &r)
 {
-    if(_var){
-        QBkeVariableRef t = *this;
-        return t -= *r._var;
-    }
-    else
-        return *this;
+	return operator - (r.value());
 }
 
 QBkeVariableRef &QBkeVariableRef::operator -=(const QBkeVariableRef &r)
 {
-    if(_var)
-        *_var - *r._var;
-    return *this;
+	return operator - (r.value());
 }
 
 int QBkeVariableRef::getCount() const
 {
     try
     {
-        if(!_var || _var->isVoid())
+        if(!_var)
             return 0;
-        return _var->getCount();
+        return _var->get().getCount();
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -540,7 +583,7 @@ bool QBkeVariableRef::isNull() const
 {
     if(!_var)
         return true;
-    return _var->isVoid();
+    return _var->get().isVoid();
 }
 
 bool QBkeVariableRef::operator ==(const QBkeVariableRef &r) const
@@ -549,9 +592,9 @@ bool QBkeVariableRef::operator ==(const QBkeVariableRef &r) const
         return false;
     try
     {
-        return *_var == *r._var;
+        return value() == r.value();
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -559,28 +602,28 @@ bool QBkeVariableRef::operator ==(const QBkeVariableRef &r) const
 
 QBkeVariable::QBkeVariable(const QBkeVariableRef &v)
 {
-    _var = new BKE_Variable(*v._var);
+    _var = v.value();
 }
 
 QBkeVariable::QBkeVariable(const QBkeVariable &v)
 {
-    _var = new BKE_Variable(*v._var);
+    _var = *v._var;
 }
 
-QBkeVariable::QBkeVariable(const BKE_Variable &v)
+QBkeVariable::QBkeVariable(const Bagel_Var &v)
 {
-    _var = new BKE_Variable(v);
+    _var = v;
 }
 
 QBkeVariable &QBkeVariable::operator =(const QBkeVariable &v)
 {
-    *_var = *v._var;
+    _var = *v._var;
     return *this;
 }
 
 QBkeVariable &QBkeVariable::operator =(const QBkeVariableRef &v)
 {
-    *_var = *v._var;
+	_var = v.value();
     return *this;
 }
 
@@ -593,7 +636,7 @@ QBkeVariable &QBkeVariable::operator -(const QBkeVariable &v)
 QBkeVariable &QBkeVariable::operator -(const QBkeVariableRef &v)
 {
     QBkeVariable t = *this;
-    return t -= *v._var;
+    return t -= v.value();
 }
 
 QBkeVariable &QBkeVariable::operator -=(const QBkeVariable &v)
@@ -604,7 +647,7 @@ QBkeVariable &QBkeVariable::operator -=(const QBkeVariable &v)
 
 QBkeVariable &QBkeVariable::operator -=(const QBkeVariableRef &v)
 {
-    *_var -= *v._var;
+    *_var -= v.value();
     return *this;
 }
 
@@ -614,7 +657,7 @@ bool QBkeVariable::operator ==(const QBkeVariable &r) const
     {
         return *_var==*r._var;
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -632,17 +675,17 @@ bool QBkeVariable::isNull() const
 
 QString QBkeVariable::saveToString() const
 {
-    return QString::fromStdWString(_var->save(false));
+    return QString::fromStdU16String(_var->save(false));
 }
 
 QBkeVariable QBkeVariable::array(int count)
 {
-    return BKE_Variable::array(count);
+    return Bagel_Var::array(count);
 }
 
 QBkeVariable QBkeVariable::dic()
 {
-    return BKE_Variable::dic();
+    return Bagel_Var::dic();
 }
 
 int QBkeVariable::toInt() const
@@ -652,7 +695,7 @@ int QBkeVariable::toInt() const
 
 QString QBkeVariable::toString() const
 {
-    return QString::fromStdWString(_var->asString());
+    return QString::fromStdU16String(_var->asString());
 }
 
 qreal QBkeVariable::toReal() const
@@ -685,45 +728,44 @@ bool QBkeVariable::isString() const
     return _var->getType()==VAR_STR;
 }
 
-
 bool QBkeVariableRef::isDic() const
 {
-    return _var->getType()==VAR_DIC;
+    return _var->get().getType()==VAR_DIC;
 }
 
 bool QBkeVariableRef::isArray() const
 {
-    return _var->getType()==VAR_ARRAY;
+    return _var->get().getType()==VAR_ARRAY;
 }
 
 bool QBkeVariableRef::isNum() const
 {
-    return _var->getType()==VAR_NUM;
+    return _var->get().getType()==VAR_NUM;
 }
 
 bool QBkeVariableRef::isString() const
 {
-    return _var->getType()==VAR_STR;
+    return _var->get().getType()==VAR_STR;
 }
 
 int QBkeVariableRef::toInt() const
 {
-    return _var->asInteger();
+    return _var->get().asInteger();
 }
 
 QString QBkeVariableRef::toString() const
 {
-    return QString::fromStdWString(_var->asString());
+    return QString::fromStdU16String(_var->get().asString());
 }
 
 qreal QBkeVariableRef::toReal() const
 {
-    return _var->asNumber();
+    return _var->get().asNumber();
 }
 
 bool QBkeVariableRef::toBool() const
 {
-    return _var->asBoolean();
+    return _var->get().asBoolean();
 }
 
 QStringList QBkeVariableRef::toStringList() const
@@ -731,11 +773,12 @@ QStringList QBkeVariableRef::toStringList() const
     try
     {
         QStringList a;
-        for(int i = 0 ; i < _var->getCount(); i++)
-            a << QString::fromStdWString((*_var)[i].asString());
+		int c = getCount();
+        for(int i = 0 ; i < c; i++)
+            a << QString::fromStdU16String(_var->get()[i].asString());
         return a;
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -744,19 +787,20 @@ QStringList QBkeVariableRef::toStringList() const
 QBkeDictionary QBkeVariableRef::toBkeDic() const
 {
     QMap<QString, QBkeVariable> a;
-    if(_var->isVoid())
+	Bagel_Var v = _var->get();
+    if(v.isVoid())
         return a;
-    if(_var->getType()!=VAR_DIC)
+    if(v.getType()!=VAR_DIC)
         throw(QBkeVarExcept("非字典类型不能转换为QtMap。"));
     try
     {
-        auto b = ((BKE_VarDic *)_var->obj)->varmap;
+        auto b = v.forceAsDic()->varmap;
         for(auto it = b.begin(); it != b.end(); it++)
         {
-            a[QString::fromStdWString(it->first.getConstStr())] = QBkeVariable(it->second);
+            a[QString::fromStdU16String(it->first.getConstStr())] = QBkeVariable(it->second);
         }
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -766,20 +810,21 @@ QBkeDictionary QBkeVariableRef::toBkeDic() const
 QBkeArray QBkeVariableRef::toBkeArray() const
 {
     QBkeArray a;
-    if(_var->isVoid())
-        return a;
-    if(_var->getType()!=VAR_ARRAY)
-        throw(QBkeVarExcept("非数组类型不能转换为QtList。"));
+	Bagel_Var v = _var->get();
+	if (v.isVoid())
+		return a;
+	if (v.getType() != VAR_ARRAY)
+		throw(QBkeVarExcept("非数组类型不能转换为QtList。"));
     try
     {
-        auto b = (BKE_VarArray *)_var->obj;
-        for(auto i = 0; i < _var->getCount(); i++)
+        auto b = v.forceAsArray();
+        for(auto i = 0; i < b->getCount(); i++)
         {
             a.append(QBkeVariable(b->getMember(i)));
         }
         return a;
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }
@@ -788,20 +833,21 @@ QBkeArray QBkeVariableRef::toBkeArray() const
 QBkeVector QBkeVariableRef::toBkeVector() const
 {
     QBkeVector a;
-    if(_var->isVoid())
-        return a;
-    if(_var->getType()!=VAR_ARRAY)
-        throw(QBkeVarExcept("非数组类型不能转换为QVector。"));
+	Bagel_Var v = _var->get();
+	if (v.isVoid())
+		return a;
+	if (v.getType() != VAR_ARRAY)
+		throw(QBkeVarExcept("非数组类型不能转换为QVector。"));
     try
     {
-        auto b = (BKE_VarArray *)_var->obj;
-        for(auto i = 0; i < _var->getCount(); i++)
-        {
+		auto b = v.forceAsArray();
+		for (auto i = 0; i < b->getCount(); i++)
+		{
             a.append(QBkeVariable(b->getMember(i)));
         }
         return a;
     }
-    catch(Var_Except &e)
+    catch(Bagel_Except &e)
     {
         throw(QBkeVarExcept(e));
     }

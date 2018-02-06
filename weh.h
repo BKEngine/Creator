@@ -40,7 +40,7 @@
 #include "function.h"
 
 #include "ParserHelper/ParserHelper.h"
-#include "ParserHelper/parser/parser.h"
+#include "ParserHelper/Bagel/Bagel_Include.h"
 
 #if _MSC_VER
 #pragma execution_character_set("utf-8")

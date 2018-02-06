@@ -276,7 +276,7 @@ void ParserEditor::load()
 	
 	try
 	{
-		QBkeVariable var = QBkeVariable::fromString(text);
+		QBkeVariable var = QBkeVariable::parseString(text);
 		if (!var.isArray() && !var.isDic())
 		{
 			_error = "根节点应该是Dictionary或者Array。";

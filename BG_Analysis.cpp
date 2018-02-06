@@ -10,7 +10,6 @@
 #include <DbgHelp.h>
 //for windows debug
 
-
 unsigned int runAddress;
 
 EXCEPTION_POINTERS firstException;
@@ -112,7 +111,7 @@ void simpleDump(PEXCEPTION_POINTERS ExceptionInfo)
 
 #endif
 
-void dumpExcept(Var_Except &e, int code)
+void dumpExcept(Bagel_Except &e, int code)
 {
 	QString logfile = BKE_CURRENT_DIR + "/log.txt";
 	QFile log(logfile);
@@ -120,7 +119,7 @@ void dumpExcept(Var_Except &e, int code)
 	QTextStream out(&log);
 	QString tm = QTime::currentTime().toString("hh-mm-ss");
 	out << tm;
-	out << " Var_Except:" << QString::fromStdWString(e.getMsg()) << "\nCode:" << code;
+	out << " Bagel_Except:" << QString::fromStdWString(e.getWMsg()) << "\nCode:" << code;
 	out << "\n";
 	//out << "from:" << QString::fromStdWString(e._file) << " " << QString::fromStdWString(e._line) << "" << QString::fromStdWString(e._func);
 }
@@ -273,15 +272,15 @@ BG_Analysis::BG_Analysis(const QString &p)
 	cancel = false;
 	newmacrofile = false;
 	pdir = p;
-	backup_topclo = new BKE_VarClosure();
+	backup_topclo = new Bagel_Closure();
 	//backup_topclo->cloneFrom(global_bke_info.glo);
 	BKE_hashmap<void*, void*> pMap;
-	pMap[BKE_VarClosure::global()] = BKE_VarClosure::global();
+	pMap[Bagel_Closure::global()] = Bagel_Closure::global();
 	backup_topclo->assignStructure(global_bke_info.glo, pMap, true);
-	topclo = new BKE_VarClosure();
+	topclo = new Bagel_Closure();
 	//topclo->cloneFrom(global_bke_info.glo);
 	pMap.clear();
-	pMap[BKE_VarClosure::global()] = BKE_VarClosure::global();
+	pMap[Bagel_Closure::global()] = Bagel_Closure::global();
 	topclo->assignStructure(global_bke_info.glo, pMap, true);
 	this->start();
 }
@@ -291,10 +290,6 @@ BG_Analysis::~BG_Analysis()
 	stop = true;
 	cancel = true;
 	wait();
-	if (topclo)
-		topclo->release();
-	if (backup_topclo)
-		backup_topclo->release();
 
 	for (auto &it : data)
 		delete it;
@@ -364,10 +359,9 @@ void BG_Analysis::parseMacro(const QString &file)
 				}
 				else
 				{
-					PAModule pa(n->name);
-					bool suc;
-					QString mname = pa.getStringValue(&suc);
-					if (suc)
+					Bagel_AST_Analysis pa;
+					QString mname = QString::fromStdU16String(pa.tryGetConstVar(n->name.toStdU16String()).getString());
+					if (!mname.isEmpty())
 					{
 						auto f = searchFile(mname);
 						if (f.isEmpty())
@@ -404,10 +398,9 @@ void BG_Analysis::parseMacro(const QString &file)
 				}
 				else
 				{
-					PAModule pa(n->name);
-					bool suc;
-					QString mname = pa.getStringValue(&suc);
-					if (suc)
+					Bagel_AST_Analysis pa;
+					QString mname = QString::fromStdU16String(pa.tryGetConstVar(n->name.toStdU16String()).getString());
+					if (!mname.isEmpty())
 					{
 						if (CmdList.find(mname) != CmdList.end() || SpecialCmdList.find(mname) != SpecialCmdList.end())
 						{
@@ -451,10 +444,10 @@ void BG_Analysis::parseMacro(const QString &file)
 		{
 			try
 			{
-				PAModule pa((*node)->name);
-				pa.analysisToClosure(backup_topclo);
+				Bagel_AST_Analysis pa;
+				pa.analysis((*node)->name.toStdU16String(), backup_topclo, backup_topclo);
 			}
-			catch (Var_Except &e)
+			catch (Bagel_Except &e)
 			{
 				dumpExcept(e, 4);
 				newmacrofile = false;
@@ -488,6 +481,7 @@ extern LONG WINAPI ApplicationCrashHandler(EXCEPTION_POINTERS *pException);
 
 void BG_Analysis::run()
 {
+	__init_memorypool_thread();
 #if WIN32
 //	_set_se_translator(TranslateSEHtoCE);
 	AddVectoredExceptionHandler(0, VectoredHandler);
@@ -535,7 +529,7 @@ void BG_Analysis::run()
 						backup_topclo->clear();
 						//backup_topclo->cloneFrom(global_bke_info.glo);
 						BKE_hashmap<void*, void*> pMap;
-						pMap[BKE_VarClosure::global()] = BKE_VarClosure::global();
+						pMap[Bagel_Closure::global()] = Bagel_Closure::global();
 						backup_topclo->assignStructure(global_bke_info.glo, pMap, true);
 
 						msgmutex.lock();
@@ -562,7 +556,7 @@ void BG_Analysis::run()
 							topclo->clear();
 							//topclo->cloneFrom(backup_topclo);
 							BKE_hashmap<void*, void*> pMap;
-							pMap[BKE_VarClosure::global()] = BKE_VarClosure::global();
+							pMap[Bagel_Closure::global()] = Bagel_Closure::global();
 							topclo->assignStructure(backup_topclo, pMap, true);
 							msgmutex.unlock();
 						}
@@ -577,6 +571,7 @@ void BG_Analysis::run()
 					break;
 				}
 				cur_state = STATE_IDLE;
+				_GC.GC_little();
 				msleep(50);
 				continue;
 			}
@@ -634,8 +629,8 @@ void BG_Analysis::run()
 									++it;
 								if (it != p->fileNodes.end())
 								{
-									PAModule pa((*it)->name);
-									pa.analysisToClosure(p->fileclo);
+									Bagel_AST_Analysis pa;
+									pa.analysis((*it)->name.toStdU16String(), p->fileclo, p->fileclo);
 									++it;
 								}
 							}
@@ -656,6 +651,7 @@ void BG_Analysis::run()
 					break;
 				}
 			}
+			_GC.GC_little();
 
 			try
 			{
@@ -670,7 +666,7 @@ void BG_Analysis::run()
 				notifyExit();
 			}
 		}
-		catch (Var_Except &e)
+		catch (Bagel_Except &e)
 		{
 			dumpExcept(e, 0);
 #if WIN32

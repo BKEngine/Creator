@@ -36,9 +36,10 @@ void CLangEdit::save()
 		QMessageBox::warning(NULL, "警告", "语言编号不能为空");
 		ui->comboBox->setCurrentIndex(0);
 	}
-	global_bke_info.projsetting[L"lang"] = ui->comboBox->currentText().toStdWString();
 
-	BKE_Variable tempset = new BKE_VarDic();
+	(*global_bke_info.projsetting)[u"lang"] = ui->comboBox->currentText().toStdU16String();
+
+	Bagel_Handler<Bagel_Dic> tempset = new Bagel_Dic();
 
 	int row = ui->tableWidget->rowCount();
 
@@ -48,24 +49,24 @@ void CLangEdit::save()
 		auto t2 = ui->tableWidget->item(i, 1)->text();
 
 		if (t2.isEmpty())
-			tempset[t1] = 1;
+			tempset->setMember(t1, 1);
 		else
 		{
 			auto tl = t2.split(' ');
-			BKE_Variable t = new BKE_VarDic();
+			Bagel_Handler<Bagel_Dic>  t = new Bagel_Dic();
 			for (auto &ii : tl)
 			{
 				auto prop = ii.trimmed();
 				if (!prop.isEmpty())
 				{
-					t[prop.toStdWString()] = 1;
+					t->setMember(prop.toStdU16String(), 1);
 				}
 			}
-			tempset[t1] = t;
+			tempset->setMember(t1, t);
 		}
 	}
 
-	global_bke_info.projsetting[L"langopt"] = tempset;
+	(*global_bke_info.projsetting)[u"langopt"] = tempset;
 
 	global_bke_info.save();
 }
@@ -88,7 +89,7 @@ void CLangEdit::reset()
 
 void CLangEdit::load()
 {
-	QString lng = QString::fromStdWString(global_bke_info.projsetting[L"lang"].getString(L"chs"));
+	QString lng = QString::fromStdU16String((*global_bke_info.projsetting)[L"lang"].getString(u"chs"));
 	if (langs.contains(lng))
 	{
 		ui->comboBox->setCurrentText(lng);
@@ -98,10 +99,10 @@ void CLangEdit::load()
 		ui->comboBox->setCurrentIndex(0);
 	}
 
-	auto opt = global_bke_info.projsetting[L"langopt"];
+	Bagel_Var opt = (*global_bke_info.projsetting)[u"langopt"];
 
 	if (opt.getType() != VAR_DIC)
-		opt = new BKE_VarDic();
+		return;
 	auto &vmap = opt.forceAsDic()->varmap;
 	int row = 0;
 	for (auto &it : vmap)
@@ -110,7 +111,7 @@ void CLangEdit::load()
 		if (v.getType() == VAR_NUM && v.asBoolean())
 		{
 			ui->tableWidget->setRowCount(row + 1);
-			QTableWidgetItem *item = new QTableWidgetItem(QString::fromStdWString(it.first.getConstStr()));
+			QTableWidgetItem *item = new QTableWidgetItem(QString::fromStdU16String(it.first.getConstStr()));
 			ui->tableWidget->setItem(row, 0, item);
 			item = new QTableWidgetItem("");
 			ui->tableWidget->setItem(row, 1, item);
@@ -121,7 +122,7 @@ void CLangEdit::load()
 		{
 			//part
 			ui->tableWidget->setRowCount(row + 1);
-			QTableWidgetItem *item = new QTableWidgetItem(QString::fromStdWString(it.first.getConstStr()));
+			QTableWidgetItem *item = new QTableWidgetItem(QString::fromStdU16String(it.first.getConstStr()));
 			ui->tableWidget->setItem(row, 0, item);
 			item = new QTableWidgetItem("");
 			ui->tableWidget->setItem(row, 1, item);
@@ -135,7 +136,7 @@ void CLangEdit::load()
 					{
 						if (!res.isEmpty())
 							res += " ";
-						res += QString::fromStdWString(it2.first.getConstStr());
+						res += QString::fromStdU16String(it2.first.getConstStr());
 					}
 				}
 				item = new QTableWidgetItem(res);

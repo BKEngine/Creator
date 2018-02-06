@@ -12,6 +12,8 @@
 #include "../BG_Analysis.h"
 #include "Debugger/BreakpointInfo.h"
 
+#define BAGEL_STARTMARK 10
+
 class BkeDocBase;
 class BkeProject;
 
@@ -166,6 +168,7 @@ private:
 
 	//补全相关
 public:
+	QString getBagelMaskText(int pos, int *start, int *stop, int *offset);
 	void UpdateAutoComplete();
 
 protected:

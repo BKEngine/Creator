@@ -29,7 +29,7 @@ void BkeCompile::CompileLang(const QString &dir, bool release/* = false*/)
 	connect(cmd, SIGNAL(error(QProcess::ProcessError)), this, SLOT(error(QProcess::ProcessError)));
 	cmd->setWorkingDirectory(dir);
 	QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
-	QString lang = QString::fromStdWString(global_bke_info.projsetting[L"lang"].getString(L"chs"));
+	QString lang = QString::fromStdU16String((*global_bke_info.projsetting)[L"lang"].getString(u"chs"));
 	QString langopt = dir + "/" + BKE_PROJECT_NAME + ".user|langopt";
 #ifdef Q_OS_WIN
 	cmd->start(BKE_CURRENT_DIR + "/tool/" + exeName + ".exe", QStringList() << dir << "-nopause" << "-nocompile" << "-lang" << lang << "-langopt" << langopt);

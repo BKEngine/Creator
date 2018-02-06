@@ -6,13 +6,13 @@
 #include <QVariant>
 #include <QMap>
 #include "config.h"
+#include "Bagel/Bagel_Include.h"
 
-class Var_Except;
 class QBkeVarExcept
 {
     QString msg;
 public:
-    QBkeVarExcept(const Var_Except &e);
+    QBkeVarExcept(const Bagel_Except &e);
     QBkeVarExcept(const QString &e):msg(e){}
     QString getMsg();
 };
@@ -22,22 +22,36 @@ typedef QMap<QString, QBkeVariable> QBkeDictionary;
 typedef QList<QBkeVariable> QBkeArray;
 typedef QVector<QBkeVariable> QBkeVector;
 
-class BKE_Variable;
+
 class QBkeVariableRef
 {
 protected:
-    BKE_Variable *_var;
+	Bagel_Handler<Bagel_Pointer> _var;
     friend class QBkeVariable;
 public:
-    QBkeVariable value() const;
-    QBkeVariableRef(BKE_Variable *v = NULL):_var(v){}
-    //QBkeVariableRef(BKE_Variable &v):_var(&v){}
+	QBkeVariable value() const;
+	QBkeVariableRef(const Bagel_Var &parent, Bagel_StringHolder key)
+	{
+		_var = new Bagel_Pointer(parent, key, false);
+	}
+	QBkeVariableRef(Bagel_Var *thiz)
+	{
+		_var = new Bagel_Pointer(thiz);
+	}
+	QBkeVariableRef()
+	{
+	}
+	bool isValid() const
+	{
+		return _var;
+	}
     QBkeVariableRef(const QBkeVariableRef &r){_var = r._var;}
-    bool operator == (const QBkeVariableRef &r) const;
+	bool operator == (const QBkeVariableRef &r) const;
     QBkeVariableRef &operator = (const QBkeVariableRef &r);
     QBkeVariableRef &operator = (const QBkeVariable &r);
-    QBkeVariableRef operator - (const QBkeVariableRef &r);
-    QBkeVariableRef operator - (const QBkeVariable &r);
+	//same as operator -=
+    QBkeVariableRef &operator - (const QBkeVariableRef &r);
+    QBkeVariableRef &operator - (const QBkeVariable &r);
     QBkeVariableRef &operator -= (const QBkeVariableRef &r);
     QBkeVariableRef &operator -= (const QBkeVariable &r);
     void redirect(QBkeVariable &v);
@@ -80,7 +94,7 @@ public:
 class QBkeVariable
 {  
 protected:
-    BKE_Variable *_var;
+	Bagel_VarHandler _var;
     friend class QBkeVariableRef;
 public:
     QBkeVariable();
@@ -99,23 +113,29 @@ public:
     QBkeVariable(bool b);
     QBkeVariable(const QBkeVariableRef &v);
     QBkeVariable(const QBkeVariable &v);
-    QBkeVariable(const BKE_Variable &v);
+    QBkeVariable(const Bagel_Var &v);
     QBkeVariable &operator = (const QBkeVariable &v);
     QBkeVariable &operator = (const QBkeVariableRef &v);
     QBkeVariable &operator - (const QBkeVariable &v);
     QBkeVariable &operator - (const QBkeVariableRef &v);
     QBkeVariable &operator -= (const QBkeVariable &v);
     QBkeVariable &operator -= (const QBkeVariableRef &v);
-    operator BKE_Variable &(){return *_var;}
+	operator const Bagel_Var &() const {return *_var;}
     bool operator == (const QBkeVariable &r) const;
     const QBkeVariable operator [](int i) const;
     const QBkeVariable operator [](const QString &k) const;
     QBkeVariableRef operator [](int i);
     QBkeVariableRef operator [](const QString &k);
 
+	static Bagel_Parser* getMainParser()
+	{
+		static Bagel_Parser mainParser;
+		return &mainParser;
+	}
+
     int getCount()const;
     void append(const QBkeVariable &v);
-    void insert(const QString &key, const QBkeVariable &value){(*this)[key]=value;}
+	void insert(const QString &key, const QBkeVariable &value);
     void insert(int i, const QBkeVariable &_v);
     const QBkeVariable value(int i) const { return (*this)[i];}
     const QBkeVariable value(const QString &k) const { return (*this)[k];}
@@ -124,13 +144,14 @@ public:
     void remove(const QString &key);
     void remove(int i);
     QStringList getKeys() const;
-    QBkeVariableRef ref(){return _var;}
+    QBkeVariableRef ref(){return &*_var;}
 
     QByteArray saveToBinary()const {return saveToString().toUtf8();}
     QString saveToString()const ;
     void loadFromBinary(const QByteArray &b);
-    void loadFromString(const QString &s);
-    void loadClosureDicFromString(const QString &s);
+	void loadFromString(const QString &s);
+	void parseFromString(const QString &s);
+	void loadClosureDicFromString(const QString &s);
 
     void setVoid();
 
@@ -154,8 +175,9 @@ public:
     //extern template class QMap<QString, QBkeVariable>;
 
     static QBkeVariable fromBinary(const QByteArray &b){QBkeVariable a;a.loadFromBinary(b);return a;}
-    static QBkeVariable fromString(const QString &b){QBkeVariable a;a.loadFromString(b);return a;}
-    static QBkeVariable closureDicFromString(const QString &s){QBkeVariable a;a.loadClosureDicFromString(s);return a;}
+	static QBkeVariable fromString(const QString &b) { QBkeVariable a; a.loadFromString(b); return a; }
+	static QBkeVariable parseString(const QString &b) { QBkeVariable a; a.parseFromString(b); return a; }
+	static QBkeVariable closureDicFromString(const QString &s){QBkeVariable a;a.loadClosureDicFromString(s);return a;}
     static QBkeVariable array(int count = 0);
     static QBkeVariable dic();
 

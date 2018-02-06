@@ -1,4 +1,4 @@
-#include "bkutf8.h"
+﻿#include "bkutf8.h"
 #include <wchar.h>
 #include <memory>
 
@@ -75,6 +75,70 @@ int ConvertSingleUTF8Character(wchar_t &dst, const bkuchar *src, bkulong size, b
 #endif
 }
 
+int ConvertSingleUTF8Character2U16(char16_t &dst, const bkuchar *src, bkulong size, bkulong &bytes_used)
+{
+	bytes_used = 0;
+	bkuchar byte = src[bytes_used++];
+	bkulong c = 0;
+	if (!(byte & 0x80))
+		c = byte;
+	else if ((byte & 0xC0) == 0x80)
+	{
+		bytes_used = 1;
+		return 0;
+	}
+	else if ((byte & 0xE0) == 0xC0)
+	{
+		if (size < 2)
+		{
+			bytes_used = size;
+			return 0;
+		}
+		c = byte & 0x1F;
+		c <<= 6;
+		c |= src[bytes_used++] & 0x3F;
+	}
+	else if ((byte & 0xF0) == 0xE0)
+	{
+		if (size < 3)
+		{
+			bytes_used = size;
+			return 0;
+		}
+		c = byte & 0x0F;
+		c <<= 6;
+		c |= src[bytes_used++] & 0x3F;
+		c <<= 6;
+		c |= src[bytes_used++] & 0x3F;
+	}
+	else if ((byte & 0xF8) == 0xF0)
+	{
+		if (size < 4)
+		{
+			bytes_used = size;
+			return 0;
+		}
+		c = byte & 0x07;
+		c <<= 6;
+		c |= src[bytes_used++] & 0x3F;
+		c <<= 6;
+		c |= src[bytes_used++] & 0x3F;
+		c <<= 6;
+		c |= src[bytes_used++] & 0x3F;
+	}
+	if (c<0x10000)
+	{
+		dst = (wchar_t)c;
+		return 1;
+	}
+	else
+	{
+		c -= 0x10000;
+		dst = (wchar_t)(0xD800 + ((c & 0xFFC00) >> 10));
+		*(&dst + 1) = (wchar_t)(0xDC00 + (c & 0x3FF));
+		return 2;
+	}
+}
 
 void ConvertSingleCharacterToUTF8(char dst[6], wchar_t src, bkulong &bytes_used){
 	bytes_used = 0;
@@ -117,24 +181,28 @@ bool UTF8_WC(wchar_t *dst, const bkuchar *src, bkulong srclen){
 }
 
 
-bkulong UniToUTF8_Size(const wchar_t *buffer, bkulong size){
+bkulong UniToUTF8_Size(const wchar_t *buffer, unsigned int size)
+{
 	bkulong res = 0;
-	for (bkulong a = 0; a < size; a++){
-		if (buffer[a] < 0x80){
+	for (bkulong a = 0; a < size; a++)
+	{
+		if (buffer[a] < 0x80)
+		{
 			res++;
 		}
 		else if (buffer[a] < 0x800)
 			res += 2;
-#if WCHAR_MAX==0xFFFF
-		else
-#else
-		else if (buffer[a] < 0x10000)
-#endif
+	#if WCHAR_MAX==0xFFFF
+		else if (buffer[a] < 0xD800 || buffer[a] > 0xDFFF)
 			res += 3;
-#if WCHAR_MAX!=0xFFFF
+		else
+			a++,res += 4;
+	#else
+		else if (buffer[a] < 0x10000)
+			res += 3;
 		else
 			res += 4;
-#endif
+	#endif
 	}
 	return res;
 }
@@ -204,7 +272,7 @@ std::string UniToUTF8(const wchar_t *str, unsigned int len, bool addBOM)
 		res.push_back(BOM8C);
 	}
 	UniToUTF8(&res[(addBOM ? 3 : 0)], &str[0], len);
-	return std::move(res);
+	return res;
 }
 
 void UniToUTF8(char *dst, const wchar_t *str, unsigned int len)
@@ -214,6 +282,44 @@ void UniToUTF8(char *dst, const wchar_t *str, unsigned int len)
 #else
 	WC_UTF8((bkuchar *)dst, (bkulong*)str, len);
 #endif
+}
+
+bkulong UTF16ToUTF8_Size(const char16_t *buffer, unsigned int size)
+{
+	bkulong res = 0;
+	for (bkulong a = 0; a < size; a++)
+	{
+		if (buffer[a] < 0x80)
+		{
+			res++;
+		}
+		else if (buffer[a] < 0x800)
+			res += 2;
+		else if (buffer[a] < 0xD800 || buffer[a] > 0xDFFF)
+			res += 3;
+		else
+			a++, res += 4;
+	}
+	return res;
+}
+
+std::string UTF16ToUTF8(const char16_t *str, unsigned int len, bool addBOM)
+{
+	std::string res;
+	res.resize(UTF16ToUTF8_Size(str, len) + (addBOM ? 3 : 0));
+	if (addBOM)
+	{
+		res.push_back(BOM8A);
+		res.push_back(BOM8B);
+		res.push_back(BOM8C);
+	}
+	UTF16ToUTF8(&res[(addBOM ? 3 : 0)], &str[0], len);
+	return res;
+}
+
+void UTF16ToUTF8(char *dst, const char16_t *str, unsigned int len)
+{
+	U16_UTF8((bkuchar *)dst, (unsigned short *)str, len);
 }
 
 unsigned int UniFromUTF8_Size(const char *str, unsigned int len)
@@ -234,7 +340,7 @@ unsigned int UniFromUTF8_Size(const char *str, unsigned int len)
     return size;
 }
 
-std::wstring UniFromUTF8(const char *str, bkulong len)
+std::wstring UniFromUTF8(const char *str, unsigned int len)
 {
     const char *start = str;
 	if (len>=3 && (bkuchar)str[0]==BOM8A && (bkuchar)str[1]==BOM8B && (bkuchar)str[2]==BOM8C)
@@ -247,23 +353,65 @@ std::wstring UniFromUTF8(const char *str, bkulong len)
 	res.resize(size);
 	bool UTF8_WC(wchar_t *dst, const bkuchar *src, bkulong srcl);
 	UTF8_WC(&res[0], (const unsigned char *)start, len);
-	return std::move(res);
+	return res;
 }
 
-void UniFromUTF8(wchar_t *dst, const char *str, bkulong len)
+unsigned int UTF16FromUTF8_Size(const char *str, unsigned int len)
+{
+	unsigned char *start = (unsigned char *)str;
+	unsigned char *end = start + len;
+	unsigned int size = 0;
+	for (; start < end; start++)
+	{
+		if ((*start & 0xF0) == 0xF0)
+			size += 2;
+		else
+			if ((*start < 128) || (*start & 192) == 192)
+				size++;
+	}
+	return size;
+}
+
+bool UTF16FromUTF8(char16_t *dst, const char *str, unsigned int srclen)
+{
+	bkulong advance;
+	for (bkulong a = 0; a < srclen; a += advance)
+	{
+		if (!ConvertSingleUTF8Character2U16(*dst++, (const bkuchar *)str + a, srclen - a, advance))
+			return false;
+	}
+	return true;
+}
+
+std::u16string UTF16FromUTF8(const char * str, unsigned int len)
+{
+	const char *start = str;
+	if (len >= 3 && (bkuchar)str[0] == BOM8A && (bkuchar)str[1] == BOM8B && (bkuchar)str[2] == BOM8C)
+	{
+		start += 3;
+		len -= 3;
+	}
+	bkulong size = UTF16FromUTF8_Size(start, len);
+	std::u16string res;
+	res.resize(size);
+	UTF16FromUTF8(&res[0], str, len);
+	return res;
+}
+
+bool UniFromUTF8(wchar_t *dst, const char *str, bkulong len)
 {
 	bool UTF8_WC(wchar_t *dst, const bkuchar *src, bkulong srcl);
-    UTF8_WC(dst, (const bkuchar *)str, len);
+    return UTF8_WC(dst, (const bkuchar *)str, len);
 }
 
-unsigned int UniFromUTF16_Size(const unsigned short *str, unsigned int len)
+unsigned int UniFromUTF16_Size(const char16_t *str, unsigned int len)
 {
 #if WCHAR_MAX==0xFFFF
     (void)str;
     return len;
 #else
-    const unsigned short *start = str;
-    const unsigned short *end = str + len;
+    const char16_t *start = str;
+    const char16_t *end = str + len;
     unsigned int size = 0;
     while (start < end)
     {
@@ -289,7 +437,7 @@ unsigned int UniFromUTF16_Size(const unsigned short *str, unsigned int len)
 #endif
 }
 
-std::wstring UniFromUTF16(const unsigned short *str, unsigned int len)
+std::wstring UniFromUTF16(const char16_t *str, unsigned int len)
 {
     std::wstring res;
     if (!len) {
@@ -297,17 +445,17 @@ std::wstring UniFromUTF16(const unsigned short *str, unsigned int len)
     }
     res.resize(UniFromUTF16_Size(str, len));
     UniFromUTF16(&res[0], str, len);
-	return std::move(res);
+	return res;
 }
 
-bool UniFromUTF16(wchar_t *dst, const unsigned short *str, unsigned int len)
+bool UniFromUTF16(wchar_t *dst, const char16_t *str, unsigned int len)
 {
 #if WCHAR_MAX == 0xFFFF
     memcpy(dst, str, len * 2);
 	return true;
 #else
-    const unsigned short *start = str;
-    const unsigned short *end = str + len;
+    const char16_t *start = str;
+    const char16_t *end = str + len;
     while (start < end)
     {
         if ((*start)<0xD800 || (*start)>0xDFFF)
@@ -357,7 +505,7 @@ unsigned int UniToUTF16_Size(const wchar_t *str, unsigned int len)
 #endif
 }
 
-void UniToUTF16(unsigned short *dst, const wchar_t *str, unsigned int len)
+void UniToUTF16(char16_t *dst, const wchar_t *str, unsigned int len)
 {
 #if WCHAR_MAX == 0xFFFF
     memcpy(dst, str, len * 2);
@@ -378,6 +526,30 @@ void UniToUTF16(unsigned short *dst, const wchar_t *str, unsigned int len)
             break;
     }
 #endif
+}
+
+std::u16string UniToUTF16(const std::wstring & str)
+{
+	std::u16string dst;
+	auto size = UniToUTF16_Size(str);
+	if (size)
+	{
+		dst.resize(size);
+		UniToUTF16(&dst[0], str);
+	}
+	return dst;
+}
+
+std::u16string UniToUTF16(const wchar_t *str, unsigned int len)
+{
+	std::u16string dst;
+	auto size = UniToUTF16_Size(str, len);
+	if (size)
+	{
+		dst.resize(size);
+		UniToUTF16(&dst[0], str, len);
+	}
+	return dst;
 }
 
 bool IsValidUTF8(const char *str, unsigned int len)

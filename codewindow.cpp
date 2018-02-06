@@ -17,6 +17,11 @@ CodeWindow::CodeWindow(QWidget *parent)
 	aclist->DefineIcon(1, QIcon(":/auto/auto_function.png"));
 	aclist->DefineIcon(3, QIcon(":/auto/auto_normal.png"));
 	aclist->DefineIcon(9, QIcon(":/auto/auto_key.png"));
+	aclist->DefineIcon(BAGEL_STARTMARK + PromptType::API_KEYWORDS, QIcon(":/auto/auto_key.png"));
+	aclist->DefineIcon(BAGEL_STARTMARK + PromptType::API_VARIABLE, QIcon(":/auto/auto_normal.png"));
+	aclist->DefineIcon(BAGEL_STARTMARK + PromptType::API_FUNCTION, QIcon(":/auto/auto_function.png"));
+	aclist->DefineIcon(BAGEL_STARTMARK + PromptType::API_CLASS, QIcon(":/auto/auto_function.png"));
+	aclist->DefineIcon(BAGEL_STARTMARK + PromptType::API_PROPERTY, QIcon(":/auto/auto_normal.png"));
 	aclist->hide();
 	aclist->SetStops(" ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
 
@@ -1591,17 +1596,17 @@ void CodeWindow::AnnotateSelect()
 	currentedit->BkeAnnotateSelect();
 }
 
-void CodeWindow::ClearCompileAndSaveData()
+void CodeWindow::ClearCompile()
 {
 	DeleteCompileFile();
-	DeleteSaveData();
 	btnrunact->setEnabled(false); //清理后运行按钮不可用
 	btndebugact->setEnabled(false); //debug按钮也不可用
 }
 
-void CodeWindow::ClearCompile()
+void CodeWindow::ClearCompileAndSaveData()
 {
 	DeleteCompileFile();
+	DeleteSaveData();
 	btnrunact->setEnabled(false); //清理后运行按钮不可用
 	btndebugact->setEnabled(false); //debug按钮也不可用
 }
