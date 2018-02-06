@@ -2730,7 +2730,11 @@ void Bagel_ClassDef::assignStructure(Bagel_ClassDef *cla, BKE_hashmap<void*, voi
 	cannotcreate = cla->cannotcreate;
 	parents = cla->parents;
 	children = cla->children;
-	native = cla->native->retain();
+	if (cla->native)
+		native = cla->native->retain();
+	else
+		native = NULL;
+	innerCreateInstance = cla->innerCreateInstance;
 	isFinal = cla->isFinal;
 	for (auto it = cla->classvar.begin(); it != cla->classvar.end(); it++)
 	{
@@ -2744,7 +2748,10 @@ void Bagel_Class::assignStructure(Bagel_Class *cla, BKE_hashmap<void*, void*> &p
 	classname = cla->classname;
 	finalized = cla->finalized;
 	defclass = cla->defclass;
-	native = cla->native->retain();
+	if (cla->native)
+		native = cla->native->retain();
+	else
+		native = NULL;
 }
 
 void Bagel_Class::VMgetClassMember(Bagel_StringHolder key, Bagel_Var * out, Bagel_ThreadContext * ctx, bool searchGlobal) const
