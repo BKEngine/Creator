@@ -2439,7 +2439,7 @@ Bagel_Var Bagel_Var::dotValue(const Bagel_Var &funcname) const
 	}
 }
 
-Bagel_Var& Bagel_Var::dotAddr(Bagel_StringHolder  funcname)
+Bagel_Var& Bagel_Var::dotAddr(Bagel_StringHolder funcname)
 {
 	if (getType() == VAR_PROP)
 	{
@@ -2470,9 +2470,15 @@ Bagel_Var& Bagel_Var::dotAddr(Bagel_StringHolder  funcname)
 			{
 				return static_cast<Bagel_Dic*>(obj)->getMember(funcname);
 			}
-			if (getType() == VAR_CLO)
+			else if (getType() == VAR_CLO)
 			{
 				return static_cast<Bagel_Closure*>(obj)->getMember(funcname);
+			}
+			else if (getType() == VAR_ARRAY)
+			{
+				if(funcname.canBeNumber())
+					return forceAsArray()->getMemberAddr((int)funcname.asNumber());
+				_throw(W("该变量不存在方法") + funcname.getConstStr() + W("，也不是一个合法的下标"));
 			}
 			_throw(W("该变量不存在方法") + funcname.getConstStr());
 		}

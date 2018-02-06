@@ -468,6 +468,15 @@ public:
 	}
 
 	/// <summary>
+	/// 判断字符串是否可以转化为数值。
+	/// </summary>
+	/// <returns>布尔</returns>
+	inline bool canBeNumber() const
+	{
+		return s->canBeNumber();
+	}
+
+	/// <summary>
 	/// 获取字符串首个字符的地址。
 	/// </summary>
 	/// <returns>首地址，字符串以\0结尾。</returns>

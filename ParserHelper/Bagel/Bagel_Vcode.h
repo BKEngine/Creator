@@ -211,11 +211,15 @@ public:
 	int getFirstPos()
 	{
 		int childpos = Node.pos;
-		if (!childs.empty())
+		for (auto &it : childs)
 		{
-			int pos2 = childs[0]->getFirstPos();
-			if (childpos > pos2)
-				childpos = pos2;
+			if (it)
+			{
+				int pos2 = it->getFirstPos();
+				if (childpos > pos2)
+					childpos = pos2;
+				break;
+			}
 		}
 		return childpos;
 	}

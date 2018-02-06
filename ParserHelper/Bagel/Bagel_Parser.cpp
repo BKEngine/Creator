@@ -3687,7 +3687,7 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 			if (!name.empty())
 			{
 				if (getaddr)
-					return new Bagel_Pointer(withvar, name, true);
+					return new Bagel_Pointer(withvar, name, false);
 				else
 					return withvar[name];
 			}
@@ -3775,7 +3775,7 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 				if (!name->empty())
 				{
 					if (getaddr)
-						return new Bagel_Pointer(v1, v2, true);
+						return new Bagel_Pointer(v1, v2, false);
 					else
 						return v1[v2];
 				}
