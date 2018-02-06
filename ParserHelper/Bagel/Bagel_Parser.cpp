@@ -1112,7 +1112,7 @@ void Bagel_Parser::readToken()
 			if (it != opmap.end())
 			{
 				node.opcode = it->second;
-				if (node.opcode == OP_NEW || node.opcode == OP_FUNCTION)
+				if (node.opcode == OP_NEW || node.opcode == OP_FUNCTION || node.opcode == OP_PROPERTY || node.opcode == OP_PROPGET || node.opcode == OP_PROPSET)
 					NextIsBareWord = true;
 				return;
 			}
