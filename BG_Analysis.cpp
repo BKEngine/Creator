@@ -373,7 +373,7 @@ void BG_Analysis::parseMacro(const QString &file)
 						else if (std::find(backup_macrofiles.begin(), backup_macrofiles.end(), f) == backup_macrofiles.end())
 						{
 							backup_macrofiles.push_back(f);
-							qDebug() << f;
+							//qDebug() << f;
 							parseMacro(f);
 						}
 					}
@@ -571,7 +571,9 @@ void BG_Analysis::run()
 					break;
 				}
 				cur_state = STATE_IDLE;
-				_GC.GC_little();
+				//我们认为更新宏文件的过程中会产生大量垃圾
+				_GC.GC_All();
+				shrink(thread_pool);
 				msleep(50);
 				continue;
 			}

@@ -219,7 +219,7 @@ inline T * BKE_PoolAllocator<T>::allocate(size_t count)
 {
 	if (count == 1)
 		return allocate();
-	else if (sizeof(T) * count + sizeof(PoolUnitTail) <= MAXELE)
+	else if (sizeof(T) * count + sizeof(PoolUnitTail) < MAXELE)
 		return (T*)pool_malloc(sizeof(T) * count);
 	else
 		return (T*)malloc(fixsize * count);
@@ -248,7 +248,7 @@ inline void BKE_PoolAllocator<T>::deallocate(T * p, size_t count)
 		return;
 	if (count == 1)
 		return deallocate(p);
-	else if (sizeof(T) * count + sizeof(PoolUnitTail) <= MAXELE)
+	else if (sizeof(T) * count + sizeof(PoolUnitTail) < MAXELE)
 		return pool_free(p);
 	else
 		return free(p);
