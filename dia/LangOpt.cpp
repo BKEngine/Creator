@@ -21,7 +21,10 @@ langs({ "chs", "cht", "eng", "jpn", "kor" })
 
 	ui->comboBox->insertItems(0, langs);
 
-	load();
+	if (global_bke_info.projsetting->isVoid())
+		reset();
+	else
+		load();
 }
 
 CLangEdit::~CLangEdit()
@@ -35,6 +38,11 @@ void CLangEdit::save()
 	{
 		QMessageBox::warning(NULL, "警告", "语言编号不能为空");
 		ui->comboBox->setCurrentIndex(0);
+	}
+
+	if (global_bke_info.projsetting->isVoid())
+	{
+		global_bke_info.projsetting = Bagel_Var::dic();
 	}
 
 	(*global_bke_info.projsetting)[u"lang"] = ui->comboBox->currentText().toStdU16String();

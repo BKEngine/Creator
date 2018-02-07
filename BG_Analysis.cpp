@@ -643,6 +643,14 @@ void BG_Analysis::run()
 						curfile.clear();
 						msgmutex.unlock();
 					}
+					catch (Bagel_Except &e)
+					{
+						dumpExcept(e, 0);
+#if WIN32
+						simpleDump(&firstException);
+#endif
+						newmacrofile = false;
+					}
 					catch (std::exception &e)
 					{
 						dumpExcept(e, 13);

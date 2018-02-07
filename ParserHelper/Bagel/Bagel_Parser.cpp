@@ -3651,15 +3651,21 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 		{
 			Bagel_Var v1, v2;
 			EXIST_CHILD_DO(1, v2 = _analysis(subtree, glo, thiz, false));
-			EXIST_CHILD_DO(0, v1 = _analysis(subtree, glo, thiz, true));
-			if (v1.getType() == VAR_POINTER)
+			try
 			{
-				auto p = v1.forceAsPointer();
-				p->set(v2);
-				if (getaddr)
-					return v1;
-				else
-					return p->get();
+				EXIST_CHILD_DO(0, v1.forceSet(_analysis(subtree, glo, thiz, true)));
+				if (v1.getType() == VAR_POINTER)
+				{
+					auto p = v1.forceAsPointer();
+					p->set(v2);
+					if (getaddr)
+						return v1;
+					else
+						return p->get();
+				}
+			}
+			catch (Bagel_Except &)
+			{
 			}
 		}
 		break;
@@ -3667,7 +3673,7 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 		{
 			Bagel_Var v1, v2;
 			EXIST_CHILD_DO(1, v2 = _analysis(subtree, glo, thiz, false));
-			EXIST_CHILD_DO(0, v1 = _analysis(subtree, glo, thiz, true));
+			EXIST_CHILD_DO(0, v1.forceSet(_analysis(subtree, glo, thiz, true)));
 			if (v1.getType() == VAR_POINTER)
 			{
 				auto p = v1.forceAsPointer();
@@ -3699,11 +3705,18 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 	case OP_SELFDEC + OP_COUNT:
 		{
 			Bagel_Var v1;
-			EXIST_CHILD_DO(0, v1 = _analysis(subtree, glo, thiz, true));
-			if (v1.getType() == VAR_POINTER)
+			EXIST_CHILD_DO(0, v1.forceSet(_analysis(subtree, glo, thiz, true)));
+			try
 			{
-				auto p = v1.forceAsPointer();
-				p->set(0);
+				if (v1.getType() == VAR_POINTER)
+				{
+					auto p = v1.forceAsPointer();
+					p->set(0);
+					return 0;
+				}
+			}
+			catch (Bagel_Except&)
+			{
 				return 0;
 			}
 		}
@@ -4265,10 +4278,6 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 		{
 			if(getaddr)
 				outvar = false;
-			EXIST_CHILD_DOALL(
-				if (_analysisVar(subtree, glo, thiz, pos, out, outvar, false))
-					return true;
-			);
 			break;
 		}
 	case OP_SET:
@@ -4280,11 +4289,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 	case OP_SETPOW:
 	case OP_SETSET:		//|=
 		{
-			EXIST_CHILD_DO(1,
-				if (_analysisVar(subtree, glo, thiz, pos, out, outvar, false))
-					return true;
-			);
-			EXIST_CHILD_DO(0,
+			EXIST_CHILD_DOALL(
 				if (_analysisVar(subtree, glo, thiz, pos, out, outvar, false))
 					return true;
 			);

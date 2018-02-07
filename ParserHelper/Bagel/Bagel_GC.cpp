@@ -280,7 +280,7 @@ void GC_Manager::GC_little(int objcount /* = 10ms*/)
 			while (!tosweep.compare_exchange_weak(markedtail->next, marked, memory_order_relaxed));
 			markedtail->next->last = markedtail;
 			marked = nullptr;
-			count_threshold = count < GC_INCREMENTAL ? count + GC_INCREMENTAL : count + (count >> 1);
+			count_threshold = count < GC_INCREMENTAL ? count + GC_INCREMENTAL : count + (count >> 2);
 			gc_smallcount++;
 		}
 		if(gc_type == GC_FULL)
@@ -289,7 +289,7 @@ void GC_Manager::GC_little(int objcount /* = 10ms*/)
 			while (!stringhead.compare_exchange_weak(markedtail2->next, markedstring, memory_order_relaxed));
 			markedtail2->next->last = markedtail2;
 			markedstring = nullptr;
-			stringcount_threshold = stringcount < GC_INCREMENTAL ? stringcount + GC_INCREMENTAL : stringcount + (stringcount >> 1);
+			stringcount_threshold = stringcount < GC_INCREMENTAL ? stringcount + GC_INCREMENTAL : stringcount + (stringcount >> 2);
 			gc_smallcount = 0;
 		}
 		{
