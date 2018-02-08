@@ -1137,6 +1137,8 @@ void Bagel_Parser::readToken()
 void Bagel_Parser::skipToNextBlock()
 {
 	//出错的地方就是;或}的话，就跳过。
+	token = next;
+	readToken();
 	if (token.opcode >= OP_COUNT)
 		token.opcode -= OP_COUNT;
 	int blockcount = 0;
