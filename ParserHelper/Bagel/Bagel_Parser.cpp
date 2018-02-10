@@ -3691,7 +3691,14 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 	case OP_DOT + OP_COUNT:
 		{
 			Bagel_StringHolder name;
-			EXIST_CHILD_DO(0, name = _analysis(subtree, glo, thiz, false).getBKEStr());
+			if (tree->childs.size() > 0 && tree->childs[0])
+			{
+				auto subtree = tree->childs[0];
+				if (subtree->Node.opcode == OP_LITERAL + OP_COUNT)
+				{
+					name = subtree->Node.var.getBKEStr();
+				}
+			}
 			if (!name.empty())
 			{
 				if (getaddr)
@@ -3781,18 +3788,25 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 	case OP_ARRAY:
 	case OP_DOT:
 		{
-			Bagel_Var v1, v2;
+			Bagel_Var v1;
+			Bagel_StringHolder name;
 			EXIST_CHILD_DO(0, v1 = _analysis(subtree, glo, thiz, false));
-			EXIST_CHILD_DO(1, v2 = _analysis(subtree, glo, thiz, false));
-			auto name = v2.getBKEStr();
+			if (tree->childs.size() > 1 && tree->childs[1])
+			{
+				auto subtree = tree->childs[1];
+				if (subtree->Node.opcode == OP_LITERAL + OP_COUNT)
+				{
+					name = subtree->Node.var.getBKEStr();
+				}
+			}
 			try
 			{
-				if (!name->empty())
+				if (!name.empty())
 				{
 					if (getaddr)
-						return new Bagel_Pointer(v1, v2, false);
+						return new Bagel_Pointer(v1, name, false);
 					else
-						return v1[v2];
+						return v1[name];
 				}
 			}
 			catch (Bagel_Except&)

@@ -568,12 +568,13 @@ void BG_Analysis::run()
 					}
 
 					newmacrofile = false;
+					//我们认为更新宏文件的过程中会产生大量垃圾
+					_GC.GC_All();
+					shrink(thread_pool);
 					break;
 				}
 				cur_state = STATE_IDLE;
-				//我们认为更新宏文件的过程中会产生大量垃圾
-				_GC.GC_All();
-				shrink(thread_pool);
+				_GC.GC_little();
 				msleep(50);
 				continue;
 			}
