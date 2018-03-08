@@ -2077,6 +2077,7 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 	case OP_RESERVE + OP_COUNT:
 		a = -1;
 		b = subtree->childs.size();
+		d1 = dest;
 		while (++a < b)
 		{
 			d1 = _compile(dest, subtree->childs[a], code, a == b - 1, jit);
@@ -2091,6 +2092,7 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 	case OP_RESERVE2 + OP_COUNT:
 		a = -1;
 		b = subtree->childs.size();
+		d1 = dest;
 		while (++a < b)
 		{
 			d1 = _compile(dest, subtree->childs[a], code, a == b - 1, jit);

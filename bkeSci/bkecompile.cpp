@@ -30,10 +30,10 @@ void BkeCompile::CompileLang(const QString &dir, bool release/* = false*/)
 	cmd->setWorkingDirectory(dir);
 	QString exeName = release ? "BKCompiler" : "BKCompiler_Dev";
 	QString lang = QString::fromStdU16String((*global_bke_info.projsetting)[L"lang"].getString(u"chs"));
-	QString langopt = dir + "/" + BKE_PROJECT_NAME + ".user|langopt";
+	QString langopt = "\"" + dir + "/" + BKE_PROJECT_NAME + ".user|langopt\"";
 	//rebuild，这样才能刷新所有脚本的语言文件
 #ifdef Q_OS_WIN
-	cmd->start(BKE_CURRENT_DIR + "/tool/" + exeName + ".exe", QStringList() << dir << "-rebuild" << "-nopause" << "-nocompile" << "-lang" << lang << "-langopt" << langopt);
+	cmd->start(BKE_CURRENT_DIR + "/tool/" + exeName + ".exe", QStringList() << dir << "-rebuild" << "-nopause" << "-lang" << lang << "-langopt" << langopt);
 #elif defined(Q_OS_MAC)
 	/*QString str = "./BKCompiler_Dev '" + dir + "'-nopause";
 	QFile file(BKE_CURRENT_DIR + "/run_bkc.sh");

@@ -3624,7 +3624,7 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 	case OP_FASTOR:
 		{
 			Bagel_Var v;
-			EXIST_CHILD_DOALL(if (v.isVoid()) v = _analysis(subtree, glo, thiz, false));
+			EXIST_CHILD_DOALL(if (v.isVoid()) v.forceSet(_analysis(subtree, glo, thiz, false)));
 			return v;
 		}
 	case OP_EQUAL:

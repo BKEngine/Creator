@@ -503,6 +503,25 @@ QList<QPair<QString, int>> BkeScintilla::GetLabelList()
 QList<QPair<QString, int>> BkeScintilla::GetEnums(const QString &name, const QString &attr, const QString &alltext)
 {
 	QList<QPair<QString, int>> result;
+	//test macro first
+	{
+		BKEMacros macro;
+		bool r = analysis->findMacro(name, &macro);
+		if (r && !macro.paramqueue.empty())
+		{
+			for (auto &it : macro.paramqueue)
+			{
+				if (it.first == attr)
+				{
+					if (it.second == "true" || it.second == "false")
+					{
+						return result << qMakePair(QString("true"), 0) << qMakePair(QString("false"), 0);
+					}
+				}
+			}
+			return result;
+		}
+	}
 	{
 		auto it = CmdList.find(name);
 		if (it != CmdList.end())
@@ -862,6 +881,18 @@ void BkeScintilla::UpdateAutoComplete()
 			{
 				getAllMembers(out, completeList);
 				autoCompleteType = SHOW_AUTOVALLIST;
+				autoCompleteContext.clear();
+				for (int i = context.length() - 1; i >= 0; --i)
+				{
+					if (context[i].isLetterOrNumber() || context[i] > 0x80)
+					{
+						autoCompleteContext = context[i] + autoCompleteContext;
+					}
+					else
+					{
+						break;
+					}
+				}
 			}
 			/*
 			QByteArray valexpBytes;
