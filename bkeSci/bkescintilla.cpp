@@ -289,21 +289,31 @@ void BkeScintilla::EditModified(int pos, int mtype, const char *text,
 	}
 	else if (mtype & (SC_MOD_INSERTTEXT | SC_MOD_DELETETEXT))
 	{
-		ChangeType = mtype;
-		modfieddata.pos = pos;
-		modfieddata.type = mtype;
-		modfieddata.line = xline;
-		modfieddata.index = xindex;
-		modfieddata.lineadd = added;
-		modfieddata.bytes = text;
-		modfieddata.text = QString::fromUtf8(text);
-		if (mtype & SC_MOD_INSERTTEXT)
+		if ((ChangeType & SC_MOD_INSERTTEXT) && (mtype & SC_MOD_INSERTTEXT) && pos == modfieddata.endpos)
 		{
-			modfieddata.endpos = modfieddata.pos + modfieddata.text.length();
+			modfieddata.lineadd |= added;
+			modfieddata.bytes += text;
+			modfieddata.text += QString::fromUtf8(text, len);
+			modfieddata.endpos += len;
 		}
 		else
 		{
-			modfieddata.endpos = modfieddata.pos;
+			ChangeType = mtype;
+			modfieddata.pos = pos;
+			modfieddata.type = mtype;
+			modfieddata.line = xline;
+			modfieddata.index = xindex;
+			modfieddata.lineadd = added;
+			modfieddata.bytes = text;
+			modfieddata.text = QString::fromUtf8(text, len);
+			if (mtype & SC_MOD_INSERTTEXT)
+			{
+				modfieddata.endpos = modfieddata.pos + len;
+			}
+			else
+			{
+				modfieddata.endpos = modfieddata.pos;
+			}
 		}
 	}
 }
@@ -835,11 +845,11 @@ void BkeScintilla::UpdateAutoComplete()
 	//当前不存在AutoComplete的Context，则尝试找一个新的AutoComplete
 	if (autoCompleteType == SHOW_NULL)
 	{
-		int pos = modfieddata.pos;
+		int pos;
 		if (ChangeType & SC_MOD_INSERTTEXT)
-			pos = pos + modfieddata.bytes.length() - 1;
+			pos = modfieddata.endpos - 1;
 		else
-			pos = pos - 1;
+			pos = modfieddata.pos - 1;
 		unsigned char style = SendScintilla(SCI_GETSTYLEAT, pos);
 		unsigned char ch = SendScintilla(SCI_GETCHARAT, pos);
 		unsigned char curstyle = style;
@@ -972,13 +982,13 @@ void BkeScintilla::UpdateAutoComplete()
 						oldStyle = style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
 						pp++;
 						QStringList attrs;
-						QString tmp;
+						QByteArray tmp;
 						while (pp <= pos)
 						{
 							style = ((unsigned char)SendScintilla(SCI_GETSTYLEAT, pp)) & ~128;
 							if (style == SCE_BKE_DEFAULT && oldStyle == SCE_BKE_ATTRIBUTE)
 							{
-								attrs << tmp;
+								attrs << QString::fromUtf8(tmp);
 								tmp.clear();
 								hasAttr = true;
 							}
