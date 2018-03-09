@@ -7,6 +7,8 @@
 #include "dia/gotofiledialog.h"
 #include "dia/autocompletelist.h"
 
+static const QString AUTO_COMPLETE_STOPS = " ~,./!@#$%^&()+-=\\;[]{}|:?<>";
+
 CodeWindow::CodeWindow(QWidget *parent)
 	:QMainWindow(parent)
 {
@@ -18,7 +20,7 @@ CodeWindow::CodeWindow(QWidget *parent)
 	aclist->DefineIcon(3, QIcon(":/auto/auto_normal.png"));
 	aclist->DefineIcon(9, QIcon(":/auto/auto_key.png"));
 	aclist->hide();
-	aclist->SetStops(" ~,./!@#$%^&()+-=\\;'[]{}|:?<>");
+	aclist->SetStops(AUTO_COMPLETE_STOPS);
 
 	addDockWidget(Qt::BottomDockWidgetArea, diasearch);
 	currentedit = nullptr;

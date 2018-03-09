@@ -925,11 +925,14 @@ void BkeScintilla::UpdateAutoComplete()
 								ch2 = SendScintilla(SCI_GETCHARAT, --pos2);
 							} while (ch2 != '=');
 							QString tmp = QString::fromUtf8(contextBytes);
-							completeList = GetEnums(cmdname, attrContext, tmp);
-							if (completeList.size())
+							if (QRegExp("^[\"a-zA-Z0-9_]$").exactMatch(tmp))
 							{
-								autoCompleteContext = tmp;
-								autoCompleteType = SHOW_ENUMLIST;
+								completeList = GetEnums(cmdname, attrContext, tmp);
+								if (completeList.size())
+								{
+									autoCompleteContext = tmp;
+									autoCompleteType = SHOW_ENUMLIST;
+								}
 							}
 						}
 						if (autoCompleteType == SHOW_NULL)
