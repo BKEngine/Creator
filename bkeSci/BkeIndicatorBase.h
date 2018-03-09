@@ -31,6 +31,7 @@ public:
     int line ;
     int index ;
     int lineadd ;
+	int endpos;
     QString text ;
 	QByteArray bytes;
     BkeModifiedBase(){clear();}
@@ -40,6 +41,7 @@ public:
         type = 0 ;
         line = 0 ;
         lineadd = 0 ;
+		endpos = 0;
         text.clear();
     }
     bool isEmpty(){ return text.isEmpty() || pos < 1 ; }

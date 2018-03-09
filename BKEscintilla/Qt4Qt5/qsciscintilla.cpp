@@ -386,8 +386,8 @@ void QsciScintilla::callTip()
         ct = ct_entries.join("\n");
     }
 
-    QByteArray ct_ba = ct.toLatin1();
-    const char *cts = ct_ba.data();
+    ScintillaBytes ct_bytes = textAsBytes(ct);
+    const char *cts = ScintillaBytesConstData(ct_bytes);
 
     SendScintilla(SCI_CALLTIPSHOW, adjustedCallTipPosition(shift), cts);
 
@@ -2081,7 +2081,7 @@ void QsciScintilla::setCaretLineVisible(bool enable)
 // Set the background colour of a hotspot area.
 void QsciScintilla::setHotspotBackgroundColor(const QColor &col)
 {
-    SendScintilla(SCI_SETSELBACK, 1, col);
+    SendScintilla(SCI_SETHOTSPOTACTIVEBACK, 1, col);
 }
 
 
@@ -2095,7 +2095,7 @@ void QsciScintilla::setHotspotForegroundColor(const QColor &col)
 // Reset the background colour of a hotspot area to the default.
 void QsciScintilla::resetHotspotBackgroundColor()
 {
-    SendScintilla(SCI_SETSELBACK, 0UL);
+    SendScintilla(SCI_SETHOTSPOTACTIVEBACK, 0UL);
 }
 
 
@@ -4475,4 +4475,31 @@ static QColor asQColor(long sci_colour)
             ((int)sci_colour) & 0x00ff,
             ((int)(sci_colour >> 8)) & 0x00ff,
             ((int)(sci_colour >> 16)) & 0x00ff);
+}
+
+
+// Set the scroll width.
+void QsciScintilla::setScrollWidth(int pixelWidth)
+{
+    SendScintilla(SCI_SETSCROLLWIDTH, pixelWidth);
+}
+
+// Get the scroll width.
+int QsciScintilla::scrollWidth() const
+{
+    return SendScintilla(SCI_GETSCROLLWIDTH);
+}
+
+
+// Set scroll width tracking.
+void QsciScintilla::setScrollWidthTracking(bool enabled)
+{
+    SendScintilla(SCI_SETSCROLLWIDTHTRACKING, enabled);
+}
+
+
+// Get scroll width tracking.
+bool QsciScintilla::scrollWidthTracking() const
+{
+    return SendScintilla(SCI_GETSCROLLWIDTHTRACKING);
 }
