@@ -30,7 +30,7 @@ void BKE_Info::init()
 	glo->setConstMember(L"f", Bagel_Var::dic());
 	try
 	{
-		Bagel_VM::getInstance()->RunFile(u"BKE_dump.bkpsr");
+		Bagel_VM::getInstance()->RunFile((BKE_CURRENT_DIR + "/BKE_dump.bkpsr").toStdU16String());
 	}
 	catch (Bagel_Except &e)
 	{

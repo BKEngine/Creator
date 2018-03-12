@@ -351,7 +351,7 @@ static void getAllMembers(const std::map<StringVal, PromptType> &vmap, QList<QPa
 	for (auto &it : vmap)
 	{
 		//TODO func def
-		if (it.second == PromptType::API_FUNCTION || it.second == PromptType::API_CLASS)
+		if (it.second == PromptType::API_FUNCTION/* || it.second == PromptType::API_CLASS*/)
 			result << qMakePair(QString::fromStdU16String(it.first) + "()", BAGEL_STARTMARK + it.second);
 		else
 			result << qMakePair(QString::fromStdU16String(it.first), BAGEL_STARTMARK + it.second);
@@ -892,7 +892,7 @@ void BkeScintilla::UpdateAutoComplete()
 				getAllMembers(out, completeList);
 				autoCompleteType = SHOW_AUTOVALLIST;
 				autoCompleteContext.clear();
-				for (int i = context.length() - 1; i >= 0; --i)
+				for (int i = offset - 1; i >= 0; --i)
 				{
 					if (context[i].isLetterOrNumber() || context[i] > 0x80)
 					{
@@ -1104,7 +1104,7 @@ void BkeScintilla::UpdateAutoComplete()
 	{
 		if (ChangeType & SC_MOD_INSERTTEXT)
 		{
-			if (modfieddata.text == "\n" || modfieddata.text == "\r\n")
+			if (modfieddata.text == "\n" || modfieddata.text == "\r\n" || modfieddata.lineadd)
 			{
 				emit AutoCompleteCancel();
 				return;
