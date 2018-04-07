@@ -727,6 +727,15 @@
     <ClCompile Include="ParserHelper\Bagel\poolmalloc.cpp">
       <Filter>Bagel</Filter>
     </ClCompile>
+    <ClCompile Include="dia\bkespriteviewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_bkespriteviewer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_bkespriteviewer.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -1242,6 +1251,9 @@
     <ClInclude Include="ParserHelper\Bagel\stack_allocator.h">
       <Filter>Bagel</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_bkespriteviewer.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\Setoptiondia.ui">
@@ -1330,6 +1342,12 @@
     </CustomBuild>
     <CustomBuild Include="Debugger\DebugServer.h">
       <Filter>Debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\bkespriteviewer.ui">
+      <Filter>Form Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\bkespriteviewer.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

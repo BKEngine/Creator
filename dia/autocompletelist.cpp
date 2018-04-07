@@ -71,11 +71,21 @@ bool AutoCompleteList::OnKeyPress(int key)
 	}
 	else if (key == Qt::Key_Down)
 	{
-		ui->listWidget->setCurrentRow(ui->listWidget->currentRow() + 1);
+		auto row = ui->listWidget->currentRow();
+		if (row == ui->listWidget->count() - 1)
+			row = 0;
+		else
+			row++;
+		ui->listWidget->setCurrentRow(row);
 	}
 	else if (key == Qt::Key_Up)
 	{
-		ui->listWidget->setCurrentRow(ui->listWidget->currentRow() -1);
+		auto row = ui->listWidget->currentRow();
+		if (row == 0)
+			row = ui->listWidget->count() - 1;
+		else
+			row--;
+		ui->listWidget->setCurrentRow(row);
 	}
 	else
 	{
