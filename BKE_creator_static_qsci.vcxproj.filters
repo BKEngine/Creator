@@ -80,6 +80,9 @@
     <Filter Include="Bagel">
       <UniqueIdentifier>{3c475f1f-51bc-4ed3-8ddd-1328b692ce0e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="lz4">
+      <UniqueIdentifier>{afb24704-59ef-405f-a510-5b467e7309f2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp">
@@ -736,6 +739,18 @@
     <ClCompile Include="Release\moc_bkespriteviewer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4.c">
+      <Filter>lz4</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4frame.c">
+      <Filter>lz4</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4hc.c">
+      <Filter>lz4</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\xxhash.c">
+      <Filter>lz4</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -1253,6 +1268,21 @@
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_bkespriteviewer.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4.h">
+      <Filter>lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4frame.h">
+      <Filter>lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4frame_static.h">
+      <Filter>lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4hc.h">
+      <Filter>lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\xxhash.h">
+      <Filter>lz4</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,7 @@
 #include "dia/openlabeldialog.h"
 #include "dia/gotofiledialog.h"
 #include "dia/autocompletelist.h"
+#include "dia/bkespriteviewer.h"
 
 CodeWindow::CodeWindow(QWidget *parent)
 	:QMainWindow(parent)
@@ -94,6 +95,8 @@ CodeWindow::CodeWindow(QWidget *parent)
 	connect(btncopyact, SIGNAL(triggered()), this, SLOT(ActCopy()));
 	//切换折叠
 	connect(btnswitchfold, SIGNAL(triggered()), this, SLOT(SwitchFold()));
+	//BkeSpriteViewer
+	connect(btnspriteviewer, &QAction::triggered, this, &CodeWindow::OpenSpriteViewer);
 
 	btnDisable();
 	ignoreflag = false;
@@ -166,6 +169,7 @@ void CodeWindow::CreateBtn()
 	btngotofile = new QAction("转到文件", this);
 	btnswitchfold = new QAction("全部折叠", this);
 	btnautofix = new QAction("自动修正", this);
+	btnspriteviewer = new QAction("精灵预览", this);
 
 	//右键菜单
 	jumpToDef = new QAction(this);
@@ -201,7 +205,9 @@ void CodeWindow::CreateBtn()
 	btngotofile->setShortcut(Qt::CTRL + Qt::Key_P);
 	btnswitchfold->setShortcut(Qt::CTRL + Qt::Key_M);
 	btnautofix->setShortcut(Qt::ALT + Qt::Key_Return);
+	btnspriteviewer->setShortcut(Qt::Key_F6);
 	addAction(btnautofix);
+	addAction(btnspriteviewer);
 
 	toolbar->addAction(btnlastact);
 	toolbar->addAction(btnnextact);
@@ -2069,6 +2075,12 @@ void CodeWindow::AutoFix()
 		QPoint pos = currentedit->mapToGlobal(currentedit->PointByPosition(currentedit->GetCurrentPosition()));
 		menu.exec(pos + QPoint(0, 20));
 	}
+}
+
+void CodeWindow::OpenSpriteViewer()
+{
+	BkeSpriteViewer *viewer = new BkeSpriteViewer(debugServer, this);
+	viewer->show();
 }
 
 void CodeWindow::RefreshNavigation()

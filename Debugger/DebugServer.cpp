@@ -109,12 +109,19 @@ void DebugServer::processBinaryMessage(const QByteArray & message)
 	if (message.length() >= 8)
 	{
 		auto protocol = *(int32_t *)(&message.constData()[0]);
-		auto type = (SocketDataType)protocol & 0xFF;
+		auto type = (SocketDataType)(protocol & 0xFF);
 		auto taskmask = protocol & 0xFFFFFF00;
 		auto datalen = *(int32_t *)(&message.constData()[4]);
 		// 在debugClient未指定或者Client不是debugClient的时候，除了CONNECT_CONFIRM以外的所有消息都不处理
 		if ((debugClient == nullptr || debugClient != pClient) && type != SocketDataType::CONNECT_CONFIRM)
 			return;
+		if (debugClient) {
+			auto cs = callbacks[debugClient];
+			if (cs.contains(taskmask)) {
+				cs[taskmask](type, (const unsigned char *)(&message.constData()[8]), datalen);
+				return;
+			}
+		}
 		switch (type)
 		{
 			case SocketDataType::LOG:

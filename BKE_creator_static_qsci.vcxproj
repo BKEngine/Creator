@@ -150,6 +150,10 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4.c" />
+    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4frame.c" />
+    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4hc.c" />
+    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\xxhash.c" />
     <ClCompile Include="BG_Analysis.cpp" />
     <ClCompile Include="BKEscintilla\lexlib\Accessor.cpp" />
     <ClCompile Include="BKEscintilla\lexlib\CharacterCategory.cpp" />
@@ -562,6 +566,11 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
+    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4.h" />
+    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4frame.h" />
+    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4frame_static.h" />
+    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4hc.h" />
+    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\xxhash.h" />
     <ClInclude Include="BKEscintilla\include\ILexer.h" />
     <ClInclude Include="BKEscintilla\include\Platform.h" />
     <ClInclude Include="BKEscintilla\include\SciLexer.h" />

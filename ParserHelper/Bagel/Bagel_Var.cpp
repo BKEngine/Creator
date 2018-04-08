@@ -2185,7 +2185,43 @@ Bagel_Var Bagel_Var::getMid(int32_t *start, int32_t *stop, int32_t step)
 	}
 }
 
-Bagel_Var& Bagel_Var::operator [] (int v) const
+Bagel_Var& Bagel_Var::operator [] (int v)
+{
+	switch (vt)
+	{
+	case VAR_PROP:
+		//if (static_cast<Bagel_Prop*>(obj)->hasGet())
+		//	return static_cast<Bagel_Prop*>(obj)->Get()[v];
+		_throw(W("property类型不能直接用于[]运算"));
+	case VAR_ARRAY:
+		return static_cast<Bagel_Array*>(obj)->getMemberAddr(v);
+	case VAR_DIC:
+		return static_cast<Bagel_Dic *>(obj)->getMember(bkpInt2Str((int32_t)v));
+	case VAR_CLO:
+		return static_cast<Bagel_Closure *>(obj)->getMember(bkpInt2Str((int32_t)v));
+	case VAR_CLASS:
+	{
+		auto name = bkpInt2Str((int32_t)v);
+		Bagel_Var &vv = static_cast<Bagel_Class*>(obj)->getClassMemberAddr(name);
+		//if (vv.getType() == VAR_FUNC)
+		//	static_cast<Bagel_Function*>(vv.obj)->setSelf(*const_cast<Bagel_Var*>(this));
+		//if (vv.getType() == VAR_PROP)
+		//	static_cast<Bagel_Prop*>(vv.obj)->setSelf(*const_cast<Bagel_Var*>(this));
+		return vv;
+	}
+	case VAR_CLASSDEF:
+		return forceAsClassDef()->getClassMemberAddr(bkpInt2Str((int32_t)v));
+	default:
+		_throw(W("不支持的[]运算"));
+	}
+}
+
+Bagel_Var& Bagel_Var::operator [] (int64_t v)
+{
+	return operator [] ((int)v);
+}
+
+const Bagel_Var& Bagel_Var::operator [] (int v) const
 {
 	switch (vt)
 	{
@@ -2216,7 +2252,7 @@ Bagel_Var& Bagel_Var::operator [] (int v) const
 	}
 }
 
-Bagel_Var& Bagel_Var::operator [] (int64_t v) const
+const Bagel_Var& Bagel_Var::operator [] (int64_t v) const
 {
 	return operator [] ((int)v);
 }

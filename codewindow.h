@@ -140,6 +140,7 @@ public:
 	QAction *btngotofile;
 	QAction *btnswitchfold;	//	全部折叠/全部展开
 	QAction *btnautofix; //自动纠正系统，类似于VS的Ctrl+.
+	QAction *btnspriteviewer; //BkeSpriteViewer
 	QToolBar *toolbar;
 	QComboBox *slablelist;
 	QStringList slablels;
@@ -230,6 +231,7 @@ public slots:
 	void RemoveNavigation(const QString &file);
 	void CreateAndGotoLabel(QString label);
 	void AutoFix();
+	void OpenSpriteViewer();
 
 private slots:
 	void onTimer();

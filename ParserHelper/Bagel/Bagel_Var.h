@@ -152,7 +152,8 @@ public:
 	template<class T> Bagel_Var(initializer_list<T> list);
 
 	//static constructor for dic and array
-	static FORCEINLINE Bagel_Var array(int size = 0);
+	static FORCEINLINE Bagel_Var array();
+	static FORCEINLINE Bagel_Var array(int size);
 	static FORCEINLINE Bagel_Var dic();
 
 	template<class Head, class ... Args>
@@ -705,8 +706,10 @@ public:
 		u16string vv(v); return operator [] (vv);
 	};
 	//getAddr
-	Bagel_Var& operator [] (int v) const;
-	Bagel_Var& operator [] (int64_t v) const;
+	const Bagel_Var& operator [] (int v) const;
+	const Bagel_Var& operator [] (int64_t v) const;
+	Bagel_Var& operator [] (int v);
+	Bagel_Var& operator [] (int64_t v);
 	bool operator == (const Bagel_Var &v) const;
 	bool strictEqual(const Bagel_Var &v) const;
 	bool normalEqual(const Bagel_Var &v) const;
@@ -3065,6 +3068,12 @@ FORCEINLINE Bagel_Var::Bagel_Var(Bagel_NativeFunction func)
 	vt = VAR_FUNC;
 	//is_var = VARIABLE_VAR;
 	obj = new Bagel_Function(func);
+}
+
+FORCEINLINE Bagel_Var Bagel_Var::array()
+{
+	auto arr = new Bagel_Array();
+	return arr;
 }
 
 FORCEINLINE Bagel_Var Bagel_Var::array(int size)

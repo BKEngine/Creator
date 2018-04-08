@@ -28,6 +28,9 @@ namespace details
 		RETURN_BAGEL,	//data=serialized bagel data
 		RETURN_EXCEPT,	//data=serialized bagel data
 		LOG,			//data=[int32]level [u16string]msg
+		QUERY_SPRITE_TREE, //datalen=0
+		QUERY_SPRITE_IMAGE, //datalen=6, data=index:int32_t,witheffect:bool,withchildren:bool
+		RETURN_SPRITE_IMAGE, //datalen=8+?, data=width:uint16,height:uint16,decompressed:int32,lz4data
 	};
 };
 typedef details::SocketDataType SocketDataType;

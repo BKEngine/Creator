@@ -448,28 +448,7 @@ void Bagel_Serializer::operator<<(const Bagel_Var & v)
 
 Bagel_Var Bagel_Serializer::parse(const vector<uint32_t>& save)
 {
-	//invalid data
-	if (save.empty() || save[0] != BAGEL_SERIALIZE_SIG || save[1] != save.size() || save.size() < 4)
-		return Bagel_Var();
-	//hash check
-	uint32_t h = 0;
-	for (unsigned int i = 3; i < save.size(); i++)
-		h ^= save[i];
-	if(save[2] != h)
-		return Bagel_Var();
-	const uint32_t *s = &save[3];
-	GC_Locker locker;
-	try
-	{
-		auto v = _parse(s);
-		recache.clear();
-		return v;
-	}
-	catch(Bagel_Except &)
-	{
-		recache.clear();
-		return Bagel_Var();
-	}
+	return parse(save.data(), save.size());
 }
 
 Bagel_Var Bagel_Serializer::parse(const uint32_t * save, int size)

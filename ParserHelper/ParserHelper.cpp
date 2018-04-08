@@ -187,7 +187,7 @@ QBkeVariableRef QBkeVariable::operator [](int i)
     {
         if(_var->isVoid())
             *_var = Bagel_Var::array();
-        return QBkeVariableRef(*_var, i);
+        return QBkeVariableRef(&_var->operator[](i));
     }
     catch(Bagel_Except &e)
     {
@@ -211,9 +211,8 @@ QBkeVariableRef QBkeVariable::operator [](const QString &k)
 
 void QBkeVariable::loadFromBinary(const QByteArray &b)
 {
-    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-    QString a = codec->toUnicode(b);
-    loadFromString(a);
+	Bagel_Serializer sel;
+	_var = sel.parse((const uint32_t *)b.constData(), b.size() / 4);
 }
 
 //Bagel_Run只能放在一个线程，这里我们放主线程，因为子线程基本只做一些静态分析的事情
