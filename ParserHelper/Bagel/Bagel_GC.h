@@ -130,7 +130,7 @@ public:
 	/// <summary>
 	/// 默认的构造函数，为NULL.
 	/// </summary>
-	Bagel_Handler() : inner(NULL)
+	Bagel_Handler() noexcept : inner(NULL)
 	{
 	};
 
@@ -138,13 +138,13 @@ public:
 	/// 构造函数，表示持有v这个对象.
 	/// </summary>
 	/// <param name="v">一个 Bagel_Object 对象</param>
-	Bagel_Handler(T *v);
+	Bagel_Handler(T *v) noexcept;
 
 	/// <summary>
 	/// 拷贝构造函数。
 	/// </summary>
 	/// <param name="h">另一个 Bagel_Handler 对象。</param>
-	Bagel_Handler(const Bagel_Handler& h) : Bagel_Handler(h.inner)
+	Bagel_Handler(const Bagel_Handler& h) noexcept : Bagel_Handler(h.inner)
 	{
 	};
 
@@ -152,7 +152,7 @@ public:
 	/// 移动构造函数。
 	/// </summary>
 	/// <param name="h">另一个 Bagel_Handler 对象。</param>
-	Bagel_Handler(Bagel_Handler&& h) : inner(h.inner)
+	Bagel_Handler(Bagel_Handler&& h) noexcept : inner(h.inner)
 	{
 		h.inner = nullptr;
 	};
@@ -162,14 +162,14 @@ public:
 	/// </summary>
 	/// <param name="v">要持有的新 Bagel_Object 对象。</param>
 	/// <returns>持有的新 Bagel_Object 对象指针。</returns>
-	T* operator = (T *v);
+	T* operator = (T *v) noexcept;
 
 	/// <summary>
 	/// 更换持有的对象。
 	/// </summary>
 	/// <param name="h">包含另一个对象的 Bagel_Handler 实例。</param>
 	/// <returns>持有的新 Bagel_Object 对象指针。</returns>
-	T* operator = (const Bagel_Handler& h)
+	T* operator = (const Bagel_Handler& h) noexcept
 	{
 		return operator = (h.inner);
 	}
@@ -179,7 +179,7 @@ public:
 	/// </summary>
 	/// <param name="h">包含另一个对象的 Bagel_Handler 实例。</param>
 	/// <returns>持有的新 Bagel_Object 对象指针。</returns>
-	T* operator = (Bagel_Handler&& h)
+	T* operator = (Bagel_Handler&& h) noexcept
 	{
 		inner = h.inner;
 		h.inner = nullptr;
@@ -206,12 +206,12 @@ public:
 	/// 返回持有的对象引用。
 	/// </summary>
 	/// <returns>持有的对象引用。</returns>
-	T& operator *()
+	T& operator *() noexcept
 	{
 		return *inner;
 	}
 
-	const T& operator *() const
+	const T& operator *() const noexcept
 	{
 		return *inner;
 	}
@@ -220,7 +220,7 @@ public:
 	/// 返回持有的对象指针。
 	/// </summary>
 	/// <returns>持有的对象指针。</returns>
-	operator T* () const
+	operator T* () const noexcept
 	{
 		return inner;
 	}
@@ -230,7 +230,7 @@ public:
 	/// </summary>
 	/// <param name="other">另一个对象。</param>
 	/// <returns>相同返回true，不同返回false。</returns>
-	bool operator == (T* other) const
+	bool operator == (T* other) const noexcept
 	{
 		return inner == other;
 	}
@@ -240,7 +240,7 @@ public:
 	/// </summary>
 	/// <param name="other">另一个对象。</param>
 	/// <returns>相同返回false，不同返回true。</returns>
-	bool operator != (T* other) const
+	bool operator != (T* other) const noexcept
 	{
 		return inner != other;
 	}
@@ -250,7 +250,7 @@ public:
 	/// </summary>
 	/// <param name="other">另一个对象。</param>
 	/// <returns>相同返回true，不同返回false。</returns>
-	bool operator == (const Bagel_Handler &other) const
+	bool operator == (const Bagel_Handler &other) const noexcept
 	{
 		return inner == other.inner;
 	}
@@ -260,7 +260,7 @@ public:
 	/// </summary>
 	/// <param name="other">另一个对象。</param>
 	/// <returns>相同返回false，不同返回true。</returns>
-	bool operator != (const Bagel_Handler &other) const
+	bool operator != (const Bagel_Handler &other) const noexcept
 	{
 		return inner != other.inner;
 	}
@@ -271,7 +271,7 @@ public:
 	/// <returns>
 	/// 返回知否为一个空对象（nullptr），即什么对象也不持有。
 	/// </returns>
-	operator bool() const
+	operator bool() const noexcept
 	{
 		return !!inner;
 	}
@@ -613,7 +613,7 @@ public:
 #define _GC (*_globalStructures.GC)
 
 template<typename T>
-inline Bagel_Handler<T>::Bagel_Handler(T *v)
+inline Bagel_Handler<T>::Bagel_Handler(T *v) noexcept
 {
 	inner = v;
 	if(inner)
@@ -621,7 +621,7 @@ inline Bagel_Handler<T>::Bagel_Handler(T *v)
 }
 
 template<typename T>
-inline T * Bagel_Handler<T>::operator=(T * v)
+inline T * Bagel_Handler<T>::operator=(T * v) noexcept
 {
 	if (inner)
 		_GC.removeRoot(inner);

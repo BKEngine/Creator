@@ -156,7 +156,8 @@ const BKE_Char* op_name[]=
 	W("BC_JUMPFALSE"),		//if(![B])code=A
 	W("BC_JUMPTRUE"),		//if([B])code=A
 	W("BC_JUMPVOID"),		//if([B]===void)code=A
-	W("BC_JUMPNOTVOID"),		//if([B]!==void)code=A
+	W("BC_JUMPVOIDANDSET"),	//if([B]===void)code=A;[C]=void
+	W("BC_JUMPNOTVOID"),	//if([B]!==void)code=A
 	W("BC_JUMP"),			//code=A
 	W("BC_JUMPEQUAL"),		//if([B]==[C])code=A;
 	W("BC_JUMPNEQUAL"),		//if([B]!=[C])code=A;

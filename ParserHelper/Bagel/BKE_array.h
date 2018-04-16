@@ -716,7 +716,7 @@ public:
 			}
 			else
 			{
-				memcpy(it + 1, it, (uint8_t*)_Myend - (uint8_t*)it);
+				memmove(it + 1, it, (uint8_t*)_Myend - (uint8_t*)it);
 				new (it) T(t);
 			}
 			++count;
@@ -756,7 +756,7 @@ public:
 			}
 			else
 			{
-				memcpy(it + 1, it, (uint8_t*)_Myend - (uint8_t*)it);
+				memmove(it + 1, it, (uint8_t*)_Myend - (uint8_t*)it);
 				new (it) T(std::forward<Args>(t)...);
 			}
 			++count;
@@ -789,7 +789,7 @@ public:
 		assert(it < _Myend && it >= _Myfirst);
 		--count;
 		int sz = (uint8_t*)_Myend - (uint8_t*)it;
-		memcpy(it, it + 1, sz);
+		memmove(it, it + 1, sz);
 		--_Myend;
 		return it;
 	}

@@ -98,7 +98,7 @@ public:
 /// 将字符串转为数值，支持十进制浮点和十六进制浮点。转换会一直到非法的字符或结束。
 /// </summary>
 /// <returns>转换的结果</returns>
-	inline double asNumber() const
+	inline double asNumber() const noexcept
 	{
 		return Bagel_Number::str2num(str.c_str());
 	}
@@ -107,7 +107,7 @@ public:
 	/// 返回字符串的char16_t*的地址。
 	/// </summary>
 	/// <returns>字符串地址。</returns>
-	const BKE_Char *c_str() const
+	const BKE_Char *c_str() const noexcept
 	{
 		return str.c_str();
 	}
@@ -116,21 +116,21 @@ public:
 	/// 判断这个字符串是否可以全部被转化为数值。
 	/// </summary>
 	/// <returns>如果转化完后面还有非法字符，则返回false，否则返回true。</returns>
-	inline bool canBeNumber() const
+	inline bool canBeNumber() const noexcept
 	{
 		BKE_Char *end;
 		Bagel_Number::str2num(str.c_str(), &end);
 		return !*end;
 	}
 
-	static bool canBeNumber(const u16string &u)
+	static bool canBeNumber(const u16string &u) noexcept
 	{
 		BKE_Char *end;
 		Bagel_Number::str2num(u.c_str(), &end);
 		return !*end;
 	}
 
-	static bool canBeNumber(const char16_t *str, int size)
+	static bool canBeNumber(const char16_t *str, int size) noexcept
 	{
 		return canBeNumber(u16string(str, size));
 	}
@@ -139,7 +139,7 @@ public:
 	/// 判断字符串是否为空。
 	/// </summary>
 	/// <returns>为空则返回true，否则返回false。</returns>
-	inline bool empty() const
+	inline bool empty() const noexcept
 	{
 		return str.empty();
 	};
@@ -149,7 +149,7 @@ public:
 	/// </summary>
 	/// <param name="s">另一个字符串。</param>
 	/// <returns>是否相同</returns>
-	inline bool operator == (const Bagel_String &s) const
+	inline bool operator == (const Bagel_String &s) const noexcept
 	{
 		//字符串池唯一副本
 		if (pool && s.pool)
@@ -167,7 +167,7 @@ public:
 	/// </summary>
 	/// <param name="s">另一个字符串。</param>
 	/// <returns>是否不同</returns>
-	inline bool operator != (const Bagel_String &s) const
+	inline bool operator != (const Bagel_String &s) const noexcept
 	{
 		return !operator == (s);
 	}
@@ -177,7 +177,7 @@ public:
 	/// </summary>
 	/// <param name="s">另一个字符串。</param>
 	/// <returns>若大于等于另一个字符串则返回true，否则返回false。</returns>
-	inline bool operator >= (const Bagel_String &s) const
+	inline bool operator >= (const Bagel_String &s) const noexcept
 	{
 		return str >= s.str;
 	}
@@ -187,7 +187,7 @@ public:
 	/// </summary>
 	/// <param name="s">另一个字符串。</param>
 	/// <returns>若小于等于另一个字符串则返回true，否则返回false。</returns>
-	inline bool operator <= (const Bagel_String &s) const
+	inline bool operator <= (const Bagel_String &s) const noexcept
 	{
 		return str <= s.str;
 	}
@@ -197,7 +197,7 @@ public:
 	/// </summary>
 	/// <param name="s">另一个字符串。</param>
 	/// <returns>若小于另一个字符串则返回true，否则返回false。</returns>
-	inline bool operator < (const Bagel_String &s) const
+	inline bool operator < (const Bagel_String &s) const noexcept
 	{
 		return !(operator >=(s));
 	}
@@ -207,7 +207,7 @@ public:
 	/// </summary>
 	/// <param name="s">另一个字符串。</param>
 	/// <returns>若大于另一个字符串则返回true，否则返回false。</returns>
-	inline bool operator > (const Bagel_String &s) const
+	inline bool operator > (const Bagel_String &s) const noexcept
 	{
 		return !(operator <=(s));
 	}
@@ -218,7 +218,7 @@ public:
 	/// <returns>
 	/// 转化的结果。
 	/// </returns>
-	inline operator const StringVal & () const
+	inline operator const StringVal & () const noexcept
 	{
 		return str;
 	};
@@ -227,7 +227,7 @@ public:
 	/// 获取字符串长度。
 	/// </summary>
 	/// <returns>字符串的长度。</returns>
-	inline int32_t size() const
+	inline int32_t size() const noexcept
 	{
 		return (int32_t)str.size();
 	};
@@ -236,7 +236,7 @@ public:
 	/// 判断字符串是否为空，同empty。
 	/// </summary>
 	/// <returns>为空则返回true，否则返回false。</returns>
-	inline bool isVoid() const
+	inline bool isVoid() const noexcept
 	{
 		return empty();
 	};
@@ -246,7 +246,7 @@ public:
 	/// </summary>
 	/// <param name="n">要取的字符的位置。</param>
 	/// <returns>字符串中第n的字符。</returns>
-	inline BKE_Char operator[](int n)
+	inline BKE_Char operator[](int n) noexcept
 	{
 		return getConstStr()[n];
 	};
@@ -256,7 +256,7 @@ public:
 	/// </summary>
 	/// <param name="n">要取的字符的位置。</param>
 	/// <returns>由字符串中第n的字符这一个字符组成的字符串。</returns>
-	inline StringVal getElement(int n)
+	inline StringVal getElement(int n) noexcept
 	{
 		auto &&ss = getConstStr();
 		if (n < 0)
@@ -270,7 +270,7 @@ public:
 	/// 获取对应的宽字符串。
 	/// </summary>
 	/// <returns>字符串的 std::wstring 版本。</returns>
-	inline wstring getWString() const
+	inline wstring getWString() const noexcept
 	{
 		return UniFromUTF16(str.c_str(), str.size());
 	};
@@ -279,7 +279,7 @@ public:
 	/// 获取对应的 std::u16string 字符串。
 	/// </summary>
 	/// <returns> std::u16string 字符串。</returns>
-	inline const StringVal& getConstStr() const
+	inline const StringVal& getConstStr() const noexcept
 	{
 		return str;
 	};
@@ -290,7 +290,7 @@ public:
 	/// <param name="start">开始位置。</param>
 	/// <param name="count">子串的长度，默认为-1，-1表示取到结尾。</param>
 	/// <returns>子串。</returns>
-	inline StringVal substr(int32_t start = 0, uint32_t count = (uint32_t)-1) const
+	inline StringVal substr(int32_t start = 0, uint32_t count = (uint32_t)-1) const noexcept
 	{
 		return str.substr(start, count);
 	}
@@ -301,9 +301,9 @@ public:
 	/// 如果有其他字符，则返回单引号版本的字符串，内容中的特殊字符都用转义来表示。
 	/// </summary>
 	/// <returns>返回的可显示的版本，直接解析这个返回值就可以得到原字符串内容。</returns>
-	StringVal printStr() const;
+	StringVal printStr() const noexcept;
 
-	bool beginWith(const StringVal &dst) const
+	bool beginWith(const StringVal &dst) const noexcept
 	{
 		if (dst.length() == 0)
 			return true;
@@ -312,7 +312,7 @@ public:
 		return memcmp(str.c_str(), dst.c_str(), dst.length() * sizeof(BKE_Char)) == 0;
 	}
 
-	bool endWith(const StringVal &dst) const
+	bool endWith(const StringVal &dst) const noexcept
 	{
 		if (dst.length() == 0)
 			return true;
@@ -354,13 +354,18 @@ public:
 	/// <summary>
 	/// 默认构造函数，存放一个空字符串。
 	/// </summary>
-	Bagel_StringHolder();
+	Bagel_StringHolder() noexcept;
+
+	/// <summary>
+	/// null构造函数，存放一个空字符串。
+	/// </summary>
+	Bagel_StringHolder(nullptr_t) noexcept;
 
 	/// <summary>
 	/// 存放一个 Bagel_String 指针。
 	/// </summary>
 	/// <param name="ss"> Bagel_String 字符串指针。</param>
-	Bagel_StringHolder(const Bagel_String *const ss) :s((Bagel_String*)ss)
+	Bagel_StringHolder(const Bagel_String *const ss) noexcept :s((Bagel_String*)ss)
 	{
 	};
 
@@ -368,7 +373,7 @@ public:
 	/// 拷贝构造函数。
 	/// </summary>
 	/// <param name="ss">另一个 Bagel_StringHolder 对象。</param>
-	Bagel_StringHolder(const Bagel_StringHolder& ss) :s(ss.s)
+	Bagel_StringHolder(const Bagel_StringHolder& ss) noexcept :s(ss.s)
 	{
 	};
 
@@ -376,57 +381,57 @@ public:
 	/// 从一个Bagel_Var对象中获得字符串。如果对象不能转化为字符串，会抛出异常。
 	/// </summary>
 	/// <param name="v"> Bagel_Var 对象。</param>
-	explicit Bagel_StringHolder(const Bagel_Var& v);
+	explicit Bagel_StringHolder(const Bagel_Var& v) noexcept;
 
 	/// <summary>
 	/// 从wchar_t*的字符串构建 Bagel_StringHolder 对象。
 	/// </summary>
 	/// <param name="str">字符串。</param>
-	Bagel_StringHolder(const wchar_t *str);
+	Bagel_StringHolder(const wchar_t *str) noexcept;
 
 	/// <summary>
 	/// 从 std::wstring 的字符串构建 Bagel_StringHolder 对象。
 	/// </summary>
 	/// <param name="str">字符串。</param>
-	Bagel_StringHolder(const std::wstring &str);
+	Bagel_StringHolder(const std::wstring &str) noexcept;
 
 	/// <summary>
 	/// 从char16_t*的字符串构建 Bagel_StringHolder 对象。
 	/// </summary>
 	/// <param name="str">字符串。</param>
-	Bagel_StringHolder(const char16_t *str);
+	Bagel_StringHolder(const char16_t *str) noexcept;
 
 	/// <summary>
 	/// 从 std::u16string 的字符串构建 Bagel_StringHolder 对象。
 	/// </summary>
 	/// <param name="str">字符串。</param>
-	Bagel_StringHolder(const std::u16string &str);
+	Bagel_StringHolder(const std::u16string &str) noexcept;
 
 	/// <summary>
 	/// 从 std::u16string&& 的字符串构建 Bagel_StringHolder 对象。
 	/// </summary>
 	/// <param name="str">字符串。</param>
-	Bagel_StringHolder(std::u16string &&str);
+	Bagel_StringHolder(std::u16string &&str) noexcept;
 
 	//construct from number;
 /// <summary>
 /// 从数字构建 Bagel_StringHolder 对象。
 /// </summary>
 /// <param name="num">数字。</param>
-	Bagel_StringHolder(double num);
+	Bagel_StringHolder(double num) noexcept;
 
 	//construct from integer;
 	/// <summary>
 	/// 从整数构建 Bagel_StringHolder 对象。
 	/// </summary>
 	/// <param name="num">数字。</param>
-	Bagel_StringHolder(int num);
+	Bagel_StringHolder(int num) noexcept;
 
 	/// <summary>
 	/// 判断字符串是否为空。
 	/// </summary>
 	/// <returns>为空则返回true，否则返回false。</returns>
-	inline bool empty() const
+	inline bool empty() const noexcept
 	{
 		return s->empty();
 	};
@@ -435,7 +440,7 @@ public:
 	/// 获取字符串长度。
 	/// </summary>
 	/// <returns>字符串的长度。</returns>
-	inline size_t size() const
+	inline size_t size() const noexcept
 	{
 		return s->size();
 	}
@@ -444,7 +449,7 @@ public:
 	/// 获取 std::u16string 常量字符串。
 	/// </summary>
 	/// <returns>字符串。</returns>
-	inline const StringVal& getConstStr() const
+	inline const StringVal& getConstStr() const noexcept
 	{
 		return s->getConstStr();
 	};
@@ -453,7 +458,7 @@ public:
 	/// 获取 std::wstring 字符串。
 	/// </summary>
 	/// <returns>字符串。</returns>
-	inline wstring getStrCopy() const
+	inline wstring getStrCopy() const noexcept
 	{
 		return s->getWString();
 	};
@@ -462,7 +467,7 @@ public:
 	/// 获取字符串转化为的数值。
 	/// </summary>
 	/// <returns>数值</returns>
-	inline double asNumber() const
+	inline double asNumber() const noexcept
 	{
 		return s->asNumber();
 	}
@@ -471,7 +476,7 @@ public:
 	/// 判断字符串是否可以转化为数值。
 	/// </summary>
 	/// <returns>布尔</returns>
-	inline bool canBeNumber() const
+	inline bool canBeNumber() const noexcept
 	{
 		return s->canBeNumber();
 	}
@@ -480,17 +485,17 @@ public:
 	/// 获取字符串首个字符的地址。
 	/// </summary>
 	/// <returns>首地址，字符串以\0结尾。</returns>
-	const BKE_Char *c_str() const
+	const BKE_Char *c_str() const noexcept
 	{
 		return s->c_str();
 	}
 
-	operator const u16string& () const
+	operator const u16string& () const noexcept
 	{
 		return s->getConstStr();
 	}
 
-	operator wstring () const
+	operator wstring () const noexcept
 	{
 		return s->getWString();
 	}
@@ -499,7 +504,7 @@ public:
 	/// 获取小写版本的字符串。
 	/// </summary>
 	/// <returns>小写版本的字符串。</returns>
-	inline Bagel_StringHolder toLowerCase()
+	inline Bagel_StringHolder toLowerCase() noexcept
 	{
 		auto s = getConstStr();
 		for (auto &i : s)
@@ -514,7 +519,7 @@ public:
 	/// 获取大写版本的字符串。
 	/// </summary>
 	/// <returns>大写版本的字符串。</returns>
-	inline Bagel_StringHolder toUpperCase()
+	inline Bagel_StringHolder toUpperCase() noexcept
 	{
 		auto s = getConstStr();
 		for (auto &i : s)
@@ -525,12 +530,12 @@ public:
 		return s;
 	};
 
-	bool beginWith(const StringVal &dst) const
+	bool beginWith(const StringVal &dst) const noexcept
 	{
 		return s->beginWith(dst);
 	}
 
-	bool endWith(const StringVal &dst) const
+	bool endWith(const StringVal &dst) const noexcept
 	{
 		return s->endWith(dst);
 	}
@@ -540,7 +545,7 @@ public:
 	/// </summary>
 	/// <param name="v">位置。</param>
 	/// <returns>对应位置的字符。</returns>
-	char16_t operator [] (int v) const
+	char16_t operator [] (int v) const noexcept
 	{
 		return getConstStr()[v];
 	}
@@ -552,7 +557,7 @@ public:
 /// <param name="str1">字符串1。</param>
 /// <param name="str2">字符串2。</param>
 /// <returns>相加后的字符串</returns>
-inline Bagel_StringHolder operator + (const Bagel_StringHolder &str1, const Bagel_StringHolder &str2)
+inline Bagel_StringHolder operator + (const Bagel_StringHolder &str1, const Bagel_StringHolder &str2) noexcept
 {
 	return str1.getConstStr() + str2.getConstStr();
 }
@@ -563,7 +568,7 @@ inline Bagel_StringHolder operator + (const Bagel_StringHolder &str1, const Bage
 /// <param name="str1">字符串1。</param>
 /// <param name="str2">字符串2。</param>
 /// <returns>等于则返回true，否则返回false。</returns>
-inline bool operator == (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2)
+inline bool operator == (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2) noexcept
 {
 	return *s1.s == *s2.s;
 }
@@ -574,7 +579,7 @@ inline bool operator == (const Bagel_StringHolder &s1, const Bagel_StringHolder 
 /// <param name="str1">字符串1。</param>
 /// <param name="str2">字符串2。</param>
 /// <returns>不等于则返回true，否则返回false。</returns>
-inline bool operator != (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2)
+inline bool operator != (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2) noexcept
 {
 	return *s1.s != *s2.s;
 }
@@ -585,7 +590,7 @@ inline bool operator != (const Bagel_StringHolder &s1, const Bagel_StringHolder 
 /// <param name="str1">字符串1。</param>
 /// <param name="str2">字符串2。</param>
 /// <returns>字符串1大于等于字符串2则返回true，否则返回false。</returns>
-inline bool operator >= (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2)
+inline bool operator >= (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2) noexcept
 {
 	return *s1.s >= *s2.s;
 }
@@ -596,7 +601,7 @@ inline bool operator >= (const Bagel_StringHolder &s1, const Bagel_StringHolder 
 /// <param name="str1">字符串1。</param>
 /// <param name="str2">字符串2。</param>
 /// <returns>字符串1小于等于字符串2则返回true，否则返回false。</returns>
-inline bool operator <= (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2)
+inline bool operator <= (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2) noexcept
 {
 	return *s1.s <= *s2.s;
 }
@@ -607,7 +612,7 @@ inline bool operator <= (const Bagel_StringHolder &s1, const Bagel_StringHolder 
 /// <param name="str1">字符串1。</param>
 /// <param name="str2">字符串2。</param>
 /// <returns>字符串1小于字符串2则返回true，否则返回false。</returns>
-inline bool operator < (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2)
+inline bool operator < (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2) noexcept
 {
 	return *s1.s > *s2.s;
 }
@@ -618,7 +623,7 @@ inline bool operator < (const Bagel_StringHolder &s1, const Bagel_StringHolder &
 /// <param name="str1">字符串1。</param>
 /// <param name="str2">字符串2。</param>
 /// <returns>字符串1大于字符串2则返回true，否则返回false。</returns>
-inline bool operator > (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2)
+inline bool operator > (const Bagel_StringHolder &s1, const Bagel_StringHolder &s2) noexcept
 {
 	return *s1.s < *s2.s;
 }
@@ -639,7 +644,7 @@ protected:
 	}
 
 	template<class T>
-	Bagel_String *getNode(T &&key)
+	Bagel_String *getNode(T &&key) noexcept
 	{
 		int32_t ha = BKE_hash(key);
 		int32_t h = ha & (hashsize - 1);
@@ -697,32 +702,32 @@ protected:
 public:
 	Bagel_String *nullString;
 
-	GlobalStringMap()
+	GlobalStringMap() noexcept
 	{
 		nullString = allocateString(W(""));
 	}
 
-	Bagel_String *allocateString(const char *str)
+	Bagel_String *allocateString(const char *str) noexcept
 	{
 		return allocateString(UTF16FromUTF8(str));
 	}
 
-	Bagel_String *allocateString(const char16_t *str)
+	Bagel_String *allocateString(const char16_t *str) noexcept
 	{
 		return allocateString(std::u16string(str));
 	}
 
-	Bagel_String *allocateString(const wchar_t *str)
+	Bagel_String *allocateString(const wchar_t *str) noexcept
 	{
 		return allocateString(UniToUTF16(str));
 	}
 
-	Bagel_String *allocateString(const std::string &str)
+	Bagel_String *allocateString(const std::string &str) noexcept
 	{
 		return allocateString(UTF16FromUTF8(str));
 	}
 
-	Bagel_String *allocateString(const std::u16string &str)
+	Bagel_String *allocateString(const std::u16string &str) noexcept
 	{
 		if (str.length() <= MAX_POOL_STRING_LEN)
 			return getNode(str);
@@ -730,12 +735,12 @@ public:
 			return new Bagel_String(str, false);
 	}
 
-	Bagel_String *allocateString(const std::wstring &str)
+	Bagel_String *allocateString(const std::wstring &str) noexcept
 	{
 		return allocateString(UniToUTF16(str));
 	}
 
-	Bagel_String *allocateString(std::u16string &&str)
+	Bagel_String *allocateString(std::u16string &&str) noexcept
 	{
 		if (str.length() <= MAX_POOL_STRING_LEN)
 			return getNode(std::move(str));
@@ -759,6 +764,16 @@ public:
 	/// 默认构造函数，代表一个空字符串。
 	/// </summary>
 	Bagel_Handler()
+	{
+		_GC.addRoot(inner.s);
+	};
+
+	/// <summary>
+	/// null构造一个字符串。
+	/// </summary>
+	/// <param name="v">参数。</param>
+	template<class T>
+	Bagel_Handler(nullptr_t) : inner(nullptr)
 	{
 		_GC.addRoot(inner.s);
 	};

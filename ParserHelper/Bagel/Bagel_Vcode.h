@@ -63,6 +63,9 @@ enum BKE_opcode : int32_t
 	OP_NULLDIC,
 	OP_BLOCK,		// {
 	OP_DOT,
+	OP_OPTIONAL_DOT,		//?.
+	OP_OPTIONAL_ARR,		//?.[
+	OP_OPTIONAL_CALL,		//?.(
 	OP_CONTINUE,
 	OP_BREAK,
 	OP_RETURN,
@@ -123,6 +126,8 @@ enum BKE_opcode : int32_t
 
 	OP_COUNT,
 };
+
+#define IS_OPTIONAL(x) (((x)>=OP_OPTIONAL_DOT && (x)<=OP_OPTIONAL_CALL) || (x)==OP_OPTIONAL_DOT + OP_COUNT)
 
 class BKE_Node
 {
@@ -206,7 +211,8 @@ public:
 	}
 	bool isVar() const
 	{
-		return (Node.opcode == OP_LITERAL + OP_COUNT) || (Node.opcode == OP_DOT) || (Node.opcode == OP_DOT + OP_COUNT) || (Node.opcode == OP_ARRAY && childs.size() == 2);
+		return (Node.opcode == OP_LITERAL + OP_COUNT) || (Node.opcode == OP_DOT) || (Node.opcode == OP_DOT + OP_COUNT) || (Node.opcode == OP_OPTIONAL_DOT + OP_COUNT)
+			|| (Node.opcode == OP_ARRAY && childs.size() == 2) || Node.opcode == OP_OPTIONAL_DOT || (Node.opcode == OP_OPTIONAL_ARR && childs.size() == 2);
 	}
 	int getFirstPos()
 	{
@@ -397,6 +403,7 @@ enum Bagel_BC : unsigned char
 	BC_JUMPFALSE,		//if(![B])code=A
 	BC_JUMPTRUE,		//if([B])code=A
 	BC_JUMPVOID,		//if([B]===void)code=A
+	BC_JUMPVOIDANDSET,	//if([B]===void)code=A;[C]=void
 	BC_JUMPNOTVOID,		//if([B]!==void)code=A
 	BC_JUMP,			//code=A
 	BC_JUMPEQUAL,		//if([B]==[C])code=A;

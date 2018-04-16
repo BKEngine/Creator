@@ -68,6 +68,9 @@ const BKE_Char* OP_CODE[] =
 	W("%[]"),
 	W("{"),
 	W("."),
+	W("?."),
+	W("?.["),
+	W("?.("),
 	W("continue"),
 	W("break"),
 	W("return"),
@@ -499,6 +502,7 @@ void Bagel_Parser::init()
 	REG_NUD(var, OP_STATIC);
 	REG_NUD(one, OP_THROW);
 	REG_NUD(one, OP_DOT);
+	REG_NUD(one, OP_OPTIONAL_DOT);
 	REG_NUD(with, OP_WITH);
 	REG_NUD(stop, OP_STOP);
 	REG_NUD(stop, OP_COMMA);
@@ -547,8 +551,11 @@ void Bagel_Parser::init()
 	REG_LED(one, OP_SELFDEC);
 	//REG_LED(comment, comment, OP_COMMENT);
 	REG_LED(param, OP_BRACKET);	//used in function call
+	REG_LED(param, OP_OPTIONAL_CALL);	//used in function call
 	REG_LED(dot, OP_DOT);
+	REG_LED(dot, OP_OPTIONAL_DOT);
 	REG_LED(ele, OP_ARRAY);
+	REG_LED(ele, OP_OPTIONAL_ARR);
 	REG_LED(choose, OP_CHOOSE);
 	REG_LED(two, OP_INSTANCE);
 	REG_LED(two, OP_IF);
@@ -668,11 +675,15 @@ void Bagel_Parser::init()
 	INC;
 	LBP(EXTRACTARGS);
 	LBP(BRACKET);
+	LBP(OPTIONAL_CALL);
 	LBP(ARRAY);
+	LBP(OPTIONAL_ARR);
 	INC;
 	PRE(NEW);
 	LBP(DOT);
+	LBP(OPTIONAL_DOT);
 	PRE(DOT);
+	PRE(OPTIONAL_DOT);
 	PRE(MUL);
 
 	head[OP_WHILE] = 1;
@@ -824,6 +835,18 @@ void Bagel_Parser::readToken()
 		node.opcode = OP_DOT;
 		return;
 	case L'?':
+		if (MatchFunc(W("?."), &curpos))
+		{
+			if (curpos[2] == '[')
+				node.opcode = OP_OPTIONAL_ARR;
+			else if (curpos[2] == '(')
+				node.opcode = OP_OPTIONAL_CALL;
+			else if (curpos[2] >= '0' && curpos[2] <= '9')
+				node.opcode = OP_CHOOSE;	//for xxx?.3:.4
+			else
+				node.opcode = OP_OPTIONAL_DOT;
+			return;
+		}
 		QRET(OP_CHOOSE);
 	case L':':
 		QRET(OP_MAOHAO);
@@ -2724,6 +2747,10 @@ void Bagel_Parser::led_pow(Bagel_AST** tree)
 
 void Bagel_Parser::led_dot(Bagel_AST** tree)
 {
+	if (IS_OPTIONAL((*tree)->Node.opcode))
+	{
+		token.opcode = OP_OPTIONAL_DOT;
+	}
 	(*tree) = (*tree)->addParent(token);
 	//left don't need to be a NAME because we enable syntax such as "233".type
 	if (next.opcode != OP_LITERAL)
@@ -2741,6 +2768,10 @@ void Bagel_Parser::led_dot(Bagel_AST** tree)
 
 void Bagel_Parser::led_ele(Bagel_AST** tree)
 {
+	if (IS_OPTIONAL((*tree)->Node.opcode))
+	{
+		token.opcode = OP_OPTIONAL_ARR;
+	}
 	(*tree) = (*tree)->addParent(token);
 	int32_t p = token.pos;
 	Bagel_AST* &tr = *tree;
@@ -2806,6 +2837,10 @@ void Bagel_Parser::led_set(Bagel_AST** tree)
 
 void Bagel_Parser::led_param(Bagel_AST** tree)
 {
+	if (IS_OPTIONAL((*tree)->Node.opcode))
+	{
+		token.opcode = OP_OPTIONAL_CALL;
+	}
 	(*tree) = (*tree)->addParent(token);
 	Bagel_AST* &tr = *tree;
 	auto oldInFunction = inFunctionCall;

@@ -2564,6 +2564,13 @@ Bagel_Var Bagel_VM::_debugRun(Bagel_ThreadContext * btc, Bagel_ThreadHandle * ou
 						pos = code + A;
 					}
 					break;
+				case Bagel_BC::BC_JUMPVOIDANDSET:
+					if (stack[B].isVoid())
+					{
+						pos = code + A;
+						stack[C].setVoid();
+					}
+					break;
 				case Bagel_BC::BC_JUMPNOTVOID:
 					if (!stack[B].isVoid())
 					{

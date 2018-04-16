@@ -54,7 +54,9 @@
 #define FUNC_INFO(name) {W2(name), &CURRENTCLASS::nativeFunc_##name}
 #define FUNC_ALIAS_INFO(alias, name) {W2(alias), &CURRENTCLASS::nativeFunc_##name}
 #define GET_INFO(name) {W2(name), &CURRENTCLASS::nativeGet_##name}
+#define GET_ALIAS_INFO(alias, name) {W2(alias), &CURRENTCLASS::nativeGet_##name}
 #define SET_INFO(name) {W2(name), &CURRENTCLASS::nativeSet_##name}
+#define SET_ATLAS_INFO(alias, name) {W2(alias), &CURRENTCLASS::nativeSet_##name}
 
 inline void _bkpCheckClassInstance(Bagel_Class *__obj, const char16_t *__classname)
 {
@@ -97,7 +99,7 @@ T *_bkpGetClassInstance(Bagel_Object *__obj, const char16_t * __classname)
 #define RETURNDEFAULT return Bagel_Var();
 #define PARAMEXIST(n) (paramcount > (n))
 #define PARAM(n) (paramarray[n])
-#define PARAMDEFAULT(n, v) (PARAMEXIST(n)?(decltype(v))paramarray[n]:v)
+#define PARAMDEFAULT(n, v) (PARAMEXIST(n)&&!PARAM(n).isVoid()?(decltype(v))PARAM(n):v)
 #define PARAMCOUNT() (paramcount)
 #define MINIMUMPARAMNUM(n) if(paramcount<n) throw Bagel_Except(W("参数数目不足"));
 
@@ -377,8 +379,8 @@ namespace ParserUtils
 		*  @param number x
 		*  @param number min
 		*  @param number max
-		*  @return integer
-		*  @brief 返回以[min,max]的范围截取x的结果。
+		*  @return number
+		*  @brief 返回如果x小于min，返回min。如果x大于max，返回max，否则返回x。
 		*/
 		NATIVE_FUNC(clamp);
 

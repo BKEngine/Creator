@@ -9,7 +9,7 @@ Bagel_String::~Bagel_String()
 		_globalStructures.stringMap->removeString(this);
 }
 
-StringVal Bagel_String::printStr() const
+StringVal Bagel_String::printStr() const noexcept
 {
 	StringVal printStr;
 	bool sim = true;
@@ -60,38 +60,43 @@ StringVal Bagel_String::printStr() const
 	return printStr;
 }
 
-Bagel_StringHolder::Bagel_StringHolder() : s(_globalStructures.stringMap->nullString)
+Bagel_StringHolder::Bagel_StringHolder() noexcept : s(_globalStructures.stringMap->nullString)
 {
 }
 
-Bagel_StringHolder::Bagel_StringHolder(const Bagel_Var & v) : Bagel_StringHolder(v.asBKEStr())
+Bagel_StringHolder::Bagel_StringHolder(nullptr_t) noexcept : s(_globalStructures.stringMap->nullString)
 {
 }
 
-Bagel_StringHolder::Bagel_StringHolder(const wchar_t * str) : s(_globalStructures.stringMap->allocateString(str))
+Bagel_StringHolder::Bagel_StringHolder(const Bagel_Var & v) noexcept : Bagel_StringHolder(v.asBKEStr())
 {
 }
 
-Bagel_StringHolder::Bagel_StringHolder(const std::wstring & str) : s(_globalStructures.stringMap->allocateString(str))
+Bagel_StringHolder::Bagel_StringHolder(const wchar_t * str) noexcept : s(_globalStructures.stringMap->allocateString(str))
 {
 }
 
-Bagel_StringHolder::Bagel_StringHolder(const char16_t * str) : s(_globalStructures.stringMap->allocateString(str))
+Bagel_StringHolder::Bagel_StringHolder(const std::wstring & str) noexcept : s(_globalStructures.stringMap->allocateString(str))
 {
 }
 
-Bagel_StringHolder::Bagel_StringHolder(const std::u16string & str) : s(_globalStructures.stringMap->allocateString(str))
+Bagel_StringHolder::Bagel_StringHolder(const char16_t * str) noexcept : s(_globalStructures.stringMap->allocateString(str))
 {
 }
 
-Bagel_StringHolder::Bagel_StringHolder(std::u16string && str) : s(_globalStructures.stringMap->allocateString(std::move(str)))
+Bagel_StringHolder::Bagel_StringHolder(const std::u16string & str) noexcept : s(_globalStructures.stringMap->allocateString(str))
 {
 }
 
-Bagel_StringHolder::Bagel_StringHolder(double num) : s(_globalStructures.stringMap->allocateString(Bagel_Number::toString(num)))
+Bagel_StringHolder::Bagel_StringHolder(std::u16string && str) noexcept : s(_globalStructures.stringMap->allocateString(std::move(str)))
 {
 }
 
-Bagel_StringHolder::Bagel_StringHolder(int num) : s(_globalStructures.stringMap->allocateString(bkpInt2Str(num)))
+Bagel_StringHolder::Bagel_StringHolder(double num) noexcept : s(_globalStructures.stringMap->allocateString(Bagel_Number::toString(num)))
 {
 }
+
+Bagel_StringHolder::Bagel_StringHolder(int num) noexcept : s(_globalStructures.stringMap->allocateString(bkpInt2Str(num)))
+{
+}
+

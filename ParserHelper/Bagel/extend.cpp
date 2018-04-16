@@ -752,6 +752,25 @@ namespace ParserUtils
 		return s;
 	}
 
+	NATIVE_FUNC(contains)
+	{
+		MINIMUMPARAMNUM(1);
+#ifdef HAS_REGEX
+		if (PARAM(0).getType() == VAR_CLASS)
+		{
+			if (PARAM(0).forceAsClass()->isInstanceof(W("Regex")))
+			{
+				Regex *r = (Regex *)(PARAM(0).forceAsClass()->native);
+				auto tmp = self->forceAsBKEStr()->getWString();
+				std::wsmatch m;
+				return std::regex_search(tmp, m, r->reg);
+			}
+			throw Bagel_Except(W("参数1必须是Regex的子类或字符串"));
+		}
+#endif
+		return self->forceAsBKEStr()->getConstStr().find(PARAM(0).asString()) != u16string::npos;
+	}
+
 	NATIVE_FUNC(lastIndexOf)
 	{
 		MINIMUMPARAMNUM(1);
@@ -2540,6 +2559,13 @@ namespace ParserUtils
 				*   @brief  返回新字符串，原字符串中所有小写字母被转化为大写。
 				*/
 		{ QUICKFUNC(toUpperCase) },
+
+				/**
+				*	@class string（内部保留类）
+				*   @return string
+				*   @brief  返回新字符串，原字符串中所有小写字母被转化为大写。
+				*/
+		{ QUICKFUNC(contains) },
 	}
 	REG_FUNC_END;
 

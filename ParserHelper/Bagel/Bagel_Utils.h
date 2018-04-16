@@ -4,9 +4,9 @@
 #include "Bagel_Config.h"
 #include "BKE_hash.hpp"
 
-inline bool bkpIsSpace(wchar_t ch)
+inline bool bkpIsSpace(char16_t ch)
 {
-	for (const wchar_t *a = L"\x0009\x000A\x000B\x000C\x000D\x0020\x0085\x00A0\x1680\x180E\x2002\x2003\x2004\x2005\x2006\x2008\x2009\x200A\x200B\x200C\x200D\x205F\x3000"; *a; a++)
+	for (const char16_t *a = W("\x0009\x000A\x000B\x000C\x000D\x0020\x0085\x00A0\x1680\x180E\x2002\x2003\x2004\x2005\x2006\x2008\x2009\x200A\x200B\x200C\x200D\x205F\x3000"); *a; a++)
 	{
 		if (ch == *a)
 			return 1;
@@ -172,6 +172,7 @@ int bkpRandomInt();
 int32_t bkpRandomInt(int min, int max);
 
 double bkpRandomDouble(double min, double max);
+float bkpRandomFloat(float min, float max);
 
 #define BKE_UNUSED_PARAM(_a) (void)_a
 

@@ -78,64 +78,64 @@ private:
 public:
 
 	//construct functions
-	inline Bagel_Var() :vt(VAR_NONE)//, is_var(VARIABLE_VAR)
+	inline Bagel_Var() noexcept :vt(VAR_NONE)//, is_var(VARIABLE_VAR)
 	{
 	}
 
-	inline Bagel_Var(int16_t i) : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(int16_t i) noexcept : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(uint16_t i) : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(uint16_t i) noexcept : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(float i) : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(float i) noexcept : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(double i) : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(double i) noexcept : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(int64_t i) : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(int64_t i) noexcept : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(int32_t i) : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(int32_t i) noexcept : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(uint32_t i) : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(uint32_t i) noexcept : vt(VAR_NUM), num(i)//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(const wchar_t *s) : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(s))//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(const wchar_t *s) noexcept : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(s))//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(const char16_t *s) : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(s))//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(const char16_t *s) noexcept : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(s))//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(wchar_t s) : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(wstring(1, s)))//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(wchar_t s) noexcept : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(wstring(1, s)))//, is_var(VARIABLE_VAR)
 	{
 	}
 #if !defined(_MSC_VER) || _MSC_VER > 1800
-	inline Bagel_Var(char16_t s) : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(u16string(1, s)))//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(char16_t s) noexcept : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(u16string(1, s)))//, is_var(VARIABLE_VAR)
 	{
 	}
 #endif
-	inline Bagel_Var(const wstring &s) : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(s))//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(const wstring &s) noexcept : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(s))//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(Bagel_StringHolder s) : vt(VAR_STR), obj(s.s)//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(Bagel_StringHolder s) noexcept : vt(VAR_STR), obj(s.s)//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(const StringVal &s) : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(s))//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(const StringVal &s) noexcept : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(s))//, is_var(VARIABLE_VAR)
 	{
 	}
-	inline Bagel_Var(StringVal &&s) : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(std::move(s)))//, is_var(VARIABLE_VAR)
+	inline Bagel_Var(StringVal &&s) noexcept : vt(VAR_STR), obj(_globalStructures.stringMap->allocateString(std::move(s)))//, is_var(VARIABLE_VAR)
 	{
 	}
 
 	template <class T>
-	inline Bagel_Var(const Bagel_Handler<T> &s) : Bagel_Var((T*)s)
+	inline Bagel_Var(const Bagel_Handler<T> &s) noexcept : Bagel_Var((T*)s)
 	{
 	}
 
-	inline Bagel_Var(const Bagel_Object* const o)
+	inline Bagel_Var(const Bagel_Object* const o) noexcept
 	{
 		obj = (Bagel_Object*)o;
 		if (!o)
@@ -145,16 +145,16 @@ public:
 		//is_var = VARIABLE_VAR;
 	}
 
-	Bagel_Var(const Bagel_Var &v) = default;
+	Bagel_Var(const Bagel_Var &v) noexcept = default;
 
-	Bagel_Var(Bagel_NativeFunction func);
+	Bagel_Var(Bagel_NativeFunction func) noexcept;
 
 	template<class T> Bagel_Var(initializer_list<T> list);
 
 	//static constructor for dic and array
-	static FORCEINLINE Bagel_Var array();
-	static FORCEINLINE Bagel_Var array(int size);
-	static FORCEINLINE Bagel_Var dic();
+	static FORCEINLINE Bagel_Var array(int size) noexcept;
+	static FORCEINLINE Bagel_Var array() noexcept;
+	static FORCEINLINE Bagel_Var dic() noexcept;
 
 	template<class Head, class ... Args>
 	static Bagel_Var arrayWithObjects(const Head &h, Args... args);
@@ -397,21 +397,21 @@ public:
 		return _canBeNumber();
 	}
 
-	const double& forceAsNumber() const;
-	double& forceAsNumber();
-	int64_t forceAsInteger() const;
-	bool forceAsBoolean() const;
-	u16string forceAsString() const;
-	wstring forceAsWString() const;
-	Bagel_String* forceAsBKEStr() const;
-	Bagel_Array *forceAsArray() const;
-	Bagel_Dic *forceAsDic() const;
-	Bagel_Function *forceAsFunc() const;
-	Bagel_Prop *forceAsProp() const;
-	Bagel_Pointer *forceAsPointer() const;
-	Bagel_Closure *forceAsClosure() const;
-	Bagel_Class *forceAsClass() const;
-	Bagel_ClassDef *forceAsClassDef() const;
+	const double& forceAsNumber() const noexcept;
+	double& forceAsNumber() noexcept;
+	int64_t forceAsInteger() const noexcept;
+	bool forceAsBoolean() const noexcept;
+	u16string forceAsString() const noexcept;
+	wstring forceAsWString() const noexcept;
+	Bagel_String* forceAsBKEStr() const noexcept;
+	Bagel_Array *forceAsArray() const noexcept;
+	Bagel_Dic *forceAsDic() const noexcept;
+	Bagel_Function *forceAsFunc() const noexcept;
+	Bagel_Prop *forceAsProp() const noexcept;
+	Bagel_Pointer *forceAsPointer() const noexcept;
+	Bagel_Closure *forceAsClosure() const noexcept;
+	Bagel_Class *forceAsClass() const noexcept;
+	Bagel_ClassDef *forceAsClassDef() const noexcept;
 
 	//get restrict value whith no throw exception
 	Bagel_Number getBKENum(Bagel_Number defaultValue = 0) const;
@@ -558,24 +558,24 @@ public:
 
 	bool instanceOf(Bagel_StringHolder str) const;
 
-	inline bool isVoid() const
+	inline bool isVoid() const noexcept
 	{
 		return !vt;
 	}
 
-	Bagel_ObjectID getObjectID() const
+	Bagel_ObjectID getObjectID() const noexcept
 	{
 		return vt >= VAR_STR ? obj->getID() : -1;
 	}
 
-	inline bool equalToVoid() const
+	inline bool equalToVoid() const noexcept
 	{
 		return isVoid() || (vt == VAR_NUM && isZero(num)) || (vt == VAR_STR && forceAsBKEStr()->isVoid());
 	}
 
-	Bagel_Var clone() const;
+	Bagel_Var clone() const noexcept;
 
-	void copyFrom(const Bagel_Var &v);
+	void copyFrom(const Bagel_Var &v) noexcept;
 	void assignStructure(const Bagel_Var &v, BKE_hashmap<void*, void*> &pMap, bool first = false);
 
 	inline void forceSet(const Bagel_Var &v)
@@ -3063,27 +3063,27 @@ Bagel_Var Bagel_Var::_run(Bagel_Vector &paramvec, Param &&head)
 	return ((Bagel_Function*)obj)->run(paramvec.data(), paramvec.size());
 }
 
-FORCEINLINE Bagel_Var::Bagel_Var(Bagel_NativeFunction func)
+FORCEINLINE Bagel_Var::Bagel_Var(Bagel_NativeFunction func) noexcept
 {
 	vt = VAR_FUNC;
 	//is_var = VARIABLE_VAR;
 	obj = new Bagel_Function(func);
 }
 
-FORCEINLINE Bagel_Var Bagel_Var::array()
-{
-	auto arr = new Bagel_Array();
-	return arr;
-}
-
-FORCEINLINE Bagel_Var Bagel_Var::array(int size)
+FORCEINLINE Bagel_Var Bagel_Var::array(int size) noexcept
 {
 	auto arr = new Bagel_Array();
 	arr->setLength(size);
 	return arr;
 }
 
-FORCEINLINE Bagel_Var Bagel_Var::dic()
+FORCEINLINE Bagel_Var Bagel_Var::array() noexcept
+{
+	auto arr = new Bagel_Array();
+	return arr;
+}
+
+FORCEINLINE Bagel_Var Bagel_Var::dic() noexcept
 {
 	return new Bagel_Dic();
 }

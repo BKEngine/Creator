@@ -474,12 +474,12 @@ double Bagel_Var::_asNumber() const
 	}
 }
 
-const double& Bagel_Var::forceAsNumber() const
+const double& Bagel_Var::forceAsNumber() const noexcept
 {
 	return num;
 }
 
-double& Bagel_Var::forceAsNumber()
+double& Bagel_Var::forceAsNumber() noexcept
 {
 	return num;
 }
@@ -528,7 +528,7 @@ uint64_t Bagel_Var::_asUInteger() const
 	}
 }
 
-int64_t Bagel_Var::forceAsInteger() const
+int64_t Bagel_Var::forceAsInteger() const noexcept
 {
 	return (int64_t)num;
 }
@@ -687,7 +687,7 @@ bool Bagel_Var::asBoolean() const
 	}
 }
 
-bool Bagel_Var::forceAsBoolean() const
+bool Bagel_Var::forceAsBoolean() const noexcept
 {
 	return !!forceAsInteger();
 }
@@ -804,22 +804,22 @@ Bagel_ClassDef * Bagel_Var::asClassDef() const
 	}
 }
 
-u16string Bagel_Var::forceAsString() const
+u16string Bagel_Var::forceAsString() const noexcept
 {
 	return forceAsBKEStr()->getConstStr();
 }
 
-wstring Bagel_Var::forceAsWString() const
+wstring Bagel_Var::forceAsWString() const noexcept
 {
 	return forceAsBKEStr()->getWString();
 }
 
-Bagel_String* Bagel_Var::forceAsBKEStr() const
+Bagel_String* Bagel_Var::forceAsBKEStr() const noexcept
 {
 	return (Bagel_String*)obj;
 }
 
-Bagel_Closure *Bagel_Var::forceAsClosure() const
+Bagel_Closure *Bagel_Var::forceAsClosure() const noexcept
 {
 	switch (vt)
 	{
@@ -832,37 +832,37 @@ Bagel_Closure *Bagel_Var::forceAsClosure() const
 	}
 }
 
-Bagel_Class * Bagel_Var::forceAsClass() const
+Bagel_Class * Bagel_Var::forceAsClass() const noexcept
 {
 	return static_cast<Bagel_Class*>(obj);
 }
 
-Bagel_ClassDef * Bagel_Var::forceAsClassDef() const
+Bagel_ClassDef * Bagel_Var::forceAsClassDef() const noexcept
 {
 	return static_cast<Bagel_ClassDef*>(obj);
 }
 
-Bagel_Array *Bagel_Var::forceAsArray() const
+Bagel_Array *Bagel_Var::forceAsArray() const noexcept
 {
 	return static_cast<Bagel_Array *>(obj);
 }
 
-Bagel_Dic *Bagel_Var::forceAsDic() const
+Bagel_Dic *Bagel_Var::forceAsDic() const noexcept
 {
 	return static_cast<Bagel_Dic *>(obj);
 }
 
-Bagel_Function *Bagel_Var::forceAsFunc() const
+Bagel_Function *Bagel_Var::forceAsFunc() const noexcept
 {
 	return static_cast<Bagel_Function *>(obj);
 }
 
-Bagel_Prop *Bagel_Var::forceAsProp() const
+Bagel_Prop *Bagel_Var::forceAsProp() const noexcept
 {
 	return static_cast<Bagel_Prop *>(obj);
 }
 
-Bagel_Pointer * Bagel_Var::forceAsPointer() const
+Bagel_Pointer * Bagel_Var::forceAsPointer() const noexcept
 {
 	return static_cast<Bagel_Pointer *>(obj);
 }
@@ -1072,7 +1072,7 @@ Bagel_Prop *Bagel_Var::getProp(Bagel_Prop *defaultValue) const
 	}
 }
 
-Bagel_Var Bagel_Var::clone() const
+Bagel_Var Bagel_Var::clone() const noexcept
 {
 	switch (vt)
 	{
@@ -1093,7 +1093,7 @@ Bagel_Var Bagel_Var::clone() const
 	}
 }
 
-void Bagel_Var::copyFrom(const Bagel_Var &v)
+void Bagel_Var::copyFrom(const Bagel_Var &v) noexcept
 {
 	//clear();
 	vt = VAR_NONE;

@@ -836,6 +836,11 @@ double bkpRandomDouble(double min, double max)
 	std::uniform_real_distribution<double> u(min, max);
 	return u(get_random_pool());
 }
+float bkpRandomFloat(float min, float max)
+{
+	std::uniform_real_distribution<float> u(min, max);
+	return u(get_random_pool());
+}
 
 #include "Bagel_String.h"
 #include "Bagel_Var.h"

@@ -319,6 +319,9 @@ class Bagel_ReleaseCompiler
 
 	BKE_hashmap<Bagel_Var, int> constpos;
 
+	int optionalChainDepth;
+	vector<int> jumpCodeIndex;
+
 	int getConstPos(Bagel_ByteCode &code, const Bagel_Var &v)
 	{
 		auto it = constpos.find(v);

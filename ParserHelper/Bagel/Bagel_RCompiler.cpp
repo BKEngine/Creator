@@ -33,6 +33,22 @@ if(curcode->varPosInfo)  \
 
 #define ENSURE(c) if(code.stackDepth < (c)) code.stackDepth = (c);
 
+#define beginOptionalChain() optionalChainDepth++;
+
+#define addOptionalJumpAddress(x) \
+	jumpCodeIndex.push_back(code.code.size()); \
+	PUSHCODE(Bagel_BC::BC_JUMPVOIDANDSET, pos, 0, x, 0);
+
+#define endOptionalChain() \
+	optionalChainDepth--; \
+	if (optionalChainDepth == 0) \
+	{ \
+		int jd = code.code.size(); \
+		for(auto &idx:jumpCodeIndex)\
+			code.code[idx].A=jd, code.code[idx].C=dest; \
+		jumpCodeIndex.clear(); \
+	}
+
 int Bagel_ReleaseCompiler::getVarPos(Bagel_StringHolder str, int codepos)
 {
 	int a = curclo->getLocal(str);
@@ -1289,10 +1305,15 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 			ENSURE(dest + 2);
 			return dest;
 		case OP_DOT + OP_COUNT:
+		case OP_OPTIONAL_DOT + OP_COUNT:
+			if (subtree->childs[0]->Node.opcode == OP_OPTIONAL_DOT + OP_COUNT)
+				beginOptionalChain();
 			b = getConstPos(code, subtree->childs[0]->childs[0]->Node.var);
 			PUSHCACHE(pos);
 			if (curclo->withpos >= 0)
 			{
+				if (subtree->childs[0]->Node.opcode == OP_OPTIONAL_DOT + OP_COUNT)
+					addOptionalJumpAddress(curclo->withpos);
 				PUSHCODE(Bagel_BC::BC_GETMEMBERSTRIDX_PTR, pos, curclo->withpos, b, dest + 1);
 			}
 			else
@@ -1317,9 +1338,12 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 			{
 				PUSHCODE(Bagel_BC::BC_LOADPOINTER, pos, dest, dest + 1, 0);
 			}
+			if (subtree->childs[0]->Node.opcode == OP_OPTIONAL_DOT + OP_COUNT)
+				endOptionalChain();
 			ENSURE(dest + 2);
 			break;
 		case OP_DOT:
+		case OP_OPTIONAL_DOT:
 			b = getConstPos(code, subtree->childs[0]->childs[1]->Node.var);
 			if (subtree->childs[0]->childs[0]->Node.opcode == OP_SUPER + OP_COUNT)
 			{
@@ -1345,7 +1369,15 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 			}
 			else
 			{
+				if (subtree->childs[0]->Node.opcode == OP_OPTIONAL_DOT)
+				{
+					beginOptionalChain();
+				}
 				d2 = _compile(dest + 2, subtree->childs[0]->childs[0], code, true, jit);
+				if (subtree->childs[0]->Node.opcode == OP_OPTIONAL_DOT)
+				{
+					addOptionalJumpAddress(d2);
+				}
 				PUSHCACHE(pos);
 				PUSHCODE(Bagel_BC::BC_GETMEMBERSTRIDX_PTR, pos, d2, b, dest + 1);
 				//需要多次用到self，存在obj内
@@ -1365,12 +1397,25 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 				{
 					PUSHCODE(Bagel_BC::BC_LOADPOINTER, pos, dest, dest + 1, 0);
 				}
+				if (subtree->childs[0]->Node.opcode == OP_OPTIONAL_DOT)
+				{
+					endOptionalChain();
+				}
 			}
 			REG_TYPE(dest, VAR_UNKNOWN);
 			ENSURE(dest + 3);
 			break;
 		case OP_ARRAY:
+		case OP_OPTIONAL_ARR:
+			if (subtree->childs[0]->Node.opcode == OP_OPTIONAL_ARR)
+			{
+				beginOptionalChain();
+			}
 			d2 = _compile(dest + 1, subtree->childs[0]->childs[0], code, true, jit);
+			if (subtree->childs[0]->Node.opcode == OP_OPTIONAL_ARR)
+			{
+				addOptionalJumpAddress(d2);
+			}
 			if (subtree->childs[0]->childs[1]->Node.opcode == OP_CONSTVAR + OP_COUNT)
 			{
 				auto &v = subtree->childs[0]->childs[1]->Node.var;
@@ -1424,13 +1469,22 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 			{
 				PUSHCODE(Bagel_BC::BC_LOADPOINTER, pos, dest, dest, 0);
 			}
+			if (subtree->childs[0]->Node.opcode == OP_OPTIONAL_ARR)
+			{
+				endOptionalChain();
+			}
 			REG_TYPE(dest, VAR_UNKNOWN);
 			ENSURE(dest + 2);
 			break;
 		}
 		break;
 	case OP_BRACKET:
+	case OP_OPTIONAL_CALL:
+		if (subtree->Node.opcode == OP_OPTIONAL_CALL)
+			beginOptionalChain();
 		d1 = _compile(dest, subtree->childs[0], code, true, jit);
+		if (subtree->Node.opcode == OP_OPTIONAL_CALL)
+			addOptionalJumpAddress(d1);
 		//PUSHCODE(Bagel_BC::BC_PRECALL, pos, d1, 0, 0);
 		if (d1 != dest)
 		{
@@ -1497,7 +1551,10 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 			}
 			PUSHCODE(Bagel_BC::BC_CALLVECTOR, pos, dest, dest + 1, 0);
 		}
+		if (subtree->Node.opcode == OP_OPTIONAL_CALL)
+			endOptionalChain();
 		break;
+	case OP_OPTIONAL_ARR:
 	case OP_ARRAY:
 		if (subtree->childs[0]->Node.opcode == OP_SUPER + OP_COUNT)
 		{
@@ -1506,7 +1563,15 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 		}
 		else
 		{
+			if (subtree->Node.opcode == OP_OPTIONAL_ARR)
+			{
+				beginOptionalChain();
+			}
 			d1 = _compile(dest, subtree->childs[0], code, true, jit);
+			if (subtree->Node.opcode == OP_OPTIONAL_ARR)
+			{
+				addOptionalJumpAddress(d1);
+			}
 			if (subtree->childs.size() == 2)//Parser保证此时child[1]不为NULL
 			{
 				if (subtree->childs[1]->Node.opcode == OP_CONSTVAR + OP_COUNT)
@@ -1544,6 +1609,10 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 					{
 						PUSHCODE(Bagel_BC::BC_LOADMEMBER_VALUE, pos, d1, d2, dest);
 					}
+				}
+				if (subtree->Node.opcode == OP_OPTIONAL_ARR)
+				{
+					endOptionalChain();
 				}
 				break;
 			}
@@ -1584,6 +1653,10 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 				PUSHCODE2(Bagel_BC::BC_LOADNUM, pos, dest + 3, 1.0);
 			}
 			PUSHCODE(Bagel_BC::BC_ELEMENT, pos, dest, d1, dest + 1);
+			if (subtree->Node.opcode == OP_OPTIONAL_ARR)
+			{
+				endOptionalChain();
+			}
 			REG_TYPE(dest, VAR_UNKNOWN);
 			ENSURE(dest + 3);
 		}
@@ -1655,6 +1728,7 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 		END_CLO(subtree);
 		break;
 	case OP_DOT:
+	case OP_OPTIONAL_DOT:
 		a = getConstPos(code, subtree->childs[1]->Node.var);
 		switch (subtree->childs[0]->Node.opcode - OP_COUNT)
 		{
@@ -1667,14 +1741,28 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 			PUSHCODE(Bagel_BC::BC_LOADGLOBALMEMBER_VALUE, pos, a, 0, dest);
 			break;
 		default:
-			d1 = _compile(dest + 1, subtree->childs[0], code, true, jit);
-			PUSHCACHE(pos);
-			PUSHCODE(Bagel_BC::BC_LOADMEMBERSTRIDX_VALUE, pos, d1, a, dest);
+			if (subtree->Node.opcode == OP_DOT)
+			{
+				d1 = _compile(dest + 1, subtree->childs[0], code, true, jit);
+				PUSHCACHE(pos);
+				PUSHCODE(Bagel_BC::BC_LOADMEMBERSTRIDX_VALUE, pos, d1, a, dest);
+			}
+			else
+			{
+				//OP_DOT2	?.
+				beginOptionalChain();
+				d1 = _compile(dest + 1, subtree->childs[0], code, true, jit);
+				addOptionalJumpAddress(d1);
+				PUSHCACHE(pos);
+				PUSHCODE(Bagel_BC::BC_LOADMEMBERSTRIDX_VALUE, pos, d1, a, dest);
+				endOptionalChain();
+			}
 			break;
 		}
 		REG_TYPE(dest, VAR_UNKNOWN);
 		break;
 	case OP_DOT + OP_COUNT:
+	case OP_OPTIONAL_DOT + OP_COUNT:
 		a = getConstPos(code, subtree->childs[0]->Node.var);
 		PUSHCACHE(pos);
 		if (curclo->withpos < 0)
@@ -1683,7 +1771,17 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 		}
 		else
 		{
-			PUSHCODE(Bagel_BC::BC_LOADMEMBERSTRIDX_VALUE, pos, curclo->withpos, a, dest);
+			if (subtree->Node.opcode == OP_OPTIONAL_DOT + OP_COUNT)
+			{
+				beginOptionalChain();
+				addOptionalJumpAddress(curclo->withpos);
+				PUSHCODE(Bagel_BC::BC_LOADMEMBERSTRIDX_VALUE, pos, curclo->withpos, a, dest);
+				endOptionalChain();
+			}
+			else
+			{
+				PUSHCODE(Bagel_BC::BC_LOADMEMBERSTRIDX_VALUE, pos, curclo->withpos, a, dest);
+			}
 		}
 		REG_TYPE(dest, VAR_UNKNOWN);
 		break;
@@ -1837,7 +1935,7 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 		REG_TYPE(dest, VAR_CLASS);
 		break;
 	case OP_DELETE + OP_COUNT:
-		if (subtree->childs[0]->Node.opcode == OP_DOT)
+		if (subtree->childs[0]->Node.opcode == OP_DOT || subtree->childs[0]->Node.opcode == OP_OPTIONAL_DOT)
 		{
 			d1 = _compile(dest, subtree->childs[0]->childs[0], code, true, jit);
 			a = getConstPos(code, subtree->childs[0]->childs[1]->Node.var);
@@ -1850,6 +1948,25 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 			a = getConstPos(code, subtree->childs[0]->childs[1]->Node.var);
 			PUSHCODE(Bagel_BC::BC_LOADCONST, subtree->childs[0]->childs[1]->Node.pos, dest + 1, a, 0);
 			PUSHCODE(Bagel_BC::BC_DELETE, pos, dest, dest + 1, 0);
+		}
+		else if (subtree->childs[0]->Node.opcode == OP_OPTIONAL_DOT)
+		{
+			beginOptionalChain();
+			d1 = _compile(dest, subtree->childs[0]->childs[0], code, true, jit);
+			addOptionalJumpAddress(d1);
+			a = getConstPos(code, subtree->childs[0]->childs[1]->Node.var);
+			PUSHCODE(Bagel_BC::BC_LOADCONST, subtree->childs[0]->childs[1]->Node.pos, dest + 1, a, 0);
+			PUSHCODE(Bagel_BC::BC_DELETE, pos, d1, dest + 1, 0);
+			endOptionalChain();
+		}
+		else if(IS_OPTIONAL(subtree->childs[0]->Node.opcode))
+		{
+			beginOptionalChain();
+			d1 = _compile(dest, subtree->childs[0]->childs[0], code, true, jit);
+			addOptionalJumpAddress(d1);
+			d2 = _compile(dest + 1, subtree->childs[0]->childs[1], code, true, jit);
+			PUSHCODE(Bagel_BC::BC_DELETE, pos, d1, d2, 0);
+			endOptionalChain();
 		}
 		else
 		{
@@ -2251,6 +2368,7 @@ Bagel_ReleaseCompiler::Bagel_ReleaseCompiler()
 	lastlooplevel = -1;
 	infirstloop = 0;
 	lockcode = 0;
+	optionalChainDepth = 0;
 }
 
 Bagel_ReleaseCompiler::~Bagel_ReleaseCompiler()
@@ -2333,15 +2451,71 @@ void Bagel_ReleaseCompiler::compileAddr(Bagel_AST * tree, Bagel_ByteCode & code,
 			b = dest + 1;
 		}
 		break;
+	case OP_OPTIONAL_DOT + OP_COUNT:
+		{
+			beginOptionalChain();
+			if (curclo->withpos >= 0)
+			{
+				a = curclo->withpos;
+			}
+			else
+			{
+				PUSHCODE(Bagel_BC::BC_LOADGLOBAL, pos, dest + 2, 0, 0);
+				a = dest + 2;
+			}
+			addOptionalJumpAddress(a);
+			c = getConstPos(code, subtree->childs[0]->Node.var);
+			PUSHCODE(Bagel_BC::BC_LOADCONST, subtree->childs[0]->Node.pos, dest + 1, c, 0);
+			b = dest + 1;
+			int d2 = code.code.size();
+			PUSHCODE(Bagel_BC::BC_JUMP, tree->Node.pos, 0, 0, 0);
+			endOptionalChain();
+			PUSHCODE(Bagel_BC::BC_RETURN, MINUS_POS, dest, 0, 0);
+			code.code[d2].A = code.code.size();
+		}
+		break;
 	case OP_DOT:
+		a = _compile(dest + 2, subtree->childs[0], code, true, jit);
 		c = getConstPos(code, subtree->childs[1]->Node.var);
 		PUSHCODE(Bagel_BC::BC_LOADCONST, subtree->childs[1]->Node.pos, dest + 1, c, 0);
-		a = _compile(dest + 2, subtree->childs[0], code, true, jit);
 		b = dest + 1;
+		break;
+	case OP_OPTIONAL_DOT:
+		{
+			beginOptionalChain();
+			a = _compile(dest + 2, subtree->childs[0], code, true, jit);
+			addOptionalJumpAddress(a);
+			c = getConstPos(code, subtree->childs[1]->Node.var);
+			PUSHCODE(Bagel_BC::BC_LOADCONST, subtree->childs[1]->Node.pos, dest + 1, c, 0);
+			b = dest + 1;
+			int d2 = code.code.size();
+			PUSHCODE(Bagel_BC::BC_JUMP, tree->Node.pos, 0, 0, 0);
+			endOptionalChain();
+			PUSHCODE(Bagel_BC::BC_RETURN, MINUS_POS, dest, 0, 0);
+			code.code[d2].A = code.code.size();
+		}
 		break;
 	case OP_ARRAY:
 		a = _compile(dest + 1, subtree->childs[0], code, true, jit);
 		b = _compile(dest + 2, subtree->childs[1], code, true, jit);
+		break;
+	case OP_OPTIONAL_ARR:
+		{
+			beginOptionalChain();
+			a = _compile(dest + 1, subtree->childs[0], code, true, jit);
+			addOptionalJumpAddress(a);
+			b = _compile(dest + 2, subtree->childs[1], code, true, jit);
+			int d2 = code.code.size();
+			PUSHCODE(Bagel_BC::BC_JUMP, tree->Node.pos, 0, 0, 0);
+			endOptionalChain();
+			PUSHCODE(Bagel_BC::BC_RETURN, MINUS_POS, dest, 0, 0);
+			code.code[d2].A = code.code.size();
+		}
+		break;
+	default:
+		//return void
+		PUSHCODE(Bagel_BC::BC_LOADVOID, MINUS_POS, dest, 0, 0);
+		PUSHCODE(Bagel_BC::BC_RETURN, MINUS_POS, dest, 0, 0);
 		break;
 	}
 	PUSHCODE(Bagel_BC::BC_CREATEPOINTER, MINUS_POS, dest, a, b);
