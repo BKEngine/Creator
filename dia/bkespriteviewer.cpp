@@ -20,8 +20,18 @@ BkeSpriteViewer::BkeSpriteViewer(DebugServer *debugServer, QWidget *parent) :
 	ui->splitter->setStretchFactor(1, 1);
 	scene = new QGraphicsScene(ui->graphicsView);
 	pixmapItem = new QGraphicsPixmapItem();
+	rectItem = new QGraphicsRectItem();
+	rectItem->setZValue(1);
+	QPen pen = rectItem->pen();
+	pen.setWidth(2);
+	pen.setColor(Qt::green);
+	rectItem->setPen(pen);
+
 	ui->graphicsView->setScene(scene);
 	scene->addItem(pixmapItem);
+	ui->comboBox->addItems(QStringList() << "白色" << "浅灰色" << "深灰色");
+	ui->comboBox->setCurrentIndex(0);
+
 	this->debugServer = debugServer;
 	Init();
 	connect(debugServer, &DebugServer::onDebugClientDisconnected, this, [this]() 
@@ -101,14 +111,23 @@ void BkeSpriteViewer::Clear()
 	ui->treeWidget->clear();
 }
 
-void BkeSpriteViewer::on_treeWidget_itemClicked(QTreeWidgetItem *item, int column)
+void BkeSpriteViewer::on_treeWidget_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
-	if (column != 0)
+	if (currentItem != current)
+	{
+		currentItem = current;
+	}
+	this->Refresh();
+}
+
+void BkeSpriteViewer::Refresh()
+{
+	if (!currentItem)
 		return;
 	this->setEnabled(false);
 	this->cursor().setShape(Qt::BusyCursor);
 	char data[6];
-	*((int32_t *)&data[0]) = item->data(0, Qt::UserRole).toInt();
+	*((int32_t *)&data[0]) = currentItem->data(0, Qt::UserRole).toInt();
 	*((bool *)&data[4]) = ui->checkBox->isChecked();
 	*((bool *)&data[5]) = ui->checkBox_2->isChecked();
 	QPointer<BkeSpriteViewer> self(this);
@@ -131,8 +150,49 @@ void BkeSpriteViewer::on_treeWidget_itemClicked(QTreeWidgetItem *item, int colum
 					QImage image((const uint8_t *)decompressed.constData(), width, height, QImage::Format_RGBA8888);
 					self->pixmapItem->setPixmap(QPixmap::fromImage(image));
 					self->scene->setSceneRect(image.rect());
+					self->rectItem->setRect(self->pixmapItem->boundingRect());
 				}
 			}
 		}
 	});
+}
+
+void BkeSpriteViewer::on_checkBox_toggled(bool checked)
+{
+	Refresh();
+}
+
+void BkeSpriteViewer::on_checkBox_2_toggled(bool checked)
+{
+	ui->checkBox->setEnabled(checked);
+	Refresh();
+}
+
+void BkeSpriteViewer::on_checkBox_3_toggled(bool checked)
+{
+	if (checked)
+		scene->addItem(rectItem);
+	else
+		scene->removeItem(rectItem);
+}
+
+void BkeSpriteViewer::on_comboBox_currentIndexChanged(int index)
+{
+	QBrush brush(Qt::SolidPattern);
+	switch (index)
+	{
+	case 0:
+		brush.setColor(Qt::white);
+		break;
+	case 1:
+		brush.setColor(QColor(0xBB, 0xBB, 0xBB));
+		break;
+	case 2:
+		brush.setColor(QColor(0x28, 0x28, 0x28));
+		break;
+	default:
+		brush.setColor(Qt::transparent);
+		break;
+	}
+	ui->graphicsView->setBackgroundBrush(brush);
 }
