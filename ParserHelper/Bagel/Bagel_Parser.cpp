@@ -3730,6 +3730,7 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 		}
 		break;
 	case OP_DOT + OP_COUNT:
+	case OP_OPTIONAL_DOT + OP_COUNT:
 		{
 			Bagel_StringHolder name;
 			if (tree->childs.size() > 0 && tree->childs[0])
@@ -3772,6 +3773,7 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 		}
 		break;
 	case OP_BRACKET:
+	case OP_OPTIONAL_CALL:
 		{
 			Bagel_Var v;
 			EXIST_CHILD_DO(0, v = _analysis(subtree, glo, thiz, false));
@@ -3794,6 +3796,7 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 		}
 		break;
 	case OP_ARRAY + OP_COUNT:
+	case OP_OPTIONAL_ARR + OP_COUNT:
 		{
 			auto arr = new Bagel_Array();
 			EXIST_CHILD_DOALL(arr->pushMember(_analysis(subtree, glo, thiz, false)));
@@ -3827,7 +3830,9 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 		}
 		break;
 	case OP_ARRAY:
+	case OP_OPTIONAL_ARR:
 	case OP_DOT:
+	case OP_OPTIONAL_DOT:
 		{
 			Bagel_Var v1;
 			Bagel_StringHolder name;
@@ -4409,6 +4414,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 		}
 		break;
 	case OP_BRACKET:
+	case OP_OPTIONAL_CALL:
 		{
 			EXIST_CHILD_DOALL(
 				if (_analysisVar(subtree, glo, thiz, pos, out, outvar, false))
@@ -4417,6 +4423,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 		}
 		break;
 	case OP_ARRAY + OP_COUNT:
+	case OP_OPTIONAL_ARR + OP_COUNT:
 		{
 			Bagel_Array *arr = new Bagel_Array();
 			EXIST_CHILD_DOALL(
@@ -4456,6 +4463,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 		}
 		break;
 	case OP_ARRAY:
+	case OP_OPTIONAL_ARR:
 		{
 			EXIST_CHILD_DOALL(
 				if (_analysisVar(subtree, glo, thiz, pos, out, outvar, false))
@@ -4464,6 +4472,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 		}
 		break;
 	case OP_DOT:
+	case OP_OPTIONAL_DOT:
 		{
 			EXIST_CHILD_DO(0,
 				if (_analysisVar(subtree, glo, thiz, pos, out, outvar, true))
