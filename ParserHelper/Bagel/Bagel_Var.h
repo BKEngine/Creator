@@ -263,18 +263,22 @@ public:
 			return forceAsBKEStr();
 		return _globalStructures.stringMap->allocateString(asString());
 	}
-	bool asBoolean() const;
+
+private:
 	int64_t _asInteger() const;
 	uint64_t _asUInteger() const;
 	double _asNumber() const;
-	wstring asWString() const;
 	StringVal _asString() const;
+	bool _canBeNumber() const;
+
+public:
+	bool asBoolean() const;
+	wstring asWString() const;
 	Bagel_Array *asArray() const;
 	Bagel_Dic *asDic() const;
 	Bagel_Function *asFunc() const;
 	Bagel_Class *asClass() const;
 	Bagel_ClassDef *asClassDef() const;
-	bool _canBeNumber() const;
 	inline bool isInteger() const
 	{
 		return vt == VAR_NUM && isInt(num);

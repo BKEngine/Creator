@@ -3832,11 +3832,13 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 		}
 		break;
 	case OP_ARRAY:
+	case OP_OPTIONAL_ARR:
 	case OP_DOT:
+	case OP_OPTIONAL_DOT:
 		{
 			Bagel_Var v1;
 			Bagel_StringHolder name;
-			EXIST_CHILD_DO(0, v1 = _analysis(subtree, glo, thiz, false));
+			EXIST_CHILD_DO(0, v1.forceSet(_analysis(subtree, glo, thiz, false)));
 			if (tree->childs.size() > 1 && tree->childs[1])
 			{
 				auto subtree = tree->childs[1];
