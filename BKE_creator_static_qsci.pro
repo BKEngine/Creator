@@ -155,7 +155,8 @@ SOURCES += ./main.cpp \
     TinyProcess\process.cpp \
     TinyProcess\process_unix.cpp \
     TinyProcess\process_win.cpp \
-    dia/bkespriteviewer.cpp
+    dia/bkespriteviewer.cpp \
+    dia/mainwindow.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -297,7 +298,8 @@ HEADERS  += \
     DebugServer.h \
     dia/ParserEditorUndoCommand.h \
     TinyProcess\process.hpp \
-    dia/bkespriteviewer.h
+    dia/bkespriteviewer.h \
+    dia/mainwindow.h
 
 RESOURCES += \
     source/source.qrc \
@@ -321,7 +323,8 @@ FORMS += \
     dia/openlabeldialog.ui \
     dia/gotofiledialog.ui \
     dia/autocompletelist.ui \
-    dia/bkespriteviewer.ui
+    dia/bkespriteviewer.ui \
+    dia/mainwindow.ui
 
 mac{
     QMAKE_INFO_PLIST = info-mac.plist

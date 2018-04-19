@@ -249,6 +249,9 @@
     <ClCompile Include="Debug\moc_projectwindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Debug\moc_QGraphicViewZoomer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Debug\moc_qsciabstractapis.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -308,6 +311,7 @@
     <ClCompile Include="dia\ParserEditorTreeItem.cpp" />
     <ClCompile Include="dia\ParserEditorTreeModel.cpp" />
     <ClCompile Include="dia\ParserEditorUndoCommand.cpp" />
+    <ClCompile Include="dia\QGraphicViewZoomer.cpp" />
     <ClCompile Include="dia\qnofocusitemdelegate.cpp" />
     <ClCompile Include="GeneratedFiles\qrc_res.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -497,6 +501,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Release\moc_projectwindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Release\moc_QGraphicViewZoomer.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Release\moc_qsciabstractapis.cpp">
@@ -691,6 +698,16 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
     <ClInclude Include="dia\ParserEditorUndoCommand.h" />
+    <CustomBuild Include="dia\QGraphicViewZoomer.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\debug" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o "$(ConfigurationName)\moc_%(Filename).cpp"  -DCXX11_REGEX -DBKE_CREATOR -D_WINDOWS -DUNICODE -DWIN32 -DQT -DSCI_LEXER -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -DNDEBUG -DSCINTILLA_QT -DQT_WEBSOCKETS_LIB "-I." "-I.\BKEscintilla" "-I.\BKEscintilla\lexlib" "-I.\BKEscintilla\include" "-I.\BKEscintilla\src" "-I.\BKEscintilla\Qt4Qt5" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I$(QTDIR)\include\QtANGLE" "-I$(QTDIR)\include\QtCore" "-I.\release" "-I.\GeneratedFiles" "-I.\dia" "-I$(QTDIR)\include\QtWebSockets"</Command>
+    </CustomBuild>
     <ClInclude Include="dia\qnofocusitemdelegate.h" />
     <ClInclude Include="EnumsComponent.h" />
     <ClInclude Include="GeneratedFiles\ui_autocompletelist.h" />
@@ -1554,6 +1571,7 @@ endlocal
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <SubType>Designer</SubType>
     </CustomBuild>
     <None Include="QPinyin\pinyin.txt.compress">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

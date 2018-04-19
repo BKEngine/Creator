@@ -1,7 +1,7 @@
 #ifndef BKESPRITEVIEWER_H
 #define BKESPRITEVIEWER_H
 
-#include <QDialog>
+#include <QMainWindow>
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 
@@ -11,7 +11,7 @@ class BkeSpriteViewer;
 
 class DebugServer;
 class QTreeWidgetItem;
-class BkeSpriteViewer : public QDialog
+class BkeSpriteViewer : public QMainWindow
 {
     Q_OBJECT
 
@@ -26,9 +26,12 @@ private slots:
 
     void on_checkBox_2_toggled(bool checked);
 
-    void on_checkBox_3_toggled(bool checked);
-
     void on_comboBox_currentIndexChanged(int index);
+
+    void on_action_toggled(bool arg1);
+
+signals:
+	void onNewImage();
 
 private:
     Ui::BkeSpriteViewer *ui;

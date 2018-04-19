@@ -4,13 +4,15 @@
 #include "Debugger/DebugServer.h"
 #include "ParserHelper/ParserHelper.h"
 #include "projectwindow.h"
+#include "QGraphicViewZoomer.h"
 
 #include <QPointer>
 #include <QImage>
+#include <QStackedLayout>
 #include "lz4/lz4.h"
 
 BkeSpriteViewer::BkeSpriteViewer(DebugServer *debugServer, QWidget *parent) :
-	QDialog(parent),
+	QMainWindow(parent),
     ui(new Ui::BkeSpriteViewer)
 {
 	setAttribute(Qt::WA_DeleteOnClose);
@@ -40,6 +42,9 @@ BkeSpriteViewer::BkeSpriteViewer(DebugServer *debugServer, QWidget *parent) :
 		this->setEnabled(false);
 	});
 	connect(debugServer, &DebugServer::onDebugClientConnected, this, &BkeSpriteViewer::Init);
+
+	QGraphicViewZoomer *zoomer = new QGraphicViewZoomer(ui->graphicsView);
+	connect(this, &BkeSpriteViewer::onNewImage, zoomer, &QGraphicViewZoomer::reset);
 }
 
 BkeSpriteViewer::~BkeSpriteViewer()
@@ -151,6 +156,7 @@ void BkeSpriteViewer::Refresh()
 					self->pixmapItem->setPixmap(QPixmap::fromImage(image));
 					self->scene->setSceneRect(image.rect());
 					self->rectItem->setRect(self->pixmapItem->boundingRect());
+					emit self->onNewImage();
 				}
 			}
 		}
@@ -166,14 +172,6 @@ void BkeSpriteViewer::on_checkBox_2_toggled(bool checked)
 {
 	ui->checkBox->setEnabled(checked);
 	Refresh();
-}
-
-void BkeSpriteViewer::on_checkBox_3_toggled(bool checked)
-{
-	if (checked)
-		scene->addItem(rectItem);
-	else
-		scene->removeItem(rectItem);
 }
 
 void BkeSpriteViewer::on_comboBox_currentIndexChanged(int index)
@@ -195,4 +193,12 @@ void BkeSpriteViewer::on_comboBox_currentIndexChanged(int index)
 		break;
 	}
 	ui->graphicsView->setBackgroundBrush(brush);
+}
+
+void BkeSpriteViewer::on_action_toggled(bool checked)
+{
+	if (checked)
+		scene->addItem(rectItem);
+	else
+		scene->removeItem(rectItem);
 }

@@ -751,6 +751,15 @@
     <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\xxhash.c">
       <Filter>lz4</Filter>
     </ClCompile>
+    <ClCompile Include="Debug\moc_QGraphicViewZoomer.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_QGraphicViewZoomer.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="dia\QGraphicViewZoomer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -1377,6 +1386,9 @@
       <Filter>Form Files</Filter>
     </CustomBuild>
     <CustomBuild Include="dia\bkespriteviewer.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="dia\QGraphicViewZoomer.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
