@@ -5,6 +5,7 @@
 #include "ParserHelper/ParserHelper.h"
 #include "projectwindow.h"
 #include "QGraphicViewZoomer.h"
+#include "bkespriteviewerinfo.h"
 
 #include <QPointer>
 #include <QImage>
@@ -28,6 +29,16 @@ BkeSpriteViewer::BkeSpriteViewer(DebugServer *debugServer, QWidget *parent) :
 	pen.setWidth(2);
 	pen.setColor(Qt::green);
 	rectItem->setPen(pen);
+
+	QStackedLayout *stackedLayout = new QStackedLayout(ui->widget->layout());
+	stackedLayout->setStackingMode(QStackedLayout::StackAll);
+	stackedLayout->setContentsMargins(0, 0, 0, 0);
+	stackedLayout->setMargin(0);
+	stackedLayout->addWidget(ui->graphicsView);
+	info = new BkeSpriteViewerInfo(ui->widget);
+	stackedLayout->addWidget(info);
+	stackedLayout->setCurrentWidget(info);
+	ui->widget->setLayout(stackedLayout);
 
 	ui->graphicsView->setScene(scene);
 	scene->addItem(pixmapItem);

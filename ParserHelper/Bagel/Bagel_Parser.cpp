@@ -4084,7 +4084,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 		}
 		if (getaddr)
 		{
-			outvar = new Bagel_Pointer(thiz, tree->Node.var, false);
+			outvar.forceSet(new Bagel_Pointer(thiz, tree->Node.var, false));
 		}
 		return true;
 	case OP_FUNCTION + OP_COUNT:

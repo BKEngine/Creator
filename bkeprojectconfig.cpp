@@ -7,7 +7,7 @@ BkeProjectConfig::BkeProjectConfig()
 	resolutionSize[0] = 800;
 	resolutionSize[1] = 600;
 	maxSaveDataNum = 10000;
-	saveDir = "SaveData"; 
+	saveDir = "SaveData/"; 
 	defaultFontSize = 24;
 	defaultFontColor = QBkeVariable(0xFFFFFF);
 	debugLevel = 3;
@@ -69,6 +69,8 @@ void BkeProjectConfig::readFile()
 		resolutionSize[1] = v["ResolutionSize"][1].value().toInt();
 		gameTitle = v["GameTitle"].value().toString();
 		saveDir = v["SaveDir"].value().toString();
+		if (saveDir.isEmpty())
+			saveDir = "SaveData/";
 		{
 			imageAutoSearchPath.clear();
 			if (!v["ImageAutoSearchPath"].isNull())

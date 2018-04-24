@@ -11,6 +11,7 @@ class BkeSpriteViewer;
 
 class DebugServer;
 class QTreeWidgetItem;
+class BkeSpriteViewerInfo;
 class BkeSpriteViewer : public QMainWindow
 {
     Q_OBJECT
@@ -40,6 +41,7 @@ private:
 	QGraphicsPixmapItem *pixmapItem;
 	QGraphicsRectItem *rectItem;
 	QTreeWidgetItem *currentItem = nullptr;
+	BkeSpriteViewerInfo *info;
 	void Init();
 	void Clear();
 	void Refresh();

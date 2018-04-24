@@ -222,8 +222,17 @@ bool BkeProject::OpenProject(const QString &name)
 
 	SortTree(Root);
 
+	if (config->defaultFontName.isEmpty())
+	{
+		config->defaultFontName = "SourceHanSansCN-Normal.otf";
+		config->writeFile();
+		BkeCreator::CopyStencil(pdir, QStringList() << "SourceHanSansCN-Normal.otf");
+	}
+
 	if (version < SAVE_VERSION)
+	{
 		WriteBkpFile();
+	}
 
 	return true;
 }
@@ -253,7 +262,7 @@ void BkeProject::MakeImport()
 	QString dirs = ProjectDir();
 
 	QStringList OutFilelist;
-	OutFilelist << "config.bkpsr" << "main.bkscr" << "macro.bkscr";
+	OutFilelist << "config.bkpsr" << "main.bkscr" << "macro.bkscr" << "SourceHanSansCN-Normal.otf";
 
 	//从模版中复制文件，如果没有则创建
 	for (int i = 0; i < OutFilelist.size(); i++){
@@ -265,6 +274,10 @@ void BkeProject::MakeImport()
 	config = new BkeProjectConfig(dirs, dirs + "/config.bkpsr");
 	config->readFile();
 	config->projectName = ProjectName();
+	config->resolutionSize[0] = 1280;
+	config->resolutionSize[1] = 720;
+	config->defaultFontColor = 0xffffff;
+	config->defaultFontName = "SourceHanSansCN-Normal.otf";
 	config->writeFile();
 
 	SetupConfig();
@@ -774,12 +787,13 @@ int BkeProject::addVersionData(QWidget *parent)
 void BkeProject::DeleteSaveData()
 {
 	auto saveDir = config->saveDir;
-	QDir(ProjectDir() + "/" + saveDir).removeRecursively();
+	QDir dir(ProjectDir() + "/" + saveDir);
+	if(dir.exists("GameLog.txt"))
+		dir.removeRecursively();
 }
 
 QString BkeProject::AllNameToName(const QString &allname)
 {
-
 	if (allname.startsWith("/") || (allname.length() > 1 && allname[1] == QChar(':'))){
 		if (allname.length() == ProjectDir().length()) return "";
 		else return  allname.right(allname.length() - ProjectDir().length());
