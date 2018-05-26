@@ -462,13 +462,13 @@ double Bagel_Var::_asNumber() const
 		return num;
 	case VAR_STR:
 		return forceAsBKEStr()->asNumber();
-	case VAR_PROP:
-		//if (static_cast<const Bagel_Prop *>(obj)->hasGet())
-		return forceAsProp()->get().asNumber();
-		//else
-		//	_throw(W("没有访问值的权限"));
-	case VAR_POINTER:
-		return forceAsPointer()->get().asNumber();
+	//case VAR_PROP:
+	//	//if (static_cast<const Bagel_Prop *>(obj)->hasGet())
+	//	return forceAsProp()->get().asNumber();
+	//	//else
+	//	//	_throw(W("没有访问值的权限"));
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().asNumber();
 	default:
 		_throw(W("无法转化为数值"));
 	}
@@ -494,13 +494,13 @@ int64_t Bagel_Var::_asInteger() const
 		return (int64_t)num;
 	case VAR_STR:
 		return (int64_t)forceAsBKEStr()->asNumber();
-	case VAR_PROP:
-		//if (static_cast<const Bagel_Prop *>(obj)->hasGet())
-		return (int64_t)(forceAsProp()->get().asNumber());
-		//else
-		//	_throw(W("没有访问值的权限"));
-	case VAR_POINTER:
-		return (int64_t)forceAsPointer()->get().asNumber();
+	//case VAR_PROP:
+	//	//if (static_cast<const Bagel_Prop *>(obj)->hasGet())
+	//	return (int64_t)(forceAsProp()->get().asNumber());
+	//	//else
+	//	//	_throw(W("没有访问值的权限"));
+	//case VAR_POINTER:
+	//	return (int64_t)forceAsPointer()->get().asNumber();
 	default:
 		_throw(W("无法转化为数值"));
 	}
@@ -516,13 +516,13 @@ uint64_t Bagel_Var::_asUInteger() const
 		return (uint64_t)num;
 	case VAR_STR:
 		return (uint64_t)forceAsBKEStr()->asNumber();
-	case VAR_PROP:
-		//if (static_cast<const Bagel_Prop *>(obj)->hasGet())
-		return (uint64_t)(forceAsProp()->get().asNumber());
-		//else
-		//	_throw(W("没有访问值的权限"));
-	case VAR_POINTER:
-		return (uint64_t)forceAsPointer()->get().asNumber();
+	//case VAR_PROP:
+	//	//if (static_cast<const Bagel_Prop *>(obj)->hasGet())
+	//	return (uint64_t)(forceAsProp()->get().asNumber());
+	//	//else
+	//	//	_throw(W("没有访问值的权限"));
+	//case VAR_POINTER:
+	//	return (uint64_t)forceAsPointer()->get().asNumber();
 	default:
 		_throw(W("无法转化为数值"));
 	}
@@ -543,13 +543,13 @@ bool Bagel_Var::_canBeNumber() const
 		return true;
 	case VAR_STR:
 		return forceAsBKEStr()->canBeNumber();
-	case VAR_PROP:
-		//if (static_cast<const Bagel_Prop *>(obj)->hasGet())
-		return forceAsProp()->get().canBeNumber();
-		//else
-		//	_throw(W("没有访问值的权限"));
-	case VAR_POINTER:
-		return forceAsPointer()->get().canBeNumber();
+	//case VAR_PROP:
+	//	//if (static_cast<const Bagel_Prop *>(obj)->hasGet())
+	//	return forceAsProp()->get().canBeNumber();
+	//	//else
+	//	//	_throw(W("没有访问值的权限"));
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().canBeNumber();
 	default:
 		return false;
 	}
@@ -616,7 +616,7 @@ StringVal Bagel_Var::saveShortString() const
 	case VAR_CLASS:
 		{
 			auto cla = forceAsClass();
-			return W("classdefine ") + cla->classname;
+			return W("class ") + cla->classname;
 		}
 		break;
 	case VAR_BYTECODE_P:
@@ -656,13 +656,13 @@ int64_t Bagel_Var::roundAsInteger() const
 		return round(num);
 	case VAR_STR:
 		return round(forceAsBKEStr()->asNumber());
-	case VAR_PROP:
-		//if (static_cast<const Bagel_Prop *>(obj)->hasGet())
-		return (int64_t)round(forceAsProp()->get().asNumber());
-		//else
-		//	_throw(W("没有访问值的权限"));
-	case VAR_POINTER:
-		return (int64_t)round(forceAsPointer()->get().asNumber());
+	//case VAR_PROP:
+	//	//if (static_cast<const Bagel_Prop *>(obj)->hasGet())
+	//	return (int64_t)round(forceAsProp()->get().asNumber());
+	//	//else
+	//	//	_throw(W("没有访问值的权限"));
+	//case VAR_POINTER:
+	//	return (int64_t)round(forceAsPointer()->get().asNumber());
 	default:
 		_throw(W("无法转化为数值"));
 	}
@@ -678,10 +678,10 @@ bool Bagel_Var::asBoolean() const
 		return !!asInteger();
 	case VAR_STR:
 		return !forceAsBKEStr()->empty() && forceAsBKEStr()->getConstStr() != W("false");
-	case VAR_PROP:
-		return forceAsProp()->get().asBoolean();
-	case VAR_POINTER:
-		return forceAsPointer()->get().asBoolean();
+	//case VAR_PROP:
+	//	return forceAsProp()->get().asBoolean();
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().asBoolean();
 	default:
 		return true;
 	}
@@ -702,10 +702,10 @@ wstring Bagel_Var::asWString() const
 		return Bagel_Number::toWString(num);
 	case VAR_STR:
 		return forceAsBKEStr()->getWString();
-	case VAR_PROP:
-		return forceAsProp()->get().asWString();
-	case VAR_POINTER:
-		return forceAsPointer()->get().asWString();
+	//case VAR_PROP:
+	//	return forceAsProp()->get().asWString();
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().asWString();
 	default:
 		_throw(W("无法转化为字符串"));
 	}
@@ -721,10 +721,10 @@ StringVal Bagel_Var::_asString() const
 		return Bagel_Number::toString(num);
 	case VAR_STR:
 		return forceAsBKEStr()->getConstStr();
-	case VAR_PROP:
-		return forceAsProp()->get().asString();
-	case VAR_POINTER:
-		return forceAsPointer()->get().asString();
+	//case VAR_PROP:
+	//	return forceAsProp()->get().asString();
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().asString();
 	default:
 		_throw(W("无法转化为字符串"));
 	}
@@ -739,8 +739,8 @@ Bagel_Array *Bagel_Var::asArray() const
 	{
 	case VAR_ARRAY:
 		return forceAsArray();
-	case VAR_POINTER:
-		return forceAsPointer()->get().asArray();
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().asArray();
 	default:
 		_throw(W("无法转化为数组"));
 	}
@@ -754,8 +754,8 @@ Bagel_Dic *Bagel_Var::asDic() const
 	{
 	case VAR_DIC:
 		return forceAsDic();
-	case VAR_POINTER:
-		return forceAsPointer()->get().asDic();
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().asDic();
 	default:
 		_throw(W("无法转化为字典"));
 	}
@@ -769,8 +769,8 @@ Bagel_Function *Bagel_Var::asFunc() const
 	{
 	case VAR_FUNC:
 		return forceAsFunc();
-	case VAR_POINTER:
-		return forceAsPointer()->get().asFunc();
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().asFunc();
 	default:
 		_throw(W("无法转化为方法"));
 	}
@@ -784,8 +784,8 @@ Bagel_Class *Bagel_Var::asClass() const
 	{
 	case VAR_CLASS:
 		return forceAsClass();
-	case VAR_POINTER:
-		return forceAsPointer()->get().asClass();
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().asClass();
 	default:
 		_throw(W("无法转化为类"));
 	}
@@ -797,8 +797,8 @@ Bagel_ClassDef * Bagel_Var::asClassDef() const
 	{
 	case VAR_CLASSDEF:
 		return forceAsClassDef();
-	case VAR_POINTER:
-		return forceAsPointer()->get().asClassDef();
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().asClassDef();
 	default:
 		_throw(W("无法转化为类"));
 	}
@@ -873,10 +873,10 @@ Bagel_Number Bagel_Var::getBKENum(Bagel_Number defaultValue) const
 	{
 	case VAR_NUM:
 		return num;
-	case VAR_PROP:
-		return forceAsProp()->get().getBKENum(defaultValue);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getBKENum(defaultValue);
+	//case VAR_PROP:
+	//	return forceAsProp()->get().getBKENum(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getBKENum(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -888,10 +888,10 @@ Bagel_String *Bagel_Var::getBKEStr(Bagel_String *defaultValue) const
 	{
 	case VAR_STR:
 		return forceAsBKEStr();
-	case VAR_PROP:
-		return forceAsProp()->get().getBKEStr(defaultValue);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getBKEStr(defaultValue);
+	//case VAR_PROP:
+	//	return forceAsProp()->get().getBKEStr(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getBKEStr(defaultValue);
 	default:
 		return defaultValue ? defaultValue : _globalStructures.stringMap->nullString;
 	}
@@ -903,10 +903,10 @@ float Bagel_Var::getFloat(float defaultValue /*= 0*/) const
 	{
 	case VAR_NUM:
 		return num;
-	case VAR_PROP:
-		return forceAsProp()->get().getFloat(defaultValue);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getFloat(defaultValue);
+	//case VAR_PROP:
+	//	return forceAsProp()->get().getFloat(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getFloat(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -918,10 +918,10 @@ double Bagel_Var::getDouble(double defaultValue) const
 	{
 	case VAR_NUM:
 		return num;
-	case VAR_PROP:
-		return forceAsProp()->get().getDouble(defaultValue);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getDouble(defaultValue);
+	//case VAR_PROP:
+	//	return forceAsProp()->get().getDouble(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getDouble(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -933,10 +933,10 @@ int64_t Bagel_Var::getInteger(int64_t defaultValue) const
 	{
 	case VAR_NUM:
 		return (int64_t)num;
-	case VAR_PROP:
-		return forceAsProp()->get().getInteger(defaultValue);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getInteger(defaultValue);
+	//case VAR_PROP:
+	//	return forceAsProp()->get().getInteger(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getInteger(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -948,10 +948,10 @@ StringVal Bagel_Var::getString(const StringVal & defaultValue) const
 	{
 	case VAR_STR:
 		return forceAsBKEStr()->getConstStr();
-	case VAR_PROP:
-		return forceAsProp()->get().getString(defaultValue);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getString(defaultValue);
+	//case VAR_PROP:
+	//	return forceAsProp()->get().getString(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getString(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -963,10 +963,10 @@ wstring Bagel_Var::getWString(const wstring &defaultValue) const
 	{
 	case VAR_STR:
 		return forceAsBKEStr()->getWString();
-	case VAR_PROP:
-		return forceAsProp()->get().getWString(defaultValue);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getWString(defaultValue);
+	//case VAR_PROP:
+	//	return forceAsProp()->get().getWString(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getWString(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -982,10 +982,10 @@ bool Bagel_Var::getBoolean(bool defaultValue) const
 		return !!(int64_t)num;
 	case VAR_STR:
 		return !forceAsBKEStr()->getConstStr().empty() && forceAsBKEStr()->getConstStr() != W("false");
-	case VAR_PROP:
-		return forceAsProp()->get().getBoolean(defaultValue);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getBoolean(defaultValue);
+	//case VAR_PROP:
+	//	return forceAsProp()->get().getBoolean(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getBoolean(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -1000,8 +1000,8 @@ Bagel_Array *Bagel_Var::getArray(Bagel_Array *defaultValue) const
 		//Bagel_Prop get出来的是临时变量
 		//case VAR_PROP:
 		//	return forceAsProp()->get().getArray(defaultValue);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getArray(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getArray(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -1013,8 +1013,8 @@ Bagel_Dic *Bagel_Var::getDic(Bagel_Dic *defaultValue) const
 	{
 	case VAR_DIC:
 		return static_cast<Bagel_Dic*>(obj);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getDic(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getDic(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -1026,8 +1026,8 @@ Bagel_Function *Bagel_Var::getFunc(Bagel_Function *defaultValue) const
 	{
 	case VAR_FUNC:
 		return static_cast<Bagel_Function*>(obj);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getFunc(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getFunc(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -1039,8 +1039,8 @@ Bagel_Class *Bagel_Var::getClass(Bagel_Class *defaultValue) const
 	{
 	case VAR_CLASS:
 		return static_cast<Bagel_Class*>(obj);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getClass(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getClass(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -1054,8 +1054,8 @@ Bagel_Closure *Bagel_Var::getClosure(Bagel_Closure *defaultValue) const
 	case VAR_CLASS:
 	case VAR_CLASSDEF:
 		return static_cast<Bagel_Closure*>(obj);
-	case VAR_POINTER:
-		return forceAsPointer()->get().getClosure(defaultValue);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getClosure(defaultValue);
 	default:
 		return defaultValue;
 	}
@@ -1069,6 +1069,74 @@ Bagel_Prop *Bagel_Var::getProp(Bagel_Prop *defaultValue) const
 		return static_cast<Bagel_Prop*>(obj);
 	default:
 		return defaultValue;
+	}
+}
+
+Bagel_Pointer * Bagel_Var::getPointer(Bagel_Pointer * defaultValue) const
+{
+	switch (vt)
+	{
+	case VAR_POINTER:
+		return static_cast<Bagel_Pointer*>(obj);
+	default:
+		return defaultValue;
+	}
+}
+
+Bagel_Var Bagel_Var::getValue() const
+{
+	switch (vt)
+	{
+	case VAR_PROP:
+		return forceAsProp()->get().getValue();
+	case VAR_POINTER:
+		return forceAsPointer()->get().getValue();
+	default:
+		return *this;
+	}
+}
+
+void Bagel_Var::setValue(const Bagel_Var & v)
+{
+	switch (vt)
+	{
+	case VAR_PROP:
+		forceAsProp()->set(v);
+		break;
+	case VAR_POINTER:
+		forceAsPointer()->set(v);
+		break;
+	default:
+		*this = v;
+		break;
+	}
+}
+
+Bagel_Var Bagel_Var::getPointerValue() const
+{
+	switch (vt)
+	{
+	case VAR_PROP:
+		return Bagel_Var();
+	case VAR_POINTER:
+		return forceAsPointer()->getWithoutProp();
+	default:
+		return *this;
+	}
+}
+
+void Bagel_Var::setPointerValue(const Bagel_Var & v)
+{
+	switch (vt)
+	{
+	case VAR_PROP:
+		break;
+	case VAR_POINTER:
+		forceAsPointer()->setWithoutProp(v);
+		break;
+	default:
+		*this = v;
+		break;
 	}
 }
 
@@ -1212,21 +1280,21 @@ void Bagel_Var::setMember(const Bagel_Var &str, const Bagel_Var & v)
 
 Bagel_Var& Bagel_Var::operator = (int16_t v)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		forceAsProp()->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	forceAsProp()->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(W("常量不能赋值"));
 	clear();
@@ -1237,21 +1305,21 @@ Bagel_Var& Bagel_Var::operator = (int16_t v)
 
 Bagel_Var& Bagel_Var::operator = (uint16_t v)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(W("常量不能赋值"));
 	clear();
@@ -1262,21 +1330,21 @@ Bagel_Var& Bagel_Var::operator = (uint16_t v)
 
 Bagel_Var& Bagel_Var::operator = (int32_t v)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(W("常量不能赋值"));
 	clear();
@@ -1287,21 +1355,21 @@ Bagel_Var& Bagel_Var::operator = (int32_t v)
 
 Bagel_Var& Bagel_Var::operator = (uint32_t v)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(L"常量不能赋值");
 	clear();
@@ -1312,21 +1380,21 @@ Bagel_Var& Bagel_Var::operator = (uint32_t v)
 
 Bagel_Var& Bagel_Var::operator = (int64_t v)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(L"没有赋值的权限");
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(L"没有赋值的权限");
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(L"常量不能赋值");
 	clear();
@@ -1337,21 +1405,21 @@ Bagel_Var& Bagel_Var::operator = (int64_t v)
 
 Bagel_Var& Bagel_Var::operator = (double v)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(L"没有赋值的权限");
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(L"没有赋值的权限");
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(L"常量不能赋值");
 	clear();
@@ -1362,21 +1430,21 @@ Bagel_Var& Bagel_Var::operator = (double v)
 
 Bagel_Var& Bagel_Var::operator = (float v)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(L"没有赋值的权限");
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(L"没有赋值的权限");
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(L"常量不能赋值");
 	clear();
@@ -1387,21 +1455,21 @@ Bagel_Var& Bagel_Var::operator = (float v)
 
 Bagel_Var& Bagel_Var::operator = (const wchar_t *str)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(str);
-		return *this;
-		//}
-		//else
-		//	_throw(L"没有赋值的权限");
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(str);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(str);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(L"没有赋值的权限");
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(str);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(L"常量不能赋值");
 	clear();
@@ -1412,21 +1480,21 @@ Bagel_Var& Bagel_Var::operator = (const wchar_t *str)
 
 Bagel_Var& Bagel_Var::operator = (const char16_t *str)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(str);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(str);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(str);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(str);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(W("常量不能赋值"));
 	clear();
@@ -1437,21 +1505,21 @@ Bagel_Var& Bagel_Var::operator = (const char16_t *str)
 
 Bagel_Var& Bagel_Var::operator = (const wstring &str)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(str);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(str);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(str);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(str);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(W("常量不能赋值"));
 	clear();
@@ -1462,21 +1530,21 @@ Bagel_Var& Bagel_Var::operator = (const wstring &str)
 
 Bagel_Var& Bagel_Var::operator = (Bagel_StringHolder v)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(W("常量不能赋值"));
 	clear();
@@ -1501,33 +1569,33 @@ Bagel_Var& Bagel_Var::operator = (const Bagel_Var &v)
 	//	copyFrom(v);
 	//	return *this;
 	//}
-	if (v.getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(v.obj)->hasGet())
-		return operator = (v.forceAsProp()->get());
-		//else
-		//	_throw(W("没有访问值的权限"));
-	}
-	if (v.getType() == VAR_POINTER)
-	{
-		return operator = (v.forceAsPointer()->get());
-		return *this;
-	}
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (v.getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(v.obj)->hasGet())
+	//	return operator = (v.forceAsProp()->get());
+	//	//else
+	//	//	_throw(W("没有访问值的权限"));
+	//}
+	//if (v.getType() == VAR_POINTER)
+	//{
+	//	return operator = (v.forceAsPointer()->get());
+	//	return *this;
+	//}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(W("常量不能赋值"));
 
@@ -1540,33 +1608,33 @@ Bagel_Var& Bagel_Var::operator = (const Bagel_Var &v)
 
 Bagel_Var& Bagel_Var::operator = (Bagel_Var &&v)
 {
-	if (v.getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(v.obj)->hasGet())
-		return operator = (v.forceAsProp()->get());
-		//else
-		//	_throw(W("没有访问值的权限"));
-	}
-	if (v.getType() == VAR_POINTER)
-	{
-		return operator = (v.forceAsPointer()->get());
-		return *this;
-	}
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		forceAsProp()->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (v.getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(v.obj)->hasGet())
+	//	return operator = (v.forceAsProp()->get());
+	//	//else
+	//	//	_throw(W("没有访问值的权限"));
+	//}
+	//if (v.getType() == VAR_POINTER)
+	//{
+	//	return operator = (v.forceAsPointer()->get());
+	//	return *this;
+	//}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	forceAsProp()->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(W("常量不能赋值"));
 	//num = std::move(v.num);
@@ -1581,21 +1649,21 @@ Bagel_Var& Bagel_Var::operator = (Bagel_Var &&v)
 
 Bagel_Var& Bagel_Var::operator = (Bagel_Object *v)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(v);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(v);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(v);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(v);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(W("常量不能赋值"));
 	if (!v)
@@ -1614,21 +1682,21 @@ Bagel_Var& Bagel_Var::operator = (Bagel_Object *v)
 
 Bagel_Var& Bagel_Var::operator = (Bagel_NativeFunction func)
 {
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasSet())
-		//{
-		static_cast<Bagel_Prop*>(obj)->set(func);
-		return *this;
-		//}
-		//else
-		//	_throw(W("没有赋值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		forceAsPointer()->set(func);
-		return *this;
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasSet())
+	//	//{
+	//	static_cast<Bagel_Prop*>(obj)->set(func);
+	//	return *this;
+	//	//}
+	//	//else
+	//	//	_throw(W("没有赋值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	forceAsPointer()->set(func);
+	//	return *this;
+	//}
 	//if (!isVar())
 	//	_throw(W("常量不能赋值"));
 	clear();
@@ -1674,12 +1742,12 @@ Bagel_Var Bagel_Var::operator + (const Bagel_Var &v) const
 			}
 			_throw(W("字典的加法操作需要右操作数为一个字典。"));
 		}
-	case VAR_PROP:
-		//if (!static_cast<Bagel_Prop*>(obj)->hasGet())
-		//	_throw(W("没有访问值的权限"));
-		return forceAsProp()->get() + v;
-	case VAR_POINTER:
-		return forceAsPointer()->get() + v;
+	//case VAR_PROP:
+	//	//if (!static_cast<Bagel_Prop*>(obj)->hasGet())
+	//	//	_throw(W("没有访问值的权限"));
+	//	return forceAsProp()->get() + v;
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get() + v;
 	default:
 		_throw(W("不支持加法操作"));
 	}
@@ -1703,12 +1771,12 @@ Bagel_Var Bagel_Var::operator + (const wstring &v) const
 		}
 	case VAR_DIC:
 		_throw(W("字典的加法操作需要右操作数为一个字典。"));
-	case VAR_PROP:
-		//if (!static_cast<Bagel_Prop*>(obj)->hasGet())
-		//	_throw(L"没有访问值的权限");
-		return forceAsProp()->get() + v;
-	case VAR_POINTER:
-		return forceAsPointer()->get() + v;
+	//case VAR_PROP:
+	//	//if (!static_cast<Bagel_Prop*>(obj)->hasGet())
+	//	//	_throw(L"没有访问值的权限");
+	//	return forceAsProp()->get() + v;
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get() + v;
 	default:
 		_throw(W("不支持加法操作"));
 	}
@@ -1732,12 +1800,12 @@ Bagel_Var Bagel_Var::operator + (double v) const
 		}
 	case VAR_DIC:
 		_throw(W("字典的加法操作需要右操作数为一个字典。"));
-	case VAR_PROP:
-		//if (!static_cast<Bagel_Prop*>(obj)->hasGet())
-		//	_throw(W("没有访问值的权限"));
-		return forceAsProp()->get() + v;
-	case VAR_POINTER:
-		return forceAsPointer()->get() + v;
+	//case VAR_PROP:
+	//	//if (!static_cast<Bagel_Prop*>(obj)->hasGet())
+	//	//	_throw(W("没有访问值的权限"));
+	//	return forceAsProp()->get() + v;
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get() + v;
 	default:
 		_throw(W("不支持加法操作"));
 	}
@@ -1788,12 +1856,12 @@ Bagel_Var Bagel_Var::operator - (const Bagel_Var &v) const
 			}
 			return v2;
 		}
-	case VAR_PROP:
-		//if (!static_cast<Bagel_Prop*>(obj)->hasGet())
-		//	_throw(W("没有访问值的权限"));
-		return forceAsProp()->get() - v;
-	case VAR_POINTER:
-		return forceAsPointer()->get() - v;
+	//case VAR_PROP:
+	//	//if (!static_cast<Bagel_Prop*>(obj)->hasGet())
+	//	//	_throw(W("没有访问值的权限"));
+	//	return forceAsProp()->get() - v;
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get() - v;
 	default:
 		_throw(W("不支持减法操作"));
 	}
@@ -1821,12 +1889,12 @@ Bagel_Var Bagel_Var::operator - (double v) const
 			static_cast<Bagel_Dic *>(v2.obj)->deleteMemberIndex(_globalStructures.stringMap->allocateString(bkpInt2Str(v)));
 			return v2;
 		}
-	case VAR_PROP:
-		//if (!static_cast<Bagel_Prop*>(obj)->hasGet())
-		//	_throw(W("没有访问值的权限"));
-		return forceAsProp()->get() - v;
-	case VAR_POINTER:
-		return forceAsPointer()->get() - v;
+	//case VAR_PROP:
+	//	//if (!static_cast<Bagel_Prop*>(obj)->hasGet())
+	//	//	_throw(W("没有访问值的权限"));
+	//	return forceAsProp()->get() - v;
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get() - v;
 	default:
 		_throw(W("不支持减法操作"));
 	}
@@ -1868,20 +1936,20 @@ Bagel_Var& Bagel_Var::operator += (const Bagel_Var &v)
 			return *this;
 		}
 		_throw(W("字典的加法操作需要右操作数为一个字典。"));
-	case VAR_PROP:
-		{
-			auto &&p = static_cast<Bagel_Prop*>(obj);
-			//if (!p->hasGet())
-			//	_throw(W("没有访问值的权限"));
-			//if (!p->hasSet())
-			//	_throw(W("没有修改值的权限"));
-			if (p->hasGet() && p->hasSet())
-				p->set(p->get() + v);
-			return *this;
-		}
-	case VAR_POINTER:
-		forceAsPointer()->get() += v;
-		return *this;
+	//case VAR_PROP:
+	//	{
+	//		auto &&p = static_cast<Bagel_Prop*>(obj);
+	//		//if (!p->hasGet())
+	//		//	_throw(W("没有访问值的权限"));
+	//		//if (!p->hasSet())
+	//		//	_throw(W("没有修改值的权限"));
+	//		if (p->hasGet() && p->hasSet())
+	//			p->set(p->get() + v);
+	//		return *this;
+	//	}
+	//case VAR_POINTER:
+	//	forceAsPointer()->get() += v;
+	//	return *this;
 	default:
 		_throw(W("不支持加法操作"));
 	}
@@ -1931,20 +1999,20 @@ Bagel_Var& Bagel_Var::operator -= (const Bagel_Var &v)
 			}
 			return *this;
 		}
-	case VAR_PROP:
-		{
-			auto &&p = static_cast<Bagel_Prop*>(obj);
-			//if (!p->hasGet())
-			//	_throw(W("没有访问值的权限"));
-			//if (!p->hasSet())
-			//	_throw(W("没有修改值的权限"));
-			if (p->hasGet() && p->hasSet())
-				p->set(p->get() - v);
-			return *this;
-		}
-	case VAR_POINTER:
-		forceAsPointer()->get() -= v;
-		return *this;
+	//case VAR_PROP:
+	//	{
+	//		auto &&p = static_cast<Bagel_Prop*>(obj);
+	//		//if (!p->hasGet())
+	//		//	_throw(W("没有访问值的权限"));
+	//		//if (!p->hasSet())
+	//		//	_throw(W("没有修改值的权限"));
+	//		if (p->hasGet() && p->hasSet())
+	//			p->set(p->get() - v);
+	//		return *this;
+	//	}
+	//case VAR_POINTER:
+	//	forceAsPointer()->get() -= v;
+	//	return *this;
 	default:
 		_throw(W("不支持减法操作"));
 	}
@@ -1978,8 +2046,8 @@ Bagel_Var& Bagel_Var::operator [] (const Bagel_Var &v) const
 		}
 	case VAR_CLASSDEF:
 		return forceAsClassDef()->getClassMemberAddr(v);
-	case VAR_POINTER:
-		return forceAsPointer()->get().operator [](v);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().operator [](v);
 	default:
 		_throw(W("不支持的运算"));
 	}
@@ -2010,8 +2078,8 @@ Bagel_Var& Bagel_Var::operator [] (Bagel_StringHolder v) const
 		}
 	case VAR_CLASSDEF:
 		return forceAsClassDef()->getClassMemberAddr(v);
-	case VAR_POINTER:
-		return forceAsPointer()->get().operator [](v);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().operator [](v);
 	default:
 		_throw(W("不支持的运算"));
 	}
@@ -2042,8 +2110,8 @@ Bagel_Var & Bagel_Var::operator[](const Bagel_String * v) const
 		}
 	case VAR_CLASSDEF:
 		return forceAsClassDef()->getClassMemberAddr(v);
-	case VAR_POINTER:
-		return forceAsPointer()->get().operator [](v);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().operator [](v);
 	default:
 		_throw(W("不支持的运算"));
 	}
@@ -2074,8 +2142,8 @@ Bagel_Var& Bagel_Var::operator [] (const wstring &v) const
 		}
 	case VAR_CLASSDEF:
 		return forceAsClassDef()->getClassMemberAddr(v);
-	case VAR_POINTER:
-		return forceAsPointer()->get().operator [](v);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().operator [](v);
 	default:
 		_throw(W("不支持的运算"));
 	}
@@ -2106,8 +2174,8 @@ Bagel_Var& Bagel_Var::operator [] (const u16string &v) const
 		}
 	case VAR_CLASSDEF:
 		return forceAsClassDef()->getClassMemberAddr(v);
-	case VAR_POINTER:
-		return forceAsPointer()->get().operator [](v);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().operator [](v);
 	default:
 		_throw(W("不支持的运算"));
 	}
@@ -2123,8 +2191,8 @@ Bagel_Var Bagel_Var::getMid(int32_t *start, int32_t *stop, int32_t step)
 		//if (static_cast<Bagel_Prop*>(obj)->hasGet())
 		return forceAsProp()->get().getMid(start, stop, step);
 		//_throw(W("没有访问值的权限"));
-	case VAR_POINTER:
-		return forceAsPointer()->get().getMid(start, stop, step);
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getMid(start, stop, step);
 	case VAR_ARRAY:
 		{
 			Bagel_Array *v = static_cast<Bagel_Array*>(obj);
@@ -2264,14 +2332,14 @@ bool Bagel_Var::operator == (const Bagel_Var &v) const
 
 bool Bagel_Var::strictEqual(const Bagel_Var &v) const
 {
-	if (getType() == VAR_PROP)
-	{
-		return forceAsProp()->get().strictEqual(v);
-	}
-	if (v.getType() == VAR_PROP)
-	{
-		return v.forceAsProp()->get().strictEqual(*this);
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	return forceAsProp()->get().strictEqual(v);
+	//}
+	//if (v.getType() == VAR_PROP)
+	//{
+	//	return v.forceAsProp()->get().strictEqual(*this);
+	//}
 	//if (getType() == VAR_POINTER)
 	//{
 	//	return forceAsPointer()->get().strictEqual(v);
@@ -2297,14 +2365,14 @@ bool Bagel_Var::strictEqual(const Bagel_Var &v) const
 
 bool Bagel_Var::normalEqual(const Bagel_Var & v) const
 {
-	if (getType() == VAR_PROP)
-	{
-		return forceAsProp()->get().normalEqual(v);
-	}
-	if (v.getType() == VAR_PROP)
-	{
-		return v.forceAsProp()->get().normalEqual(*this);
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	return forceAsProp()->get().normalEqual(v);
+	//}
+	//if (v.getType() == VAR_PROP)
+	//{
+	//	return v.forceAsProp()->get().normalEqual(*this);
+	//}
 	if (isVoid())
 		return v.equalToVoid();
 	if (v.isVoid())
@@ -2323,10 +2391,12 @@ bool Bagel_Var::normalEqual(const Bagel_Var & v) const
 	return obj == v.obj;
 }
 
-#define HANDLE_PROP(a) if(getType()==VAR_PROP) return ((Bagel_Prop*)obj)->get() a v;\
-			 if(v.getType()==VAR_PROP) return (*this) a ((Bagel_Prop*)v.obj)->get();\
+//#define HANDLE_PROP(a) if(getType()==VAR_PROP) return ((Bagel_Prop*)obj)->get() a v;\
+//			 if(v.getType()==VAR_PROP) return (*this) a ((Bagel_Prop*)v.obj)->get();\
 			 //if(getType()==VAR_POINTER) return ((Bagel_Pointer*)obj)->get() a v;\
 			 //if(v.getType()==VAR_POINTER) return (*this) a ((Bagel_Pointer*)v.obj)->get();
+
+#define HANDLE_PROP(a) 
 
 
 bool Bagel_Var::operator < (const Bagel_Var &v) const
@@ -2349,14 +2419,14 @@ bool Bagel_Var::operator > (const Bagel_Var &v) const
 
 Bagel_Var Bagel_Var::getAllDots() const
 {
-	if (getType() == VAR_PROP)
-	{
-		return forceAsProp()->get().getAllDots();
-	}
-	if (getType() == VAR_POINTER)
-	{
-		return forceAsPointer()->get().getAllDots();
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	return forceAsProp()->get().getAllDots();
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	return forceAsPointer()->get().getAllDots();
+	//}
 	if (getType() != VAR_CLASS)
 	{
 		if (getType() == VAR_NONE)
@@ -2398,7 +2468,7 @@ Bagel_Var Bagel_Var::getAllDots() const
 	return arr;
 }
 
-bool Bagel_Var::dotFunc(Bagel_StringHolder  funcname, Bagel_Var &out) const
+bool Bagel_Var::dotFunc(Bagel_StringHolder funcname, Bagel_Var &out) const
 {
 	if (getType() != VAR_CLASS && getType() != VAR_CLO)
 	{
@@ -2431,14 +2501,16 @@ bool Bagel_Var::dotFunc(Bagel_StringHolder  funcname, Bagel_Var &out) const
 
 Bagel_Var Bagel_Var::dotValue(const Bagel_Var &funcname) const
 {
-	if (getType() == VAR_PROP)
-	{
-		return static_cast<Bagel_Prop*>(obj)->get().dotValue(funcname);
-	}
-	if (getType() == VAR_POINTER)
-	{
-		return forceAsPointer()->get().dotValue(funcname);
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	return static_cast<Bagel_Prop*>(obj)->get().dotValue(funcname);
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	return forceAsPointer()->get().dotValue(funcname);
+	//}
+	if (isVoid())
+		return Bagel_Var();
 	if (getType() == VAR_CLO)
 		return static_cast<Bagel_Closure*>(obj)->getMember(funcname);
 	//xxx.yyy
@@ -2481,10 +2553,10 @@ Bagel_Var& Bagel_Var::dotAddr(Bagel_StringHolder funcname)
 	{
 		_throw(W("property不能直接用于dot赋值"));
 	}
-	if (getType() == VAR_POINTER)
-	{
-		return forceAsPointer()->get().dotAddr(funcname);
-	}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	return forceAsPointer()->get().dotAddr(funcname);
+	//}
 	if (getType() == VAR_CLO)
 		return static_cast<Bagel_Closure*>(obj)->getMember(funcname);
 	if (getType() != VAR_CLASS)
@@ -2539,10 +2611,10 @@ int32_t Bagel_Var::getCount() const
 		return static_cast<Bagel_Dic *>(obj)->getCount();
 	case VAR_CLO:
 		return static_cast<Bagel_Closure*>(obj)->getNonVoidCount();
-	case VAR_PROP:
-		return forceAsProp()->get().getCount();
-	case VAR_POINTER:
-		return forceAsPointer()->get().getCount();
+	//case VAR_PROP:
+	//	return forceAsProp()->get().getCount();
+	//case VAR_POINTER:
+	//	return forceAsPointer()->get().getCount();
 	default:
 		_throw(W("该变量无方法getCount"));
 	}
@@ -2551,28 +2623,28 @@ int32_t Bagel_Var::getCount() const
 bool Bagel_Var::equals(const Bagel_Var &v) const
 {
 	static Bagel_StringHolder _equals(W("equals"));
-	if (getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(obj)->hasGet())
-		return forceAsProp()->get().equals(v);
-		//else
-		//	_throw(W("没有访问值的权限"));
-	}
-	if (v.getType() == VAR_PROP)
-	{
-		//if (static_cast<Bagel_Prop*>(v.obj)->hasGet())
-		return this->equals(v.forceAsProp()->get());
-		//else
-		//	_throw(W("没有访问值的权限"));
-	}
-	if (getType() == VAR_POINTER)
-	{
-		return forceAsPointer()->get().equals(v);
-	}
-	if (v.getType() == VAR_POINTER)
-	{
-		return this->equals(v.forceAsPointer()->get());
-	}
+	//if (getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(obj)->hasGet())
+	//	return forceAsProp()->get().equals(v);
+	//	//else
+	//	//	_throw(W("没有访问值的权限"));
+	//}
+	//if (v.getType() == VAR_PROP)
+	//{
+	//	//if (static_cast<Bagel_Prop*>(v.obj)->hasGet())
+	//	return this->equals(v.forceAsProp()->get());
+	//	//else
+	//	//	_throw(W("没有访问值的权限"));
+	//}
+	//if (getType() == VAR_POINTER)
+	//{
+	//	return forceAsPointer()->get().equals(v);
+	//}
+	//if (v.getType() == VAR_POINTER)
+	//{
+	//	return this->equals(v.forceAsPointer()->get());
+	//}
 	if (getType() == VAR_NONE)
 		return v.equalToVoid();
 	if (v.getType() == VAR_NONE)

@@ -377,7 +377,7 @@ public:
 #endif
 
 	//for analysis
-	void getKeywordsWithPrefix(std::map<StringVal, PromptType>& result, const StringVal &prefix);
+	void getKeywordsWithPrefix(std::map<StringVal, PromptType>& result, const StringVal &prefix, bool is_head);
 
 	/// <summary>
 	/// 双引号和单引号字符串解析使用krkr的规则。

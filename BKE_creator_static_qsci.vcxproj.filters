@@ -739,18 +739,6 @@
     <ClCompile Include="Release\moc_bkespriteviewer.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4.c">
-      <Filter>lz4</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4frame.c">
-      <Filter>lz4</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4hc.c">
-      <Filter>lz4</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\xxhash.c">
-      <Filter>lz4</Filter>
-    </ClCompile>
     <ClCompile Include="Debug\moc_QGraphicViewZoomer.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
@@ -768,6 +756,18 @@
     </ClCompile>
     <ClCompile Include="dia\bkespriteviewerinfo.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lz4\lz4.c">
+      <Filter>lz4</Filter>
+    </ClCompile>
+    <ClCompile Include="lz4\lz4frame.c">
+      <Filter>lz4</Filter>
+    </ClCompile>
+    <ClCompile Include="lz4\lz4hc.c">
+      <Filter>lz4</Filter>
+    </ClCompile>
+    <ClCompile Include="lz4\xxhash.c">
+      <Filter>lz4</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1287,23 +1287,23 @@
     <ClInclude Include="GeneratedFiles\ui_bkespriteviewer.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4.h">
-      <Filter>lz4</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4frame.h">
-      <Filter>lz4</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4frame_static.h">
-      <Filter>lz4</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\lz4hc.h">
-      <Filter>lz4</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\BKEngine\BKEngine\prebuilt\lz4\lib\xxhash.h">
-      <Filter>lz4</Filter>
-    </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_bkespriteviewerinfo.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4\lz4.h">
+      <Filter>lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4\lz4frame.h">
+      <Filter>lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4\lz4frame_static.h">
+      <Filter>lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4\lz4hc.h">
+      <Filter>lz4</Filter>
+    </ClInclude>
+    <ClInclude Include="lz4\xxhash.h">
+      <Filter>lz4</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

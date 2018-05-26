@@ -54,8 +54,12 @@ static void __cdecl QuerySpeCmdListF(void *opaque, const char16_t *name, uint32_
 //	{&CmdAnimateLoopModeEnumList, ENUM_ANIMATE_LOOP},
 //};
 
+static bool isLoadedCmd = false;
+
 bool CmdListLoader::load()
 {
+	if (isLoadedCmd)
+		return true;
 #ifndef Q_OS_MAC
 	QLibrary library(BKE_CURRENT_DIR + "/tool/" + "BKECmdList");
 #else
@@ -87,5 +91,6 @@ bool CmdListLoader::load()
 	//{
 	//	QueryEnumList(QueryEnumListF, s.type, s.list);
 	//}
+	isLoadedCmd = true;
 	return true;
 }

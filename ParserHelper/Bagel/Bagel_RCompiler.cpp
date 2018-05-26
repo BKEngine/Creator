@@ -36,18 +36,18 @@ if(curcode->varPosInfo)  \
 #define beginOptionalChain() optionalChainDepth++;
 
 #define addOptionalJumpAddress(x) \
-	jumpCodeIndex.push_back(code.code.size()); \
-	PUSHCODE(Bagel_BC::BC_JUMPVOIDANDSET, pos, 0, x, 0);
+	{jumpCodeIndex.push_back(code.code.size()); \
+	PUSHCODE(Bagel_BC::BC_JUMPVOIDANDSET, pos, 0, x, 0);}
 
 #define endOptionalChain() \
-	optionalChainDepth--; \
+	{optionalChainDepth--; \
 	if (optionalChainDepth == 0) \
 	{ \
 		int jd = code.code.size(); \
 		for(auto &idx:jumpCodeIndex)\
 			code.code[idx].A=jd, code.code[idx].C=dest; \
 		jumpCodeIndex.clear(); \
-	}
+	}}
 
 int Bagel_ReleaseCompiler::getVarPos(Bagel_StringHolder str, int codepos)
 {
@@ -1938,9 +1938,12 @@ int Bagel_ReleaseCompiler::_compile(int dest, Bagel_AST * subtree, Bagel_ByteCod
 		if (subtree->childs[0]->Node.opcode == OP_DOT || subtree->childs[0]->Node.opcode == OP_OPTIONAL_DOT)
 		{
 			d1 = _compile(dest, subtree->childs[0]->childs[0], code, true, jit);
+			b = code.code.size();
+			PUSHCODE(Bagel_BC::BC_JUMPVOID, subtree->childs[0]->Node.pos, 0, d1, 0);
 			a = getConstPos(code, subtree->childs[0]->childs[1]->Node.var);
 			PUSHCODE(Bagel_BC::BC_LOADCONST, subtree->childs[0]->childs[1]->Node.pos, dest + 1, a, 0);
 			PUSHCODE(Bagel_BC::BC_DELETE, pos, d1, dest + 1, 0);
+			code.code[b].A = code.code.size();
 		}
 		else if (subtree->childs[0]->Node.opcode == OP_DOT + OP_COUNT)
 		{

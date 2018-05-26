@@ -842,11 +842,17 @@ void Bagel_Parser::readToken()
 	case L'?':
 		if (MatchFunc(W("?."), &curpos))
 		{
-			if (curpos[2] == '[')
+			if (curpos[0] == '[')
+			{
+				curpos++;
 				node.opcode = OP_OPTIONAL_ARR;
-			else if (curpos[2] == '(')
+			}
+			else if (curpos[0] == '(')
+			{
+				curpos++;
 				node.opcode = OP_OPTIONAL_CALL;
-			else if (curpos[2] >= '0' && curpos[2] <= '9')
+			}
+			else if (curpos[0] >= '0' && curpos[0] <= '9')
 				node.opcode = OP_CHOOSE;	//for xxx?.3:.4
 			else
 				node.opcode = OP_OPTIONAL_DOT;
@@ -3396,7 +3402,7 @@ void Bagel_Parser::unParse(Bagel_AST *tree, StringVal &res)
 #undef MAKE_TWO
 }
 
-void Bagel_Parser::getKeywordsWithPrefix(std::map<StringVal, PromptType>& result, const StringVal & prefix)
+void Bagel_Parser::getKeywordsWithPrefix(std::map<StringVal, PromptType>& result, const StringVal & prefix, bool is_head)
 {
 	for (auto &it : constmap)
 	{
@@ -3415,7 +3421,8 @@ void Bagel_Parser::getKeywordsWithPrefix(std::map<StringVal, PromptType>& result
 		{
 			if (prefix.empty() || !memcmp(it.first.c_str(), prefix.c_str(), 2 * prefix.length()))
 			{
-				//see constvar as keywords
+				if (!is_head && head[it.second])
+					continue;
 				result[it.first] = PromptType::API_KEYWORDS;
 			}
 		}
@@ -3425,6 +3432,7 @@ void Bagel_Parser::getKeywordsWithPrefix(std::map<StringVal, PromptType>& result
 #define EXIST_CHILD(n) (tree->childs.size() > n && tree->childs[n])
 #define EXIST_CHILD_DO(n, sentence) if(tree->childs.size() > n && tree->childs[n]){auto &subtree = tree->childs[n];sentence;}
 #define EXIST_CHILD_DOALL(sentence) for(auto &subtree : tree->childs){if(!subtree)continue; sentence;}
+#define IS_HEAD(tree)	(tree->parent==NULL || tree->parent->Node.opcode == OP_BLOCK + OP_COUNT || tree->parent->Node.opcode == OP_RESERVE + OP_COUNT)
 
 Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, Bagel_Closure * thiz, bool getaddr)
 {
@@ -3483,6 +3491,19 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 			EXIST_CHILD_DO(0, auto name = subtree->Node.var.getString(); if (!name.empty()) thiz2->setMember(name, Bagel_Var()));
 			EXIST_CHILD_DO(1, auto name = subtree->Node.var.getString(); if (!name.empty()) thiz2->setMember(name, Bagel_Var()));
 			EXIST_CHILD_DO(3, _analysis(subtree, glo, thiz2, false));
+			if (EXIST_CHILD(0) && EXIST_CHILD(2))
+			{
+				Bagel_Var in = thiz->getMember(tree->childs[2]->Node.var.getString()).getValue();
+				auto name = tree->childs[0]->Node.var.getString();
+				if (in.isArray())
+				{
+					 if (!name.empty()) thiz2->setMember(name, 0);
+				}
+				else if (in.isDic())
+				{
+					if (!name.empty()) thiz2->setMember(name, Bagel_StringHolder());
+				}
+			};
 		}
 		break;
 	case OP_CONSTVAR + OP_COUNT:
@@ -3664,7 +3685,7 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 	case OP_FASTOR:
 		{
 			Bagel_Var v;
-			EXIST_CHILD_DOALL(if (v.isVoid()) v.forceSet(_analysis(subtree, glo, thiz, false)));
+			EXIST_CHILD_DOALL(if (v.isVoid()) v = _analysis(subtree, glo, thiz, false));
 			return v;
 		}
 	case OP_EQUAL:
@@ -3695,11 +3716,11 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 			EXIST_CHILD_DO(1, v2 = _analysis(subtree, glo, thiz, false));
 			try
 			{
-				EXIST_CHILD_DO(0, v1.forceSet(_analysis(subtree, glo, thiz, true)));
+				EXIST_CHILD_DO(0, v1 = _analysis(subtree, glo, thiz, true));
 				if (v1.getType() == VAR_POINTER)
 				{
 					auto p = v1.forceAsPointer();
-					p->set(v2);
+					p->setWithoutProp(v2);
 					if (getaddr)
 						return v1;
 					else
@@ -3717,17 +3738,13 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 			EXIST_CHILD_DO(1, v2 = _analysis(subtree, glo, thiz, false));
 			try
 			{
-				EXIST_CHILD_DO(0, v1.forceSet(_analysis(subtree, glo, thiz, true)));
-				if (v1.getType() == VAR_POINTER)
-				{
-					auto p = v1.forceAsPointer();
-					if (p->get().isVoid())
-						p->set(v2);
-					if (getaddr)
-						return v1;
-					else
-						return p->get();
-				}
+				auto p = v1.forceAsPointer();
+				if (p->get().isVoid())
+					p->setWithoutProp(v2);
+				if (getaddr)
+					return v1;
+				else
+					return p->get();
 			}
 			catch (Bagel_Except &)
 			{
@@ -3760,13 +3777,13 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 	case OP_SELFDEC + OP_COUNT:
 		{
 			Bagel_Var v1;
-			EXIST_CHILD_DO(0, v1.forceSet(_analysis(subtree, glo, thiz, true)));
+			EXIST_CHILD_DO(0, v1 = _analysis(subtree, glo, thiz, true));
 			try
 			{
 				if (v1.getType() == VAR_POINTER)
 				{
 					auto p = v1.forceAsPointer();
-					p->set(0);
+					p->setWithoutProp(0);
 					return 0;
 				}
 			}
@@ -3776,6 +3793,7 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 			}
 		}
 		break;
+	case OP_OPTIONAL_CALL:
 	case OP_BRACKET:
 		{
 			Bagel_Var v;
@@ -3827,8 +3845,8 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 		break;
 	case OP_NULLDIC + OP_COUNT:
 		{
-			auto arr = new Bagel_Dic();
-			return arr;
+			auto dic = new Bagel_Dic();
+			return dic;
 		}
 		break;
 	case OP_ARRAY:
@@ -3838,8 +3856,10 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 		{
 			Bagel_Var v1;
 			Bagel_StringHolder name;
-			EXIST_CHILD_DO(0, v1.forceSet(_analysis(subtree, glo, thiz, false)));
-			if (tree->childs.size() > 1 && tree->childs[1])
+			EXIST_CHILD_DO(0, v1 = _analysis(subtree, glo, thiz, false));
+			if (IS_OPTIONAL(op) && v1.isVoid())
+				return v1;
+			if (EXIST_CHILD(1))
 			{
 				auto subtree = tree->childs[1];
 				if (subtree->Node.opcode == OP_LITERAL + OP_COUNT)
@@ -3962,7 +3982,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 	if (tree->Node.pos2 < pos)
 	{
 		if (getaddr)
-			outvar.forceSet(_analysis(tree, glo, thiz, true));
+			outvar = _analysis(tree, glo, thiz, true);
 		else
 			_analysis(tree, glo, thiz, false);
 		return false;
@@ -4059,6 +4079,19 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 			auto *thiz2 = new Bagel_Closure(thiz);
 			EXIST_CHILD_DO(0, auto name = subtree->Node.var.getString(); if (!name.empty()) thiz2->setMember(name, Bagel_Var()));
 			EXIST_CHILD_DO(1, auto name = subtree->Node.var.getString(); if (!name.empty()) thiz2->setMember(name, Bagel_Var()));
+			if (EXIST_CHILD(0) && EXIST_CHILD(2))
+			{
+				Bagel_Var in = thiz->getMember(tree->childs[2]->Node.var.getString()).getValue();
+				auto name = tree->childs[0]->Node.var.getString();
+				if (in.isArray())
+				{
+					if (!name.empty()) thiz2->setMember(name, 0);
+				}
+				else if (in.isDic())
+				{
+					if (!name.empty()) thiz2->setMember(name, Bagel_StringHolder());
+				}
+			};
 			EXIST_CHILD_DO(3,
 				if (_analysisVar(subtree, glo, thiz2, pos, out, outvar, false))
 					return true;
@@ -4074,13 +4107,15 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 	case OP_LITERAL + OP_COUNT:
 		//列出thiz下面可能的做候选字
 		{
-			std::map<StringVal, PromptType> outset;
+			//std::map<StringVal, PromptType> outset;
 			out.clear();
-			thiz->getAllVariablesWithPrefix(outset, tree->Node.var.getString());
-			for (auto &i : outset)
-			{
-				out.emplace(i.first, i.second);
-			}
+			auto prefix = tree->Node.var.getString();
+			thiz->getAllVariablesWithPrefix(out, prefix);
+			Bagel_Parser::getInstance()->getKeywordsWithPrefix(out, prefix, IS_HEAD(tree));
+			//for (auto &i : outset)
+			//{
+			//	out.emplace(i.first, i.second);
+			//}
 		}
 		if (getaddr)
 		{
@@ -4099,6 +4134,9 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 						thiz2->setMember(p, Bagel_Var());
 					if (_analysisVar(func->func->code, glo, thiz2, pos, out, outvar, false))
 						return true;
+#if PARSER_DEBUG
+					func->func->returnvar = ana.ret;
+#endif
 				}
 				if (!func->name.empty())
 				{
@@ -4128,13 +4166,13 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 					if (tree->childs[i]->Node.pos2 == pos)
 					{
 						//这是最后一个位置，我们给出候选字
-						std::map<StringVal, PromptType> outset;
+						//std::map<StringVal, PromptType> outset;
 						out.clear();
-						thiz->getAllVariablesWithPrefixAndType(outset, tree->Node.var.getString(), VAR_CLASSDEF);
-						for (auto &i : outset)
-						{
-							out.emplace(i.first, i.second);
-						}
+						thiz->getAllVariablesWithPrefixAndType(out, tree->Node.var.getString(), VAR_CLASSDEF);
+						//for (auto &i : outset)
+						//{
+						//	out.emplace(i.first, i.second);
+						//}
 						return true;
 					}
 					name = tree->childs[i]->Node.var.getBKEStr();
@@ -4367,7 +4405,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 				if (subtree->Node.pos <= pos && subtree->Node.pos2 > pos)
 					name = subtree->Node.var.asString().substr(pos - subtree->Node.pos);
 			);
-			std::map<StringVal, PromptType> outset;
+			//std::map<StringVal, PromptType> outset;
 			out.clear();
 			if (withvar.getType() == VAR_POINTER)
 			{
@@ -4378,30 +4416,31 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 			case VAR_CLO:
 			case VAR_CLASS:
 			case VAR_CLASSDEF:
-				withvar.forceAsClosure()->getAllVariablesWithPrefix(outset, name);
+				withvar.forceAsClosure()->getAllVariablesWithPrefix(out, name);
 				break;
 			default:
 				{
 					auto cla = _globalStructures.typeclass[outvar.getType()];
 					if (cla)
 					{
-						cla->getAllVariablesWithPrefix(outset, name);
+						cla->getAllVariablesWithPrefix(out, name);
 					}
 					if (outvar.getType() == VAR_DIC)
 					{
-						for (auto &s : outvar.forceAsDic()->varmap)
-						{
-							if (s.first.beginWith(name))
-								outset.emplace(s.first, getPromptTypeFromVar(s.second));
-						}
+						outvar.forceAsDic()->getAllVariablesWithPrefix(out, name);
+						//for (auto &s : outvar.forceAsDic()->varmap)
+						//{
+						//	if (s.first.beginWith(name))
+						//		out.emplace(s.first, getPromptTypeFromVar(s.second));
+						//}
 					}
 				}
 				break;
 			}
-			for (auto &i : outset)
-			{
-				out.emplace(i.first, i.second);
-			}
+			//for (auto &i : outset)
+			//{
+			//	out.emplace(i.first, i.second);
+			//}
 		}
 		return true;
 	case OP_SELFINC:
@@ -4415,6 +4454,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 			);
 		}
 		break;
+	case OP_OPTIONAL_CALL:
 	case OP_BRACKET:
 		{
 			EXIST_CHILD_DOALL(
@@ -4462,6 +4502,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 				outvar = new Bagel_Dic();
 		}
 		break;
+	case OP_OPTIONAL_ARR:
 	case OP_ARRAY:
 		{
 			EXIST_CHILD_DOALL(
@@ -4470,6 +4511,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 			);
 		}
 		break;
+	case OP_OPTIONAL_DOT:
 	case OP_DOT:
 		{
 			EXIST_CHILD_DO(0,
@@ -4481,41 +4523,42 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 				if (subtree->Node.pos <= pos && subtree->Node.pos2 > pos)
 					name = subtree->Node.var.asString().substr(pos - subtree->Node.pos);
 			);
-			std::map<StringVal, PromptType> outset;
+			//std::map<StringVal, PromptType> outset;
 			out.clear();
 			if (outvar.getType() == VAR_POINTER)
 			{
-				outvar.forceSet(outvar.forceAsPointer()->get());
+				outvar = outvar.getPointerValue();
 			}
 			switch (outvar.getType())
 			{
 			case VAR_CLO:
 			case VAR_CLASS:
 			case VAR_CLASSDEF:
-				outvar.forceAsClosure()->getAllVariablesWithPrefix(outset, name);
+				outvar.forceAsClosure()->getAllVariablesWithPrefix(out, name);
 				break;
 			default:
 				{
 					auto cla = _globalStructures.typeclass[outvar.getType()];
 					if (cla)
 					{
-						cla->getAllVariablesWithPrefix(outset, name);
+						cla->getAllVariablesWithPrefix(out, name);
 					}
 					if (outvar.getType() == VAR_DIC)
 					{
-						for (auto &s : outvar.forceAsDic()->varmap)
-						{
-							if (s.first.beginWith(name))
-								outset.emplace(s.first, getPromptTypeFromVar(s.second));
-						}
+						outvar.forceAsDic()->getAllVariablesWithPrefix(out, name);
+						//for (auto &s : outvar.forceAsDic()->varmap)
+						//{
+						//	if (s.first.beginWith(name))
+						//		outset.emplace(s.first, getPromptTypeFromVar(s.second));
+						//}
 					}
 				}
 				break;
 			}
-			for (auto &i : outset)
-			{
-				out.emplace(i.first, i.second);
-			}
+			//for (auto &i : outset)
+			//{
+			//	out.emplace(i.first, i.second);
+			//}
 		}
 		break;
 	case OP_CONTINUE + OP_COUNT:

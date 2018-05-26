@@ -291,6 +291,14 @@ public:
 	{
 		return vt == VAR_STR;
 	}
+	inline bool isProp() const
+	{
+		return vt == VAR_PROP;
+	}
+	inline bool isPointer() const
+	{
+		return vt == VAR_POINTER;
+	}
 	int64_t roundAsInteger() const;
 	inline int64_t roundToInteger()
 	{
@@ -432,6 +440,15 @@ public:
 	Bagel_Class *getClass(Bagel_Class *defaultValue = NULL) const;
 	Bagel_Closure * getClosure(Bagel_Closure * defaultValue = NULL) const;
 	Bagel_Prop *getProp(Bagel_Prop *defaultValue = NULL) const;
+	Bagel_Pointer *getPointer(Bagel_Pointer *defaultValue = NULL) const;
+
+	//get value of prop or pointer
+	Bagel_Var getValue() const;
+	void setValue(const Bagel_Var &v);
+
+	//recursive
+	Bagel_Var getPointerValue() const;
+	void setPointerValue(const Bagel_Var &v);
 
 	template<class T, class Cond = void, class... Args>
 	struct ConventerDelegate
@@ -2058,13 +2075,34 @@ public:
 		else
 			return var.dotValue(name);
 	}
+	Bagel_Var getWithoutProp() const
+	{
+		if (dir)
+			return (*dir).getPointerValue();
+		else
+			return var.dotValue(name).getPointerValue();
+	}
 	void set(const Bagel_Var &v)
 	{
-		(dir ? *dir : var.dotAddr(name)) = v;
+		Bagel_Var &vv = (dir ? *dir : var.dotAddr(name));
+		vv.setValue(v);
 		if (v.isObject())
 			_GC.forceBarrier(v.forceAsObject());
-	};
-
+	}
+	void setWithoutProp(const Bagel_Var &v)
+	{
+		Bagel_Var &vv = (dir ? *dir : var.dotAddr(name));
+		vv.setPointerValue(v);
+		if (v.isObject())
+			_GC.forceBarrier(v.forceAsObject());
+	}
+	void setWithoutPropAndPointer(const Bagel_Var &v)
+	{
+		Bagel_Var &vv = (dir ? *dir : var.dotAddr(name));
+		vv = v;
+		if (v.isObject())
+			_GC.forceBarrier(v.forceAsObject());
+	}
 	void changeAddr(Bagel_Var *addr)
 	{
 		dir = addr;
