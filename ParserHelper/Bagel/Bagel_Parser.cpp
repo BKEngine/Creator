@@ -3738,13 +3738,17 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 			EXIST_CHILD_DO(1, v2 = _analysis(subtree, glo, thiz, false));
 			try
 			{
-				auto p = v1.forceAsPointer();
-				if (p->get().isVoid())
-					p->setWithoutProp(v2);
-				if (getaddr)
-					return v1;
-				else
-					return p->get();
+				EXIST_CHILD_DO(0, v1 = _analysis(subtree, glo, thiz, true));
+				if (v1.getType() == VAR_POINTER)
+				{
+					auto p = v1.forceAsPointer();
+					if (p->get().isVoid())
+						p->setWithoutProp(v2);
+					if (getaddr)
+						return v1;
+					else
+						return p->get();
+				}
 			}
 			catch (Bagel_Except &)
 			{
