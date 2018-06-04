@@ -166,14 +166,14 @@ void BkeScintilla::onTimer()
 	SendScintilla(BkeScintilla::SCI_INDICATORCLEARRANGE, 0, len);
 	for (auto &it : p->infos)
 	{
-		SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, it.type);
+		SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, it.type + BKE_INDICATOR_START);
 		SendScintilla(BkeScintilla::SCI_SETINDICATORVALUE, it.value);
 		SendScintilla(BkeScintilla::SCI_INDICATORFILLRANGE, it.from, it.len);
 	}
 	p->infos2_mutex.lock();
 	for (auto &it : p->infos2)
 	{
-		SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, it.type);
+		SendScintilla(BkeScintilla::SCI_SETINDICATORCURRENT, it.type + BKE_INDICATOR_START);
 		SendScintilla(BkeScintilla::SCI_SETINDICATORVALUE, it.value);
 		SendScintilla(BkeScintilla::SCI_INDICATORFILLRANGE, it.from, it.len);
 	}
@@ -815,6 +815,8 @@ QString BkeScintilla::getBagelMaskText(int pos, int *start, int *stop, int *offs
 	++beginPos;
 	int endPos = modfieddata.EndPos() + 1;
 	int len = this->length();
+	if (endPos > len)
+		endPos = len;
 	do
 	{
 		style = SendScintilla(SCI_GETSTYLEAT, endPos);
@@ -828,7 +830,7 @@ QString BkeScintilla::getBagelMaskText(int pos, int *start, int *stop, int *offs
 	}
 	if (start)
 		*start = beginPos;
-	if (*stop)
+	if (stop)
 		*stop = endPos;
 	if (offset)
 	{
@@ -1523,7 +1525,12 @@ QString BkeScintilla::TextForRange(const BkeIndicatorBase &range) const
 		return QString();
 	auto len = range.Len();
 	auto buf = new char[len + 1];
-	SendScintilla(SCI_GETTEXTRANGE, range.Start(), range.End(), buf);
+	auto start = range.Start();
+	auto stop = range.End();
+	int txtlength = this->length();
+	if (stop > txtlength)
+		stop = txtlength;
+	SendScintilla(SCI_GETTEXTRANGE, start, stop, buf);
 	QString dst = QString::fromUtf8(buf);
 	delete[] buf;
 	return dst;

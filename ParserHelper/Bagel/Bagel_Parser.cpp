@@ -2141,7 +2141,7 @@ void Bagel_Parser::nud_function(Bagel_AST** tree)
 					readToken();
 					Bagel_AST *_tr = NULL;
 					expression(&_tr, commaprior);
-					if (_tr->Node.opcode != OP_CONSTVAR + OP_COUNT)
+					if (!_tr || _tr->Node.opcode != OP_CONSTVAR + OP_COUNT)
 					{
 						THROW(W("缺省值只能是常数"), next.pos);
 					}
@@ -3797,6 +3797,11 @@ Bagel_Var Bagel_AST_Analysis::_analysis(Bagel_AST * tree, Bagel_Closure * glo, B
 			}
 		}
 		break;
+	case OP_NEW + OP_COUNT:
+		{
+			EXIST_CHILD_DO(0, return glo->getMember(subtree->Node.var));
+		}
+		break;
 	case OP_OPTIONAL_CALL:
 	case OP_BRACKET:
 		{
@@ -4114,6 +4119,8 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 			//std::map<StringVal, PromptType> outset;
 			out.clear();
 			auto prefix = tree->Node.var.getString();
+			if (tree->Node.pos <= pos && tree->Node.pos2 > pos)
+				prefix = tree->Node.var.asString().substr(0, pos - tree->Node.pos);
 			thiz->getAllVariablesWithPrefix(out, prefix);
 			Bagel_Parser::getInstance()->getKeywordsWithPrefix(out, prefix, IS_HEAD(tree));
 			//for (auto &i : outset)
@@ -4407,7 +4414,7 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 			Bagel_StringHolder name;
 			EXIST_CHILD_DO(0, 
 				if (subtree->Node.pos <= pos && subtree->Node.pos2 > pos)
-					name = subtree->Node.var.asString().substr(pos - subtree->Node.pos);
+					name = subtree->Node.var.asString().substr(0, pos - subtree->Node.pos);
 			);
 			//std::map<StringVal, PromptType> outset;
 			out.clear();
@@ -4455,6 +4462,19 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 			EXIST_CHILD_DO(0,
 				if (_analysisVar(subtree, glo, thiz, pos, out, outvar, false))
 					return true;
+			);
+		}
+		break;
+	case OP_NEW + OP_COUNT:
+		{
+			EXIST_CHILD_DO(0,
+				out.clear();
+				StringVal prefix;
+				if (subtree->Node.pos <= pos && subtree->Node.pos2 > pos)
+					prefix = subtree->Node.var.asString().substr(0, pos - subtree->Node.pos);
+				glo->getAllVariablesWithPrefixAndType(out, prefix, VarType::VAR_CLASSDEF);
+				glo->getAllVariablesWithPrefixAndType(out, prefix, VarType::VAR_CLASS);
+				return true;
 			);
 		}
 		break;
