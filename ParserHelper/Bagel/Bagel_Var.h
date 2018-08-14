@@ -869,6 +869,19 @@ public:
 	Bagel_Except(const std::wstring &str, int32_t p, const std::u16string & _f, const std::u16string & _f2, const std::u16string &l) :msg(UniToUTF16(str)), pos(p), line(-1), _file(_f), _func(_f2), _line(l)
 	{
 	};
+	Bagel_Except(Bagel_Except &&r) :msg(std::move(r.msg)), pos(r.pos), line(r.line), lineinfo(std::move(r.lineinfo)), functionname(std::move(r.functionname)), _file(std::move(r._file)), _func(std::move(r._func)), _line(std::move(r._line))
+	{
+	};
+	Bagel_Except(const Bagel_Except &r) :msg(r.msg), pos(r.pos), line(r.line), lineinfo(r.lineinfo), functionname(r.functionname), _file(r._file), _func(r._func), _line(r._line)
+	{
+	};
+#else
+	Bagel_Except(Bagel_Except &&r) :msg(std::move(r.msg)), pos(r.pos), line(r.line)
+	{
+	};
+	Bagel_Except(const Bagel_Except &r) :msg(r.msg), pos(r.pos), line(r.line)
+	{
+	};
 #endif
 	/// <summary>
 	/// 构造一个异常类。

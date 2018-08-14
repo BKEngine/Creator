@@ -4551,7 +4551,14 @@ bool Bagel_AST_Analysis::_analysisVar(Bagel_AST * tree, Bagel_Closure * glo, Bag
 			out.clear();
 			if (outvar.getType() == VAR_POINTER)
 			{
-				outvar = outvar.getPointerValue();
+				try
+				{
+					outvar = outvar.getPointerValue();
+				}
+				catch(Bagel_Except)
+				{
+					break;
+				}
 			}
 			switch (outvar.getType())
 			{
