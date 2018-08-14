@@ -119,7 +119,11 @@ void AutoCompleteList::Match(const QString &str)
 	if (!str.isEmpty() && stops.contains(str.right(1)))
 	{
 		Cancel();
+		if (restartDepth)
+			return;
+		restartDepth++;
 		emit RequestRestart();
+		restartDepth--;
 		return;
 	}
 	QStringList qs;

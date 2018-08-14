@@ -59,6 +59,7 @@ private:
 	QStringList matches;
 	std::unique_ptr<QFuzzyMatcher> matcher;
 	MatcherOptions options;
+	int restartDepth = 0;
 };
 
 #endif // AUTOCOMPLETELIST_H
