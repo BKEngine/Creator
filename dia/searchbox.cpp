@@ -81,7 +81,7 @@ void SearchBox::onDocChanged()
 {
 	if (this->isVisible() && edit->text() == fstr && !(sciedit->ChangeStateFlag & BkeScintilla::BKE_CHANGE_REPLACE))
 	{
-		sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+		sciedit->findFirst1(fstr);
 	}
 }
 
@@ -97,6 +97,7 @@ void SearchBox::onSelectionChanged()
 void SearchBox::onFindConditionChange()
 {
 	sciedit->refind = true;
+	sciedit->UpdateFindFlag(iscase->isChecked(), isregular->isChecked(), isword->isChecked());
 }
 
 void SearchBox::onSearchAllConditionChange()
@@ -144,7 +145,7 @@ void SearchBox::FindNext()
 	}
 	else if (sciedit->refind || edit->text() != fstr){
 		fstr = edit->text();
-		sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+		sciedit->findFirst1(fstr);
 		if (isalwaysbegin->isChecked()) sciedit->FindForward(0);
 		else sciedit->FindForward(sciedit->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS));
 	}
@@ -162,7 +163,7 @@ void SearchBox::FindLast()
 	}
 	else if (edit->text() != fstr){
 		fstr = edit->text();
-		sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+		sciedit->findFirst1(fstr);
 		if (isalwaysbegin->isChecked()) sciedit->FindBack();
 		else sciedit->FindBack(sciedit->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS));
 	}
@@ -175,6 +176,10 @@ void SearchBox::FindLast()
 void SearchBox::SetSci(BkeScintilla *sci)
 {
 	sciedit = sci;
+	if(sciedit)
+	{
+		sciedit->UpdateFindFlag(iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+	}
 }
 
 void SearchBox::closeEvent(QCloseEvent *event)
@@ -273,7 +278,7 @@ void SearchBox::ReplaceText()
 		return;
 	}
 
-	sciedit->findFirst1(fstr, iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+	sciedit->findFirst1(fstr);
 	//if (!sciedit->hasSelectedText()){
 	//	QMessageBox::information(this, "替换", "没有可以替换的位置!", QMessageBox::Ok);
 	//	return;

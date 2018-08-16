@@ -97,6 +97,7 @@ BkeScintilla::BkeScintilla(QWidget *parent)
 	WorkingUndoDepth = 0;
 
 	standardCommands()->find(QsciCommand::LineCut)->setKey(0);
+	standardCommands()->find(QsciCommand::SelectionDuplicate)->setKey(0);
 
 	connect(this, SIGNAL(SCN_MODIFIED(int, int, const char *, int, int, int, int, int, int, int)),
 		SLOT(EditModified(int, int, const char *, int, int, int, int, int, int, int)));
@@ -1589,7 +1590,7 @@ void BkeScintilla::DefineIndicators(int id, int intype)
 	SendScintilla(SCI_INDICSETSTYLE, id, intype);
 }
 
-int BkeScintilla::findFirst1(const QString fstr, bool cs, bool exp, bool word, bool mark)
+int BkeScintilla::findFirst1(const QString fstr, bool mark)
 {
 	findcount = 0;
 	fstrdata = fstr.toUtf8();
@@ -1597,9 +1598,6 @@ int BkeScintilla::findFirst1(const QString fstr, bool cs, bool exp, bool word, b
 	if (ss[0] == 0)
 		return 0;
 	testlist.clear();
-	findflag = (cs ? SCFIND_MATCHCASE : 0) |
-		(word ? SCFIND_WHOLEWORD : 0) |
-		(exp ? SCFIND_CXX11REGEX | SCFIND_REGEXP : 0);
 
 	SendScintilla(SCI_SETINDICATORCURRENT, BKE_INDICATOR_FIND);
 	ClearIndicators(BKE_INDICATOR_FIND);
@@ -1623,6 +1621,13 @@ int BkeScintilla::findFirst1(const QString fstr, bool cs, bool exp, bool word, b
 	return findcount;
 }
 
+void BkeScintilla::UpdateFindFlag(bool cs, bool exp, bool word)
+{
+	findflag = (cs ? SCFIND_MATCHCASE : 0) |
+		(word ? SCFIND_WHOLEWORD : 0) |
+		(exp ? SCFIND_CXX11REGEX | SCFIND_REGEXP : 0);
+	SendScintilla(SCI_SETSEARCHFLAGS, findflag);
+}
 
 void BkeScintilla::ClearIndicators(int id)
 {
@@ -1922,6 +1927,13 @@ void BkeScintilla::SetSelection(const BkeIndicatorBase &p)
 bool BkeScintilla::IsSelectionsEmpty() const
 {
 	return SendScintilla(SCI_GETSELECTIONEMPTY);
+}
+
+void BkeScintilla::MultipleSelectAddNext()
+{
+	SendScintilla(SCI_SETTARGETSTART, std::max(SendScintilla(SCI_GETANCHOR), SendScintilla(SCI_GETCURRENTPOS)));
+	SendScintilla(SCI_SETTARGETEND, SendScintilla(SCI_GETTEXTLENGTH));
+	SendScintilla(SCI_MULTIPLESELECTADDNEXT);
 }
 
 int BkeScintilla::GetTextLength() const

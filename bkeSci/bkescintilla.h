@@ -50,7 +50,8 @@ public:
 	void DefineIndicators(int id,int intype) ;
 	void ClearIndicators(int id) ;
 	void ClearIndicator(int id, const BkeIndicatorBase &p) ;
-	int findFirst1(const QString fstr,bool cs,bool exp,bool word,bool mark = true) ;
+	int findFirst1(const QString fstr, bool mark = true) ;
+	void UpdateFindFlag(bool cs, bool exp, bool word);
 	void ReplaceAllFind(const QString &rstr) ;
 	bool ReplaceText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word);
 	void ReplaceAllText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word);
@@ -88,6 +89,7 @@ public:
 	void ClearSelection(int pos = -1);
 	void SetSelection(const BkeIndicatorBase &p);
 	bool IsSelectionsEmpty() const;
+	void MultipleSelectAddNext();
 
 	int findcount ;
 

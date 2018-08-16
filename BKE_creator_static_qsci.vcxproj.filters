@@ -1113,9 +1113,6 @@
     <ClInclude Include="BKEscintilla\src\UnicodeFromUTF8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ParserHelper\parser\parserextend.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dia\ParserEditorTreeItem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
