@@ -1629,6 +1629,12 @@ void BkeScintilla::UpdateFindFlag(bool cs, bool exp, bool word)
 	SendScintilla(SCI_SETSEARCHFLAGS, findflag);
 }
 
+void BkeScintilla::UpdateFindFlag(int flag)
+{
+	findflag = flag;
+	SendScintilla(SCI_SETSEARCHFLAGS, findflag);
+}
+
 void BkeScintilla::ClearIndicators(int id)
 {
 	int xl, xi;
@@ -1724,13 +1730,10 @@ void BkeScintilla::ReplaceAllFind(const QString &rstr)
 	}
 }
 
-bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word)
+bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr)
 {
 	ChangeIgnore++;
 	BkeStartUndoAction();
-	int flag = (cs ? SCFIND_MATCHCASE : 0) |
-		(word ? SCFIND_WHOLEWORD : 0) |
-		(exp ? SCFIND_CXX11REGEX | SCFIND_REGEXP : 0);
 
 	int from = SendScintilla(SCI_GETCURRENTPOS);
 	int to = this->length();
@@ -1748,7 +1751,7 @@ bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr, bool cs
 	//if (from < to)
 	do
 	{
-		SendScintilla(SCI_SETSEARCHFLAGS, flag);
+		SendScintilla(SCI_SETSEARCHFLAGS, findflag);
 		SendScintilla(SCI_SETTARGETSTART, from);
 		SendScintilla(SCI_SETTARGETEND, to);
 
@@ -1757,7 +1760,7 @@ bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr, bool cs
 			break;
 		}
 
-		if (exp)
+		if (findflag & SCFIND_REGEXP)
 		{
 			SendScintilla(SCI_REPLACETARGETRE, dstlen, dd);
 		}
@@ -1780,15 +1783,11 @@ bool BkeScintilla::ReplaceText(const QString &rstr, const QString &dstr, bool cs
 	return true;
 }
 
-void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word)
+void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr)
 {
 	//关闭补全，自动提示等等
 	ChangeIgnore++;
 	BkeStartUndoAction();
-
-	int flag = (cs ? SCFIND_MATCHCASE : 0) |
-		(word ? SCFIND_WHOLEWORD : 0) |
-		(exp ? SCFIND_CXX11REGEX | SCFIND_REGEXP : 0);
 
 	int from = 0;
 	int to = this->length();
@@ -1805,7 +1804,7 @@ void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool
 
 	while (from < to)
 	{
-		SendScintilla(SCI_SETSEARCHFLAGS, flag);
+		SendScintilla(SCI_SETSEARCHFLAGS, findflag);
 		SendScintilla(SCI_SETTARGETSTART, from);
 		SendScintilla(SCI_SETTARGETEND, to);
 
@@ -1814,7 +1813,7 @@ void BkeScintilla::ReplaceAllText(const QString &rstr, const QString &dstr, bool
 			break;
 		}
 
-		if (exp)
+		if (findflag & SCFIND_REGEXP)
 		{
 			SendScintilla(SCI_REPLACETARGETRE, dstlen, dd);
 		}

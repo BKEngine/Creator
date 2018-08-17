@@ -270,7 +270,7 @@ void SearchBox::ChangeModel()
 void SearchBox::ReplaceText()
 {
 	fstr = edit->text();
-	bool res = sciedit->ReplaceText(fstr, edit1->text(), iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+	bool res = sciedit->ReplaceText(fstr, edit1->text());
 
 	if (!res)
 	{
@@ -300,7 +300,7 @@ void SearchBox::ReplaceAllText()
 	{
 		sciedit->ClearIndicators(BkeScintilla::BKE_INDICATOR_FIND);
 		fstr = edit->text();
-		sciedit->ReplaceAllText(fstr, edit1->text(), iscase->isChecked(), isregular->isChecked(), isword->isChecked());
+		sciedit->ReplaceAllText(fstr, edit1->text());
 	}
 	else
 	{

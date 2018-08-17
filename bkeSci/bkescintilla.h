@@ -52,9 +52,10 @@ public:
 	void ClearIndicator(int id, const BkeIndicatorBase &p) ;
 	int findFirst1(const QString fstr, bool mark = true) ;
 	void UpdateFindFlag(bool cs, bool exp, bool word);
+	void UpdateFindFlag(int findflag);
 	void ReplaceAllFind(const QString &rstr) ;
-	bool ReplaceText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word);
-	void ReplaceAllText(const QString &rstr, const QString &dstr, bool cs, bool exp, bool word);
+	bool ReplaceText(const QString &rstr, const QString &dstr);
+	void ReplaceAllText(const QString &rstr, const QString &dstr);
 	BkeIndicatorBase ReplaceFind(const QString &rstr);
 	int findIndicatorStart(int id,int from) ;
 	int findIndicatorEnd(int id,int from) ; //不是以ID开头直接返回-1
