@@ -14,6 +14,9 @@ using std::atomic_bool;
 
 class BkeScintilla;
 
+//变量在所有脚本中穿透还是只在宏文件中穿透
+#define VAR_CROSS_ALL true
+
 struct BKEMacros
 {
     QString name;
@@ -143,7 +146,7 @@ private:
 		return QString();
 	}
 
-	void parseMacro(const QString &file);
+	void parseMacro(const QString &file, bool regardAsNormalScripts = false);
 	void notifyExit();
 
 public:
@@ -169,7 +172,7 @@ public:
 			//update buffer
 			filebuf[file] = *buffer;
 		}
-		if (file == "macro.bkscr" || std::find(macrofiles.begin(), macrofiles.end(), file) != macrofiles.end())
+		if (VAR_CROSS_ALL || file == "macro.bkscr" || std::find(macrofiles.begin(), macrofiles.end(), file) != macrofiles.end())
 		{
 			newmacrofile = true;
 			if (cur_state == STATE_PARSEMACRO)
@@ -187,7 +190,16 @@ public:
 	{
 		msgmutex.lock();
 		listfile.append(files);
-		newmacrofile = true;
+		for (auto & file : files)
+		{
+			if (VAR_CROSS_ALL || file == "macro.bkscr" || std::find(macrofiles.begin(), macrofiles.end(), file) != macrofiles.end())
+			{
+				newmacrofile = true;
+				if (cur_state == STATE_PARSEMACRO)
+					cancel = true;
+				break;
+			}
+		}
 		msgmutex.unlock();
 	}
 

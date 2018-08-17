@@ -295,7 +295,7 @@ BG_Analysis::~BG_Analysis()
 		delete it;
 }
 
-void BG_Analysis::parseMacro(const QString &file)
+void BG_Analysis::parseMacro(const QString &file, bool regardAsNormalScripts)
 {
 	ParseData *p;
 	try
@@ -309,6 +309,8 @@ void BG_Analysis::parseMacro(const QString &file)
 		dumpExcept(e, 2);
 		notifyExit();
 	}
+	if (!p)
+		return;
 	try
 	{
 		if (p->fileNodes.empty())
@@ -344,7 +346,7 @@ void BG_Analysis::parseMacro(const QString &file)
 	}
 	while (!cancel && node != p->fileNodes.end())
 	{
-		if ((*node)->isCommand() && (*node)->name == "return")
+		if ((*node)->isCommand() && (*node)->name == "return" && !regardAsNormalScripts)
 			return;
 		if ((*node)->isCommand() && (*node)->name == "import")
 		{
@@ -545,6 +547,16 @@ void BG_Analysis::run()
 					}
 
 					parseMacro("macro.bkscr");
+					if (VAR_CROSS_ALL)
+					{
+						for (auto it = data.keyBegin(); it != data.keyEnd(); it++)
+						{
+							if (!backup_macrofiles.contains(*it))
+							{
+								parseMacro(*it, true);
+							}
+						}
+					}
 
 					try
 					{

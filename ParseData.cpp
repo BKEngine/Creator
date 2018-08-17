@@ -65,7 +65,10 @@ ParseData::ParseData(const QByteArray &file, Bagel_Closure *clo)
 	//fileclo->cloneFrom(clo);
 	BKE_hashmap<void*, void*> pMap;
 	pMap[Bagel_Closure::global()] = Bagel_Closure::global();
-	fileclo->assignStructure(clo, pMap, true);
+	if (!VAR_CROSS_ALL)
+		fileclo->assignStructure(clo, pMap, true);
+	else
+		fileclo = clo;	//共享一个全局闭包
 }
 
 ParseData::~ParseData()
