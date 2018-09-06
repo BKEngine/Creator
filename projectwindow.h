@@ -1,8 +1,8 @@
 ﻿#ifndef PROJECTWINDOW_H
 #define PROJECTWINDOW_H
 
-#include <QDialogButtonBox>
 #include "weh.h"
+#include <QDialogButtonBox>
 #include "topbarwindow.h"
 #include "bkeproject.h"
 #include "dia/bkeconfigdialog.h"

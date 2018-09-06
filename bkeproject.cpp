@@ -1,4 +1,5 @@
 ﻿#include <weh.h>
+#include <QFileSystemWatcher>
 #include "bkeproject.h"
 //#include "dia/newversiondatawizard.h"
 //#include "dia/versioninfo.h"
@@ -58,6 +59,7 @@ BkeProject::BkeProject(QObject *parent)
 	isnull = true;
 	currentptr = 0;
 	analysis = 0;
+	watcher = nullptr;
 
 	fileico = new QIcon(":/project/file.png");
 	dirsico = new QIcon(":/project/doc.png");
@@ -136,6 +138,7 @@ bool BkeProject::NewProject(const QString &dir, const QString &name)
 
 	delete analysis;
 	analysis = new BG_Analysis(ProjectDir());
+	SetupWatcher();
 	return WriteBkpFile();
 }
 
@@ -212,6 +215,7 @@ bool BkeProject::OpenProject(const QString &name)
 
 	analysis = new BG_Analysis(ProjectDir());
 	analysis->addFiles(ls);
+	SetupWatcher();
 	//检查路径是否已经改变
 	/*
 	QFileInfo llm(name) ;
@@ -367,12 +371,12 @@ QTreeWidgetItem *BkeProject::FindItem(QTreeWidgetItem *dest, const QString &dir,
 	return root;
 }
 
-QString BkeProject::ProjectDir() const
+const QString &BkeProject::ProjectDir() const
 {
 	return pdir;
 }
 
-QString BkeProject::ProjectName() const
+const QString &BkeProject::ProjectName() const
 {
 	return pname;
 }
@@ -394,7 +398,7 @@ QStringList BkeProject::SearchDir(const	QString &root, const QString &dir, const
 	QDir d(root + "/" + dir);
 	if (!d.exists()) return list;
 
-	d.setFilter(QDir::Dirs | QDir::Files | QDir::NoSymLinks);
+	d.setFilter(QDir::Dirs | QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot);
 	d.setSorting(QDir::DirsFirst);
 
 	QFileInfoList infols = d.entryInfoList();
@@ -402,9 +406,7 @@ QStringList BkeProject::SearchDir(const	QString &root, const QString &dir, const
 	for (int i = 0; i < infols.size(); i++){
 		fff = infols.at(i);
 
-		if (fff.fileName() == "." || fff.fileName() == "..")
-			continue;
-		else if (fff.isDir())
+		if (fff.isDir())
 			list.append(SearchDir(root, dir + "/" + fff.fileName(), suffix));
 		else if (suffix.indexOf(chopFileExt(fff.fileName()).toLower()) < 0)
 			continue; //不是已指定后缀结尾
@@ -412,6 +414,22 @@ QStringList BkeProject::SearchDir(const	QString &root, const QString &dir, const
 		{
 			list << QDir(root).relativeFilePath(fff.absoluteFilePath());
 		}
+	}
+	return list;
+}
+
+QStringList BkeProject::GetDirs(const QString & root, const QString & dir)
+{
+	QStringList list;
+	QDir d(root + "/" + dir);
+	if (!d.exists()) return list;
+
+	d.setFilter(QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+	QStringList ls = d.entryList();
+	list << ls;
+	for (auto &&s : ls)
+	{
+		list.append(GetDirs(root, dir + '/' + s));
 	}
 	return list;
 }
@@ -802,4 +820,78 @@ QString BkeProject::AllNameToName(const QString &allname)
 void BkeProject::ReleaseGame()
 {
 	
+}
+
+static QStringList watcherSuffix = imageSuffixes + audioSuffixes;
+
+void BkeProject::SetupWatcher()
+{
+	delete watcher;
+	watcher = new QFileSystemWatcher();
+	watcher->addPath(pdir);
+	connect(watcher, &QFileSystemWatcher::directoryChanged, this, &BkeProject::projectDirChanged);
+	entryMap.clear();
+	FeedEntryMap(QDir(pdir));
+}
+
+void BkeProject::projectDirChanged(const QString &path)
+{
+	QSet<QString> newDirSet = GetEntries(pdir, QDir(path), watcherSuffix);
+	QSet<QString> currentDirSet = entryMap[path];
+
+	// 添加了文件
+	QSet<QString> newFiles = newDirSet - currentDirSet;
+
+	// 文件已被移除
+	QSet<QString> deletedFiles = currentDirSet - newDirSet;
+
+	// 更新当前设置
+	entryMap[path] = newDirSet;
+
+	if (!newFiles.isEmpty() && !deletedFiles.isEmpty())
+	{
+		// 文件/目录重命名
+		if ((newFiles.count() == 1) && (deletedFiles.count() == 1))
+		{
+			
+		}
+	}
+	else
+	{
+		// 添加新文件/目录至Dir
+		if (!newFiles.isEmpty())
+		{
+			
+		}
+
+		// 从Dir中删除文件/目录
+		if (!deletedFiles.isEmpty())
+		{
+
+		}
+	}
+}
+
+QSet<QString> BkeProject::GetEntries(const QString & root, const QDir & dir, const QStringList & suffix)
+{
+	QSet<QString> ls;
+	for (auto &&s : dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot))
+	{
+		if (!s.isDir() || suffix.indexOf(chopFileExt(s.fileName()).toLower()) < 0)
+			continue; //不是已指定后缀结尾
+		else
+		{
+			ls << QDir(root).relativeFilePath(s.absolutePath());
+		}
+	}
+	return ls;
+}
+
+void BkeProject::FeedEntryMap(const QDir & dir)
+{
+	entryMap[dir.absolutePath()] = GetEntries(pdir, dir, watcherSuffix);
+	for (auto &&s : dir.entryList(QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot))
+	{
+		FeedEntryMap(QDir(s));
+	}
 }

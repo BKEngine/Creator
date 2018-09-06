@@ -77,7 +77,7 @@ enum ItemType
 };
 
 class CodeWindow;
-
+class QFileSystemWatcher;
 class BkeProject :public QObject
 {
 public:
@@ -86,8 +86,8 @@ public:
 	~BkeProject() ;
 	QString ProjectFile() const;
 	QString ProjectLangFile() const;
-	QString ProjectDir() const;
-	QString ProjectName() const ;
+	const QString &ProjectDir() const;
+	const QString &ProjectName() const ;
 	QString absName(const QString &name){ return ProjectDir()+name ; }
 	QString AllNameToName(const QString &allname) ;
 	bool NewProject(const QString &dir,const QString &name) ;
@@ -117,6 +117,8 @@ public:
 	QStringList SearchDir(const	QString &root, const QString &dir, const QString suffix){
 		return SearchDir(root, dir, QStringList()<<suffix);
 	}
+	QStringList GetDirs(const QString &root, const QString &dir);
+	QStringList GetDirs(const QString &root) { return GetDirs(root, QString()); }
 
 	//发布游戏
 	void ReleaseGame();
@@ -163,7 +165,7 @@ private:
 	QString Time ;
 	QStringList emptylist ;
 	bool isnull ;
-	int  currentptr ;
+	int currentptr ;
 
 	/**
 	 *	在QTreeWidgetItem节点中寻找一个节点，名称是{name}。若不存在，由{createnew}参数指定是否创建一个新的节点，图标为{icon}
@@ -204,6 +206,14 @@ public:
 	QList<VersionData> &getVersionDataList(){return _versionData;}
 	int addVersionData(QWidget *parent); //返回编号，如果是-1表明没有添加成功或者用户取消了添加操作
 	void DeleteSaveData();
+
+private:
+	QFileSystemWatcher * watcher;
+	void SetupWatcher();
+	void projectDirChanged(const QString &path);
+	QMap<QString, QSet<QString>> entryMap;
+	QSet<QString> GetEntries(const QString &root, const QDir &dir, const QStringList &suffix);
+	void FeedEntryMap(const QDir &dir);
 };
 
 #endif // BKEPROJECT_H
