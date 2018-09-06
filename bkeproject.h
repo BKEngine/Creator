@@ -122,7 +122,6 @@ public:
 	void ReleaseGame();
 
 	QStringList AllScriptFiles() ;
-	QStringList AllSourceFiles() ;
 	QTreeWidgetItem *FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty = true) ;
 	QTreeWidgetItem *FindItemAll(const QString &name) ;
 	QTreeWidgetItem *MakeItem(QTreeWidgetItem *dest,const QString &dir) ;
@@ -130,7 +129,8 @@ public:
 	QTreeWidgetItem *ConfigFile;
 	QTreeWidgetItem *Import;
 	QTreeWidgetItem *Script;
-	QTreeWidgetItem *Source;
+	QTreeWidgetItem *Audio;
+	QTreeWidgetItem *Image;
 	QTreeWidgetItem *BKAfile;
 	QTreeWidgetItem *ImageFile;
 	QTreeWidgetItem *VoiceFile;
@@ -148,7 +148,8 @@ public:
 	QIcon *baseico ;
 	QIcon *importico ;
 	QIcon *bksdocico ;
-	QIcon *sourcedocico ;
+	QIcon *audiodirico ;
+	QIcon *picdirico;
 	QIcon *bksfileico ;
 	QIcon *imgfileico ;
 	QIcon *volfileico ;

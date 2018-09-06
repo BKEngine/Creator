@@ -1733,16 +1733,18 @@ void CodeWindow::QfileChange(const QString &path)
 		return;
 	}
 
-	msg.setText("文件：\r\n" + tempbase->Name() + "\r\n已经被改变，是否重新载入？");
-	msg.addButton(QMessageBox::Yes);
-	msg.addButton(QMessageBox::No);
-	if (msg.exec() == QMessageBox::No) return;
-
 	if (tempbase->edit->isModified()){
 		msg.setText("文件：\r\n" + tempbase->Name() + "\r\n已经修改，是否放弃修改？");
 		msg.addButton(QMessageBox::Yes);
 		msg.addButton(QMessageBox::No);
 		if (msg.exec() == QMessageBox::No) SaveAs();
+	}
+	else
+	{
+		msg.setText("文件：\r\n" + tempbase->Name() + "\r\n已经被改变，是否重新载入？");
+		msg.addButton(QMessageBox::Yes);
+		msg.addButton(QMessageBox::No);
+		if (msg.exec() == QMessageBox::No) return;
 	}
 
 	QString en;

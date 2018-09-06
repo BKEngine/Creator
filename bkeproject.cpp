@@ -39,7 +39,7 @@ void BKE_PROJECT_READITEM(QTreeWidgetItem *dest, ItemInfo &info)
 	else if (list.size() == 1){  //导入，脚本，资源
 		info.RootName = info.Name;
 		info.FullName = info.Dirs;
-		if (info.FullName.isEmpty())
+		if (info.FullName.isEmpty() && root->childCount() == 0)
 		{
 			//config.bkpsr这个东西现在直接属于顶级目录下
 			info.FullName = info.RootName;
@@ -64,7 +64,8 @@ BkeProject::BkeProject(QObject *parent)
 	baseico = new QIcon(":/project/database.png");
 	importico = new QIcon(":/project/import.png");
 	bksdocico = new QIcon(":/project/bksdoc.png");
-	sourcedocico = new QIcon(":/project/sourcedoc.png");
+	audiodirico = new QIcon(":/project/audiodir.png");
+	picdirico = new QIcon(":/project/picdir.png");
 	bksfileico = new QIcon(":/project/bksfile.png");
 	imgfileico = new QIcon(":/project/image.png");
 	volfileico = new QIcon(":/project/music.png");
@@ -83,7 +84,8 @@ BkeProject::~BkeProject()
 	delete baseico;
 	delete importico;
 	delete bksdocico;
-	delete sourcedocico;
+	delete audiodirico;
+	delete picdirico;
 	delete bksfileico;
 	delete imgfileico;
 	delete volfileico;
@@ -99,18 +101,21 @@ void BkeProject::BuildItem(const QString &name)
 	ConfigFile = new QTreeWidgetItem(QStringList() << "config.bkpsr");
 	Import = new QTreeWidgetItem(QStringList() << "宏");
 	Script = new QTreeWidgetItem(QStringList() << "脚本");
-	Source = new QTreeWidgetItem(QStringList() << "资源");
+	Audio = new QTreeWidgetItem(QStringList() << "音频");
+	Image = new QTreeWidgetItem(QStringList() << "图片");
 
 	Root->setIcon(0, *baseico);
 	ConfigFile->setIcon(0, *bksfileico);
 	Import->setIcon(0, *importico);
 	Script->setIcon(0, *bksdocico);
-	Source->setIcon(0, *sourcedocico);
+	Audio->setIcon(0, *audiodirico);
+	Image->setIcon(0, *picdirico);
 
 	Root->addChild(ConfigFile);
 	Root->addChild(Import);
 	Root->addChild(Script);
-	Root->addChild(Source);
+	Root->addChild(Image);
+	Root->addChild(Audio);
 	Root->setExpanded(true);
 }
 
@@ -194,7 +199,6 @@ bool BkeProject::OpenProject(const QString &name)
 	{
 		JsonToTree(Import, bkpAdmin.value("import").toObject(), version);
 		JsonToTree(Script, bkpAdmin.value("script").toObject(), version);
-		JsonToTree(Source, bkpAdmin.value("source").toObject(), version);
 	}
 	//remove config.bkpsr from Import
 	auto it = FindItem(Import, "config.bkpsr", false);
@@ -455,7 +459,6 @@ bool BkeProject::WriteBkpFile()
 	//bkpAdmin.insert("source", HashToJson(SourceHash));
 	bkpAdmin.insert("import", TreeToJson(Import));
 	bkpAdmin.insert("script", TreeToJson(Script));
-	bkpAdmin.insert("source", TreeToJson(Source));
 	bkpAdmin.insert("version", QString("1.2"));
 
 	QJsonDocument llm;
@@ -663,20 +666,14 @@ QStringList BkeProject::AllScriptFiles()
 	return temp;
 }
 
-QStringList BkeProject::AllSourceFiles()
-{
-	QStringList temp;
-	temp.append(ListFiles(3));
-	return temp;
-}
-
 QTreeWidgetItem *BkeProject::FindItemAll(const QString &name)
 {
 	QTreeWidgetItem *le;
 	QString temp = AllNameToName(name);
 	le = FindItem(Import, temp, false);
 	if (le == 0) le = FindItem(Script, temp, false);
-	else if (le == 0) le = FindItem(Source, temp, false);
+	if (le == 0) le = FindItem(Image, temp, false);
+	if (le == 0) le = FindItem(Audio, temp, false);
 	return le;
 }
 
@@ -750,7 +747,8 @@ void BkeProject::AddFiles(const QStringList &ls, const ItemInfo &f)
 	for (auto &&s : ls)
 	{
 		FindItem(f.Root, s);
-		analysis->pushFile(f.FullName + "/" + s);
+		if(f.Root == Import || f.Root == Script)
+			analysis->pushFile(f.FullName + "/" + s);
 	}
 	SortTree(f.Root);
 	WriteBkpFile();
@@ -761,7 +759,7 @@ void BkeProject::AddDir(const QString &dir, const ItemInfo &f)
 	auto ff = f.getLayer1ItemInfo();
 	FindItem(f.Root, dir);
 	
-	QStringList ls = SearchDir(ProjectDir()+f.getDir(), dir, (ff.Name == "脚本" || ff.Name == "宏") ? scriptSuffixes : (audioSuffixes + imageSuffixes));
+	QStringList ls = SearchDir(ProjectDir()+f.getDir(), dir, (f.Root == Import || f.Root == Script) ? scriptSuffixes : (audioSuffixes + imageSuffixes));
 	AddFiles(ls, f);
 }
 
