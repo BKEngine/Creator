@@ -853,7 +853,9 @@ void BkeProject::projectDirChanged(const QString &path)
 		// 文件/目录重命名
 		if ((newFiles.count() == 1) && (deletedFiles.count() == 1))
 		{
-			
+			QString newFile = *newFiles.begin();
+			QString oldFile = *deletedFiles.begin();
+			if(QFileInfo(pdir + '/' + newFile).isDir())
 		}
 	}
 	else
@@ -877,9 +879,11 @@ QSet<QString> BkeProject::GetEntries(const QString & root, const QDir & dir, con
 	QSet<QString> ls;
 	for (auto &&s : dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot))
 	{
-		if (!s.isDir() || suffix.indexOf(chopFileExt(s.fileName()).toLower()) < 0)
-			continue; //不是已指定后缀结尾
-		else
+		if (s.isDir())
+		{
+			ls << QDir(root).relativeFilePath(s.absolutePath()) + '/';
+		}
+		else if (suffix.indexOf(chopFileExt(s.fileName()).toLower()) >= 0)
 		{
 			ls << QDir(root).relativeFilePath(s.absolutePath());
 		}
