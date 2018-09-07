@@ -338,7 +338,7 @@ QTreeWidgetItem *BkeProject::FindItem(QTreeWidgetItem *dest, const QString &dir,
 	if (llm.isEmpty()) return dest;
 
 	QTreeWidgetItem *root = dest;
-	QStringList tk = llm.split("/");
+	QStringList tk = llm.split('/', QString::SkipEmptyParts);
 	QString a, b;
 	for (int i = 0; i < tk.size(); i++){
 		int s = root->childCount() - 1;
@@ -832,11 +832,24 @@ void BkeProject::SetupWatcher()
 	watcher->addPath(pdir);
 	connect(watcher, &QFileSystemWatcher::directoryChanged, this, &BkeProject::projectDirChanged);
 	entryMap.clear();
-	FeedEntryMap(QDir(pdir));
+	FeedEntryMap(entryMap, QDir(pdir));
+	watcher->addPaths(entryMap.keys());
+	for (auto &&entry : entryMap)
+	{
+		for (auto &&s : entry)
+		{
+			if (!s.endsWith('/'))
+				FindItem(Source, s);
+		}
+	}
+	SortTree(Source);
 }
 
-void BkeProject::projectDirChanged(const QString &path)
+void BkeProject::projectDirChanged(const QString &path2)
 {
+	QString path = path2;
+	if (path.endsWith('/'))
+		path = path.left(path.length() - 1);
 	QSet<QString> newDirSet = GetEntries(pdir, QDir(path), watcherSuffix);
 	QSet<QString> currentDirSet = entryMap[path];
 
@@ -849,54 +862,92 @@ void BkeProject::projectDirChanged(const QString &path)
 	// 更新当前设置
 	entryMap[path] = newDirSet;
 
-	if (!newFiles.isEmpty() && !deletedFiles.isEmpty())
+	// 从Dir中删除文件/目录
+	for (auto &&deletedFile : deletedFiles)
 	{
-		// 文件/目录重命名
-		if ((newFiles.count() == 1) && (deletedFiles.count() == 1))
+		if (deletedFile.endsWith('/'))
 		{
-			QString newFile = *newFiles.begin();
-			QString oldFile = *deletedFiles.begin();
-			if(QFileInfo(pdir + '/' + newFile).isDir())
+			QString path = QDir(pdir).absoluteFilePath(deletedFile);
+			QString path2 = path.left(path.length() - 1);
+			for (auto it = entryMap.begin(); it != entryMap.end();)
+			{
+				if (it.key() == path2 || it.key().startsWith(path))
+				{
+					it = entryMap.erase(it);
+				}
+				else
+				{
+					it++;
+				}
+			}
+		}
+		QTreeWidgetItem *le = FindItem(Source, deletedFile, false);
+		if (le != nullptr)
+		{
+			le->parent()->removeChild(le);
 		}
 	}
-	else
+
+	for (auto &&newFile : newFiles)
 	{
-		// 添加新文件/目录至Dir
-		if (!newFiles.isEmpty())
+		QDir newDir = QDir(pdir + "/" + newFile);
+		if (newDir.exists())
 		{
-			
+			watcher->addPath(newDir.absolutePath());
+			QMap<QString, QSet<QString>> newEntryMap;
+			FeedEntryMap(newEntryMap, newDir);
+			watcher->addPaths(newEntryMap.keys());
+			entryMap.unite(newEntryMap);
+			for (auto &&entry : newEntryMap)
+			{
+				for (auto &&s : entry)
+				{
+					if (!s.endsWith('/'))
+						FindItem(Source, s);
+				}
+			}
+			SortTree(Source);
 		}
-
-		// 从Dir中删除文件/目录
-		if (!deletedFiles.isEmpty())
+		else
 		{
-
+			QTreeWidgetItem *le = FindItem(Source, newFile);
+			if (le != nullptr)
+			{
+				SortTree(le->parent());
+			}
 		}
 	}
 }
 
-QSet<QString> BkeProject::GetEntries(const QString & root, const QDir & dir, const QStringList & suffix)
+QSet<QString> BkeProject::GetEntries(const QDir & root, const QDir & dir, const QStringList & suffix)
 {
 	QSet<QString> ls;
 	for (auto &&s : dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot))
 	{
 		if (s.isDir())
 		{
-			ls << QDir(root).relativeFilePath(s.absolutePath()) + '/';
+			ls << root.relativeFilePath(s.absoluteFilePath()) + '/';
 		}
 		else if (suffix.indexOf(chopFileExt(s.fileName()).toLower()) >= 0)
 		{
-			ls << QDir(root).relativeFilePath(s.absolutePath());
+			ls << root.relativeFilePath(s.absoluteFilePath());
 		}
 	}
 	return ls;
 }
 
-void BkeProject::FeedEntryMap(const QDir & dir)
+QSet<QString> BkeProject::GetEntries(const QString & root, const QDir & dir, const QStringList & suffix)
+{
+	return GetEntries(QDir(root), dir, suffix);
+}
+
+void BkeProject::FeedEntryMap(QMap<QString, QSet<QString>> &entryMap, const QDir & dir)
 {
 	entryMap[dir.absolutePath()] = GetEntries(pdir, dir, watcherSuffix);
 	for (auto &&s : dir.entryList(QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot))
 	{
-		FeedEntryMap(QDir(s));
+		QDir d(dir);
+		d.cd(s);
+		FeedEntryMap(entryMap, d);
 	}
 }

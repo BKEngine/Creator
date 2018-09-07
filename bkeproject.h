@@ -127,7 +127,9 @@ public:
 	QStringList AllSourceFiles() ;
 	QTreeWidgetItem *FindItem(QTreeWidgetItem *dest,const QString &dir,bool mkempty = true) ;
 	QTreeWidgetItem *FindItemAll(const QString &name) ;
-	QTreeWidgetItem *MakeItem(QTreeWidgetItem *dest,const QString &dir) ;
+	QTreeWidgetItem *MakeItem(QTreeWidgetItem *dest, const QString &dir);
+	void AddFiles(const QStringList &ls, QTreeWidgetItem *dest);
+	void AddDir(const QString &dir, QTreeWidgetItem *dest);
 
 	QTreeWidgetItem *ConfigFile;
 	QTreeWidgetItem *Import;
@@ -211,8 +213,9 @@ private:
 	void SetupWatcher();
 	void projectDirChanged(const QString &path);
 	QMap<QString, QSet<QString>> entryMap;
+	QSet<QString> GetEntries(const QDir &root, const QDir &dir, const QStringList &suffix);
 	QSet<QString> GetEntries(const QString &root, const QDir &dir, const QStringList &suffix);
-	void FeedEntryMap(const QDir &dir);
+	void FeedEntryMap(QMap<QString, QSet<QString>> &entryMap, const QDir &dir);
 };
 
 #endif // BKEPROJECT_H
