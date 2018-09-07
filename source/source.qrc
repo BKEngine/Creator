@@ -43,11 +43,10 @@
         <file>movie.png</file>
         <file>bksfile.png</file>
         <file>bksdoc.png</file>
+        <file>sourcedoc.png</file>
         <file>open_file.png</file>
         <file>openfile.png</file>
         <file>newfile.png</file>
-        <file>audiodir.png</file>
-        <file>picdir.png</file>
     </qresource>
     <qresource prefix="/info">
         <file>alert.png</file>

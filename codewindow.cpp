@@ -1733,7 +1733,8 @@ void CodeWindow::QfileChange(const QString &path)
 		return;
 	}
 
-	if (tempbase->edit->isModified()){
+	if (tempbase->edit->isModified())
+	{
 		msg.setText("文件：\r\n" + tempbase->Name() + "\r\n已经修改，是否放弃修改？");
 		msg.addButton(QMessageBox::Yes);
 		msg.addButton(QMessageBox::No);

@@ -66,8 +66,7 @@ BkeProject::BkeProject(QObject *parent)
 	baseico = new QIcon(":/project/database.png");
 	importico = new QIcon(":/project/import.png");
 	bksdocico = new QIcon(":/project/bksdoc.png");
-	audiodirico = new QIcon(":/project/audiodir.png");
-	picdirico = new QIcon(":/project/picdir.png");
+	sourcedocico = new QIcon(":/project/sourcedoc.png");
 	bksfileico = new QIcon(":/project/bksfile.png");
 	imgfileico = new QIcon(":/project/image.png");
 	volfileico = new QIcon(":/project/music.png");
@@ -86,8 +85,7 @@ BkeProject::~BkeProject()
 	delete baseico;
 	delete importico;
 	delete bksdocico;
-	delete audiodirico;
-	delete picdirico;
+	delete sourcedocico;
 	delete bksfileico;
 	delete imgfileico;
 	delete volfileico;
@@ -103,21 +101,18 @@ void BkeProject::BuildItem(const QString &name)
 	ConfigFile = new QTreeWidgetItem(QStringList() << "config.bkpsr");
 	Import = new QTreeWidgetItem(QStringList() << "宏");
 	Script = new QTreeWidgetItem(QStringList() << "脚本");
-	Audio = new QTreeWidgetItem(QStringList() << "音频");
-	Image = new QTreeWidgetItem(QStringList() << "图片");
+	Source = new QTreeWidgetItem(QStringList() << "资源");
 
 	Root->setIcon(0, *baseico);
 	ConfigFile->setIcon(0, *bksfileico);
 	Import->setIcon(0, *importico);
 	Script->setIcon(0, *bksdocico);
-	Audio->setIcon(0, *audiodirico);
-	Image->setIcon(0, *picdirico);
+	Source->setIcon(0, *sourcedocico);
 
 	Root->addChild(ConfigFile);
 	Root->addChild(Import);
 	Root->addChild(Script);
-	Root->addChild(Image);
-	Root->addChild(Audio);
+	Root->addChild(Source);
 	Root->setExpanded(true);
 }
 
@@ -684,14 +679,20 @@ QStringList BkeProject::AllScriptFiles()
 	return temp;
 }
 
+QStringList BkeProject::AllSourceFiles()
+{
+	QStringList temp;
+	temp.append(ListFiles(3));
+	return temp;
+}
+
 QTreeWidgetItem *BkeProject::FindItemAll(const QString &name)
 {
 	QTreeWidgetItem *le;
 	QString temp = AllNameToName(name);
 	le = FindItem(Import, temp, false);
 	if (le == 0) le = FindItem(Script, temp, false);
-	if (le == 0) le = FindItem(Image, temp, false);
-	if (le == 0) le = FindItem(Audio, temp, false);
+	else if (le == 0) le = FindItem(Source, temp, false);
 	return le;
 }
 
@@ -777,7 +778,7 @@ void BkeProject::AddDir(const QString &dir, const ItemInfo &f)
 	auto ff = f.getLayer1ItemInfo();
 	FindItem(f.Root, dir);
 	
-	QStringList ls = SearchDir(ProjectDir()+f.getDir(), dir, (f.Root == Import || f.Root == Script) ? scriptSuffixes : (audioSuffixes + imageSuffixes));
+	QStringList ls = SearchDir(ProjectDir() + f.getDir(), dir, (f.Root == Import || f.Root == Script) ? scriptSuffixes : (audioSuffixes + imageSuffixes));
 	AddFiles(ls, f);
 }
 

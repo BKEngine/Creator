@@ -112,6 +112,8 @@ void ProjectWindow::OpenProject(const QString &file)
 	addTopLevelItem(workpro->Root);
 	BkeChangeCurrentProject();
 
+
+
 	//    //读取书签
 	//    QString text ;
 	//    LOLI::AutoRead(text,pro->FileDir()+"/BkeProject.bmk") ;
