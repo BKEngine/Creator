@@ -7,6 +7,7 @@
 #include "bkeSci/bkemarks.h"
 #include "bkeprojectconfig.h"
 #include "BG_Analysis.h"
+#include "QFsWatcher/QFsWatcher"
 
 class ItemInfo;
 
@@ -77,12 +78,13 @@ enum ItemType
 };
 
 class CodeWindow;
-class QFileSystemWatcher;
+class QFsWatcher;
+class ProjectWindow;
 class BkeProject :public QObject
 {
 public:
+	BkeProject(ProjectWindow *parent);
 	static QString NormalizeDirPath(QString path);
-	BkeProject(QObject *parent = 0);
 	~BkeProject() ;
 	QString ProjectFile() const;
 	QString ProjectLangFile() const;
@@ -131,6 +133,7 @@ public:
 	void AddFiles(const QStringList &ls, QTreeWidgetItem *dest);
 	void AddDir(const QString &dir, QTreeWidgetItem *dest);
 
+private:
 	QTreeWidgetItem *ConfigFile;
 	QTreeWidgetItem *Import;
 	QTreeWidgetItem *Script;
@@ -147,16 +150,18 @@ public:
 	BkeProjectConfig *config;
 	BG_Analysis *analysis;
 
-	QIcon *fileico ;
-	QIcon *dirsico ;
-	QIcon *baseico ;
-	QIcon *importico ;
-	QIcon *bksdocico ;
-	QIcon *sourcedocico ;
-	QIcon *bksfileico ;
-	QIcon *imgfileico ;
-	QIcon *volfileico ;
-	QIcon *movfileico ;
+	static QIcon fileico ;
+	static QIcon dirsico ;
+	static QIcon baseico ;
+	static QIcon importico ;
+	static QIcon bksdocico ;
+	static QIcon sourcedocico ;
+	static QIcon bksfileico ;
+	static QIcon imgfileico ;
+	static QIcon volfileico ;
+	static QIcon movfileico ;
+private:
+	static bool iconInited;
 
 private:
 	QString pdir ;
@@ -174,8 +179,8 @@ private:
 	//QTreeWidgetItem* FindItemIn(QTreeWidgetItem *p, const QString &name, bool createnew = false, QIcon *icon = NULL);
 	void ForceAddScript(const QString &f, QTreeWidgetItem* p);
 	void MakeImport() ;
+	void SetName(const QString &name);
 	void ListToIni(QSettings *bkp,QStringList list) ;
-	void BuildItem(const QString &name) ;
 	void SortItem(QTreeWidgetItem *dest) ;
 	void SortTree(QTreeWidgetItem *tree) ;
 	QJsonObject TreeToJson(QTreeWidgetItem *tree);
@@ -209,13 +214,13 @@ public:
 	void DeleteSaveData();
 
 private:
-	QFileSystemWatcher * watcher;
+	QFsWatcher *watcher;
 	void SetupWatcher();
-	void projectDirChanged(const QString &path);
-	QMap<QString, QSet<QString>> entryMap;
-	QSet<QString> GetEntries(const QDir &root, const QDir &dir, const QStringList &suffix);
-	QSet<QString> GetEntries(const QString &root, const QDir &dir, const QStringList &suffix);
-	void FeedEntryMap(QMap<QString, QSet<QString>> &entryMap, const QDir &dir);
+	void onEntryCreated(QString path, QFsWatcherEntryType type);
+	void onEntryRenamed(QString oldpath, QString path, QFsWatcherEntryType type);
+	void onEntryDeleted(QString path, QFsWatcherEntryType type);
+	void BuildTree(QTreeWidgetItem *dest, const QString &path, const QStringList &suffix);
+	void BuildTree(QTreeWidgetItem *dest, const QDir &dir, const QStringList &suffix);
 };
 
 #endif // BKEPROJECT_H

@@ -63,16 +63,27 @@ void ProjectWindow::NewProject()
 		global_bke_info.save();
 		CloseProject();
 	}
-	workpro = new BkeProject();
+	workpro = new BkeProject(this);
 	if (use.type == 0){
-		workpro->NewProject(use.okdir, use.okname);
+		if (!workpro->NewProject(use.okdir, use.okname))
+		{
+			delete workpro;
+			workpro = nullptr;
+			QMessageBox::information(this, "错误", "工程文件创建失败", QMessageBox::Ok);
+			return;
+		}
 	}
 	else if (use.type == 1){
-
+		if (!workpro->OpenProject(use.okname))
+		{
+			delete workpro;
+			workpro = nullptr;
+			QMessageBox::information(this, "错误", "文件不存在，工程打开失败", QMessageBox::Ok);
+			return;
+		}
 	}
 
 	//projectlist << pro ;
-	addTopLevelItem(workpro->Root);
 	BkeChangeCurrentProject();
 	BkeCreator::AddRecentProject(workpro->ProjectDir() + BKE_PROJECT_NAME);
 }
@@ -99,20 +110,17 @@ void ProjectWindow::OpenProject(const QString &file)
 	//    }
 	//}
 
-	workpro = new BkeProject;
+	workpro = new BkeProject(this);
 	if (!workpro->OpenProject(file))
 	{
-		QMessageBox::information(this, "错误", "文件不存在，工程打开失败", QMessageBox::Ok);
-		BkeCreator::RemoveRecentProject(file);
 		delete workpro;
 		workpro = NULL;
+		QMessageBox::information(this, "错误", "文件不存在，工程打开失败", QMessageBox::Ok);
+		BkeCreator::RemoveRecentProject(file);
 		return;
 	}
 	//projectlist << pro ;
-	addTopLevelItem(workpro->Root);
 	BkeChangeCurrentProject();
-
-
 
 	//    //读取书签
 	//    QString text ;
@@ -120,9 +128,6 @@ void ProjectWindow::OpenProject(const QString &file)
 	//    emit TextToMarks(text,pro->FileDir(),0);
 	BkeCreator::AddRecentProject(workpro->ProjectDir() + BKE_PROJECT_NAME);
 	//默认展开节点
-	workpro->Root->setExpanded(true);
-	workpro->Script->setExpanded(true);
-	workpro->Import->setExpanded(true);
 
 	emit onProjectOpen(workpro);
 }
@@ -196,7 +201,7 @@ void ProjectWindow::ShowRmenu(const QPoint & pos)
 
 	mn.addSeparator();
 
-	if (info.Layer == 1 || (info.Layer > 1 && info.IconKey == workpro->dirsico->cacheKey()))
+	if (info.Layer == 1 || (info.Layer > 1 && info.IconKey == BkeProject::dirsico.cacheKey()))
 	{
 		auto info2 = info.getLayer1ItemInfo();
 		if (info2.Name == "宏")
@@ -603,7 +608,6 @@ void ProjectWindow::CloseProject()
 	if (!workpro)
 		return;
 	//workpro->deleteLater();
-	takeTopLevelItem(indexOfTopLevelItem(workpro->Root));
 	//先closeALl脚本窗口
 	emit onProjectClose();
 	delete workpro;

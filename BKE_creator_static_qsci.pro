@@ -105,20 +105,11 @@ SOURCES += ./main.cpp \
     bkeprojectconfig.cpp \
     BKS_info.cpp \
     BKEscintilla/lexers/BKE_Lexer.cpp \
-    ParserHelper/ParserHelper.cpp \
-    ParserHelper/parser/BKE_number.cpp \
-    ParserHelper/parser/BKE_string.cpp \
-    ParserHelper/parser/BKE_variable.cpp \
-    ParserHelper/parser/parser.cpp \
-    ParserHelper/parser/utils.cpp \
     dia/cdiroption.cpp \
     dia/cskinoption.cpp \
     dia/Setoptiondia.cpp \
     dia/WaitWindow.cpp \
     dia/versioninfo.cpp \
-    ParserHelper/parser/bkutf8.cpp \
-    ParserHelper/parser/extend.cpp \
-    ParserHelper/parser/parserextend.cpp \
     BG_Analysis.cpp \
     ParseData.cpp \
     dia/GameProperty.cpp \
@@ -156,8 +147,22 @@ SOURCES += ./main.cpp \
     TinyProcess\process_unix.cpp \
     TinyProcess\process_win.cpp \
     dia/bkespriteviewer.cpp \
-    dia/mainwindow.cpp \
-    dia/bkespriteviewerinfo.cpp
+    dia/bkespriteviewerinfo.cpp \
+    ParserHelper/ParserHelper.cpp \
+    ParserHelper/Bagel/Bagel_DCompiler.cpp \
+    ParserHelper/Bagel/Bagel_Export.cpp \
+    ParserHelper/Bagel/Bagel_GC.cpp \
+    ParserHelper/Bagel/Bagel_Parser.cpp \
+    ParserHelper/Bagel/Bagel_RCompiler.cpp \
+    ParserHelper/Bagel/Bagel_Serializer.cpp \
+    ParserHelper/Bagel/Bagel_String.cpp \
+    ParserHelper/Bagel/Bagel_Utils.cpp \
+    ParserHelper/Bagel/Bagel_Var.cpp \
+    ParserHelper/Bagel/Bagel_Vcode.cpp \
+    ParserHelper/Bagel/Bagel_VM.cpp \
+    ParserHelper/Bagel/bkutf8.cpp \
+    ParserHelper/Bagel/extend.cpp \
+    ParserHelper/Bagel/poolmalloc.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -244,18 +249,6 @@ HEADERS  += \
     dia/cconfigdia.h \
     dia/ctextedit.h \
     bkeprojectconfig.h \
-    ParserHelper/ParserHelper.h \
-    ParserHelper/parser/BKE_array.h \
-    ParserHelper/parser/BKE_hash.hpp \
-    ParserHelper/parser/BKE_number.h \
-    ParserHelper/parser/BKE_string.h \
-    ParserHelper/parser/BKE_variable.h \
-    ParserHelper/parser/defines.h \
-    ParserHelper/parser/extend.h \
-    ParserHelper/parser/memorypool.h \
-    ParserHelper/parser/parser.h \
-    ParserHelper/parser/utils.h \
-    ParserHelper/parser/vcode.h \
     dia/cdiroption.h \
     dia/cskinoption.h \
     dia/Setoptiondia.h \
@@ -300,8 +293,28 @@ HEADERS  += \
     dia/ParserEditorUndoCommand.h \
     TinyProcess\process.hpp \
     dia/bkespriteviewer.h \
-    dia/mainwindow.h \
-    dia/bkespriteviewerinfo.h
+    dia/bkespriteviewerinfo.h \
+    ParserHelper/ParserHelper.h \
+    ParserHelper/Bagel/Bagel_Config.h \
+    ParserHelper/Bagel/Bagel_DCompiler.h \
+    ParserHelper/Bagel/Bagel_GC.h \
+    ParserHelper/Bagel/Bagel_Include.h \
+    ParserHelper/Bagel/Bagel_Number.h \
+    ParserHelper/Bagel/Bagel_Parser.h \
+    ParserHelper/Bagel/Bagel_RCompiler.h \
+    ParserHelper/Bagel/Bagel_Serializer.h \
+    ParserHelper/Bagel/Bagel_String.h \
+    ParserHelper/Bagel/Bagel_Utils.h \
+    ParserHelper/Bagel/Bagel_Var.h \
+    ParserHelper/Bagel/Bagel_Vcode.h \
+    ParserHelper/Bagel/Bagel_VM.h \
+    ParserHelper/Bagel/BKE_array.h \
+    ParserHelper/Bagel/BKE_hash.hpp \
+    ParserHelper/Bagel/bkutf8.h \
+    ParserHelper/Bagel/extend.h \
+    ParserHelper/Bagel/memorypool.h \
+    ParserHelper/Bagel/poolmalloc.h \
+    ParserHelper/Bagel/stack_allocator.h
 
 RESOURCES += \
     source/source.qrc \
@@ -326,7 +339,6 @@ FORMS += \
     dia/gotofiledialog.ui \
     dia/autocompletelist.ui \
     dia/bkespriteviewer.ui \
-    dia/mainwindow.ui \
     dia/bkespriteviewerinfo.ui
 
 mac{
@@ -354,3 +366,51 @@ unix:CONFIG(release, debug|release):{
 DISTFILES += \
     ico.rc \
     bkeico.ico
+
+#QFsWatcher
+
+SOURCES += \
+    QFsWatcher/src/polling/directory_record.cpp \
+    QFsWatcher/src/polling/polled_root.cpp \
+    QFsWatcher/src/polling/polling_iterator.cpp \
+    QFsWatcher/src/polling/polling_thread.cpp \
+    QFsWatcher/src/worker/recent_file_cache.cpp \
+    QFsWatcher/src/worker/worker_thread.cpp \
+    QFsWatcher/src/errable.cpp \
+    QFsWatcher/src/hub.cpp \
+    QFsWatcher/src/log.cpp \
+    QFsWatcher/src/message.cpp \
+    QFsWatcher/src/message_buffer.cpp \
+    QFsWatcher/src/queue.cpp \
+    QFsWatcher/src/status.cpp \
+    QFsWatcher/src/thread.cpp \
+    QFsWatcher/src/thread_starter.cpp \
+    QFsWatcher/qfswatcherplatform.cpp \
+    QFsWatcher/src/helper/qt.cpp \
+    QFsWatcher/qfswatcher.cpp
+
+HEADERS += \
+    QFsWatcher/src/helper/common.h \
+    QFsWatcher/src/polling/directory_record.h \
+    QFsWatcher/src/polling/polled_root.h \
+    QFsWatcher/src/polling/polling_iterator.h \
+    QFsWatcher/src/polling/polling_thread.h \
+    QFsWatcher/src/worker/recent_file_cache.h \
+    QFsWatcher/src/worker/worker_platform.h \
+    QFsWatcher/src/worker/worker_thread.h \
+    QFsWatcher/src/errable.h \
+    QFsWatcher/src/hub.h \
+    QFsWatcher/src/log.h \
+    QFsWatcher/src/message.h \
+    QFsWatcher/src/message_buffer.h \
+    QFsWatcher/src/queue.h \
+    QFsWatcher/src/result.h \
+    QFsWatcher/src/status.h \
+    QFsWatcher/src/thread.h \
+    QFsWatcher/src/thread_starter.h \
+    QFsWatcher/src/helper/qt.h \
+    QFsWatcher/qfswatcher.h
+
+mac{
+LIBS += -framework CoreService
+}

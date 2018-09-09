@@ -83,6 +83,9 @@
     <Filter Include="lz4">
       <UniqueIdentifier>{afb24704-59ef-405f-a510-5b467e7309f2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="QFsWatcher">
+      <UniqueIdentifier>{5a05f433-1bed-4154-a87e-ba07ed3636aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BKEscintilla\lexers\BKE_Lexer.cpp">
@@ -769,6 +772,72 @@
     <ClCompile Include="lz4\xxhash.c">
       <Filter>lz4</Filter>
     </ClCompile>
+    <ClCompile Include="QFsWatcher\qfswatcher.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qfswatcher.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qfswatcher.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\qfswatcherplatform.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\errable.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\hub.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\log.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\message.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\message_buffer.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\queue.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\status.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\thread.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\thread_starter.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\helper\qt.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="Debug\moc_qt.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="Release\moc_qt.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\polling\directory_record.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\polling\polled_root.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\polling\polling_iterator.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\polling\polling_thread.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\worker\recent_file_cache.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
+    <ClCompile Include="QFsWatcher\src\worker\worker_thread.cpp">
+      <Filter>QFsWatcher</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BKEscintilla\lexlib\Accessor.h">
@@ -1302,6 +1371,57 @@
     <ClInclude Include="lz4\xxhash.h">
       <Filter>lz4</Filter>
     </ClInclude>
+    <ClInclude Include="QFsWatcher\src\errable.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\hub.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\log.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\message.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\message_buffer.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\queue.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\result.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\status.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\thread.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\thread_starter.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\polling\directory_record.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\polling\polled_root.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\polling\polling_iterator.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\polling\polling_thread.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\worker\recent_file_cache.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\worker\worker_platform.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\worker\worker_thread.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="dia\Setoptiondia.ui">
@@ -1405,6 +1525,12 @@
     </CustomBuild>
     <CustomBuild Include="dia\bkespriteviewerinfo.h">
       <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="QFsWatcher\qfswatcher.h">
+      <Filter>QFsWatcher</Filter>
+    </CustomBuild>
+    <CustomBuild Include="QFsWatcher\src\helper\qt.h">
+      <Filter>QFsWatcher</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -1584,6 +1710,9 @@
     </None>
     <None Include="QSortedSet">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="QFsWatcher\QFsWatcher">
+      <Filter>QFsWatcher</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
