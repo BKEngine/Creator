@@ -3,8 +3,8 @@
 
 #include <string>
 #include <type_traits>
-#include <charconv>
 #include <array>
+#include <cstdint>
 
 class stringbuilder
 {
@@ -25,12 +25,52 @@ public:
 		buf.append(s);
 		return *this;
 	}
-	template<typename T, typename = typename std::enable_if<std::is_arithmetic<T>::value>::type>
-	stringbuilder &operator <<(T t) {
-		std::array<char, 32> str;
-		if (auto[p, ec] = std::to_chars(str.data(), str.data() + str.size(), 42);
-		ec == std::errc())
-			buf.append(str.data(), p - str.data());
+	stringbuilder &operator <<(int32_t i) {
+		char tmp[16];
+		sprintf(tmp, "%d", i);
+		buf.append(tmp);
+		return *this;
+	}
+	stringbuilder &operator <<(int64_t i) {
+		char tmp[24];
+		sprintf(tmp, "%I64d", i);
+		buf.append(tmp);
+		return *this;
+	}
+	stringbuilder &operator <<(uint32_t i) {
+		char tmp[16];
+		sprintf(tmp, "%u", i);
+		buf.append(tmp);
+		return *this;
+	}
+	stringbuilder &operator <<(uint64_t i) {
+		char tmp[24];
+		sprintf(tmp, "%I64u", i);
+		buf.append(tmp);
+		return *this;
+	}
+	stringbuilder &operator <<(long i) {
+		char tmp[24];
+		sprintf(tmp, "%ld", i);
+		buf.append(tmp);
+		return *this;
+	}
+	stringbuilder &operator <<(unsigned long i) {
+		char tmp[24];
+		sprintf(tmp, "%lu", i);
+		buf.append(tmp);
+		return *this;
+	}
+	stringbuilder &operator <<(float f) {
+		char tmp[24];
+		sprintf(tmp, "%f", f);
+		buf.append(tmp);
+		return *this;
+	}
+	stringbuilder &operator <<(double f) {
+		char tmp[24];
+		sprintf(tmp, "%f", f);
+		buf.append(tmp);
 		return *this;
 	}
 	const std::string &str() const {
