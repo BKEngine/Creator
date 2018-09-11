@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 
-#include "../log.h"
 #include "../message.h"
 #include "../queue.h"
 #include "../result.h"
@@ -31,8 +30,6 @@ Result<> WorkerThread::wake()
 
 Result<> WorkerThread::init()
 {
-  Logger::from_env("WATCHER_LOG_WORKER");
-
   return platform->init();
 }
 

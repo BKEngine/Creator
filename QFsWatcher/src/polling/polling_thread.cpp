@@ -8,19 +8,18 @@
 #include <utility>
 #include <vector>
 
-#include "../log.h"
 #include "../message_buffer.h"
 #include "../result.h"
 #include "../status.h"
 #include "../thread.h"
 #include "polled_root.h"
 #include "polling_thread.h"
+#include "../stringbuilder.h"
 
 using std::endl;
 using std::move;
 using std::ostream;
 using std::string;
-using std::to_string;
 using std::unique_ptr;
 using std::vector;
 
@@ -34,33 +33,24 @@ PollingThread::PollingThread(QtMainThreadCallback *main_callback) :
 
 Result<> PollingThread::init()
 {
-  Logger::from_env("WATCHER_LOG_POLLING");
-
   return ok_result();
 }
 
 Result<> PollingThread::body()
 {
   while (true) {
-    FsTimer t;
 
-    LOGGER << "Handling commands." << endl;
     Result<size_t> cr = handle_commands();
     if (cr.is_error()) {
-      LOGGER << "Unable to process incoming commands: " << cr << endl;
     } else if (is_stopping()) {
-      LOGGER << "Polling thread stopping." << endl;
       return ok_result();
     }
 
     Result<> r = cycle();
     if (r.is_error()) {
-      LOGGER << "Polling cycle failure " << r << "." << endl;
       return r.propagate_as_void();
     }
 
-    t.stop();
-    LOGGER << "Polling cycle complete in " << t << ". Sleeping for " << poll_interval.count() << "ms." << endl;
     std::this_thread::sleep_for(poll_interval);
   }
 }
@@ -71,20 +61,14 @@ Result<> PollingThread::cycle()
   size_t remaining = poll_throttle;
 
   size_t roots_left = roots.size();
-  LOGGER << "Polling " << plural(roots_left, "root") << " with " << plural(poll_throttle, "throttle slot") << "."
-         << endl;
 
   for (auto &it : roots) {
     PolledRoot &root = it.second;
     size_t allotment = remaining / roots_left;
 
-    LOGGER << "Polling " << root << " with an allotment of " << plural(allotment, "throttle slot") << "." << endl;
 
     size_t progress = root.advance(buffer, allotment);
     remaining -= progress;
-    if (progress != allotment) {
-      LOGGER << root << " only consumed " << plural(progress, "throttle slot") << "." << endl;
-    }
 
     roots_left--;
   }
@@ -139,11 +123,6 @@ Result<Thread::OfflineCommandOutcome> PollingThread::handle_offline_command(cons
 
 Result<Thread::CommandOutcome> PollingThread::handle_add_command(const CommandPayload *command)
 {
-  ostream &logline = LOGGER << "Adding poll root at path " << command->get_root();
-  if (!command->get_recursive()) logline << " (non-recursively)";
-  logline << " to channel " << command->get_channel_id() << " with " << plural(command->get_split_count(), "split")
-          << "." << endl;
-
   roots.emplace(std::piecewise_construct,
     std::forward_as_tuple(command->get_channel_id()),
     std::forward_as_tuple(string(command->get_root()), command->get_channel_id(), command->get_recursive()));
@@ -151,7 +130,8 @@ Result<Thread::CommandOutcome> PollingThread::handle_add_command(const CommandPa
   auto existing = pending_splits.find(command->get_channel_id());
   if (existing != pending_splits.end()) {
     bool inconsistent = false;
-    string msg("Inconsistent split ADD command received by polling thread: ");
+	stringbuilder msg;
+	msg << "Inconsistent split ADD command received by polling thread: ";
 
     const CommandID &existing_command_id = existing->second.first;
     const size_t &split_count = existing->second.second;
@@ -159,27 +139,27 @@ Result<Thread::CommandOutcome> PollingThread::handle_add_command(const CommandPa
     if (existing_command_id != command->get_id()) {
       inconsistent = true;
 
-      msg += " command ID (";
-      msg += to_string(existing_command_id);
-      msg += " => ";
-      msg += to_string(command->get_id());
-      msg += ")";
+      msg << " command ID (";
+      msg << existing_command_id;
+      msg << " => ";
+      msg << command->get_id();
+      msg << ")";
     }
 
     if (split_count != command->get_split_count()) {
       if (inconsistent) {
-        msg += " and";
+        msg << " and";
       }
 
-      msg += " split count (";
-      msg += to_string(split_count);
-      msg += " => ";
-      msg += to_string(command->get_split_count());
-      msg += ")";
+      msg << " split count (";
+      msg << split_count;
+      msg << " => ";
+      msg << command->get_split_count();
+      msg << ")";
     }
 
     if (inconsistent) {
-      return Result<CommandOutcome>::make_error(move(msg));
+      return Result<CommandOutcome>::make_error(msg.mstr());
     }
 
     return ok_result(NOTHING);
@@ -201,7 +181,6 @@ Result<Thread::CommandOutcome> PollingThread::handle_add_command(const CommandPa
 Result<Thread::CommandOutcome> PollingThread::handle_remove_command(const CommandPayload *command)
 {
   const ChannelID &channel_id = command->get_channel_id();
-  LOGGER << "Removing poll roots at channel " << channel_id << "." << endl;
 
   roots.erase(command->get_channel_id());
 
@@ -217,7 +196,6 @@ Result<Thread::CommandOutcome> PollingThread::handle_remove_command(const Comman
   }
 
   if (roots.empty()) {
-    LOGGER << "Final root removed." << endl;
     return ok_result(TRIGGER_STOP);
   }
 

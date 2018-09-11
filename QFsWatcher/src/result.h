@@ -6,8 +6,6 @@
 #include <string>
 #include <utility>
 
-#include "log.h"
-
 // Container to be returned from method calls that may fail, optionally wrapping a return value.
 //
 // Result objects are expected to be stack-allocated and returned using move semantics or return-value optimization.
@@ -157,7 +155,6 @@ private:
     switch (state) {
       case RESULT_OK: new (&value) V(original.value); break;
       case RESULT_ERROR: new (&error) std::string(original.error); break;
-      default: LOGGER << "Invalid result state " << state << " in Result::Result(Result&)" << std::endl; break;
     }
   }
 
@@ -168,7 +165,6 @@ private:
     switch (state) {
       case RESULT_OK: new (&value) V(std::move(original.value)); break;
       case RESULT_ERROR: new (&error) std::string(std::move(original.error)); break;
-      default: LOGGER << "Invalid result state " << state << " in Result::assign(Result&&)." << std::endl; break;
     }
   }
 
@@ -177,7 +173,6 @@ private:
     switch (state) {
       case RESULT_OK: value.~V(); break;
       case RESULT_ERROR: error.~basic_string(); break;
-      default: LOGGER << "Invalid result state " << state << " in Result::clear()." << std::endl; break;
     }
   }
 
@@ -209,19 +204,6 @@ inline Result<void *> ok_result()
 inline Result<void *> error_result(std::string &&message)
 {
   return Result<void *>::make_error(std::move(message));
-}
-
-template <class V>
-std::ostream &operator<<(std::ostream &out, const Result<V> &result)
-{
-  if (result.is_error()) {
-    out << result.get_error();
-  } else if (result.is_ok()) {
-    out << "OK";
-  } else {
-    out << "INVALID";
-  }
-  return out;
 }
 
 #endif

@@ -10,27 +10,24 @@
 #include <windows.h>
 
 #include "../../helper/windows/helper.h"
-#include "../../log.h"
 #include "../../message.h"
 #include "../../message_buffer.h"
 #include "../recent_file_cache.h"
 #include "../worker_platform.h"
 #include "../worker_thread.h"
 #include "subscription.h"
+#include "../../stringbuilder.h"
 
 using std::default_delete;
 using std::endl;
 using std::make_pair;
 using std::map;
 using std::move;
-using std::ostream;
-using std::ostringstream;
 using std::pair;
 using std::shared_ptr;
 using std::string;
 using std::unique_ptr;
 using std::vector;
-using std::wostringstream;
 using std::wstring;
 
 const size_t DEFAULT_CACHE_SIZE = 4096;
@@ -116,7 +113,7 @@ public:
       NULL  // template file
     );
     if (root == INVALID_HANDLE_VALUE) {
-      ostringstream msg;
+      stringbuilder msg;
       msg << "Unable to open directory handle " << root_path;
       return windows_error_result<bool>(msg.str());
     }
@@ -127,20 +124,14 @@ public:
     if (!insert_result.second) {
       delete sub;
 
-      ostringstream msg("Channel collision: ");
-      msg << channel;
-      return Result<bool>::make_error(msg.str());
+	  stringbuilder msg;
+	  msg << "Channel collision: " << channel;
+      return Result<bool>::make_error(msg.mstr());
     }
-
-    ostream &logline = LOGGER << "Added directory root " << root_path;
-    if (!recursive) logline << " (non-recursive)";
-    logline << " at channel " << channel << "." << endl;
 
     Result<bool> schedr = sub->schedule(&event_helper);
     if (schedr.is_error()) return schedr.propagate<bool>();
     if (!schedr.get_value()) {
-      LOGGER << "Falling back to polling for watch root " << root_path << "." << endl;
-
       return emit_msg(Message(CommandPayloadBuilder::add(channel, string(root_path), recursive, 1).build()))
         .propagate(false);
     }
@@ -154,27 +145,22 @@ public:
   {
     auto it = subscriptions.find(channel);
     if (it == subscriptions.end()) {
-      LOGGER << "Channel " << channel << " was already removed." << endl;
       return ok_result(true);
     }
 
     Result<> r = it->second->stop(command);
     if (r.is_error()) return r.propagate<bool>();
 
-    LOGGER << "Subscription for channel " << channel << " stopped." << endl;
     return ok_result(false);
   }
 
   void handle_cache_size_command(size_t cache_size) override
   {
-    LOGGER << "Changing cache size to " << cache_size << "." << endl;
     cache.resize(cache_size);
   }
 
   Result<> handle_fs_event(DWORD error_code, DWORD num_bytes, Subscription *sub)
   {
-	  FsTimer t;
-
     // Ensure that the subscription is valid.
     ChannelID channel = sub->get_channel();
     auto it = subscriptions.find(channel);
@@ -185,17 +171,14 @@ public:
     // Subscription termination.
     bool terminate = false;
     if (error_code == ERROR_OPERATION_ABORTED) {
-      LOGGER << "Completing termination of channel " << channel << "." << endl;
       terminate = true;
     } else if (sub->is_terminating()) {
-      LOGGER << "Filesystem event encountered on terminating channel " << channel << "." << endl;
       terminate = true;
     }
     if (terminate) return remove(sub);
 
     // Handle errors.
     if (error_code == ERROR_INVALID_PARAMETER) {
-      LOGGER << "Attempting to revert to a network-friendly buffer size." << endl;
 
       Result<> resize = sub->use_network_size();
       if (resize.is_error()) return emit_fatal_error(sub, move(resize));
@@ -204,7 +187,6 @@ public:
     }
 
     if (error_code == ERROR_NOTIFY_ENUM_DIR) {
-      LOGGER << "Change buffer overflow. Some events may have been lost." << endl;
       return reschedule(sub);
     }
 
@@ -213,7 +195,6 @@ public:
     }
 
     if (num_bytes == 0) {
-      LOGGER << "Empty event batch received." << endl;
       return reschedule(sub);
     }
 
@@ -232,7 +213,6 @@ public:
 
       Result<> pr = process_event_payload(info, sub, messages);
       if (pr.is_error()) {
-        LOGGER << "Skipping entry " << pr << "." << endl;
       }
 
       if (info->NextEntryOffset == 0) {
@@ -246,13 +226,6 @@ public:
 
     if (!messages.empty()) {
       Result<> er = emit_all(messages.begin(), messages.end());
-      if (er.is_error()) {
-        LOGGER << "Unable to emit messages: " << er << "." << endl;
-      } else {
-        t.stop();
-        LOGGER << "Filesystem event batch of size " << num_events << " completed in " << t << ". "
-               << plural(messages.size(), "message") << " produced." << endl;
-      }
     }
 
     return next.propagate_as_void();
@@ -267,9 +240,6 @@ private:
     if (!sch.get_value()) {
       Result<string> root = sub->get_root_path();
       if (root.is_error()) return emit_fatal_error(sub, root.propagate_as_void());
-
-      LOGGER << "Falling back to polling for path " << root.get_value() << " at channel " << sub->get_channel() << "."
-             << endl;
 
       Result<> rem = remove(sub);
       rem &= emit_msg(Message(
@@ -321,7 +291,6 @@ private:
 
     Result<string> u8r = to_utf8(pathw);
     if (u8r.is_error()) {
-      LOGGER << "Unable to convert path to utf-8: " << u8r << "." << endl;
       return ok_result();
     }
     string &path = u8r.get_value();
@@ -337,55 +306,38 @@ private:
     }
     EntryKind kind = stat->get_entry_kind();
 
-    ostream &logline = LOGGER;
-    logline << "Event at [" << path << "] ";
-
     switch (info->Action) {
       case FILE_ACTION_ADDED:
-        logline << "FILE_ACTION_ADDED " << kind << "." << endl;
         messages.created(move(path), kind);
         break;
       case FILE_ACTION_MODIFIED:
-        logline << "FILE_ACTION_MODIFIED " << kind;
         if (kind != KIND_DIRECTORY) {
-          logline << "." << endl;
           messages.modified(move(path), kind);
         } else {
-          logline << " (ignored)." << endl;
         }
         break;
       case FILE_ACTION_REMOVED:
-        logline << "FILE_ACTION_REMOVED " << kind << "." << endl;
         messages.deleted(move(path), kind);
         break;
       case FILE_ACTION_RENAMED_OLD_NAME:
-        logline << "FILE_ACTION_RENAMED_OLD_NAME " << kind << "." << endl;
         sub->remember_old_path(move(path), kind);
         break;
       case FILE_ACTION_RENAMED_NEW_NAME:
-        logline << "FILE_ACTION_RENAMED_NEW_NAME ";
         if (sub->was_old_path_seen()) {
           // Old name received first
           if (kind == KIND_UNKNOWN) {
             kind = sub->get_old_path_kind();
           }
 
-          logline << kind << "." << endl;
           cache.update_for_rename(sub->get_old_path(), path);
           messages.renamed(string(sub->get_old_path()), move(path), kind);
           sub->clear_old_path();
         } else {
           // No old name. Treat it as a creation
-          logline << "(unpaired) " << kind << "." << endl;
           messages.created(move(path), kind);
         }
         break;
       default:
-        logline << " with unexpected action " << info->Action << "." << endl;
-
-        ostringstream out;
-        out << "Unexpected action " << info->Action << " reported by ReadDirectoryChangesW for " << path;
-        return error_result(out.str());
         break;
     }
 
@@ -415,7 +367,4 @@ void CALLBACK event_helper(DWORD error_code, DWORD num_bytes, LPOVERLAPPED overl
 {
   Subscription *sub = static_cast<Subscription *>(overlapped->hEvent);
   Result<> r = sub->get_platform()->handle_fs_event(error_code, num_bytes, sub);
-  if (r.is_error()) {
-    LOGGER << "Unable to handle filesystem events: " << r << "." << endl;
-  }
 }

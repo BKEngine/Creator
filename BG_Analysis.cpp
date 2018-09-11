@@ -6,8 +6,14 @@
 #include "CmdListLoader.h"
 
 #if WIN32
+#define WIN32_LEAD_AND_MEAN
+#define NOMINMAX 1
+//  override byte to prevent clashes with <cstddef>
+#define byte win_byte_override
 #include <Windows.h>
 #include <DbgHelp.h>
+//  Undefine byte macros so it won't collide with <cstddef> header content.
+#undef byte
 //for windows debug
 
 unsigned int runAddress;

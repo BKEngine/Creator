@@ -53,6 +53,4 @@ public:
   bool complete() { return worker_received && polling_received; }
 };
 
-std::ostream &operator<<(std::ostream &out, const Status &status);
-
 #endif

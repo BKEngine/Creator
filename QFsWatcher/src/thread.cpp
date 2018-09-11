@@ -5,7 +5,6 @@
 #include <utility>
 #include <vector>
 
-#include "log.h"
 #include "message.h"
 #include "result.h"
 #include "thread.h"
@@ -14,8 +13,6 @@ using std::bind;
 using std::endl;
 using std::function;
 using std::move;
-using std::ostream;
-using std::ostringstream;
 using std::string;
 using std::unique_ptr;
 using std::vector;
@@ -30,10 +27,6 @@ Thread::DispatchTable::DispatchTable()
 {
   handlers[COMMAND_ADD] = &Thread::handle_add_command;
   handlers[COMMAND_REMOVE] = &Thread::handle_remove_command;
-  handlers[COMMAND_LOG_FILE] = &Thread::handle_log_file_command;
-  handlers[COMMAND_LOG_STDERR] = &Thread::handle_log_stderr_command;
-  handlers[COMMAND_LOG_STDOUT] = &Thread::handle_log_stdout_command;
-  handlers[COMMAND_LOG_DISABLE] = &Thread::handle_log_disable_command;
   handlers[COMMAND_POLLING_INTERVAL] = &Thread::handle_polling_interval_command;
   handlers[COMMAND_POLLING_THROTTLE] = &Thread::handle_polling_throttle_command;
   handlers[COMMAND_CACHE_SIZE] = &Thread::handle_cache_size_command;
@@ -80,16 +73,11 @@ Result<bool> Thread::send(Message &&message)
   if (is_stopped()) {
     const CommandPayload *command = message.as_command();
     if (command == nullptr) {
-      ostringstream m;
-      m << "Non-command message " << message << " sent to a stopped thread";
-
-      out.enqueue(Message::ack(message, false, m.str()));
+      out.enqueue(Message::ack(message, false, "Non-command message " + message.describe() + " sent to a stopped thread"));
       return ok_result(true);
     }
 
-    LOGGER << "Processing offline command: " << *command << "." << endl;
     Result<OfflineCommandOutcome> r0 = handle_offline_command(command);
-    LOGGER << "Result: " << r0 << "." << endl;
     if (r0.is_error() || r0.get_value() == OFFLINE_ACK) {
       out.enqueue(Message::ack(message, r0.propagate_as_void()));
       return ok_result(true);
@@ -145,24 +133,12 @@ void Thread::start()
 
   // Initialize any state necessary to call command handler methods.
   Result<> ir = init();
-  if (ir.is_error()) {
-    LOGGER << "Unable to initialize thread: " << ir << "." << endl;
-  }
 
   // Handle any commands that were enqueued while the thread was starting.
   Result<size_t> cr = handle_commands();
-  if (cr.is_error()) {
-    LOGGER << "Unable to handle initially enqueued commands: " << cr << "." << endl;
-  }
 
   Result<> r = body();
-  if (r.is_error()) {
-    LOGGER << "Thread stopping because of an error: " << r << "." << endl;
-  } else {
-    LOGGER << "Thread stopping normally." << endl;
-  }
 
-  Logger::disable();
   mark_stopped();
 }
 
@@ -178,10 +154,6 @@ Result<> Thread::emit_msg(Message &&message)
 Result<Thread::OfflineCommandOutcome> Thread::handle_offline_command(const CommandPayload *payload)
 {
   CommandAction action = payload->get_action();
-  if (action == COMMAND_LOG_FILE || action == COMMAND_LOG_STDOUT || action == COMMAND_LOG_STDERR
-    || action == COMMAND_LOG_DISABLE) {
-    starter->set_logging(payload);
-  }
 
   return ok_result(OFFLINE_ACK);
 }
@@ -201,7 +173,6 @@ Result<size_t> Thread::handle_commands()
   for (Message &message : *accepted) {
     const CommandPayload *command = message.as_command();
     if (command == nullptr) {
-      LOGGER << "Received unexpected non-command message " << message << "." << endl;
       continue;
     }
 
@@ -241,8 +212,6 @@ Result<size_t> Thread::handle_commands()
 
     // Notify the Hub if this thread has messages that need to be drained.
     if (dead_letter_office) {
-      LOGGER << plural(dead_letter_office->size(), "message") << " are now waiting in the dead letter office." << endl;
-
       emit(Message(CommandPayloadBuilder::drain().build()));
     }
   }
@@ -258,42 +227,6 @@ Result<Thread::CommandOutcome> Thread::handle_add_command(const CommandPayload *
 Result<Thread::CommandOutcome> Thread::handle_remove_command(const CommandPayload *payload)
 {
   return handle_unknown_command(payload);
-}
-
-Result<Thread::CommandOutcome> Thread::handle_log_file_command(const CommandPayload *payload)
-{
-  string err = Logger::to_file(payload->get_root().c_str());
-  if (!err.empty()) return Result<CommandOutcome>::make_error(move(err));
-
-  starter->set_logging(payload);
-  return ok_result(ACK);
-}
-
-Result<Thread::CommandOutcome> Thread::handle_log_stderr_command(const CommandPayload *payload)
-{
-  string err = Logger::to_stderr();
-  if (!err.empty()) return Result<CommandOutcome>::make_error(move(err));
-
-  starter->set_logging(payload);
-  return ok_result(ACK);
-}
-
-Result<Thread::CommandOutcome> Thread::handle_log_stdout_command(const CommandPayload *payload)
-{
-  string err = Logger::to_stdout();
-  if (!err.empty()) return Result<CommandOutcome>::make_error(move(err));
-
-  starter->set_logging(payload);
-  return ok_result(ACK);
-}
-
-Result<Thread::CommandOutcome> Thread::handle_log_disable_command(const CommandPayload *payload)
-{
-  string err = Logger::disable();
-  if (!err.empty()) return Result<CommandOutcome>::make_error(move(err));
-
-  starter->set_logging(payload);
-  return ok_result(ACK);
 }
 
 Result<Thread::CommandOutcome> Thread::handle_polling_interval_command(const CommandPayload *payload)
@@ -318,7 +251,6 @@ Result<Thread::CommandOutcome> Thread::handle_status_command(const CommandPayloa
 
 Result<Thread::CommandOutcome> Thread::handle_unknown_command(const CommandPayload *payload)
 {
-  LOGGER << "Received command with unexpected action " << *payload << "." << endl;
   return ok_result(ACK);
 }
 
@@ -331,10 +263,4 @@ string Thread::state_name()
     case STOPPING: return "stopping";
     default: return "!!";
   }
-}
-
-ostream &operator<<(ostream &out, const Thread &th)
-{
-  out << "Thread[" << th.name << "]";
-  return out;
 }

@@ -17,6 +17,7 @@
 #include "status.h"
 #include "thread_starter.h"
 #include "helper/qt.h"
+#include "stringbuilder.h"
 
 // Abstract superclass used by the Hub to manage and communicate with separate threads of execution.
 //
@@ -129,18 +130,6 @@ protected:
   // Override to remove a root directory. Optionally, trigger a possible thread shutdown by returning `TRIGGER_STOP`.
   virtual Result<CommandOutcome> handle_remove_command(const CommandPayload *payload);
 
-  // Configure this thread to log to a file.
-  Result<CommandOutcome> handle_log_file_command(const CommandPayload *payload);
-
-  // Configure this thread to log to stderr.
-  Result<CommandOutcome> handle_log_stderr_command(const CommandPayload *payload);
-
-  // Configure this thread to log to stdout.
-  Result<CommandOutcome> handle_log_stdout_command(const CommandPayload *payload);
-
-  // Disable logging from this thread.
-  Result<CommandOutcome> handle_log_disable_command(const CommandPayload *payload);
-
   // Configure the polling thread's sleep interval.
   virtual Result<CommandOutcome> handle_polling_interval_command(const CommandPayload *payload);
 
@@ -235,8 +224,6 @@ private:
   // thread's `state` being set to `STOPPING` to signal this. Messages here are processed by a call to `Thread::drain()`
   // or the next call to `Thread::send()`.
   std::unique_ptr<std::vector<Message>> dead_letter_office;
-
-  friend std::ostream &operator<<(std::ostream &out, const Thread &th);
 };
 
 template <class InputIt>
@@ -264,9 +251,9 @@ Result<bool> Thread::send_all(InputIt begin, InputIt end)
     for (InputIt it = begin; it != end; ++it) {
       const CommandPayload *command = it->as_command();
       if (command == nullptr) {
-        std::ostringstream m;
-        m << "Non-command message " << *it << " sent";
-        acks.emplace_back(Message::ack(*it, false, m.str()));
+		stringbuilder stream;
+		stream << "Non-command message " << it->describe() << " sent";
+        acks.emplace_back(Message::ack(*it, false, stream.mstr()));
         continue;
       }
 
@@ -277,9 +264,12 @@ Result<bool> Thread::send_all(InputIt begin, InputIt end)
         in.enqueue(std::move(*it));
         should_run = true;
       } else {
-        std::ostringstream m;
-        m << "Message " << *it << " returned invalid offline outcome " << r0;
-        acks.emplace_back(Message::ack(*it, false, m.str()));
+		stringbuilder stream;
+		stream << "Message ";
+		stream << it->describe();
+		stream << " returned invalid offline outcome ";
+		stream << (int)r0.get_value();
+        acks.emplace_back(Message::ack(*it, false, stream.mstr()));
       }
     }
 

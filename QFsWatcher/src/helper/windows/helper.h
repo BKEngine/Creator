@@ -42,11 +42,9 @@ Result<V> windows_error_result(const std::string &prefix, DWORD error_code)
     msg_str.erase(msg_str.size() - 3, 3);
   }
 
-  std::ostringstream msg;
-  msg << prefix << " (" << error_code << ") " << to_utf8(msg_str);
   LocalFree(msg_buffer);
 
-  return Result<V>::make_error(msg.str());
+  return Result<V>::make_error(prefix + " (" + std::to_string(error_code) + ") " + to_utf8(msg_str).get_value());
 }
 
 #endif

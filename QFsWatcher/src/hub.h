@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "errable.h"
-#include "log.h"
 #include "message.h"
 #include "polling/polling_thread.h"
 #include "result.h"
@@ -29,105 +28,11 @@ public:
   Hub &operator=(const Hub &) = delete;
   Hub &operator=(Hub &&) = delete;
 
-  Result<> use_main_log_file(std::string &&main_log_file)
-  {
-    Result<> h = health_err_result();
-    if (h.is_error()) return h;
-
-    std::string r = Logger::to_file(main_log_file.c_str());
-    return r.empty() ? ok_result() : error_result(std::move(r));
-  }
-
-  Result<> use_main_log_stderr()
-  {
-    Result<> h = health_err_result();
-    if (h.is_error()) return h;
-
-    std::string r = Logger::to_stderr();
-    return r.empty() ? ok_result() : error_result(std::move(r));
-  }
-
-  Result<> use_main_log_stdout()
-  {
-    Result<> h = health_err_result();
-    if (h.is_error()) return h;
-
-    std::string r = Logger::to_stdout();
-    return r.empty() ? ok_result() : error_result(std::move(r));
-  }
-
-  Result<> disable_main_log()
-  {
-    Result<> h = health_err_result();
-    if (h.is_error()) return h;
-
-    std::string r = Logger::disable();
-    return r.empty() ? ok_result() : error_result(std::move(r));
-  }
-
-  Result<> use_worker_log_file(std::string &&worker_log_file, PendingCallback &&callback)
-  {
-    if (!check_async(callback)) return ok_result();
-
-    return send_command(
-      worker_thread, CommandPayloadBuilder::log_to_file(std::move(worker_log_file)), std::move(callback));
-  }
-
-  Result<> use_worker_log_stderr(PendingCallback &&callback)
-  {
-    if (!check_async(callback)) return ok_result();
-
-    return send_command(worker_thread, CommandPayloadBuilder::log_to_stderr(), std::move(callback));
-  }
-
-  Result<> use_worker_log_stdout(PendingCallback &&callback)
-  {
-    if (!check_async(callback)) return ok_result();
-
-    return send_command(worker_thread, CommandPayloadBuilder::log_to_stdout(), std::move(callback));
-  }
-
-  Result<> disable_worker_log(PendingCallback &&callback)
-  {
-    if (!check_async(callback)) return ok_result();
-
-    return send_command(worker_thread, CommandPayloadBuilder::log_disable(), std::move(callback));
-  }
-
   Result<> worker_cache_size(size_t cache_size, PendingCallback &&callback)
   {
     if (!check_async(callback)) return ok_result();
 
     return send_command(worker_thread, CommandPayloadBuilder::cache_size(cache_size), std::move(callback));
-  }
-
-  Result<> use_polling_log_file(std::string &&polling_log_file, PendingCallback &&callback)
-  {
-    if (!check_async(callback)) return ok_result();
-
-    return send_command(
-      polling_thread, CommandPayloadBuilder::log_to_file(std::move(polling_log_file)), std::move(callback));
-  }
-
-  Result<> use_polling_log_stderr(PendingCallback &&callback)
-  {
-    if (!check_async(callback)) return ok_result();
-
-    return send_command(polling_thread, CommandPayloadBuilder::log_to_stderr(), std::move(callback));
-  }
-
-  Result<> use_polling_log_stdout(PendingCallback &&callback)
-  {
-    if (!check_async(callback)) return ok_result();
-
-    return send_command(polling_thread, CommandPayloadBuilder::log_to_stdout(), std::move(callback));
-  }
-
-  Result<> disable_polling_log(PendingCallback &&callback)
-  {
-    if (!check_async(callback)) return ok_result();
-
-    return send_command(polling_thread, CommandPayloadBuilder::log_disable(), std::move(callback));
   }
 
   Result<> set_polling_interval(uint_fast32_t interval, PendingCallback &&callback)

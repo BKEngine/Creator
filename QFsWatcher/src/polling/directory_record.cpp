@@ -7,14 +7,12 @@
 #include <utility>
 
 #include "../helper/common.h"
-#include "../log.h"
 #include "../message.h"
 #include "../helper/qt.h"
 #include "directory_record.h"
 #include "polling_iterator.h"
 
 using std::move;
-using std::ostringstream;
 using std::set;
 using std::shared_ptr;
 using std::string;
@@ -98,9 +96,7 @@ void DirectoryRecord::entry(BoundPollingIterator *it,
 
   int lstat_err = QT_LSTAT(entry_path.c_str(), &stat);
   if (lstat_err != 0 && lstat_err != ENOENT && lstat_err != EACCES) {
-    ostringstream msg;
-    msg << "Unable to stat " << entry_path << ": " << strerror(lstat_err);
-    it->get_buffer().error(msg.str(), false);
+    it->get_buffer().error("Unable to stat " + entry_path + ": " + strerror(lstat_err), false);
   }
 
   auto previous = entries.find(entry_name);

@@ -6,6 +6,7 @@
 
 #include "message.h"
 #include "status.h"
+#include "stringbuilder.h"
 
 using std::move;
 using std::ostream;
@@ -13,7 +14,7 @@ using std::ostringstream;
 using std::string;
 using std::unique_ptr;
 
-ostream &operator<<(ostream &out, FileSystemAction action)
+stringbuilder &operator<<(stringbuilder &out, FileSystemAction action)
 {
   switch (action) {
     case ACTION_CREATED: out << "created"; break;
@@ -25,7 +26,7 @@ ostream &operator<<(ostream &out, FileSystemAction action)
   return out;
 }
 
-ostream &operator<<(ostream &out, EntryKind kind)
+stringbuilder &operator<<(stringbuilder &out, EntryKind kind)
 {
   switch (kind) {
     case KIND_FILE: out << "file"; break;
@@ -60,7 +61,7 @@ FileSystemPayload::FileSystemPayload(FileSystemPayload &&original) noexcept :
 
 string FileSystemPayload::describe() const
 {
-  ostringstream builder;
+  stringbuilder builder;
   builder << "[FileSystemPayload channel " << event.channel_id << " " << event.entry_kind;
   builder << " " << event.action;
   if (!event.old_path.empty()) {
@@ -112,7 +113,7 @@ CommandPayload::CommandPayload(CommandPayload &&original) noexcept :
 
 string CommandPayload::describe() const
 {
-  ostringstream builder;
+  stringbuilder builder;
   builder << "[CommandPayload id " << id << " ";
 
   switch (action) {
@@ -121,16 +122,12 @@ string CommandPayload::describe() const
       if (!recursive) builder << " (non-recursively)";
       break;
     case COMMAND_REMOVE: builder << "remove channel " << arg; break;
-    case COMMAND_LOG_FILE: builder << "log to file " << root; break;
-    case COMMAND_LOG_STDERR: builder << "log to stderr" << root; break;
-    case COMMAND_LOG_STDOUT: builder << "log to stdout" << root; break;
-    case COMMAND_LOG_DISABLE: builder << "disable logging"; break;
     case COMMAND_POLLING_INTERVAL: builder << "polling interval " << arg; break;
     case COMMAND_POLLING_THROTTLE: builder << "polling throttle " << arg; break;
     case COMMAND_CACHE_SIZE: builder << "cache size " << arg; break;
     case COMMAND_DRAIN: builder << "drain"; break;
     case COMMAND_STATUS: builder << "status request " << arg; break;
-    default: builder << "!!action=" << action; break;
+    default: builder << "!!action=" << (int)action; break;
   }
 
   if (split_count > 1) {
@@ -152,7 +149,7 @@ AckPayload::AckPayload(CommandID key, ChannelID channel_id, bool success, string
 
 string AckPayload::describe() const
 {
-  ostringstream builder;
+  stringbuilder builder;
   builder << "[AckPayload ack " << key << "]";
   return builder.str();
 }
@@ -167,7 +164,7 @@ ErrorPayload::ErrorPayload(ChannelID channel_id, std::string &&message, bool fat
 
 string ErrorPayload::describe() const
 {
-  ostringstream builder;
+  stringbuilder builder;
   builder << "[ErrorPayload channel " << channel_id << " message \"" << message << '"';
   if (fatal) builder << " fatal!";
   builder << "]";
@@ -183,7 +180,7 @@ StatusPayload::StatusPayload(RequestID request_id, unique_ptr<Status> &&status) 
 
 string StatusPayload::describe() const
 {
-  ostringstream builder;
+  stringbuilder builder;
   builder << "[StatusPayload request " << request_id << "]";
   return builder.str();
 }
@@ -277,9 +274,45 @@ Message::~Message()
   };
 }
 
+stringbuilder &operator<<(stringbuilder &stream, const FileSystemPayload &e)
+{
+	stream << e.describe();
+	return stream;
+}
+
+stringbuilder &operator<<(stringbuilder &stream, const CommandPayload &e)
+{
+	stream << e.describe();
+	return stream;
+}
+
+stringbuilder &operator<<(stringbuilder &stream, const AckPayload &e)
+{
+	stream << e.describe();
+	return stream;
+}
+
+stringbuilder &operator<<(stringbuilder &stream, const ErrorPayload &e)
+{
+	stream << e.describe();
+	return stream;
+}
+
+stringbuilder &operator<<(stringbuilder &stream, const StatusPayload &e)
+{
+	stream << e.describe();
+	return stream;
+}
+
+stringbuilder &operator<<(stringbuilder &stream, const Message &e)
+{
+	stream << e.describe();
+	return stream;
+}
+
 string Message::describe() const
 {
-  ostringstream builder;
+  stringbuilder builder;
   builder << "[Message ";
 
   switch (kind) {
@@ -288,47 +321,11 @@ string Message::describe() const
     case MSG_ACK: builder << ack_payload; break;
     case MSG_ERROR: builder << error_payload; break;
     case MSG_STATUS: builder << status_payload; break;
-    default: builder << "!!kind=" << kind; break;
+    default: builder << "!!kind=" << (int)kind; break;
   };
 
   builder << "]";
   return builder.str();
-}
-
-std::ostream &operator<<(std::ostream &stream, const FileSystemPayload &e)
-{
-  stream << e.describe();
-  return stream;
-}
-
-std::ostream &operator<<(std::ostream &stream, const CommandPayload &e)
-{
-  stream << e.describe();
-  return stream;
-}
-
-std::ostream &operator<<(std::ostream &stream, const AckPayload &e)
-{
-  stream << e.describe();
-  return stream;
-}
-
-std::ostream &operator<<(std::ostream &stream, const ErrorPayload &e)
-{
-  stream << e.describe();
-  return stream;
-}
-
-std::ostream &operator<<(std::ostream &stream, const StatusPayload &e)
-{
-  stream << e.describe();
-  return stream;
-}
-
-std::ostream &operator<<(std::ostream &stream, const Message &e)
-{
-  stream << e.describe();
-  return stream;
 }
 
 FileSystemEvent::FileSystemEvent(ChannelID channel_id,

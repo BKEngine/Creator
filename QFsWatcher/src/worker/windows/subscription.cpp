@@ -5,15 +5,12 @@
 #include <windows.h>
 
 #include "../../helper/windows/helper.h"
-#include "../../log.h"
 #include "../../result.h"
+#include "../../stringbuilder.h"
 #include "subscription.h"
 
 using std::endl;
-using std::ostream;
-using std::ostringstream;
 using std::string;
-using std::wostringstream;
 using std::wstring;
 
 const DWORD DEFAULT_BUFFER_SIZE = 128 * 1024;
@@ -48,14 +45,8 @@ Subscription::~Subscription()
 Result<bool> Subscription::schedule(LPOVERLAPPED_COMPLETION_ROUTINE fn)
 {
   if (terminating) {
-    LOGGER << "Declining to schedule a new change callback for channel " << channel
-           << " because the subscription is terminating." << endl;
     return ok_result(true);
   }
-
-  ostream &logline = LOGGER << "Scheduling the next change callback for channel " << channel;
-  if (!recursive) logline << " (non-recursively)";
-  logline << "." << endl;
 
   int success = ReadDirectoryChangesW(root,  // root directory handle
     buffer.get(),  // result buffer
@@ -85,9 +76,10 @@ Result<bool> Subscription::schedule(LPOVERLAPPED_COMPLETION_ROUTINE fn)
 Result<> Subscription::use_network_size()
 {
   if (buffer_size <= NETWORK_BUFFER_SIZE) {
-    ostringstream out("Buffer size of ");
+	stringbuilder out;
+	out << ("Buffer size of ");
     out << buffer_size << " is already lower than the network buffer size " << NETWORK_BUFFER_SIZE;
-    return error_result(out.str());
+    return error_result(out.mstr());
   }
 
   buffer_size = NETWORK_BUFFER_SIZE;
@@ -110,15 +102,14 @@ Result<string> Subscription::get_root_path()
 
 wstring Subscription::make_absolute(const wstring &sub_path)
 {
-  wostringstream out;
+  wstring p = path;
 
-  out << path;
   if (path.back() != L'\\' && path.back() != L'/' && sub_path.front() != L'\\') {
-    out << L'\\';
+	  p.push_back( L'\\');
   }
-  out << sub_path;
+  p.append(sub_path);
 
-  return out.str();
+  return p;
 }
 
 Result<> Subscription::stop(const CommandID cmd)

@@ -13,12 +13,10 @@
 
 #include "../helper/common.h"
 #include "../helper/qt.h"
-#include "../log.h"
+#include "../stringbuilder.h"
 
 using std::endl;
 using std::move;
-using std::ostream;
-using std::ostringstream;
 using std::pair;
 using std::queue;
 using std::shared_ptr;
@@ -43,7 +41,6 @@ shared_ptr<StatResult> StatResult::at(string &&path, bool file_hint, bool direct
       // Log any other errno that we see.
       if (lstat_err != ENOENT && lstat_err != EACCES && lstat_err != ELOOP && lstat_err != ENAMETOOLONG
         && lstat_err != ENOTDIR && lstat_err != EBUSY && lstat_err != EPERM) {
-        LOGGER << "lstat(" << path << ") failed: " << strerror(lstat_err) << "." << endl;
       }
 
       EntryKind guessed_kind = KIND_UNKNOWN;
@@ -85,12 +82,6 @@ const string &StatResult::get_path() const
 EntryKind StatResult::get_entry_kind() const
 {
   return entry_kind;
-}
-
-ostream &operator<<(ostream &out, const StatResult &result)
-{
-  out << result.to_string(true);
-  return out;
 }
 
 PresentEntry::PresentEntry(std::string &&path, EntryKind entry_kind, uint64_t inode, uint64_t size) :
@@ -142,7 +133,7 @@ const time_point<steady_clock> &PresentEntry::get_last_seen() const
 
 string PresentEntry::to_string(bool verbose) const
 {
-  ostringstream result;
+  stringbuilder result;
 
   result << "[present " << get_entry_kind();
   if (verbose) result << " (" << get_path() << ")";
@@ -171,7 +162,7 @@ bool AbsentEntry::could_be_rename_of(const StatResult & /*other*/) const
 
 string AbsentEntry::to_string(bool verbose) const
 {
-  ostringstream result;
+  stringbuilder result;
 
   result << "[absent " << get_entry_kind();
   if (verbose) result << " (" << get_path() << ")";
@@ -285,10 +276,7 @@ void RecentFileCache::prune()
   if (by_path.size() <= maximum_size) {
     return;
   }
-  FsTimer t;
   size_t to_remove = by_path.size() - maximum_size;
-
-  LOGGER << "Cache currently contains " << plural(by_path.size(), "entry", "entries") << ". Pruning triggered." << endl;
 
   auto last = by_timestamp.begin();
   for (size_t i = 0; i < to_remove && last != by_timestamp.end(); i++) {
@@ -300,22 +288,13 @@ void RecentFileCache::prune()
     by_path.erase(entry->get_path());
   }
   by_timestamp.erase(by_timestamp.begin(), last);
-
-  t.stop();
-  LOGGER << "Pruned " << plural(to_remove, "entry", "entries") << " in " << t << ". "
-         << plural(by_path.size(), "entry", "entries") << " remain." << endl;
 }
 
 void RecentFileCache::prepopulate(const string &root, size_t max, bool recursive)
 {
-  FsTimer t;
-
   size_t bounded_max = max > maximum_size ? maximum_size : max;
   size_t entries = prepopulate_helper(root, bounded_max, recursive);
   apply();
-
-  t.stop();
-  LOGGER << "Pre-populated cache with " << entries << " entries in " << t << "." << endl;
 }
 
 size_t RecentFileCache::prepopulate_helper(const string &root, size_t max, bool recursive)
@@ -332,7 +311,6 @@ size_t RecentFileCache::prepopulate_helper(const string &root, size_t max, bool 
     QDir qdir(QString::fromStdString(current_root));
 
     if (!qdir.exists()) {
-      LOGGER << "Unable to open directory " << current_root << endl;
       continue;
     }
 

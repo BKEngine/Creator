@@ -790,9 +790,6 @@
     <ClCompile Include="QFsWatcher\src\hub.cpp">
       <Filter>QFsWatcher</Filter>
     </ClCompile>
-    <ClCompile Include="QFsWatcher\src\log.cpp">
-      <Filter>QFsWatcher</Filter>
-    </ClCompile>
     <ClCompile Include="QFsWatcher\src\message.cpp">
       <Filter>QFsWatcher</Filter>
     </ClCompile>
@@ -1377,9 +1374,6 @@
     <ClInclude Include="QFsWatcher\src\hub.h">
       <Filter>QFsWatcher</Filter>
     </ClInclude>
-    <ClInclude Include="QFsWatcher\src\log.h">
-      <Filter>QFsWatcher</Filter>
-    </ClInclude>
     <ClInclude Include="QFsWatcher\src\message.h">
       <Filter>QFsWatcher</Filter>
     </ClInclude>
@@ -1420,6 +1414,9 @@
       <Filter>QFsWatcher</Filter>
     </ClInclude>
     <ClInclude Include="QFsWatcher\src\worker\worker_thread.h">
+      <Filter>QFsWatcher</Filter>
+    </ClInclude>
+    <ClInclude Include="QFsWatcher\src\stringbuilder.h">
       <Filter>QFsWatcher</Filter>
     </ClInclude>
   </ItemGroup>

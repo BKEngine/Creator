@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "hub.h"
-#include "log.h"
 #include "message.h"
 #include "polling/polling_thread.h"
 #include "result.h"
@@ -81,7 +80,6 @@ Result<> Hub::unwatch(ChannelID channel_id, PendingCallback &&ack_callback)
 
   auto maybe_event_callback = channel_callbacks.find(channel_id);
   if (maybe_event_callback == channel_callbacks.end()) {
-    LOGGER << "Channel " << channel_id << " already has no event callback." << endl;
     return r;
   }
   channel_callbacks.erase(maybe_event_callback);
@@ -102,7 +100,6 @@ Result<> Hub::send_command(Thread &thread, CommandPayloadBuilder &&builder, Pend
   pending_callbacks.emplace(command_id, move(callback));
   next_command_id++;
 
-  LOGGER << "Sending command " << command << " to " << thread << "." << endl;
   Result<bool> sr = thread.send(move(command));
   if (sr.is_error()) return sr.propagate();
   if (sr.get_value()) handle_events();
@@ -135,11 +132,8 @@ void Hub::handle_events_from(Thread &thread)
   for (Message &message : *accepted) {
     const AckPayload *ack = message.as_ack();
     if (ack != nullptr) {
-      LOGGER << "Received ack message " << message << "." << endl;
-
       auto maybe_callback = pending_callbacks.find(ack->get_key());
       if (maybe_callback == pending_callbacks.end()) {
-        LOGGER << "Ignoring unexpected ack " << message << "." << endl;
         continue;
       }
 
@@ -160,8 +154,6 @@ void Hub::handle_events_from(Thread &thread)
 
     const FileSystemPayload *fs = message.as_filesystem();
     if (fs != nullptr) {
-      LOGGER << "Received filesystem event message " << message << "." << endl;
-
       ChannelID channel_id = fs->get_channel_id();
 
       to_deliver[channel_id].emplace_back(fs->get_event());
@@ -170,19 +162,15 @@ void Hub::handle_events_from(Thread &thread)
 
     const CommandPayload *command = message.as_command();
     if (command != nullptr) {
-      LOGGER << "Received command message " << message << "." << endl;
-
       if (command->get_action() == COMMAND_DRAIN) {
         Result<bool> dr = thread.drain();
         if (dr.is_error()) {
-          LOGGER << "Unable to drain dead letter office: " << dr << "." << endl;
         } else if (dr.get_value()) {
           repeat = true;
         }
       } else if (command->get_action() == COMMAND_ADD && &thread == &worker_thread) {
         polling_thread.send(move(message));
       } else {
-        LOGGER << "Ignoring unexpected command." << endl;
       }
 
       continue;
@@ -190,8 +178,6 @@ void Hub::handle_events_from(Thread &thread)
 
     const ErrorPayload *error = message.as_error();
     if (error != nullptr) {
-      LOGGER << "Received error message " << message << "." << endl;
-
       const ChannelID &channel_id = error->get_channel_id();
 
       errors.emplace(channel_id, error->get_message());
@@ -202,8 +188,6 @@ void Hub::handle_events_from(Thread &thread)
 
       continue;
     }
-
-    LOGGER << "Received unexpected message " << message << "." << endl;
   }
 
   for (auto &&pair : to_deliver) {
@@ -212,13 +196,9 @@ void Hub::handle_events_from(Thread &thread)
 
     auto maybe_callback = channel_callbacks.find(channel_id);
     if (maybe_callback == channel_callbacks.end()) {
-      LOGGER << "Ignoring unexpected filesystem event channel " << channel_id << "." << endl;
       continue;
     }
     ChannelCallback &callback = maybe_callback->second;
-
-    LOGGER << "Dispatching " << events.size() << " event(s) on channel " << channel_id << " to the node callback."
-           << endl;
 
     if(callback)
       callback(nullptr, std::make_unique<vector<FileSystemEvent>>(move(events)));
@@ -231,12 +211,9 @@ void Hub::handle_events_from(Thread &thread)
     auto maybe_callback = channel_callbacks.find(channel_id);
 
     if (maybe_callback == channel_callbacks.end()) {
-      LOGGER << "Error reported for unexpected channel " << channel_id << "." << endl;
       continue;
     }
     ChannelCallback &callback = maybe_callback->second;
-
-    LOGGER << "Report an error on channel " << channel_id << " to the node callback." << endl;
 
     if(callback)
       callback(std::make_unique<string>(err), nullptr);
@@ -244,7 +221,6 @@ void Hub::handle_events_from(Thread &thread)
 
   for (const ChannelID &channel_id : to_unwatch) {
     Result<> er = unwatch(channel_id, nullptr);
-    if (er.is_error()) LOGGER << "Unable to unwatch fatally errored channel " << channel_id << "." << endl;
   }
 
   if (repeat) handle_events_from(thread);

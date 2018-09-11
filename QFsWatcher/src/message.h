@@ -9,6 +9,7 @@
 
 #include "result.h"
 #include "status.h"
+#include "stringbuilder.h"
 
 enum EntryKind
 {
@@ -20,7 +21,7 @@ enum EntryKind
   KIND_MAX = KIND_UNKNOWN
 };
 
-std::ostream &operator<<(std::ostream &out, EntryKind kind);
+stringbuilder &operator << (stringbuilder &sb, EntryKind kind);
 
 bool kinds_are_different(EntryKind a, EntryKind b);
 
@@ -44,7 +45,7 @@ enum FileSystemAction
   ACTION_MAX = ACTION_RENAMED
 };
 
-std::ostream &operator<<(std::ostream &out, FileSystemAction action);
+stringbuilder &operator << (stringbuilder &sb, FileSystemAction kind);
 
 class FileSystemEvent
 {
@@ -142,10 +143,6 @@ enum CommandAction
 {
   COMMAND_ADD,
   COMMAND_REMOVE,
-  COMMAND_LOG_FILE,
-  COMMAND_LOG_STDERR,
-  COMMAND_LOG_STDOUT,
-  COMMAND_LOG_DISABLE,
   COMMAND_POLLING_INTERVAL,
   COMMAND_POLLING_THROTTLE,
   COMMAND_CACHE_SIZE,
@@ -218,26 +215,6 @@ public:
   static CommandPayloadBuilder remove(ChannelID channel_id)
   {
     return CommandPayloadBuilder(COMMAND_REMOVE, "", channel_id, false, 1);
-  }
-
-  static CommandPayloadBuilder log_to_file(std::string &&log_file)
-  {
-    return CommandPayloadBuilder(COMMAND_LOG_FILE, std::move(log_file), NULL_CHANNEL_ID, false, 1);
-  }
-
-  static CommandPayloadBuilder log_to_stderr()
-  {
-    return CommandPayloadBuilder(COMMAND_LOG_STDERR, "", NULL_CHANNEL_ID, false, 1);
-  }
-
-  static CommandPayloadBuilder log_to_stdout()
-  {
-    return CommandPayloadBuilder(COMMAND_LOG_STDOUT, "", NULL_CHANNEL_ID, false, 1);
-  }
-
-  static CommandPayloadBuilder log_disable()
-  {
-    return CommandPayloadBuilder(COMMAND_LOG_DISABLE, "", NULL_CHANNEL_ID, false, 1);
   }
 
   static CommandPayloadBuilder polling_interval(const uint_fast32_t &interval)
@@ -454,17 +431,5 @@ private:
     bool pending{false};
   };
 };
-
-std::ostream &operator<<(std::ostream &stream, const FileSystemPayload &e);
-
-std::ostream &operator<<(std::ostream &stream, const CommandPayload &e);
-
-std::ostream &operator<<(std::ostream &stream, const AckPayload &e);
-
-std::ostream &operator<<(std::ostream &stream, const ErrorPayload &e);
-
-std::ostream &operator<<(std::ostream &stream, const StatusPayload &e);
-
-std::ostream &operator<<(std::ostream &stream, const Message &e);
 
 #endif
