@@ -232,7 +232,7 @@ public:
 	//call this function immediately after the AST has finished
 	void calcLastPos()
 	{
-		for (auto &it = childs.rbegin(); it != childs.rend(); ++it)
+        for (auto &&it = childs.rbegin(); it != childs.rend(); ++it)
 		{
 			if (*it)
 			{

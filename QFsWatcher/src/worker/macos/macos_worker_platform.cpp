@@ -12,7 +12,6 @@
 #include <utility>
 
 #include "../../helper/macos/helper.h"
-#include "../../log.h"
 #include "../../message.h"
 #include "../../message_buffer.h"
 #include "../../result.h"
@@ -27,8 +26,6 @@
 using std::bind;
 using std::endl;
 using std::move;
-using std::ostream;
-using std::ostringstream;
 using std::set;
 using std::shared_ptr;
 using std::string;
@@ -96,12 +93,6 @@ public:
     const string &root_path,
     bool recursive) override
   {
-    ostream &logline = LOGGER << "Adding watcher for path " << root_path;
-    if (!recursive) {
-      logline << " (non-recursively)";
-    }
-    logline << " at channel " << channel_id << "." << endl;
-
     FSEventStreamContext stream_context{
       0,  // version
       event_stream_registry.create_info(
@@ -146,8 +137,6 @@ public:
 
     FSEventStreamScheduleWithRunLoop(event_stream.get(), run_loop.get(), kCFRunLoopDefaultMode);
     if (FSEventStreamStart(event_stream.get()) == 0u) {
-      LOGGER << "Falling back to polling for watch root " << root_path << "." << endl;
-
       // Emit an Add command for the polling thread to pick up
       emit(Message(CommandPayloadBuilder::add(channel_id, string(root_path), true, 1).set_id(command_id).build()));
       return ok_result(false);
@@ -161,11 +150,8 @@ public:
 
   Result<bool> handle_remove_command(CommandID /*command_id*/, ChannelID channel_id) override
   {
-    LOGGER << "Removing watcher for channel " << channel_id << "." << endl;
-
     auto maybe_sub = subscriptions.find(channel_id);
     if (maybe_sub == subscriptions.end()) {
-      LOGGER << "No subscription for channel " << channel_id << "." << endl;
       return ok_result(true);
     }
     subscriptions.erase(maybe_sub);
@@ -174,7 +160,6 @@ public:
 
   void handle_cache_size_command(size_t cache_size) override
   {
-    LOGGER << "Changing cache size to " << cache_size << "." << endl;
     cache.resize(cache_size);
   }
 
@@ -188,7 +173,6 @@ public:
   FnRegistryAction source_triggered()
   {
     Result<> r = handle_commands();
-    if (r.is_error()) LOGGER << "Unable to handle incoming commands: " << r << "." << endl;
     return FN_KEEP;
   }
 
@@ -202,12 +186,9 @@ public:
     auto **paths = reinterpret_cast<char **>(event_paths);
     MessageBuffer buffer;
     ChannelMessageBuffer message_buffer(buffer, channel_id);
-    Timer t;
 
-    LOGGER << "Filesystem event batch of size " << num_events << " received." << endl;
     auto sub = subscriptions.find(channel_id);
     if (sub == subscriptions.end()) {
-      LOGGER << "No active subscription for channel " << channel_id << "." << endl;
       return FN_KEEP;
     }
 
@@ -222,8 +203,6 @@ public:
 
     shared_ptr<set<RenameBuffer::Key>> out = rename_buffer.flush_unmatched(message_buffer, cache);
     if (!out->empty()) {
-      LOGGER << "Scheduling expiration of " << out->size() << " unpaired rename entries on channel " << channel_id
-             << "." << endl;
       CFAbsoluteTime fire_time = CFAbsoluteTimeGetCurrent() + RENAME_TIMEOUT;
 
       CFRunLoopTimerContext timer_context{
@@ -249,13 +228,8 @@ public:
 
     Result<> er = emit_all(message_buffer.begin(), message_buffer.end());
     if (er.is_error()) {
-      LOGGER << "Unable to emit filesystem event messages: " << er << "." << endl;
       return FN_KEEP;
     }
-    t.stop();
-
-    LOGGER << "Filesystem event batch of size " << num_events << " completed. "
-           << plural(message_buffer.size(), "message") << " produced in " << t << "." << endl;
     cache.prune();
 
     return FN_KEEP;
@@ -265,9 +239,6 @@ public:
     ChannelID channel_id,
     CFRunLoopTimerRef timer)
   {
-    LOGGER << "Expiring " << plural(keys->size(), "rename entry", "rename entries") << " on channel " << channel_id
-           << "." << endl;
-
     MessageBuffer buffer;
     ChannelMessageBuffer message_buffer(buffer, channel_id);
 
@@ -276,7 +247,6 @@ public:
     keys.reset();
 
     Result<> er = emit_all(message_buffer.begin(), message_buffer.end());
-    if (er.is_error()) LOGGER << "Unable to emit flushed rename event messages: " << er << "." << endl;
 
     CFRelease(timer);
 

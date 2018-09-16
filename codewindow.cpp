@@ -716,7 +716,7 @@ void CodeWindow::AddFile(const QString &file)
 void CodeWindow::ConnectAutoComplete(BkeScintilla *edit)
 {
 	aclist->SetFont(edit->deflex->font(0));
-	connect(edit, &BkeScintilla::AutoCompleteStart, edit, [this, edit](auto v1, auto v2) {
+    connect(edit, &BkeScintilla::AutoCompleteStart, edit, [this, edit](auto &&v1, auto &&v2) {
 		aclist->Start(v1, v2, edit->mapToGlobal(edit->PointByPosition(edit->GetCurrentPosition() - v2.toUtf8().length())));
 	});
 	connect(edit, &BkeScintilla::AutoCompleteCancel, aclist, &AutoCompleteList::Cancel);

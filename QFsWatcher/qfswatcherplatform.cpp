@@ -13,6 +13,7 @@
 #include "src/worker/macos/macos_worker_platform.cpp"
 #include "src/worker/macos/rename_buffer.cpp"
 #include "src/worker/macos/subscription.cpp"
+#include "src/helper/macos/helper.cpp"
 #include "src/helper/common_posix.cpp"
 #elif defined(Q_OS_WIN)
 #include "src/helper/common_win.cpp"

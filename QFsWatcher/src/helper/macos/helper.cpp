@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <utility>
 
-#include "../../log.h"
 #include "helper.h"
 
 void SourceFnRegistry::callback(void *info)

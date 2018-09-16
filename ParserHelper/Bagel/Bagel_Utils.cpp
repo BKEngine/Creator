@@ -27,7 +27,7 @@ void *FASTCALL BagelMalloc(size_t size)
 	if (size + sizeof(PoolUnitTail) <= MAXELE)
 		p = pool_malloc(size);
 	else
-		throw std::exception("too large size for memory pool");
+        throw std::bad_alloc();
 	return p;
 }
 void FASTCALL BagelFree(void *p)

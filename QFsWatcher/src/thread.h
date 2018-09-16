@@ -9,6 +9,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <thread>
 
 #include "errable.h"
 #include "message.h"

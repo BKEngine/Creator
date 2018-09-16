@@ -199,7 +199,7 @@ inline BKE_PoolAllocator<T>::BKE_PoolAllocator()
 	}
 	else
 	{
-		fixsize = 0;
+        fixsize = 0;
 		//pool = nullptr;
 		//freelist = nullptr;
 	}
@@ -222,7 +222,7 @@ inline T * BKE_PoolAllocator<T>::allocate(size_t count)
 	else if (sizeof(T) * count + sizeof(PoolUnitTail) < MAXELE)
 		return (T*)pool_malloc(sizeof(T) * count);
 	else
-		return (T*)malloc(fixsize * count);
+        return (T*)malloc(sizeof(T) * count);
 }
 
 template<class T>

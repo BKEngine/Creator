@@ -17,7 +17,9 @@ inline int __stat(const char *filename, QT_STATBUF *stat)
 #define QT_STAT __stat
 #define QT_LSTAT QT_STAT
 #else
-#define QT_STATBUF struct stat64
+#include <unistd.h>
+#include <sys/stat.h>
+#define QT_STATBUF struct stat
 #define QT_STAT stat
 #define QT_LSTAT lstat
 #endif

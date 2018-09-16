@@ -7,7 +7,7 @@
 #include <atomic>
 #include <algorithm>
 //#include "ParserHelper/parser/parser.h"
-#include "ParserHelper\Bagel\Bagel_Include.h"
+#include "ParserHelper/Bagel/Bagel_Include.h"
 #include "ScopePointer.h"
 
 using std::atomic_bool;

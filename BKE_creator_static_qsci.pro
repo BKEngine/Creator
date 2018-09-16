@@ -15,9 +15,9 @@ TARGET = BKE_Creator
 TEMPLATE = app
 
 CONFIG += warn_off qt
-CONFIG+= c++14
+CONFIG += c++14
 
-DEFINES += QT SCI_LEXER SCINTILLA_QT BKE_CREATOR
+DEFINES += QT SCI_LEXER SCINTILLA_QT BKE_CREATOR CXX11_REGEX
 #if use in linux,you must use a full name
 #LIBS += /usr/lib/i386-linux-gnu/libqscintilla2.a
 
@@ -32,7 +32,23 @@ mac{
 ICON = icon.icns
 }
 
-SOURCES += ./main.cpp \
+SOURCES += \
+    ParserHelper/Bagel/Bagel_Utils.cpp \
+    ParserHelper/ParserHelper.cpp \
+    ParserHelper/Bagel/Bagel_DCompiler.cpp \
+    ParserHelper/Bagel/Bagel_Export.cpp \
+    ParserHelper/Bagel/Bagel_GC.cpp \
+    ParserHelper/Bagel/Bagel_Parser.cpp \
+    ParserHelper/Bagel/Bagel_RCompiler.cpp \
+    ParserHelper/Bagel/Bagel_Serializer.cpp \
+    ParserHelper/Bagel/Bagel_String.cpp \
+    ParserHelper/Bagel/Bagel_Var.cpp \
+    ParserHelper/Bagel/Bagel_Vcode.cpp \
+    ParserHelper/Bagel/Bagel_VM.cpp \
+    ParserHelper/Bagel/bkutf8.cpp \
+    ParserHelper/Bagel/extend.cpp \
+    ParserHelper/Bagel/poolmalloc.cpp \
+    ./main.cpp \
     topbarwindow.cpp \
     projectwindow.cpp \
     codewindow.cpp \
@@ -143,26 +159,14 @@ SOURCES += ./main.cpp \
     Debugger/DebugServer.cpp \
     Debugger/BreakpointManager.cpp \
     dia/ParserEditorUndoCommand.cpp \
-    TinyProcess\process.cpp \
-    TinyProcess\process_unix.cpp \
-    TinyProcess\process_win.cpp \
+    TinyProcess/process.cpp \
+    TinyProcess/process_unix.cpp \
+    TinyProcess/process_win.cpp \
     dia/bkespriteviewer.cpp \
     dia/bkespriteviewerinfo.cpp \
-    ParserHelper/ParserHelper.cpp \
-    ParserHelper/Bagel/Bagel_DCompiler.cpp \
-    ParserHelper/Bagel/Bagel_Export.cpp \
-    ParserHelper/Bagel/Bagel_GC.cpp \
-    ParserHelper/Bagel/Bagel_Parser.cpp \
-    ParserHelper/Bagel/Bagel_RCompiler.cpp \
-    ParserHelper/Bagel/Bagel_Serializer.cpp \
-    ParserHelper/Bagel/Bagel_String.cpp \
-    ParserHelper/Bagel/Bagel_Utils.cpp \
-    ParserHelper/Bagel/Bagel_Var.cpp \
-    ParserHelper/Bagel/Bagel_Vcode.cpp \
-    ParserHelper/Bagel/Bagel_VM.cpp \
-    ParserHelper/Bagel/bkutf8.cpp \
-    ParserHelper/Bagel/extend.cpp \
-    ParserHelper/Bagel/poolmalloc.cpp
+    lz4/lz4.c \
+    lz4/xxhash.c \
+    dia/QGraphicViewZoomer.cpp
 
 HEADERS  += \
     topbarwindow.h \
@@ -211,7 +215,6 @@ HEADERS  += \
     BKEscintilla/src/Selection.h \
     BKEscintilla/src/SplitVector.h \
     BKEscintilla/src/Style.h \
-    BKEscintilla/src/SVector.h \
     BKEscintilla/src/UniConversion.h \
     BKEscintilla/src/ViewStyle.h \
     BKEscintilla/src/XPM.h \
@@ -289,7 +292,6 @@ HEADERS  += \
     dia/gotofiledialog.h \
     qmacopenfileapplication.h \
     dia/autocompletelist.h \
-    DebugServer.h \
     dia/ParserEditorUndoCommand.h \
     TinyProcess\process.hpp \
     dia/bkespriteviewer.h \
@@ -314,7 +316,12 @@ HEADERS  += \
     ParserHelper/Bagel/extend.h \
     ParserHelper/Bagel/memorypool.h \
     ParserHelper/Bagel/poolmalloc.h \
-    ParserHelper/Bagel/stack_allocator.h
+    ParserHelper/Bagel/stack_allocator.h \
+    Debugger/BreakpointInfo.h \
+    Debugger/BreakpointManager.h \
+    Debugger/DebugServer.h \
+    Debugger/SocketDataType.h \
+    dia/QGraphicViewZoomer.h
 
 RESOURCES += \
     source/source.qrc \
@@ -348,6 +355,7 @@ mac{
     CONFIG(release, debug|release){
         QMAKE_LFLAGS += -dead_strip
     }
+    QMAKE_MAC_SDK = macosx
 }
 
 unix:!mac:{
@@ -378,7 +386,6 @@ SOURCES += \
     QFsWatcher/src/worker/worker_thread.cpp \
     QFsWatcher/src/errable.cpp \
     QFsWatcher/src/hub.cpp \
-    QFsWatcher/src/log.cpp \
     QFsWatcher/src/message.cpp \
     QFsWatcher/src/message_buffer.cpp \
     QFsWatcher/src/queue.cpp \
@@ -400,7 +407,6 @@ HEADERS += \
     QFsWatcher/src/worker/worker_thread.h \
     QFsWatcher/src/errable.h \
     QFsWatcher/src/hub.h \
-    QFsWatcher/src/log.h \
     QFsWatcher/src/message.h \
     QFsWatcher/src/message_buffer.h \
     QFsWatcher/src/queue.h \
@@ -412,5 +418,13 @@ HEADERS += \
     QFsWatcher/qfswatcher.h
 
 mac{
-LIBS += -framework CoreService
+DEFINES += PLATFORM_MACOS
+LIBS += -framework CoreServices
 }
+linux{
+DEFINES += PLATFORM_LINUX
+}
+
+SUBDIRS += \
+    ParserEditor/ParserEditor.pro
+

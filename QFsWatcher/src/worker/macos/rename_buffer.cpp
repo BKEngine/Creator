@@ -8,12 +8,10 @@
 #include <utility>
 #include <vector>
 
-#include "../../log.h"
 #include "batch_handler.h"
 
 using std::endl;
 using std::move;
-using std::ostream;
 using std::set;
 using std::shared_ptr;
 using std::static_pointer_cast;
@@ -72,15 +70,12 @@ bool RenameBuffer::observe_present_entry(Event &event,
   const shared_ptr<PresentEntry> &present,
   bool current)
 {
-  ostream &logline = LOGGER << "Rename ";
-
   auto maybe_entry = observed_by_inode.find(present->get_inode());
   if (maybe_entry == observed_by_inode.end()) {
     // The first-seen half of this rename event. Buffer a new entry to be paired with the second half when or if it's
     // observed.
     RenameBufferEntry entry(present, event.get_event_path(), current);
     observed_by_inode.emplace(present->get_inode(), move(entry));
-    logline << "first half " << *present << ": Remembering for later." << endl;
     return true;
   }
   RenameBufferEntry &existing = maybe_entry->second;
@@ -92,7 +87,6 @@ bool RenameBuffer::observe_present_entry(Event &event,
 
     if (!existing.current && current) {
       // The former end is the "from" end and the current end is the "to" end.
-      logline << "completed pair " << *existing.entry << " => " << *present << ": Emitting rename event." << endl;
 
       EntryKind kind = present->get_entry_kind();
       string from_path(existing.event_path);
@@ -106,7 +100,6 @@ bool RenameBuffer::observe_present_entry(Event &event,
       handled = true;
     } else if (existing.current && !current) {
       // The former end is the "to" end and the current end is the "from" end.
-      logline << "completed pair " << *present << " => " << *existing.entry << ": Emitting rename event." << endl;
 
       EntryKind kind = existing.entry->get_entry_kind();
       string from_path(event.get_event_path());
@@ -122,21 +115,12 @@ bool RenameBuffer::observe_present_entry(Event &event,
       // Both entries are still present (hardlink, re-used inode?).
       string existing_desc = existing.current ? " (current) " : " (former) ";
       string incoming_desc = current ? " (current) " : " (former) ";
-
-      logline << "conflicting pair " << *present << incoming_desc << " =/= " << *(existing.entry) << existing_desc
-              << "are both present." << endl;
       handled = false;
     }
 
     observed_by_inode.erase(maybe_entry);
     return handled;
   }
-
-  string existing_desc = existing.current ? " (current) " : " (former) ";
-  string incoming_desc = current ? " (current) " : " (former) ";
-
-  logline << "conflicting pair " << *present << incoming_desc << " =/= " << *(existing.entry) << existing_desc
-          << "have conflicting entry kinds." << endl;
   return false;
 }
 
@@ -144,7 +128,6 @@ bool RenameBuffer::observe_absent(Event &event, BatchHandler & /*batch*/, const 
 {
   const string &event_path = event.get_event_path();
 
-  LOGGER << "Unable to correlate rename from " << event_path << " without an inode." << endl;
   if (event.flag_created() ^ event.flag_deleted()) {
     // this entry was created just before being renamed or deleted just after being renamed.
     event.message_buffer().created(string(event_path), absent->get_entry_kind());

@@ -10,7 +10,6 @@
 #include <sys/syslimits.h>
 #include <utility>
 
-#include "../../log.h"
 #include "../../message.h"
 #include "../recent_file_cache.h"
 #include "flags.h"
@@ -20,7 +19,6 @@ using std::dec;
 using std::endl;
 using std::hex;
 using std::move;
-using std::ostream;
 using std::string;
 
 Event::Event(BatchHandler &batch, std::string &&event_path, FSEventStreamEventFlags flags) :
@@ -80,39 +78,6 @@ bool Event::should_defer()
 
 void Event::report()
 {
-  ostream &logline = LOGGER;
-  logline << "Event at [" << event_path << "] ";
-  if (!updated_event_path.empty()) {
-    logline << " (now at [" << updated_event_path << "]) ";
-  }
-  logline << "flags " << hex << flags << dec << " [";
-
-  if ((flags & kFSEventStreamEventFlagMustScanSubDirs) != 0) logline << " MustScanSubDirs";
-  if ((flags & kFSEventStreamEventFlagUserDropped) != 0) logline << " UserDropped";
-  if ((flags & kFSEventStreamEventFlagKernelDropped) != 0) logline << " KernelDropped";
-  if ((flags & kFSEventStreamEventFlagEventIdsWrapped) != 0) logline << " EventIdsWrapped";
-  if ((flags & kFSEventStreamEventFlagMustScanSubDirs) != 0) logline << " MustScanSubDirs";
-  if ((flags & kFSEventStreamEventFlagHistoryDone) != 0) logline << " HistoryDone";
-  if ((flags & kFSEventStreamEventFlagRootChanged) != 0) logline << " RootChanged";
-  if ((flags & kFSEventStreamEventFlagMount) != 0) logline << " Mount";
-  if ((flags & kFSEventStreamEventFlagUnmount) != 0) logline << " Unmount";
-  if ((flags & kFSEventStreamEventFlagMustScanSubDirs) != 0) logline << " MustScanSubDirs";
-  if ((flags & kFSEventStreamEventFlagItemCreated) != 0) logline << " ItemCreated";
-  if ((flags & kFSEventStreamEventFlagItemRemoved) != 0) logline << " ItemRemoved";
-  if ((flags & kFSEventStreamEventFlagItemInodeMetaMod) != 0) logline << " ItemInodeMetaMod";
-  if ((flags & kFSEventStreamEventFlagItemRenamed) != 0) logline << " ItemRenamed";
-  if ((flags & kFSEventStreamEventFlagItemModified) != 0) logline << " ItemModified";
-  if ((flags & kFSEventStreamEventFlagItemFinderInfoMod) != 0) logline << " ItemFinderInfoMod";
-  if ((flags & kFSEventStreamEventFlagItemChangeOwner) != 0) logline << " ItemChangeOwner";
-  if ((flags & kFSEventStreamEventFlagItemXattrMod) != 0) logline << " ItemXattrMod";
-  if ((flags & kFSEventStreamEventFlagItemIsFile) != 0) logline << " ItemIsFile";
-  if ((flags & kFSEventStreamEventFlagItemIsDir) != 0) logline << " ItemIsDir";
-  if ((flags & kFSEventStreamEventFlagItemIsSymlink) != 0) logline << " ItemIsSymlink";
-  if ((flags & kFSEventStreamEventFlagOwnEvent) != 0) logline << " OwnEvent";
-  if ((flags & kFSEventStreamEventFlagItemIsHardlink) != 0) logline << " ItemIsHardlink";
-  if ((flags & kFSEventStreamEventFlagItemIsLastHardlink) != 0) logline << " ItemIsLastHardlink";
-
-  logline << " ] former=" << former->to_string(false) << " current=" << current->to_string(false) << endl;
 }
 
 bool Event::emit_if_unambiguous()
