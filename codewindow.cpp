@@ -208,6 +208,12 @@ void CodeWindow::CreateBtn()
 	btnspriteviewer->setShortcut(Qt::Key_F6);
 	addAction(btnautofix);
 	addAction(btnspriteviewer);
+	QAction *addNextSelectionAct = new QAction(this);
+	addNextSelectionAct->setShortcut(Qt::CTRL + Qt::Key_D);
+	connect(addNextSelectionAct, &QAction::triggered, this, [this]() {
+		currentedit->MultipleSelectAddNext();
+	});
+	addAction(addNextSelectionAct);
 
 	toolbar->addAction(btnlastact);
 	toolbar->addAction(btnnextact);
